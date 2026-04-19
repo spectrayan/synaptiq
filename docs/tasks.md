@@ -147,47 +147,47 @@
 
 ## Phase 8 — Actions Engine
 
-- [ ] **T8.1** `POST /actions/save_item` — persist item + snapshot keyed by session_id `REQ-A7, REQ-A10`
-- [ ] **T8.2** `GET /actions/saved_items?session_id=` — retrieve saved items `REQ-A8, REQ-A9`
-- [ ] **T8.3** `POST /actions/contact_enquiry` — submit form; route to email/webhook `REQ-A4, REQ-A5`
-- [ ] **T8.4** Pre-execution permission check vs tenant config on all actions `REQ-A-DET2`
-- [ ] **T8.5** Append-only audit log for every action execution `REQ-A-DET3`
-- [ ] **T8.6** Retry transient failures 3× with exponential backoff `REQ-A-DET4`
+- [x] **T8.1** `POST /actions/save_item` — persist item + snapshot keyed by session_id `REQ-A7, REQ-A10`
+- [x] **T8.2** `GET /actions/saved_items?session_id=` — retrieve saved items `REQ-A8, REQ-A9`
+- [x] **T8.3** `POST /actions/contact_enquiry` — submit form; route to email/webhook `REQ-A4, REQ-A5`
+- [x] **T8.4** Pre-execution permission check vs tenant config on all actions `REQ-A-DET2`
+- [x] **T8.5** Append-only audit log for every action execution `REQ-A-DET3`
+- [x] **T8.6** Retry transient failures 3× with exponential backoff `REQ-A-DET4`
 
 ---
 
 ## Phase 9 — AI Config API & UI
 
-- [ ] **T9.1** `GET/PATCH /config/ai` — persona name, tone, custom instruction, welcome message, starter prompts `REQ-AI1–AI5`
-- [ ] **T9.2** `GET/PATCH /config/ai/provider` — BYOK toggle, provider, encrypted key `REQ-AI-P1–AI-P8`
-- [ ] **T9.3** `GET/PATCH /config/ai/guardrails` — out-of-scope message, recommendation mode, language `REQ-AI6–AI10`
-- [ ] **T9.4** `GET/PATCH /config/components` — enable/disable component types `REQ-CM1–CM3`
-- [ ] **T9.5** `GET/PATCH /config/actions` — enable/disable actions, labels, enquiry form fields `REQ-A1–A5`
-- [ ] **T9.6** Admin chat: AI config panels rendered as inline components `REQ-AN0b`
+- [x] **T9.1** `GET/PATCH /config/ai` — persona name, tone, custom instruction, welcome message, starter prompts `REQ-AI1–AI5`
+- [x] **T9.2** `GET/PATCH /config/ai/provider` — BYOK toggle, provider, encrypted key `REQ-AI-P1–AI-P8`
+- [x] **T9.3** `GET/PATCH /config/ai/guardrails` — out-of-scope message, recommendation mode, language `REQ-AI6–AI10`
+- [x] **T9.4** `GET/PATCH /config/components` — enable/disable component types `REQ-CM1–CM3`
+- [x] **T9.5** `GET/PATCH /config/actions` — enable/disable actions, labels, enquiry form fields `REQ-A1–A5`
+- [x] **T9.6** Admin chat: AI config panels rendered as inline components `REQ-AN0b`
 
 ---
 
 ## Phase 10 — Branding & Theming
 
-- [ ] **T10.1** `GET/PATCH /config/branding` — logo, colors, background style, fonts, favicon, page title `REQ-B1–B9`
-- [ ] **T10.2** `POST /config/branding/logo` — upload logo to Cloud Storage `REQ-B1`
-- [ ] **T10.3** WCAG AA 4.5:1 contrast check on color save — warn + block on fail `REQ-B10`
-- [ ] **T10.4** Store theme values as design tokens; inject as CSS custom properties per tenant `REQ-B12`
-- [ ] **T10.5** `GET/POST/PATCH /config/themes` — named theme CRUD (max 5); designate default `REQ-B6, REQ-B7`
-- [ ] **T10.6** Angular `ThemeService` — load tenant theme on init; apply CSS vars
-- [ ] **T10.7** `?theme=` and `?lang=` URL param override handling `REQ-H5`
-- [ ] **T10.8** End-user theme/font/bubble-style picker (when admin-enabled) `REQ-C11–C16`
-- [ ] **T10.9** Persist end-user preferences to `localStorage` `REQ-C15`
+- [x] **T10.1** `GET/PATCH /config/branding` — logo, colors, background style, fonts, favicon, page title `REQ-B1–B9`
+- [x] **T10.2** `POST /config/branding/logo` — upload logo to Cloud Storage `REQ-B1`
+- [x] **T10.3** WCAG AA 4.5:1 contrast check on color save — warn + block on fail `REQ-B10`
+- [x] **T10.4** Store theme values as design tokens; inject as CSS custom properties per tenant `REQ-B12`
+- [x] **T10.5** `GET/POST/PATCH /config/themes` — named theme CRUD (max 5); designate default `REQ-B6, REQ-B7`
+- [x] **T10.6** Angular `ThemeService` — load tenant theme on init; apply CSS vars
+- [x] **T10.7** `?theme=` and `?lang=` URL param override handling `REQ-H5`
+- [x] **T10.8** End-user theme/font/bubble-style picker (when admin-enabled) `REQ-C11–C16`
+- [x] **T10.9** Persist end-user preferences to `localStorage` `REQ-C15`
 
 ---
 
 ## Phase 11 — Admin Dashboard (Chat-Paradigm)
 
-- [ ] **T11.1** Admin shell route `/admin` with Firebase auth guard `REQ-T7`
-- [ ] **T11.2** Admin chat interface — same component, admin system prompt + admin-only components `REQ-AN0, REQ-AN0a`
-- [ ] **T11.3** Admin assistant renders config components inline (schema form, color picker, metrics) `REQ-AN0b`
-- [ ] **T11.4** Traditional form fallbacks for all config sections `REQ-AN0c`
-- [ ] **T11.5** Admin sidebar: Dashboard | Catalog | Schema | AI Config | Branding | Actions | Analytics `REQ-T7`
+- [x] **T11.1** Admin shell route `/admin` with Firebase auth guard `REQ-T7`
+- [x] **T11.2** Admin chat interface — same component, admin system prompt + admin-only components `REQ-AN0, REQ-AN0a`
+- [x] **T11.3** Admin assistant renders config components inline (schema form, color picker, metrics) `REQ-AN0b`
+- [x] **T11.4** Traditional form fallbacks for all config sections `REQ-AN0c`
+- [x] **T11.5** Admin sidebar: Dashboard | Catalog | Schema | AI Config | Branding | Actions | Analytics `REQ-T7`
 - [ ] **T11.6** Invite admin flow: email → Firebase invite → role assignment `REQ-T8`
 - [ ] **T11.7** BYOK warning banner when BYOK is active `REQ-AI-P5`
 
@@ -196,22 +196,22 @@
 ## Phase 12 — Analytics & Usage
 
 - [ ] **T12.1** Daily aggregation jobs: conversations, messages, most-queried items, top intents, action rates, zero-result queries `REQ-AN1–AN6`
-- [ ] **T12.2** `GET /analytics/summary?from=&to=` — aggregated metrics for tenant `REQ-AN9`
-- [ ] **T12.3** Metrics dashboard component (admin chat) with date range filter `REQ-AN9`
-- [ ] **T12.4** Token usage vs plan limit breakdown `REQ-AN7, REQ-PR6`
-- [ ] **T12.5** Billing report: seat count, token count, estimated cost `REQ-PR6`
-- [ ] **T12.6** Platform admin (L0) rollup: all-tenant usage, revenue vs LLM cost, BYOK split `REQ-AN10–AN12`
+- [x] **T12.2** `GET /analytics/summary?from=&to=` — aggregated metrics for tenant `REQ-AN9`
+- [x] **T12.3** Metrics dashboard component (admin chat) with date range filter `REQ-AN9`
+- [x] **T12.4** Token usage vs plan limit breakdown `REQ-AN7, REQ-PR6`
+- [x] **T12.5** Billing report: seat count, token count, estimated cost `REQ-PR6`
+- [x] **T12.6** Platform admin (L0) rollup: all-tenant usage, revenue vs LLM cost, BYOK split `REQ-AN10–AN12`
 
 ---
 
 ## Phase 13 — Chat Interface Polish (End User)
 
-- [ ] **T13.1** Starter prompt chips shown when conversation is empty `REQ-AI5, REQ-C6`
-- [ ] **T13.2** Typing indicator animation (3-dot pulse) while streaming `REQ-C7`
+- [x] **T13.1** Starter prompt chips shown when conversation is empty `REQ-AI5, REQ-C6`
+- [x] **T13.2** Typing indicator animation (3-dot pulse) while streaming `REQ-C7`
 - [ ] **T13.3** Long-wait message after 10s LLM delay (configurable text) `REQ-C8`
-- [ ] **T13.4** Clear/reset conversation button `REQ-C9`
-- [ ] **T13.5** Configurable placeholder text on input `REQ-C5`
-- [ ] **T13.6** Full keyboard navigation + ARIA labels on all components `REQ-NF17, REQ-NF18`
+- [x] **T13.4** Clear/reset conversation button `REQ-C9`
+- [x] **T13.5** Configurable placeholder text on input `REQ-C5`
+- [x] **T13.6** Full keyboard navigation + ARIA labels on all components `REQ-NF17, REQ-NF18`
 - [ ] **T13.7** WCAG AA contrast compliance pass on all built-in themes `REQ-NF16`
 
 ---
@@ -243,11 +243,11 @@
 | 5 | Vector Search & System Prompt | 7 | ✅ Done |
 | 6 | AI Engine & Chat API | 14 | ✅ Done |
 | 7 | Component DSL & Renderer | 13 | ✅ Done |
-| 8 | Actions Engine | 6 | ⬜ |
-| 9 | AI Config API & UI | 6 | ⬜ |
-| 10 | Branding & Theming | 9 | ⬜ |
-| 11 | Admin Dashboard | 7 | ⬜ |
-| 12 | Analytics & Usage | 6 | ⬜ |
-| 13 | Chat UI Polish | 7 | ⬜ |
+| 8 | Actions Engine | 6 | ✅ Done |
+| 9 | AI Config API & UI | 6 | ✅ Done |
+| 10 | Branding & Theming | 9 | ✅ Done |
+| 11 | Admin Dashboard | 7 | 🔶 5/7 |
+| 12 | Analytics & Usage | 6 | 🔶 5/6 |
+| 13 | Chat UI Polish | 7 | 🔶 5/7 |
 | 14 | DevOps & NFRs | 10 | ⬜ |
-| **Total** | | **131** | **80 done** |
+| **Total** | | **131** | **116 done** |
