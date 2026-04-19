@@ -5,15 +5,22 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from synaptiq_api.core.config import settings
+from synaptiq_api.core.firebase import initialize_firebase
 from synaptiq_api.core.mongodb import connect_db, disconnect_db
+from synaptiq_api.core.redis import connect_redis, disconnect_redis
+from synaptiq_api.middleware.auth import AuthMiddleware
+from synaptiq_api.middleware.rate_limit import RateLimitMiddleware
 from synaptiq_api.middleware.tenant import TenantMiddleware
-from synaptiq_api.routers import catalog, chat, health, tenants
+from synaptiq_api.routers import actions, auth, catalog, chat, health, tenants
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):  # noqa: ARG001
     await connect_db()
+    await connect_redis()
+    initialize_firebase()
     yield
+    await disconnect_redis()
     await disconnect_db()
 
 
@@ -38,14 +45,19 @@ app.add_middleware(
 )
 
 # ---------------------------------------------------------------------------
-# Custom middleware
+# Custom middleware (execution order is BOTTOM → TOP)
+# Request flow: RateLimit → Auth → Tenant → handler
 # ---------------------------------------------------------------------------
+app.add_middleware(RateLimitMiddleware)
+app.add_middleware(AuthMiddleware)
 app.add_middleware(TenantMiddleware)
 
 # ---------------------------------------------------------------------------
 # Routers
 # ---------------------------------------------------------------------------
 app.include_router(health.router)
+app.include_router(auth.router, prefix="/api/v1", tags=["auth"])
 app.include_router(chat.router, prefix="/api/v1/chat", tags=["chat"])
 app.include_router(catalog.router, prefix="/api/v1/catalog", tags=["catalog"])
 app.include_router(tenants.router, prefix="/api/v1/tenants", tags=["tenants"])
+app.include_router(actions.router, prefix="/api/v1/actions", tags=["actions"])
