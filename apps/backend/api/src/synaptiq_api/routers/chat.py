@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 
 from synaptiq_api.core.mongodb import get_db
 from synaptiq_api.services.chat_service import chat_stream
+from pymongo import ReturnDocument
 
 router = APIRouter()
 
@@ -37,12 +38,31 @@ class SessionResponse(BaseModel):
     tenant_id: str
     created_at: str
     turn_count: int = 0
+    title: str = "New conversation"
+    updated_at: str | None = None
+
+
+class SessionListItem(BaseModel):
+    session_id: str
+    title: str
+    turn_count: int
+    created_at: str
+    updated_at: str
+
+
+class SessionListResponse(BaseModel):
+    sessions: list[SessionListItem]
+    total: int
 
 
 class HistoryResponse(BaseModel):
     session_id: str
     turns: list[dict]
     total: int
+
+
+class SessionUpdateRequest(BaseModel):
+    title: str | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -131,6 +151,123 @@ async def create_session(
         tenant_id=tenant_id,
         created_at=now.isoformat(),
     )
+
+
+# ---------------------------------------------------------------------------
+# T6.12b — List sessions
+# ---------------------------------------------------------------------------
+
+@router.get("/sessions", summary="List all chat sessions")
+async def list_sessions(
+    request: Request,
+    limit: int = 20,
+    offset: int = 0,
+) -> SessionListResponse:
+    """
+    List all sessions for the current tenant, ordered by most recent activity.
+    Auto-generates a title from the first user message if not set.
+    """
+    tenant_id: str = request.state.tenant_id
+    db = get_db()
+
+    total = await db["sessions"].count_documents({"tenant_id": tenant_id})
+
+    cursor = db["sessions"].find(
+        {"tenant_id": tenant_id},
+        {"session_id": 1, "title": 1, "turns": 1, "created_at": 1, "updated_at": 1},
+    ).sort("updated_at", -1).skip(offset).limit(limit)
+
+    sessions: list[SessionListItem] = []
+    async for doc in cursor:
+        # Auto-generate title from first user message if no explicit title
+        title = doc.get("title", "")
+        if not title:
+            turns = doc.get("turns", [])
+            for turn in turns:
+                if turn.get("role") == "user":
+                    title = turn.get("content", "New conversation")[:50]
+                    break
+            if not title:
+                title = "New conversation"
+
+        sessions.append(SessionListItem(
+            session_id=doc["session_id"],
+            title=title,
+            turn_count=len(doc.get("turns", [])),
+            created_at=doc["created_at"].isoformat(),
+            updated_at=doc.get("updated_at", doc["created_at"]).isoformat(),
+        ))
+
+    return SessionListResponse(sessions=sessions, total=total)
+
+
+# ---------------------------------------------------------------------------
+# T6.12c — Update session (title)
+# ---------------------------------------------------------------------------
+
+@router.patch(
+    "/sessions/{session_id}",
+    summary="Update session metadata (e.g. title)",
+)
+async def update_session(
+    session_id: str,
+    body: SessionUpdateRequest,
+    request: Request,
+) -> SessionResponse:
+    """Update mutable session fields (title)."""
+    tenant_id: str = request.state.tenant_id
+    db = get_db()
+
+    update: dict = {"updated_at": datetime.utcnow()}
+    if body.title is not None:
+        update["title"] = body.title
+
+    result = await db["sessions"].find_one_and_update(
+        {"session_id": session_id, "tenant_id": tenant_id},
+        {"$set": update},
+        return_document=True,
+    )
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Session {session_id} not found",
+        )
+
+    return SessionResponse(
+        session_id=result["session_id"],
+        tenant_id=tenant_id,
+        created_at=result["created_at"].isoformat(),
+        turn_count=len(result.get("turns", [])),
+        title=result.get("title", "New conversation"),
+        updated_at=result["updated_at"].isoformat(),
+    )
+
+
+# ---------------------------------------------------------------------------
+# T6.12d — Delete session
+# ---------------------------------------------------------------------------
+
+@router.delete(
+    "/sessions/{session_id}",
+    summary="Delete a chat session",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete_session(
+    session_id: str,
+    request: Request,
+):
+    """Permanently delete a session and all its turns."""
+    tenant_id: str = request.state.tenant_id
+    db = get_db()
+
+    result = await db["sessions"].delete_one(
+        {"session_id": session_id, "tenant_id": tenant_id}
+    )
+    if result.deleted_count == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Session {session_id} not found",
+        )
 
 
 # ---------------------------------------------------------------------------

@@ -46,12 +46,18 @@ export interface SseErrorEvent {
   readonly message: string;
 }
 
+export interface SseTextReplaceEvent {
+  readonly type: 'text_replace';
+  readonly text: string;
+}
+
 export type ChatSseEvent =
   | SseTokenEvent
   | SseComponentEvent
   | SseStatusEvent
   | SseDoneEvent
-  | SseErrorEvent;
+  | SseErrorEvent
+  | SseTextReplaceEvent;
 
 // ---------------------------------------------------------------------------
 // Chat request payload
@@ -74,6 +80,8 @@ export interface ChatStreamCallbacks {
   onComponent?: (component: ComponentSpec) => void;
   /** Called for status/progress messages (e.g., fallback notices). */
   onStatus?: (message: string) => void;
+  /** Called when the backend replaces streamed text with cleaned version (strips raw JSON). */
+  onTextReplace?: (text: string) => void;
   /** Called once the stream completes successfully. */
   onDone?: (event: SseDoneEvent) => void;
   /** Called on any error (network, backend, parse). */
@@ -250,6 +258,8 @@ export class ChatService {
           return { type: 'component', component: data as ComponentSpec };
         case 'status':
           return { type: 'status', message: data.message ?? '' };
+        case 'text_replace':
+          return { type: 'text_replace', text: data.text ?? '' };
         case 'done':
           return {
             type: 'done',
@@ -280,6 +290,9 @@ export class ChatService {
         break;
       case 'status':
         callbacks.onStatus?.(event.message);
+        break;
+      case 'text_replace':
+        callbacks.onTextReplace?.(event.text);
         break;
       case 'done':
         callbacks.onDone?.(event);

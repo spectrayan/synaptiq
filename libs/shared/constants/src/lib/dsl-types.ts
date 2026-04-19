@@ -119,6 +119,26 @@ export interface FormFieldValidation {
 }
 
 /**
+ * Predicate that controls conditional field visibility.
+ *
+ * When present on a FormFieldDef, the field is only shown when the
+ * referenced `field` value satisfies the `operator` + `value` check.
+ *
+ * Example: Show "warranty_months" only when category == "electronics":
+ * ```json
+ * { "field": "category", "operator": "eq", "value": "electronics" }
+ * ```
+ */
+export interface VisibleWhenPredicate {
+  /** The field key whose value is checked. */
+  field: string;
+  /** Comparison operator. */
+  operator: 'eq' | 'neq' | 'in' | 'not_in' | 'truthy' | 'falsy';
+  /** The value to compare against (unused for truthy/falsy). */
+  value?: unknown;
+}
+
+/**
  * A single field definition within a form.
  *
  * This type is the **single source of truth** used in two contexts:
@@ -154,6 +174,8 @@ export interface FormFieldDef {
   currency_code?: string;
   /** Accepted file types for file fields (e.g. ".csv,.xlsx"). */
   accept?: string;
+  /** Conditional visibility predicate — field is hidden until this evaluates true. */
+  visible_when?: VisibleWhenPredicate;
 }
 
 // ---------------------------------------------------------------------------

@@ -34,8 +34,12 @@ app = FastAPI(
 )
 
 # ---------------------------------------------------------------------------
-# CORS
+# Middleware — execution order is BOTTOM → TOP (last added runs first).
+# Request flow: CORS → Tenant → Auth → RateLimit → handler
 # ---------------------------------------------------------------------------
+app.add_middleware(RateLimitMiddleware)
+app.add_middleware(AuthMiddleware)
+app.add_middleware(TenantMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
@@ -43,14 +47,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# ---------------------------------------------------------------------------
-# Custom middleware (execution order is BOTTOM → TOP)
-# Request flow: RateLimit → Auth → Tenant → handler
-# ---------------------------------------------------------------------------
-app.add_middleware(RateLimitMiddleware)
-app.add_middleware(AuthMiddleware)
-app.add_middleware(TenantMiddleware)
 
 # ---------------------------------------------------------------------------
 # Routers

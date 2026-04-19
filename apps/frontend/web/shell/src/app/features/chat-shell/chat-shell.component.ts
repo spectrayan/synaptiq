@@ -12,7 +12,7 @@ import {
   type FormInputSpec,
 } from '@synaptiq/constants';
 import { DslRendererComponent, FormSubmitEvent } from '@synaptiq/dsl-renderer';
-import { ActionsService, ChatService } from '@synaptiq/chat';
+import { ActionsService, ChatService, SessionService, SessionListItem } from '@synaptiq/chat';
 import { ENVIRONMENT } from '@synaptiq/utils';
 
 // ---------------------------------------------------------------------------
@@ -131,11 +131,14 @@ export class ChatShellComponent {
   private readonly breakpoints = inject(BreakpointObserver);
   private readonly actionsService = inject(ActionsService);
   private readonly chatService = inject(ChatService);
+  private readonly sessionService = inject(SessionService);
   private readonly env = inject(ENVIRONMENT);
   private messagesEnd = viewChild<ElementRef<HTMLDivElement>>('messagesEnd');
 
   /** Active session ID for the current conversation. */
-  private sessionId = crypto.randomUUID();
+  private sessionId: string = crypto.randomUUID();
+  /** Whether the current session has been persisted to the backend. */
+  private sessionPersisted = false;
 
   isMobile = toSignal(
     this.breakpoints.observe([Breakpoints.XSmall, Breakpoints.Small]).pipe(map((r) => r.matches)),
@@ -145,8 +148,13 @@ export class ChatShellComponent {
   sidebarOpen = signal(true);
   inputValue = signal('');
   isLoading = signal(false);
-  /** Whether the backend is reachable — enables SSE mode vs demo fallback. */
-  useBackend = signal(!this.env.production ? false : true);
+  /** Whether the backend is reachable — enables SSE mode vs demo fallback.
+   *  Defaults to `true`; auto-switches to demo on network failure (see onError). */
+  useBackend = signal(true);
+
+  /** Session history for the sidebar */
+  sessionHistory = signal<SessionListItem[]>([]);
+  activeSessionId = signal<string>('');
 
   messages = signal<ChatMessage[]>([
     {
@@ -159,7 +167,7 @@ export class ChatShellComponent {
         {
           type: 'info_banner',
           title: 'Quick start',
-          body: 'Say "add a product", "search electronics", or "compare widgets" to see rich components.',
+          body: 'Say \"add a product\", \"search electronics\", or \"compare widgets\" to see rich components.',
           style: 'info',
           suggestions: [
             { label: 'Add a product', prompt: 'Add a new product' },
@@ -177,6 +185,77 @@ export class ChatShellComponent {
       this.messages();
       setTimeout(() => this.messagesEnd()?.nativeElement?.scrollIntoView({ behavior: 'smooth' }), 50);
     });
+
+    // Load session history on startup
+    this.loadSessionHistory();
+  }
+
+  // ── Session management ───────────────────────────────────────────────
+
+  async loadSessionHistory(): Promise<void> {
+    try {
+      const response = await this.sessionService.listSessions();
+      this.sessionHistory.set(response.sessions);
+    } catch {
+      // Silently fail — sidebar shows empty list
+    }
+  }
+
+  async loadSession(session: SessionListItem): Promise<void> {
+    this.chatService.abort();
+    this.isLoading.set(true);
+    this.sessionId = session.session_id;
+    this.sessionPersisted = true;
+    this.activeSessionId.set(session.session_id);
+
+    // Close sidebar on mobile
+    if (this.isMobile()) {
+      this.sidebarOpen.set(false);
+    }
+
+    try {
+      const history = await this.sessionService.getHistory(session.session_id);
+      const restoredMessages: ChatMessage[] = history.turns.map((turn, i) => ({
+        id: `restored-${i}`,
+        role: turn.role,
+        content: turn.content,
+        timestamp: turn.timestamp ? new Date(turn.timestamp) : new Date(),
+        uiComponents: (turn.components as ComponentSpec[]) ?? [],
+      }));
+
+      this.messages.set(
+        restoredMessages.length > 0
+          ? restoredMessages
+          : [{
+              id: crypto.randomUUID(),
+              role: 'assistant',
+              content: 'Conversation loaded. How can I help?',
+              timestamp: new Date(),
+            }],
+      );
+    } catch {
+      this.messages.set([{
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: 'Could not load the conversation. Starting fresh.',
+        timestamp: new Date(),
+      }]);
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  async deleteSession(session: SessionListItem, event: Event): Promise<void> {
+    event.stopPropagation();
+    try {
+      await this.sessionService.deleteSession(session.session_id);
+      this.sessionHistory.update((s) => s.filter((h) => h.session_id !== session.session_id));
+      if (this.sessionId === session.session_id) {
+        this.newConversation();
+      }
+    } catch {
+      // Silently fail
+    }
   }
 
   // ── Sidebar ──────────────────────────────────────────────────────────
@@ -188,6 +267,8 @@ export class ChatShellComponent {
   newConversation(): void {
     this.chatService.abort();
     this.sessionId = crypto.randomUUID();
+    this.sessionPersisted = false;
+    this.activeSessionId.set('');
     this.messages.set([
       {
         id: crypto.randomUUID(),
@@ -284,6 +365,15 @@ export class ChatShellComponent {
           );
         },
 
+        onTextReplace: (text) => {
+          // Replace streamed text with cleaned version (raw JSON stripped out)
+          this.messages.update((msgs) =>
+            msgs.map((m) =>
+              m.id === assistantMsgId ? { ...m, content: text } : m,
+            ),
+          );
+        },
+
         onDone: () => {
           // Clear status text and loading state
           this.messages.update((msgs) =>
@@ -292,6 +382,15 @@ export class ChatShellComponent {
             ),
           );
           this.isLoading.set(false);
+
+          // Auto-persist session after first successful exchange
+          if (!this.sessionPersisted) {
+            this.sessionPersisted = true;
+            this.activeSessionId.set(this.sessionId);
+            this.sessionService.createSession(this.sessionId).catch(() => {});
+            // Refresh sidebar to show new session
+            this.loadSessionHistory();
+          }
         },
 
         onError: (errorMessage) => {

@@ -21,7 +21,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
-import { FormInputSpec, FormFieldDef } from '@synaptiq/constants';
+import { FormInputSpec, FormFieldDef, VisibleWhenPredicate } from '@synaptiq/constants';
 import { SuggestionBarComponent } from '../suggestion-bar/suggestion-bar.component';
 
 /** Payload emitted when the form is submitted. */
@@ -71,6 +71,7 @@ export class FormInputComponent implements OnInit {
 
   ngOnInit() {
     this.buildForm();
+    this.syncVisibility();
   }
 
   private buildForm() {
@@ -84,6 +85,60 @@ export class FormInputComponent implements OnInit {
     }
 
     this.form = new FormGroup(controls);
+  }
+
+  /**
+   * Subscribe to value changes on trigger fields so we can
+   * enable/disable dependent fields reactively.
+   */
+  private syncVisibility() {
+    const triggerKeys = new Set<string>();
+    for (const field of this.spec().fields) {
+      if (field.visible_when) triggerKeys.add(field.visible_when.field);
+    }
+
+    for (const key of triggerKeys) {
+      const ctrl = this.form.get(key);
+      if (!ctrl) continue;
+      ctrl.valueChanges.subscribe(() => this.updateDependentFields());
+    }
+
+    // Run once at init to set initial state.
+    this.updateDependentFields();
+  }
+
+  /** Enable/disable fields based on their visible_when predicate. */
+  private updateDependentFields() {
+    for (const field of this.spec().fields) {
+      if (!field.visible_when) continue;
+      const ctrl = this.getControl(field.field);
+      if (!ctrl) continue;
+
+      if (this.evaluatePredicate(field.visible_when)) {
+        ctrl.enable({ emitEvent: false });
+      } else {
+        ctrl.disable({ emitEvent: false });
+      }
+    }
+  }
+
+  /** Check whether a field should be visible based on its predicate. */
+  isFieldVisible(field: FormFieldDef): boolean {
+    if (!field.visible_when) return true;
+    return this.evaluatePredicate(field.visible_when);
+  }
+
+  private evaluatePredicate(pred: VisibleWhenPredicate): boolean {
+    const current = this.form?.get(pred.field)?.value;
+    switch (pred.operator) {
+      case 'eq':     return current === pred.value;
+      case 'neq':    return current !== pred.value;
+      case 'in':     return Array.isArray(pred.value) && pred.value.includes(current);
+      case 'not_in': return Array.isArray(pred.value) && !pred.value.includes(current);
+      case 'truthy': return !!current;
+      case 'falsy':  return !current;
+      default:       return true;
+    }
   }
 
   private getDefaultForType(type: string): unknown {

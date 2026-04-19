@@ -26,6 +26,10 @@ class AuthMiddleware(BaseHTTPMiddleware):
     """Middleware to validate Firebase ID tokens on protected routes."""
 
     async def dispatch(self, request: Request, call_next) -> Response:
+        # Let CORS preflight requests pass through
+        if request.method == "OPTIONS":
+            return await call_next(request)
+
         # Check if route is public
         if any(request.url.path.startswith(route) for route in PUBLIC_ROUTES):
             return await call_next(request)

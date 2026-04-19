@@ -173,10 +173,13 @@ async def chat_stream(
             yield _sse_error("Something went wrong. Please try again.")
             return
 
-    # -- Step 7: Parse DSL components from response
-    components = _extract_components(full_response)
-    for comp in components:
-        yield _sse_component(comp)
+    # -- Step 7: Parse DSL components from response and get cleaned text
+    components, cleaned_text = _extract_components(full_response)
+    if components:
+        # Emit a text replacement so the frontend swaps out the raw JSON
+        yield _sse_event("text_replace", {"text": cleaned_text})
+        for comp in components:
+            yield _sse_component(comp)
 
     # -- Step 8: Calculate metrics and finalize
     latency_ms = int((time.time() - start_time) * 1000)
@@ -193,7 +196,7 @@ async def chat_stream(
         session_id=session_id,
         turn_id=turn_id,
         user_message=user_message,
-        assistant_response=full_response,
+        assistant_response=cleaned_text if components else full_response,
         components=components,
         tokens_in=tokens_in,
         tokens_out=tokens_out,
@@ -268,36 +271,142 @@ def _build_context_message(results: list[dict]) -> str:
 # DSL Component extraction
 # ---------------------------------------------------------------------------
 
-def _extract_components(response: str) -> list[dict]:
+import re
+
+# Known DSL component types
+_COMPONENT_TYPES = {
+    "item_card", "item_grid", "item_detail", "comparison_table",
+    "filter_summary", "result_count", "empty_state", "action_confirm",
+    "info_banner", "data_table", "form_input",
+}
+
+
+def _extract_components(response: str) -> tuple[list[dict], str]:
     """
-    Extract ```component code fences from LLM output.
+    Extract DSL components from LLM output and return cleaned text.
 
-    The LLM is instructed to wrap DSL JSON in ```component fences.
+    Handles multiple LLM output patterns:
+      1. ```component ... ```  (instructed format)
+      2. ```json ... ```       (common LLM fallback)
+      3. Bare JSON objects     (no fences at all)
+
+    Returns:
+        (components, cleaned_text) — components list and the text with
+        component JSON blocks stripped out for clean display.
     """
-    components = []
-    marker = "```component"
-    idx = 0
+    components: list[dict] = []
+    cleaned = response
 
-    while True:
-        start = response.find(marker, idx)
-        if start == -1:
-            break
-        json_start = start + len(marker)
-        end = response.find("```", json_start)
-        if end == -1:
-            break
+    # Pattern 1 & 2: Extract from code fences (```component or ```json)
+    fence_pattern = re.compile(
+        r"```(?:component|json)\s*\n(.*?)```",
+        re.DOTALL,
+    )
 
-        raw = response[json_start:end].strip()
+    for match in fence_pattern.finditer(response):
+        raw = match.group(1).strip()
         try:
             comp = json.loads(raw)
-            if isinstance(comp, dict) and "type" in comp:
+            if isinstance(comp, dict) and comp.get("type") in _COMPONENT_TYPES:
                 components.append(comp)
+                cleaned = cleaned.replace(match.group(0), "")
         except json.JSONDecodeError:
-            logger.debug("Failed to parse component JSON: %s", raw[:100])
+            logger.debug("Failed to parse fenced JSON: %s", raw[:100])
 
-        idx = end + 3
+    # Pattern 3: Bare JSON objects with a "type" field (no fences)
+    # Only try this if no fenced components were found
+    if not components:
+        # Match JSON objects that start with {"type": "component_type"
+        bare_pattern = re.compile(
+            r'\{[^{}]*"type"\s*:\s*"(' + "|".join(_COMPONENT_TYPES) + r')"[^{}]*(?:\{[^{}]*\}[^{}]*)*\}',
+        )
+        for match in bare_pattern.finditer(response):
+            raw = match.group(0)
+            try:
+                comp = json.loads(raw)
+                if isinstance(comp, dict) and comp.get("type") in _COMPONENT_TYPES:
+                    components.append(comp)
+                    cleaned = cleaned.replace(raw, "")
+            except json.JSONDecodeError:
+                pass
 
-    return components
+    # Clean up resulting text: remove excess whitespace/newlines
+    cleaned = re.sub(r"\n{3,}", "\n\n", cleaned).strip()
+
+    # Normalize all components to ensure correct CatalogItemData structure
+    components = [_normalize_component(c) for c in components]
+
+    return components, cleaned
+
+
+def _normalize_component(comp: dict) -> dict:
+    """
+    Normalize a component to ensure CatalogItemData items have the correct
+    nested {item_id, data} structure.
+
+    LLMs frequently produce flat items like:
+      {"item_id": "x", "name": "Foo", "price": 99}
+    instead of the required:
+      {"item_id": "x", "data": {"name": "Foo", "price": 99}}
+
+    This function fixes that.
+    """
+    comp_type = comp.get("type", "")
+
+    # Components that have a single 'item' field
+    if comp_type in ("item_card", "item_detail"):
+        item = comp.get("item")
+        if isinstance(item, dict):
+            comp["item"] = _normalize_item(item)
+
+    # Components that have an 'items' array
+    if comp_type in ("item_grid", "comparison_table"):
+        items = comp.get("items", [])
+        if isinstance(items, list):
+            comp["items"] = [_normalize_item(it) for it in items if isinstance(it, dict)]
+
+    return comp
+
+
+def _normalize_item(item: dict) -> dict:
+    """
+    Ensure an item has the correct CatalogItemData shape:
+      {item_id: string, data: Record<string, unknown>}
+
+    If the LLM placed fields flat on the item object, move them into 'data'.
+    """
+    # Already properly structured
+    if "data" in item and isinstance(item["data"], dict) and item["data"]:
+        return item
+
+    # Fields that are NOT part of the data payload
+    reserved_keys = {"item_id", "data", "status", "score", "type"}
+
+    # Extract item_id
+    item_id = str(item.get("item_id", item.get("id", item.get("_id", ""))))
+    if not item_id:
+        # Generate a stable ID from the first string value
+        for v in item.values():
+            if isinstance(v, str) and v:
+                import hashlib
+                item_id = hashlib.md5(v.encode()).hexdigest()[:12]
+                break
+
+    # Collect all non-reserved fields into 'data'
+    data = {}
+    for k, v in item.items():
+        if k not in reserved_keys:
+            data[k] = v
+
+    # If 'data' existed but was empty, and we found flat fields, use those
+    if not data and "data" in item and isinstance(item.get("data"), dict):
+        data = item["data"]
+
+    return {
+        "item_id": item_id,
+        "data": data,
+        "status": item.get("status", "active"),
+    }
 
 
 def _sanitize_item(item: dict) -> dict:

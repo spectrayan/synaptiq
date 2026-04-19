@@ -1,5 +1,6 @@
 import {
   ApplicationConfig,
+  ErrorHandler,
   provideBrowserGlobalErrorListeners,
   provideZonelessChangeDetection,
 } from '@angular/core';
@@ -11,6 +12,7 @@ import { appRoutes } from './app.routes';
 import { authInterceptor } from '@synaptiq/auth';
 import { ENVIRONMENT } from '@synaptiq/utils';
 import { environment } from '../environments/environment';
+import { GlobalErrorHandler } from './core/global-error-handler';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -39,5 +41,8 @@ export const appConfig: ApplicationConfig = {
 
     // Environment config — injectable by library services
     { provide: ENVIRONMENT, useValue: environment },
+
+    // Global error boundary — prevents unhandled exceptions from crashing the app
+    { provide: ErrorHandler, useClass: GlobalErrorHandler },
   ],
 };

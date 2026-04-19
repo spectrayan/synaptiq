@@ -158,11 +158,17 @@ Wrap each component in a ```component code fence.
 
 Available component types: {', '.join(enabled_components)}
 
+### IMPORTANT — CatalogItemData Format:
+Every catalog item MUST use this exact structure:
+{{"item_id": "<unique_id>", "data": {{"name": "...", "price": 99.99, "category": "...", ...}}}}
+The `data` field is a nested object containing ALL the item's fields (name, price, category, description, etc.).
+Do NOT put fields directly on the item — they MUST be nested inside `data`.
+
 ### Component Formats:
-- item_card: {{"type": "item_card", "item": {{...data}}, "variant": "standard|compact|featured"}}
-- item_grid: {{"type": "item_grid", "items": [{{...}}], "columns": 2-4}}
-- item_detail: {{"type": "item_detail", "item": {{...data}}, "fields": ["field_id", ...]}}
-- comparison_table: {{"type": "comparison_table", "items": [{{...}}], "fields": ["field_id", ...]}}
+- item_card: {{"type": "item_card", "item": {{"item_id": "id", "data": {{...}}}}, "variant": "standard|compact|featured"}}
+- item_grid: {{"type": "item_grid", "items": [{{"item_id": "id1", "data": {{...}}}}, ...], "columns": 3}}
+- item_detail: {{"type": "item_detail", "item": {{"item_id": "id", "data": {{...}}}}, "fields": ["field_id", ...]}}
+- comparison_table: {{"type": "comparison_table", "items": [{{"item_id": "id", "data": {{...}}}}, ...], "fields": ["field_id", ...]}}
 - filter_summary: {{"type": "filter_summary", "filters": [{{"field": "...", "value": "...", "op": "..."}}]}}
 - result_count: {{"type": "result_count", "shown": N, "total": M}}
 - empty_state: {{"type": "empty_state", "message": "...", "suggestions": ["..."]}}
@@ -170,7 +176,13 @@ Available component types: {', '.join(enabled_components)}
 - info_banner: {{"type": "info_banner", "title": "...", "body": "...", "style": "info|warning|success"}}
 - data_table: {{"type": "data_table", "columns": [...], "rows": [...], "selectable": bool, "actions": [...]}}
 
-Always pair components with a brief natural language explanation.""")
+### Rules:
+1. Use the ACTUAL item_id values from the search context (e.g., "SKU-PHONE-001").
+2. Include all relevant data fields from the search results inside the `data` object.
+3. Always pair components with a brief natural language explanation.
+4. For search results, prefer `item_grid` with 3 columns.
+5. For single items, use `item_card` with variant "featured".
+6. Always include a `result_count` component after any grid or list.""")
 
     # -- Actions (REQ-A1–A5)
     actions = actions_config.get("actions", [])

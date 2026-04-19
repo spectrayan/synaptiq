@@ -19,14 +19,32 @@
 
     <div class="sidebar-section-label">Recent</div>
     <div class="history-list">
-      <div class="history-item active">
-        <mat-icon class="history-icon">chat_bubble_outline</mat-icon>
-        <span class="history-title">Product catalog search</span>
-      </div>
-      <div class="history-item">
-        <mat-icon class="history-icon">chat_bubble_outline</mat-icon>
-        <span class="history-title">Compare SKUs</span>
-      </div>
+      @for (session of sessionHistory(); track session.session_id) {
+        <div
+          class="history-item"
+          [class.active]="activeSessionId() === session.session_id"
+          (click)="loadSession(session)"
+        >
+          <mat-icon class="history-icon">chat_bubble_outline</mat-icon>
+          <span class="history-title">{{ session.title }}</span>
+          <span class="history-meta">{{ session.turn_count }}</span>
+          <button
+            class="history-delete"
+            mat-icon-button
+            (click)="deleteSession(session, $event)"
+            matTooltip="Delete"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      }
+
+      @if (!sessionHistory().length) {
+        <div class="history-empty">
+          <mat-icon>forum</mat-icon>
+          <span>No conversations yet</span>
+        </div>
+      }
     </div>
 
     <div class="sidebar-footer">

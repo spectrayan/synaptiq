@@ -35,6 +35,10 @@ class TenantMiddleware(BaseHTTPMiddleware):
     """Resolve tenant_id and attach to request.state with Redis-backed caching."""
 
     async def dispatch(self, request: Request, call_next) -> Response:
+        # Let CORS preflight requests pass through without tenant resolution
+        if request.method == "OPTIONS":
+            return await call_next(request)
+
         # Exempt routes skip tenant resolution entirely
         if any(request.url.path.startswith(route) for route in TENANT_EXEMPT_ROUTES):
             return await call_next(request)
