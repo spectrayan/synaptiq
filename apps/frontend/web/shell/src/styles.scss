@@ -26,6 +26,24 @@ $synaptiq-primary: mat.define-theme((
   ),
 ));
 
+$synaptiq-light: mat.define-theme((
+  color: (
+    theme-type: light,
+    primary: mat.$violet-palette,
+    tertiary: mat.$cyan-palette,
+  ),
+  typography: (
+    brand-family: 'Inter, system-ui, sans-serif',
+    plain-family: 'Inter, system-ui, sans-serif',
+    bold-weight: 600,
+    medium-weight: 500,
+    regular-weight: 400,
+  ),
+  density: (
+    scale: 0,
+  ),
+));
+
 // ─────────────────────────────────────────────────────────────────────────────
 // CSS Design Tokens (exposed as custom properties for tenant theming)
 // ─────────────────────────────────────────────────────────────────────────────
@@ -57,6 +75,12 @@ $synaptiq-primary: mat.define-theme((
   --sq-on-surface-variant: #9e9eb8;
   --sq-outline:            #3d3d55;
   --sq-outline-variant:    #2a2a3f;
+
+  // DSL renderer tokens (used by lib components)
+  --syn-text:              #e2e8f0;
+  --syn-text-muted:        #94a3b8;
+  --syn-bg:                #13131f;
+  --syn-border:            rgba(255 255 255 / 0.08);
 
   // Spacing scale
   --sq-space-1:  4px;
@@ -184,3 +208,58 @@ html, body {
 
 .sq-animate-in    { animation: sq-fade-in var(--sq-transition-normal) both; }
 .sq-animate-slide { animation: sq-slide-up var(--sq-transition-normal) both; }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Light Theme Override
+// Activated via [data-theme="light"] on <html>
+// ─────────────────────────────────────────────────────────────────────────────
+html[data-theme="light"] {
+  // Apply light Material theme to all Angular Material components
+  @include mat.theme($synaptiq-light);
+
+  // Surface colours
+  --sq-surface-dim:        #f5f5f8;
+  --sq-surface:            #ffffff;
+  --sq-surface-container:  #f0f0f5;
+  --sq-surface-elevated:   #e8e8f0;
+  --sq-surface-overlay:    rgba(0 0 0 / 0.04);
+
+  // Primary brand (darkened for contrast on light bg)
+  --sq-primary:            #7c4dff;
+  --sq-primary-container:  #ede7f6;
+  --sq-on-primary:         #ffffff;
+  --sq-on-primary-cont:    #311b92;
+
+  // Accent
+  --sq-tertiary:           #00838f;
+  --sq-tertiary-container: #e0f7fa;
+
+  // Semantic
+  --sq-error:              #d32f2f;
+  --sq-success:            #2e7d32;
+  --sq-warning:            #f57f17;
+
+  // Text
+  --sq-on-surface:         #1a1a2e;
+  --sq-on-surface-variant: #5c5c7a;
+  --sq-outline:            #d0d0e0;
+  --sq-outline-variant:    #e0e0eb;
+
+  // DSL renderer tokens (light-mode overrides)
+  --syn-text:              #1e293b;
+  --syn-text-muted:        #475569;
+  --syn-bg:                #ffffff;
+  --syn-border:            rgba(0 0 0 / 0.1);
+
+  // Elevation shadows (lighter)
+  --sq-shadow-sm: 0 1px 3px rgba(0 0 0 / 0.08), 0 1px 2px rgba(0 0 0 / 0.04);
+  --sq-shadow-md: 0 4px 12px rgba(0 0 0 / 0.1), 0 2px 4px rgba(0 0 0 / 0.06);
+  --sq-shadow-lg: 0 8px 32px rgba(0 0 0 / 0.12), 0 4px 8px rgba(0 0 0 / 0.08);
+}
+
+// Override glass effect in light mode
+html[data-theme="light"] .sq-glass {
+  background: rgba(255 255 255 / 0.7);
+  border-color: rgba(0 0 0 / 0.08);
+}
+

@@ -1,6 +1,8 @@
 import {
+  APP_INITIALIZER,
   ApplicationConfig,
   ErrorHandler,
+  inject,
   provideBrowserGlobalErrorListeners,
   provideZonelessChangeDetection,
 } from '@angular/core';
@@ -13,6 +15,13 @@ import { authInterceptor } from '@synaptiq/auth';
 import { ENVIRONMENT } from '@synaptiq/utils';
 import { environment } from '../environments/environment';
 import { GlobalErrorHandler } from './core/global-error-handler';
+import { ThemeService } from './core/theme.service';
+
+/** Load tenant branding during bootstrap (T10.6) */
+function initializeBranding(): () => Promise<void> {
+  const themeService = inject(ThemeService);
+  return () => themeService.loadTenantBranding();
+}
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -44,5 +53,8 @@ export const appConfig: ApplicationConfig = {
 
     // Global error boundary — prevents unhandled exceptions from crashing the app
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
+
+    // Load tenant branding on startup (T10.6)
+    { provide: APP_INITIALIZER, useFactory: initializeBranding, multi: true },
   ],
 };

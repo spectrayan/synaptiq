@@ -1,5 +1,4 @@
 import { Route } from '@angular/router';
-import { authGuard } from '@synaptiq/auth';
 
 export const appRoutes: Route[] = [
   {
@@ -8,34 +7,18 @@ export const appRoutes: Route[] = [
     pathMatch: 'full',
   },
   {
-    path: 'login',
-    loadComponent: () =>
-      import('./features/login/login.component').then(
-        (m) => m.LoginComponent,
-      ),
-  },
-  {
     path: 'chat',
     loadComponent: () =>
       import('./features/chat-shell/chat-shell.component').then(
         (m) => m.ChatShellComponent,
       ),
-    // Chat is accessible without auth for public tenants (REQ-T access_mode)
-    // Guard can be enabled per-tenant configuration
+    // Chat is the entire app — auth is handled conversationally within the shell.
+    // Anonymous users get guest access; auth upgrades happen inline.
   },
   {
     path: 'admin',
-    canActivate: [authGuard],
-    data: { roles: ['platform_admin', 'tenant_admin'] },
-    children: [
-      {
-        path: '',
-        loadComponent: () =>
-          import('./features/admin/admin-shell.component').then(
-            (m) => m.AdminShellComponent,
-          ),
-      },
-    ],
+    redirectTo: 'chat',
+    // Admin capabilities are surfaced within the chat when the user has admin claims.
   },
   {
     path: '**',
