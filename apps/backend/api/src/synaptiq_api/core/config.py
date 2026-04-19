@@ -19,11 +19,15 @@ class Settings(BaseSettings):
 
     # --- Auth ---
     firebase_project_id: str = ""
-
+    firebase_service_account_json: str = ""  # Base64-encoded service account JSON
+    firebase_api_key: str = ""  # Web API key for client-side Firebase
+    
     # --- LLM ---
     default_llm_provider: str = "vertexai"  # vertexai | openai | anthropic
     vertexai_project: str = ""
     vertexai_location: str = "us-central1"
+    gemini_api_key: str = ""  # Google AI Studio API key (non-Vertex)
+    gemini_model: str = "gemini-2.5-flash"  # Default Gemini model
     openai_api_key: str = ""
     anthropic_api_key: str = ""
 

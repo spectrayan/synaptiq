@@ -22,7 +22,6 @@ description = "Synaptiq FastAPI backend — LLM-native catalog discovery engine"
 requires-python = ">=3.12,<4"
 readme = "README.md"
 dependencies = [
-    "python-sdk @ file:../../../libs/shared/sdks/python-sdk",
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.32.0",
     "pydantic>=2.10.0",
@@ -42,6 +41,12 @@ dependencies = [
     "prometheus-client>=0.21.0",
     "tenacity>=8.0.0",
     "google-cloud-secret-manager>=2.20.0",
+    "jsonref>=1.1.0",
+    "pyyaml>=6.0.0",
+    "google-genai>=1.0.0",
+    "openai>=1.50.0",
+    "email-validator>=2.3.0",
+    "python-multipart>=0.0.26",
 ]
 
 [tool.hatch.build.targets.wheel]
