@@ -1,8 +1,19 @@
-version: '3.9'
+# Synaptiq — Local Development Stack
+# Usage: docker compose up -d
+#
+# Services:
+#   - mongodb     : MongoDB Atlas Local (supports vector search + replica set)
+#   - redis       : Redis 7 for rate limiting and prompt caching
+#   - firebase-auth : Firebase Auth Emulator (no real credentials needed)
+#   - api         : FastAPI backend (hot-reload via volume mount)
+#   - seed        : One-shot seeder for demo tenant + catalog data
+#
+# The Angular frontend runs outside Docker via `pnpm nx serve shell`
 
 services:
+  # ── MongoDB Atlas Local ────────────────────────────────────────────────
   mongodb:
-    image: mongodb/mongodb-atlas-local:latest
+    image: mongodb/mongodb-atlas-local:8.0
     container_name: synaptiq-mongo
     ports:
       - "27017:27017"
@@ -13,7 +24,9 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 20s
 
+  # ── Redis ──────────────────────────────────────────────────────────────
   redis:
     image: redis:7-alpine
     container_name: synaptiq-redis
@@ -28,6 +41,32 @@ services:
       timeout: 3s
       retries: 3
 
+  # ── Firebase Auth Emulator ─────────────────────────────────────────────
+  firebase-auth:
+    image: node:22-alpine
+    container_name: synaptiq-firebase-auth
+    working_dir: /srv/firebase
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        npm install -g firebase-tools@latest &&
+        firebase emulators:start --only auth --project synaptiq-dev
+    ports:
+      - "9099:9099"   # Auth Emulator
+      - "4000:4000"   # Emulator Suite UI
+    environment:
+      - FIREBASE_CONFIG={"projectId":"synaptiq-dev"}
+    volumes:
+      - firebase_data:/srv/firebase
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9099/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # ── FastAPI Backend ────────────────────────────────────────────────────
   api:
     build:
       context: ./apps/backend/api
@@ -40,6 +79,10 @@ services:
       - REDIS_URL=redis://redis:6379
       - DEBUG=true
       - ENVIRONMENT=development
+      - SYNAPTIQ_CORS_ORIGINS=http://localhost:4200,http://localhost:4201
+      # Connect to Firebase Auth Emulator for token verification
+      - FIREBASE_AUTH_EMULATOR_HOST=firebase-auth:9099
+      - FIREBASE_PROJECT_ID=synaptiq-dev
     env_file:
       - ./apps/backend/api/.env
     depends_on:
@@ -47,10 +90,14 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      firebase-auth:
+        condition: service_healthy
     volumes:
       - ./apps/backend/api/src:/app/src
+    restart: unless-stopped
 
-  # One-shot seed runner — populates demo tenant + catalog on first start
+  # ── One-shot seed runner ───────────────────────────────────────────────
+  # Populates demo tenant + catalog data on first start
   seed:
     build:
       context: ./apps/backend/api
@@ -71,3 +118,5 @@ services:
 volumes:
   mongo_data:
   redis_data:
+  firebase_data:
+

@@ -22,7 +22,11 @@ CACHE_PREFIX = "prompt"
 CACHE_TTL = 3600  # 1 hour
 
 
-async def build_system_prompt(tenant_id: str, use_cache: bool = True) -> str:
+async def build_system_prompt(
+    tenant_id: str,
+    user_role: str = "user",
+    use_cache: bool = True,
+) -> str:
     """
     Build (or retrieve cached) the complete system prompt for a tenant.
 
@@ -31,15 +35,16 @@ async def build_system_prompt(tenant_id: str, use_cache: bool = True) -> str:
     REQ-AI1–AI10, REQ-S10, REQ-AI11–AI12
     """
     # Check cache first (T5.6)
+    cache_key = f"{CACHE_PREFIX}:{tenant_id}:{user_role}"
     if use_cache:
         try:
             redis = get_redis()
-            cached = await redis.get(f"{CACHE_PREFIX}:{tenant_id}")
+            cached = await redis.get(cache_key)
             if cached:
-                logger.debug("Cache hit for system prompt: %s", tenant_id)
+                logger.debug("Cache hit for system prompt: %s (role=%s)", tenant_id, user_role)
                 return cached
         except Exception:
-            logger.warning("Redis cache read failed for prompt:%s", tenant_id)
+            logger.warning("Redis cache read failed for %s", cache_key)
 
     db = get_db()
 
@@ -66,15 +71,16 @@ async def build_system_prompt(tenant_id: str, use_cache: bool = True) -> str:
         schema=schema,
         components=components,
         actions_config=actions_config,
+        user_role=user_role,
     )
 
     # Cache the compiled prompt (T5.6)
     try:
         redis = get_redis()
-        await redis.set(f"{CACHE_PREFIX}:{tenant_id}", prompt, ex=CACHE_TTL)
-        logger.debug("Cached system prompt for tenant: %s", tenant_id)
+        await redis.set(cache_key, prompt, ex=CACHE_TTL)
+        logger.debug("Cached system prompt for tenant: %s (role=%s)", tenant_id, user_role)
     except Exception:
-        logger.warning("Redis cache write failed for prompt:%s", tenant_id)
+        logger.warning("Redis cache write failed for %s", cache_key)
 
     return prompt
 
@@ -85,6 +91,7 @@ def _compile_prompt(
     schema: dict[str, Any] | None,
     components: dict[str, Any],
     actions_config: dict[str, Any],
+    user_role: str = "user",
 ) -> str:
     """Assemble the full system prompt from config pieces."""
     sections: list[str] = []
@@ -165,8 +172,8 @@ The `data` field is a nested object containing ALL the item's fields (name, pric
 Do NOT put fields directly on the item — they MUST be nested inside `data`.
 
 ### Component Formats:
-- item_card: {{"type": "item_card", "item": {{"item_id": "id", "data": {{...}}}}, "variant": "standard|compact|featured"}}
-- item_grid: {{"type": "item_grid", "items": [{{"item_id": "id1", "data": {{...}}}}, ...], "columns": 3}}
+- item_card: {{"type": "item_card", "item": {{"item_id": "id", "data": {{...}}}}, "variant": "standard|compact|featured", "clickable": true}}
+- item_grid: {{"type": "item_grid", "items": [{{"item_id": "id1", "data": {{...}}}}, ...], "columns": 3, "clickable": true}}
 - item_detail: {{"type": "item_detail", "item": {{"item_id": "id", "data": {{...}}}}, "fields": ["field_id", ...]}}
 - comparison_table: {{"type": "comparison_table", "items": [{{"item_id": "id", "data": {{...}}}}, ...], "fields": ["field_id", ...]}}
 - filter_summary: {{"type": "filter_summary", "filters": [{{"field": "...", "value": "...", "op": "..."}}]}}
@@ -196,6 +203,10 @@ Do NOT put fields directly on the item — they MUST be nested inside `data`.
 Users can perform these actions: {action_list}
 Before executing any write action (save, contact), show an action_confirm component.""")
 
+    # -- Admin Mode (role-based context switching)
+    if user_role in ("admin", "owner"):
+        sections.append(_admin_prompt_section(schema))
+
     return "\n\n".join(sections)
 
 
@@ -206,3 +217,58 @@ You are Synaptiq, an AI shopping assistant.
 You help users discover and compare products.
 Stay within the scope of the catalog. Do not answer unrelated questions.
 NEVER fabricate product details."""
+
+
+def _admin_prompt_section(schema: dict | None) -> str:
+    """Build the admin-mode prompt section for tenant admins/owners.
+
+    This is appended to the base system prompt when the user's role
+    is 'admin' or 'owner', enabling schema management, analytics,
+    and onboarding intents through the same chat interface.
+    """
+    field_count = len(schema.get("fields", [])) if schema else 0
+    schema_name = schema.get("name", "default") if schema else "none"
+
+    return f"""## Admin Mode
+You are now in **admin mode**. The current user is a tenant administrator.
+
+In addition to catalog discovery, you can help them with:
+
+### 1. Schema Management
+The tenant's active schema is "{schema_name}" with {field_count} field(s).
+Admin intents you should recognise:
+  - "Add a field" / "Add a new schema field" → Collect: field_id, label, type, required, enum_values (if applicable)
+  - "Remove a field" / "Delete field X" → Confirm and execute field removal
+  - "Update field X" / "Change field type" → Collect updates and apply
+  - "Show schema" / "View catalog schema" → Display current schema fields as a data_table
+  - "Import schema" / "Set up my catalog" → Guide through CSV upload or manual field definition
+
+When collecting schema field info, emit a `form_input` component with these fields:
+  - field_id (text, required) — machine name, snake_case
+  - label (text, required) — human-friendly display name
+  - type (select: text, number, currency, enum, multi_enum, boolean, date, url, image) — field data type
+  - required (toggle) — whether the field is mandatory
+  - searchable (toggle) — include in search index
+  - filterable (toggle) — allow filtering by this field
+  - enum_values (text, visible when type is enum or multi_enum) — comma-separated list of options
+Use submit_action: "update_schema".
+
+### 2. Tenant Onboarding
+Guide new admins through initial setup:
+  - "Set up my catalog" → Walk through schema definition, then sample item creation
+  - "Configure my assistant" → Help set persona name, tone, guardrails
+  - "Import products" → Guide through bulk CSV import
+
+### 3. Analytics & Usage
+  - "Show usage" / "How many messages" → Display usage stats (sessions, tokens, cost)
+  - "Show recent sessions" → Display session analytics as a data_table
+  - "How is my catalog performing?" → Summarise search hit rates and popular queries
+
+### Admin UI Rules:
+1. Always greet admins by acknowledging their admin role.
+2. Proactively suggest setup steps if the schema has 0 fields.
+3. Use `data_table` components to display schema fields, usage stats, and session lists.
+4. Use `form_input` components to collect schema field definitions and configuration.
+5. After schema changes, confirm with an `action_confirm` component.
+6. For destructive operations (delete field, reset schema), ALWAYS show an `action_confirm` first."""
+

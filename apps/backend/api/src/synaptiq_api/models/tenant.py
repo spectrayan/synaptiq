@@ -143,6 +143,19 @@ class BrandingConfig(BaseModel):
     show_platform_branding: bool = True
 
 
+class ThemePreset(BaseModel):
+    """Named theme preset (REQ-B6, REQ-B7). Max 5 per tenant."""
+
+    theme_id: str = Field(..., min_length=1, max_length=50, pattern=r"^[a-z0-9_-]+$")
+    name: str = Field(..., min_length=1, max_length=100)
+    primary_color: str = Field(default="#6366F1", pattern=r"^#[0-9a-fA-F]{6}$")
+    secondary_color: str = Field(default="#8B5CF6", pattern=r"^#[0-9a-fA-F]{6}$")
+    background_style: BackgroundStyle = BackgroundStyle.dark
+    heading_font: str = Field(default="Inter", max_length=50)
+    body_font: str = Field(default="Inter", max_length=50)
+    is_default: bool = False
+
+
 class ComponentEnablement(BaseModel):
     """Which DSL component types are enabled for this tenant (REQ-CM1-CM3)."""
 
@@ -237,6 +250,7 @@ class Tenant(MongoBaseModel, TimestampMixin):
     components: ComponentEnablement = Field(default_factory=ComponentEnablement)
     actions: ActionsConfig = Field(default_factory=ActionsConfig)
     personalization: PersonalizationConfig = Field(default_factory=PersonalizationConfig)
+    themes: list[ThemePreset] = Field(default_factory=list, max_length=5)
 
     # Admin users
     admins: list[TenantAdmin] = Field(default_factory=list)

@@ -70,6 +70,7 @@ async def chat_stream(
     session_id: str,
     user_message: str,
     model_override: str | None = None,
+    user_role: str = "user",
 ) -> AsyncIterator[str]:
     """
     Full chat pipeline yielding SSE events (REQ-C7, REQ-AI11–AI16, REQ-NF2).
@@ -99,7 +100,7 @@ async def chat_stream(
         return
 
     # -- Step 3: Build system prompt (cached)
-    system_prompt = await build_system_prompt(tenant_id)
+    system_prompt = await build_system_prompt(tenant_id, user_role=user_role)
 
     # -- Step 4: Search for relevant catalog items
     cb = get_circuit_breaker(tenant_id)

@@ -87,12 +87,17 @@ async def post_chat_message(body: ChatMessageRequest, request: Request):
     """
     tenant_id: str = request.state.tenant_id
 
+    # Extract user role from Firebase custom claims (set by auth middleware)
+    user_info = getattr(request.state, "user", {}) or {}
+    user_role: str = user_info.get("role") or "user"
+
     return StreamingResponse(
         chat_stream(
             tenant_id=tenant_id,
             session_id=body.session_id,
             user_message=body.message,
             model_override=body.model_override,
+            user_role=user_role,
         ),
         media_type="text/event-stream",
         headers={
