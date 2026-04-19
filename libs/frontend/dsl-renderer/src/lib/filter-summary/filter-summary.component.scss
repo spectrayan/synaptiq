@@ -1,0 +1,29 @@
+.filter-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.filter-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: var(--syn-text-muted, #94a3b8);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.filter-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.filter-chip {
+  --mdc-chip-elevated-container-color: var(--syn-primary-alpha, rgba(129, 140, 248, 0.1));
+  --mdc-chip-label-text-color: var(--syn-text, #e2e8f0);
+  font-size: 0.78rem;
+}

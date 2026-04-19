@@ -1,0 +1,35 @@
+<mat-card class="item-detail" appearance="outlined">
+  @if (imageUrl()) {
+    <img mat-card-image [src]="imageUrl()" [alt]="title()" loading="lazy" />
+  }
+
+  <mat-card-header>
+    <mat-card-title>{{ title() }}</mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <mat-list class="detail-fields">
+      @for (field of displayFields(); track field.key) {
+        <mat-list-item>
+          <span matListItemTitle class="field-label">{{ formatLabel(field.key) }}</span>
+          <span matListItemLine class="field-value">{{ formatValue(field.value) }}</span>
+        </mat-list-item>
+      }
+    </mat-list>
+  </mat-card-content>
+
+  @if (spec().actions?.length) {
+    <mat-card-actions align="end">
+      @for (action of spec().actions; track action) {
+        <button mat-flat-button color="primary" (click)="onAction(action)">
+          {{ action }}
+        </button>
+      }
+    </mat-card-actions>
+  }
+
+  <syn-suggestion-bar
+    [suggestions]="spec().suggestions || []"
+    (suggestionClicked)="onSuggestion($event)"
+  />
+</mat-card>

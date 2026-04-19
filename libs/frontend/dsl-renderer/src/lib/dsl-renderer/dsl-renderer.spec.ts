@@ -1,17 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { DslRenderer } from './dsl-renderer';
+import { DslRendererComponent } from './dsl-renderer';
 
-describe('DslRenderer', () => {
-  let component: DslRenderer;
-  let fixture: ComponentFixture<DslRenderer>;
+describe('DslRendererComponent', () => {
+  let component: DslRendererComponent;
+  let fixture: ComponentFixture<DslRendererComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [DslRenderer],
+      imports: [DslRendererComponent],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(DslRenderer);
+    fixture = TestBed.createComponent(DslRendererComponent);
     component = fixture.componentInstance;
+    // Provide a required input spec
+    fixture.componentRef.setInput('spec', { type: 'info_banner', title: 'Test', body: 'Hello', style: 'info' });
     await fixture.whenStable();
   });
 

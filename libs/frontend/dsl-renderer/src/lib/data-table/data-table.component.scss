@@ -1,0 +1,59 @@
+.data-table-wrap {
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--syn-surface, #1e1e2e);
+  border: 1px solid var(--syn-border, rgba(255, 255, 255, 0.08));
+}
+
+.table-title {
+  padding: 14px 16px 8px;
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--syn-text, #e2e8f0);
+}
+
+.syn-table {
+  width: 100%;
+
+  // Material table token overrides for dark chat theme
+  --mat-table-background-color: transparent;
+  --mat-table-header-headline-color: var(--syn-text, #e2e8f0);
+  --mat-table-row-item-label-text-color: var(--syn-text-muted, #94a3b8);
+  --mat-table-header-container-height: 44px;
+  --mat-table-row-item-container-height: 40px;
+}
+
+th.mat-mdc-header-cell {
+  font-weight: 600;
+  font-size: 0.8rem;
+  background: var(--syn-surface-elevated, #252538);
+}
+
+td.mat-mdc-cell {
+  font-size: 0.82rem;
+  border-bottom-color: var(--syn-border, rgba(255, 255, 255, 0.06));
+}
+
+tr.mat-mdc-row.selected {
+  background: var(--syn-primary-alpha, rgba(129, 140, 248, 0.06));
+}
+
+.col-actions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.table-action-btn {
+  font-size: 0.72rem;
+  margin-left: 4px;
+  --mdc-outlined-button-container-height: 28px;
+}
+
+// Checkbox overrides for dark theme
+mat-checkbox {
+  --mdc-checkbox-selected-checkmark-color: #fff;
+  --mdc-checkbox-selected-focus-icon-color: var(--syn-primary, #818cf8);
+  --mdc-checkbox-selected-hover-icon-color: var(--syn-primary, #818cf8);
+  --mdc-checkbox-selected-icon-color: var(--syn-primary, #818cf8);
+  --mdc-checkbox-unselected-icon-color: var(--syn-text-muted, #94a3b8);
+}

@@ -1,0 +1,22 @@
+<div class="filter-summary">
+  <span class="filter-label">
+    <mat-icon class="filter-icon">filter_list</mat-icon>
+    Active Filters
+  </span>
+
+  <mat-chip-set aria-label="Active filters">
+    @for (entry of spec().filters | keyvalue; track entry.key) {
+      <mat-chip (removed)="removeFilter(entry.key)" class="filter-chip">
+        <strong>{{ formatLabel(entry.key) }}:</strong>&nbsp;{{ formatValue(entry.value) }}
+        <button matChipRemove aria-label="Remove {{ entry.key }} filter">
+          <mat-icon>cancel</mat-icon>
+        </button>
+      </mat-chip>
+    }
+  </mat-chip-set>
+
+  <syn-suggestion-bar
+    [suggestions]="spec().suggestions || []"
+    (suggestionClicked)="onSuggestion($event)"
+  />
+</div>

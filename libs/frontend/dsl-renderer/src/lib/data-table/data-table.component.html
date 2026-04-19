@@ -1,0 +1,72 @@
+<div class="data-table-wrap">
+  @if (spec().title) {
+    <h4 class="table-title">{{ spec().title }}</h4>
+  }
+
+  <table mat-table [dataSource]="spec().rows" class="syn-table">
+
+    <!-- Select column -->
+    @if (spec().selectable) {
+      <ng-container matColumnDef="select">
+        <th mat-header-cell *matHeaderCellDef>
+          <mat-checkbox
+            (change)="$event ? toggleAllRows() : null"
+            [checked]="selection.hasValue() && isAllSelected()"
+            [indeterminate]="selection.hasValue() && !isAllSelected()"
+          />
+        </th>
+        <td mat-cell *matCellDef="let row; let i = index">
+          <mat-checkbox
+            (click)="$event.stopPropagation()"
+            (change)="$event ? selection.toggle(i) : null"
+            [checked]="selection.isSelected(i)"
+          />
+        </td>
+      </ng-container>
+    }
+
+    <!-- Dynamic data columns -->
+    @for (col of spec().columns; track col.field) {
+      <ng-container [matColumnDef]="col.field">
+        <th mat-header-cell *matHeaderCellDef [style.width]="col.width || 'auto'">
+          {{ col.label }}
+        </th>
+        <td mat-cell *matCellDef="let row">
+          {{ formatCell(row[col.field], col.type) }}
+        </td>
+      </ng-container>
+    }
+
+    <!-- Actions column -->
+    @if (spec().actions?.length) {
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef class="col-actions">Actions</th>
+        <td mat-cell *matCellDef="let row" class="col-actions">
+          @for (action of spec().actions; track action.action_id) {
+            <button
+              mat-stroked-button
+              [color]="action.variant === 'danger' ? 'warn' : 'primary'"
+              class="table-action-btn"
+              (click)="onAction(action.action_id, row)"
+            >
+              @if (action.icon) {
+                <mat-icon>{{ action.icon }}</mat-icon>
+              }
+              {{ action.label }}
+            </button>
+          }
+        </td>
+      </ng-container>
+    }
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns(); let i = index"
+        [class.selected]="selection.isSelected(i)"
+    ></tr>
+  </table>
+
+  <syn-suggestion-bar
+    [suggestions]="spec().suggestions || []"
+    (suggestionClicked)="onSuggestion($event)"
+  />
+</div>

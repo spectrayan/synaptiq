@@ -1,0 +1,191 @@
+<mat-card class="form-input-card" appearance="outlined">
+  @if (spec().title) {
+    <mat-card-header>
+      <mat-icon matCardAvatar>edit_note</mat-icon>
+      <mat-card-title>{{ spec().title }}</mat-card-title>
+      @if (spec().description) {
+        <mat-card-subtitle>{{ spec().description }}</mat-card-subtitle>
+      }
+    </mat-card-header>
+  }
+
+  <mat-card-content>
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-fields">
+      @for (field of sortedFields(); track field.field) {
+        @switch (field.type) {
+          <!-- Text / Textarea -->
+          @case ('text') {
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>{{ field.label }}</mat-label>
+              <input matInput
+                     [formControlName]="field.field"
+                     [placeholder]="field.placeholder ?? ''" />
+              @if (field.hint || field.unit) {
+                <mat-hint>{{ field.hint ?? field.unit }}</mat-hint>
+              }
+              @if (getControl(field.field).touched && getControl(field.field).invalid) {
+                <mat-error>{{ getErrorMessage(field) }}</mat-error>
+              }
+            </mat-form-field>
+          }
+
+          @case ('textarea') {
+            <mat-form-field appearance="outline" class="form-field form-field--full">
+              <mat-label>{{ field.label }}</mat-label>
+              <textarea matInput
+                        [formControlName]="field.field"
+                        [placeholder]="field.placeholder ?? ''"
+                        rows="3"></textarea>
+              @if (field.hint) {
+                <mat-hint>{{ field.hint }}</mat-hint>
+              }
+              @if (getControl(field.field).touched && getControl(field.field).invalid) {
+                <mat-error>{{ getErrorMessage(field) }}</mat-error>
+              }
+            </mat-form-field>
+          }
+
+          <!-- Number / Currency -->
+          @case ('number') {
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>{{ field.label }}</mat-label>
+              <input matInput type="number"
+                     [formControlName]="field.field"
+                     [placeholder]="field.placeholder ?? ''" />
+              @if (field.unit) {
+                <span matTextSuffix class="field-unit">{{ field.unit }}</span>
+              }
+              @if (field.hint) {
+                <mat-hint>{{ field.hint }}</mat-hint>
+              }
+              @if (getControl(field.field).touched && getControl(field.field).invalid) {
+                <mat-error>{{ getErrorMessage(field) }}</mat-error>
+              }
+            </mat-form-field>
+          }
+
+          @case ('currency') {
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>{{ field.label }}</mat-label>
+              <span matTextPrefix class="field-currency">{{ field.currency_code ?? '$' }}&nbsp;</span>
+              <input matInput type="number"
+                     [formControlName]="field.field"
+                     [placeholder]="field.placeholder ?? '0.00'" />
+              @if (field.hint) {
+                <mat-hint>{{ field.hint }}</mat-hint>
+              }
+              @if (getControl(field.field).touched && getControl(field.field).invalid) {
+                <mat-error>{{ getErrorMessage(field) }}</mat-error>
+              }
+            </mat-form-field>
+          }
+
+          <!-- Select / Multi-Select -->
+          @case ('select') {
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>{{ field.label }}</mat-label>
+              <mat-select [formControlName]="field.field"
+                          [placeholder]="field.placeholder ?? 'Select...'">
+                @for (opt of field.options ?? []; track opt.value) {
+                  <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+                }
+              </mat-select>
+              @if (field.hint) {
+                <mat-hint>{{ field.hint }}</mat-hint>
+              }
+              @if (getControl(field.field).touched && getControl(field.field).invalid) {
+                <mat-error>{{ getErrorMessage(field) }}</mat-error>
+              }
+            </mat-form-field>
+          }
+
+          @case ('multi_select') {
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>{{ field.label }}</mat-label>
+              <mat-select [formControlName]="field.field"
+                          [placeholder]="field.placeholder ?? 'Select...'"
+                          multiple>
+                @for (opt of field.options ?? []; track opt.value) {
+                  <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+                }
+              </mat-select>
+              @if (field.hint) {
+                <mat-hint>{{ field.hint }}</mat-hint>
+              }
+            </mat-form-field>
+          }
+
+          <!-- Date -->
+          @case ('date') {
+            <mat-form-field appearance="outline" class="form-field">
+              <mat-label>{{ field.label }}</mat-label>
+              <input matInput [matDatepicker]="picker"
+                     [formControlName]="field.field"
+                     [placeholder]="field.placeholder ?? 'Choose a date'" />
+              <mat-datepicker-toggle matIconSuffix [for]="picker" />
+              <mat-datepicker #picker />
+              @if (field.hint) {
+                <mat-hint>{{ field.hint }}</mat-hint>
+              }
+            </mat-form-field>
+          }
+
+          <!-- Toggle -->
+          @case ('toggle') {
+            <div class="form-field form-field--toggle">
+              <mat-slide-toggle [formControlName]="field.field" color="primary">
+                {{ field.label }}
+              </mat-slide-toggle>
+              @if (field.hint) {
+                <span class="toggle-hint">{{ field.hint }}</span>
+              }
+            </div>
+          }
+
+          <!-- File -->
+          @case ('file') {
+            <div class="form-field form-field--file">
+              <label class="file-label" [for]="'file-' + field.field">{{ field.label }}</label>
+              <button mat-stroked-button type="button"
+                      (click)="fileInput.click()">
+                <mat-icon>upload_file</mat-icon>
+                Choose file
+              </button>
+              <input #fileInput type="file"
+                     [id]="'file-' + field.field"
+                     [accept]="field.accept ?? ''"
+                     hidden
+                     (change)="getControl(field.field).setValue($any($event.target).files)" />
+              @if (field.hint) {
+                <span class="file-hint">{{ field.hint }}</span>
+              }
+            </div>
+          }
+        }
+      }
+    </form>
+  </mat-card-content>
+
+  <mat-card-actions align="end">
+    @if (spec().cancellable) {
+      <button mat-stroked-button type="button" (click)="onCancel()" [disabled]="submitted()">
+        Cancel
+      </button>
+    }
+    <button mat-flat-button color="primary"
+            (click)="onSubmit()"
+            [disabled]="submitted()">
+      @if (submitted()) {
+        <mat-icon class="spin">sync</mat-icon>
+        Submitting...
+      } @else {
+        {{ spec().submit_label ?? 'Submit' }}
+      }
+    </button>
+  </mat-card-actions>
+</mat-card>
+
+<syn-suggestion-bar
+  [suggestions]="spec().suggestions ?? []"
+  (suggestionClicked)="onSuggestion($event)"
+/>

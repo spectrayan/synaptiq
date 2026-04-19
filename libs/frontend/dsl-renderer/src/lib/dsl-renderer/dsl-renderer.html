@@ -1,1 +1,80 @@
-<p>DslRenderer works!</p>
+@switch (spec()?.type) {
+  @case ('item_card') {
+    <syn-item-card
+      [spec]="$any(spec())"
+      (actionClicked)="onAction($event)"
+      (suggestionClicked)="onSuggestion($event)"
+    />
+  }
+  @case ('item_grid') {
+    <syn-item-grid
+      [spec]="$any(spec())"
+      (itemClicked)="onItemClick($event)"
+      (suggestionClicked)="onSuggestion($event)"
+    />
+  }
+  @case ('item_detail') {
+    <syn-item-detail
+      [spec]="$any(spec())"
+      (actionClicked)="onAction($event)"
+      (suggestionClicked)="onSuggestion($event)"
+    />
+  }
+  @case ('comparison_table') {
+    <syn-comparison-table
+      [spec]="$any(spec())"
+      (suggestionClicked)="onSuggestion($event)"
+    />
+  }
+  @case ('filter_summary') {
+    <syn-filter-summary
+      [spec]="$any(spec())"
+      (filterRemoved)="onFilterRemove($event)"
+      (suggestionClicked)="onSuggestion($event)"
+    />
+  }
+  @case ('result_count') {
+    <syn-result-count
+      [spec]="$any(spec())"
+      (suggestionClicked)="onSuggestion($event)"
+    />
+  }
+  @case ('empty_state') {
+    <syn-empty-state
+      [spec]="$any(spec())"
+      (suggestionClicked)="onSuggestion($event)"
+    />
+  }
+  @case ('action_confirm') {
+    <syn-action-confirm
+      [spec]="$any(spec())"
+      (confirmed)="onConfirm($event)"
+      (cancelled)="onCancel()"
+      (suggestionClicked)="onSuggestion($event)"
+    />
+  }
+  @case ('info_banner') {
+    <syn-info-banner
+      [spec]="$any(spec())"
+      (suggestionClicked)="onSuggestion($event)"
+    />
+  }
+  @case ('data_table') {
+    <syn-data-table
+      [spec]="$any(spec())"
+      (actionClicked)="onAction($event)"
+      (suggestionClicked)="onSuggestion($event)"
+    />
+  }
+  @case ('form_input') {
+    <syn-form-input
+      [spec]="$any(spec())"
+      (formSubmitted)="onFormSubmit($event)"
+      (formCancelled)="onCancel()"
+      (suggestionClicked)="onSuggestion($event)"
+    />
+  }
+  @default {
+    <div class="dsl-unknown">Unknown component type: {{ spec()?.type }}</div>
+  }
+}

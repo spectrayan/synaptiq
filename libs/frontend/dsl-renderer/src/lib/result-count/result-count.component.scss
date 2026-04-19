@@ -1,0 +1,23 @@
+.result-count {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 6px 0;
+}
+
+.count-number {
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--syn-primary, #818cf8);
+}
+
+.count-label {
+  font-size: 0.85rem;
+  color: var(--syn-text-muted, #94a3b8);
+}
+
+.count-query {
+  font-size: 0.85rem;
+  color: var(--syn-text, #e2e8f0);
+  font-style: italic;
+}

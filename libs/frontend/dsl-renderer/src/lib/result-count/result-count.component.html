@@ -1,0 +1,9 @@
+<div class="result-count">
+  <span class="count-number">{{ spec().shown }}</span>
+  <span class="count-label">of {{ spec().total }} results</span>
+</div>
+
+<syn-suggestion-bar
+  [suggestions]="spec().suggestions || []"
+  (suggestionClicked)="onSuggestion($event)"
+/>

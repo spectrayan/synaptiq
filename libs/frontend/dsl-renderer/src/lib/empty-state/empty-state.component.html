@@ -1,0 +1,9 @@
+<div class="empty-state">
+  <mat-icon class="empty-icon">{{ spec().icon || 'search_off' }}</mat-icon>
+  <p class="empty-message">{{ spec().message }}</p>
+
+  <syn-suggestion-bar
+    [suggestions]="spec().ai_suggestions || []"
+    (suggestionClicked)="onSuggestion($event)"
+  />
+</div>

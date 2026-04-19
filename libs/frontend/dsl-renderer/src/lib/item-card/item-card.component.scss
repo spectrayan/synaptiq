@@ -1,0 +1,63 @@
+:host {
+  display: block;
+}
+
+.item-card {
+  --mdc-outlined-card-container-color: var(--syn-surface, #1e1e2e);
+  --mdc-outlined-card-outline-color: var(--syn-border, rgba(255, 255, 255, 0.08));
+  border-radius: 14px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  }
+
+  img[mat-card-image] {
+    height: 180px;
+    object-fit: cover;
+  }
+}
+
+.variant-compact {
+  img[mat-card-image] {
+    height: 120px;
+  }
+}
+
+.variant-featured {
+  --mdc-outlined-card-outline-color: var(--syn-primary, #818cf8);
+
+  img[mat-card-image] {
+    height: 220px;
+  }
+}
+
+mat-card-title {
+  font-size: 1rem;
+  color: var(--syn-text, #e2e8f0);
+}
+
+.card-price {
+  color: var(--syn-primary, #818cf8) !important;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.card-desc {
+  font-size: 0.82rem;
+  color: var(--syn-text-muted, #94a3b8);
+  line-height: 1.5;
+  margin: 4px 0 8px;
+}
+
+.card-badges {
+  margin-top: 8px;
+}
+
+.badge-chip {
+  --mdc-chip-elevated-container-color: var(--syn-primary-alpha, rgba(129, 140, 248, 0.1));
+  --mdc-chip-label-text-color: var(--syn-primary, #818cf8);
+  font-size: 0.72rem;
+}

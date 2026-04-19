@@ -1,0 +1,13 @@
+<div class="item-grid" [style.--grid-cols]="spec().columns || 3">
+  @for (item of spec().items; track item.item_id) {
+    <syn-item-card
+      [spec]="{ type: 'item_card', item: item }"
+      (actionClicked)="onItemAction($event)"
+    />
+  }
+</div>
+
+<syn-suggestion-bar
+  [suggestions]="spec().suggestions || []"
+  (suggestionClicked)="onSuggestion($event)"
+/>

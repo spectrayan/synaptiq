@@ -1,0 +1,135 @@
+/**
+ * FormInputComponent styles — Material 3 dark theme with --syn- tokens
+ */
+
+:host {
+  display: block;
+}
+
+.form-input-card {
+  --mdc-outlined-card-container-color: var(--syn-surface-container, #1e1e2e);
+  border: 1px solid var(--syn-outline-variant, rgba(255, 255, 255, 0.12));
+  border-radius: 16px;
+  overflow: hidden;
+
+  mat-card-header {
+    padding: 20px 24px 8px;
+
+    mat-icon {
+      color: var(--syn-primary, #a78bfa);
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
+
+    mat-card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--syn-on-surface, #e0e0e0);
+    }
+
+    mat-card-subtitle {
+      font-size: 0.85rem;
+      color: var(--syn-on-surface-variant, #a0a0a0);
+      margin-top: 4px;
+    }
+  }
+
+  mat-card-content {
+    padding: 8px 24px 0;
+  }
+
+  mat-card-actions {
+    padding: 12px 24px 20px;
+    gap: 12px;
+  }
+}
+
+// Form layout
+.form-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-field {
+  min-width: 0;
+
+  &--full {
+    grid-column: 1 / -1;
+  }
+
+  &--toggle {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 0;
+
+    .toggle-hint {
+      font-size: 0.75rem;
+      color: var(--syn-on-surface-variant, #a0a0a0);
+      padding-left: 48px;
+    }
+  }
+
+  &--file {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px 0;
+
+    .file-label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--syn-on-surface, #e0e0e0);
+    }
+
+    .file-hint {
+      font-size: 0.75rem;
+      color: var(--syn-on-surface-variant, #a0a0a0);
+    }
+  }
+}
+
+.field-unit {
+  font-size: 0.85rem;
+  color: var(--syn-on-surface-variant, #a0a0a0);
+  padding-left: 4px;
+}
+
+.field-currency {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--syn-on-surface-variant, #a0a0a0);
+}
+
+// Submit button feedback
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+// Material theming overrides for dark mode
+::ng-deep {
+  .form-input-card {
+    .mat-mdc-form-field {
+      --mdc-outlined-text-field-outline-color: var(--syn-outline-variant, rgba(255, 255, 255, 0.2));
+      --mdc-outlined-text-field-focus-outline-color: var(--syn-primary, #a78bfa);
+      --mdc-outlined-text-field-label-text-color: var(--syn-on-surface-variant, #a0a0a0);
+      --mdc-outlined-text-field-input-text-color: var(--syn-on-surface, #e0e0e0);
+      --mdc-outlined-text-field-hover-outline-color: var(--syn-primary, #a78bfa);
+    }
+
+    .mat-mdc-select-value-text {
+      color: var(--syn-on-surface, #e0e0e0);
+    }
+  }
+}

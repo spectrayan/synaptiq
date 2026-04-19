@@ -1,0 +1,14 @@
+<div class="info-banner" [class]="'variant-' + (spec().style || 'info')">
+  <mat-icon class="banner-icon">{{ icon() }}</mat-icon>
+  <div class="banner-content">
+    @if (spec().title) {
+      <strong class="banner-title">{{ spec().title }}</strong>
+    }
+    <span class="banner-message">{{ spec().body }}</span>
+  </div>
+</div>
+
+<syn-suggestion-bar
+  [suggestions]="spec().suggestions || []"
+  (suggestionClicked)="onSuggestion($event)"
+/>

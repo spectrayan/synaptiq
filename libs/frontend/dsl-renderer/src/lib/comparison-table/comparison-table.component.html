@@ -1,0 +1,27 @@
+<div class="comparison-table-wrap">
+  <table class="comparison-table">
+    <thead>
+      <tr>
+        <th class="field-col">Feature</th>
+        @for (item of spec().items; track item.item_id) {
+          <th>{{ itemTitle(item) }}</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (field of comparisonFields(); track field) {
+        <tr>
+          <td class="field-label">{{ field }}</td>
+          @for (item of spec().items; track item.item_id) {
+            <td>{{ formatValue(item.data[field]) }}</td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <syn-suggestion-bar
+    [suggestions]="spec().suggestions || []"
+    (suggestionClicked)="onSuggestion($event)"
+  />
+</div>

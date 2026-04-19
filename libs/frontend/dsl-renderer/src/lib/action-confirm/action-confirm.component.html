@@ -1,0 +1,28 @@
+<mat-card class="action-confirm" appearance="outlined">
+  <mat-card-header>
+    <mat-icon matCardAvatar class="confirm-icon">help_outline</mat-icon>
+    <mat-card-title>Confirm Action</mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <p class="confirm-message">{{ spec().message }}</p>
+  </mat-card-content>
+
+  <mat-card-actions align="end">
+    <button mat-stroked-button (click)="onCancel()">
+      {{ spec().cancel_label || 'Cancel' }}
+    </button>
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="onConfirm()"
+    >
+      {{ spec().confirm_label || 'Confirm' }}
+    </button>
+  </mat-card-actions>
+
+  <syn-suggestion-bar
+    [suggestions]="spec().suggestions || []"
+    (suggestionClicked)="onSuggestion($event)"
+  />
+</mat-card>

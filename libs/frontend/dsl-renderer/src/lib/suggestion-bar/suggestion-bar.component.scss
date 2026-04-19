@@ -1,0 +1,61 @@
+.suggestion-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 0 4px;
+  border-top: 1px solid var(--syn-border, rgba(255, 255, 255, 0.06));
+  margin-top: 8px;
+}
+
+.suggestion-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  color: var(--syn-text-muted, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.sparkle-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  color: var(--syn-primary, #818cf8);
+}
+
+// Material chip overrides for chat-embedded context
+.suggestion-chip {
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(129, 140, 248, 0.2);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.variant-primary {
+  --mdc-chip-elevated-container-color: var(--syn-primary, #818cf8);
+  --mdc-chip-label-text-color: #fff;
+  --mdc-chip-elevated-selected-container-color: var(--syn-primary, #818cf8);
+}
+
+.variant-secondary {
+  --mdc-chip-elevated-container-color: var(--syn-surface-elevated, #252538);
+  --mdc-chip-label-text-color: var(--syn-text, #e2e8f0);
+  --mdc-chip-outline-color: var(--syn-border, rgba(255, 255, 255, 0.1));
+}
+
+.variant-outline {
+  --mdc-chip-elevated-container-color: transparent;
+  --mdc-chip-label-text-color: var(--syn-primary, #818cf8);
+  --mdc-chip-outline-color: var(--syn-primary, #818cf8);
+}

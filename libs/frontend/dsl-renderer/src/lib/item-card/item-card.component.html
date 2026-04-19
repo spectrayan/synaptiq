@@ -1,0 +1,40 @@
+<mat-card [class]="'item-card variant-' + (spec().variant || 'standard')" appearance="outlined">
+  @if (imageUrl()) {
+    <img mat-card-image [src]="imageUrl()" [alt]="title()" loading="lazy" />
+  }
+
+  <mat-card-header>
+    <mat-card-title>{{ title() }}</mat-card-title>
+    @if (price()) {
+      <mat-card-subtitle class="card-price">{{ price() }}</mat-card-subtitle>
+    }
+  </mat-card-header>
+
+  <mat-card-content>
+    @if (spec().variant === 'featured' && description()) {
+      <p class="card-desc">{{ description() }}</p>
+    }
+    @if (badges().length) {
+      <mat-chip-set aria-label="Tags" class="card-badges">
+        @for (badge of badges(); track badge) {
+          <mat-chip class="badge-chip" [disabled]="true">{{ badge }}</mat-chip>
+        }
+      </mat-chip-set>
+    }
+  </mat-card-content>
+
+  @if (spec().actions?.length) {
+    <mat-card-actions align="end">
+      @for (action of spec().actions; track action) {
+        <button mat-stroked-button color="primary" (click)="onAction(action)">
+          {{ action }}
+        </button>
+      }
+    </mat-card-actions>
+  }
+
+  <syn-suggestion-bar
+    [suggestions]="spec().suggestions || []"
+    (suggestionClicked)="onSuggestion($event)"
+  />
+</mat-card>

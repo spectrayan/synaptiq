@@ -1,0 +1,13 @@
+.item-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(var(--grid-cols, 3), 1fr);
+
+  @media (max-width: 599px) {
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 600px) and (max-width: 959px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

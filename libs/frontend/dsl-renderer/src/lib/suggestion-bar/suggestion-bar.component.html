@@ -1,0 +1,23 @@
+@if (suggestions()?.length) {
+  <div class="suggestion-bar">
+    <span class="suggestion-label">
+      <mat-icon class="sparkle-icon">auto_awesome</mat-icon>
+      Suggestions
+    </span>
+    <mat-chip-set aria-label="AI Suggestions">
+      @for (sug of suggestions(); track sug.prompt) {
+        <mat-chip
+          class="suggestion-chip"
+          [class]="'variant-' + (sug.variant || 'secondary')"
+          (click)="onChipClick(sug)"
+          [highlighted]="sug.variant === 'primary'"
+        >
+          @if (sug.icon) {
+            <mat-icon matChipAvatar>{{ sug.icon }}</mat-icon>
+          }
+          {{ sug.label }}
+        </mat-chip>
+      }
+    </mat-chip-set>
+  </div>
+}
