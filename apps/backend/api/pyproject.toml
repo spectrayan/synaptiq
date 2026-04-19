@@ -1,0 +1,79 @@
+[tool.coverage.run]
+branch = true
+source = ["src/synaptiq_api"]
+
+[tool.coverage.report]
+exclude_lines = ['if TYPE_CHECKING:']
+show_missing = true
+
+[tool.pytest.ini_options]
+addopts = """
+ --cov
+ --cov-report html:'../../../coverage/apps/backend/api/html'
+ --cov-report xml:'../../../coverage/apps/backend/api/coverage.xml'
+ --html='../../../reports/apps/backend/api/unittests/html/index.html'
+ --junitxml='../../../reports/apps/backend/api/unittests/junit.xml'
+"""
+
+[project]
+name = "synaptiq-api"
+version = "0.1.0"
+description = "Synaptiq FastAPI backend — LLM-native catalog discovery engine"
+requires-python = ">=3.12,<4"
+readme = "README.md"
+dependencies = [
+    "python-sdk @ file:../../../libs/shared/sdks/python-sdk",
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "pydantic>=2.10.0",
+    "pydantic-settings>=2.0.0",
+    "langchain>=0.3.0",
+    "langchain-google-vertexai>=2.0.0",
+    "langchain-openai>=0.2.0",
+    "langgraph>=0.2.0",
+    "instructor>=1.0.0",
+    "motor>=3.6.0",
+    "redis>=5.0.0",
+    "firebase-admin>=6.5.0",
+    "python-jose[cryptography]>=3.3.0",
+    "httpx>=0.27.0",
+    "tiktoken>=0.8.0",
+    "python-dotenv>=1.0.0",
+    "prometheus-client>=0.21.0",
+    "tenacity>=8.0.0",
+    "google-cloud-secret-manager>=2.20.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/synaptiq_api"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[dependency-groups]
+dev = [
+    "autopep8>=2.3.1",
+    "ruff>=0.8.2",
+    "pytest>=8.3.4",
+    "pytest-asyncio>=0.23.0",
+    "pytest-sugar>=1.0.0",
+    "pytest-cov>=6.0.0",
+    "pytest-html>=4.1.1",
+    "hypothesis>=6.115.0",
+    "httpx>=0.27.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+exclude = [".ruff_cache", ".svn", ".tox", ".venv", "dist"]
+line-length = 88
+indent-width = 4
+
+[tool.ruff.lint]
+select = ["E", "F", "UP", "B", "SIM", "I"]
+ignore = []
+fixable = ["ALL"]
+unfixable = []

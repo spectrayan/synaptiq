@@ -1,0 +1,187 @@
+@use '@angular/material' as mat;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Synaptiq M3 Theme
+// Deep violet primary × electric cyan accent — modern, enterprise-grade
+// ─────────────────────────────────────────────────────────────────────────────
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+// Define custom color palettes using M3 hue values
+$synaptiq-primary: mat.define-theme((
+  color: (
+    theme-type: dark,
+    primary: mat.$violet-palette,
+    tertiary: mat.$cyan-palette,
+  ),
+  typography: (
+    brand-family: 'Inter, system-ui, sans-serif',
+    plain-family: 'Inter, system-ui, sans-serif',
+    code-family: 'JetBrains Mono, monospace',
+    bold-weight: 600,
+    medium-weight: 500,
+    regular-weight: 400,
+  ),
+  density: (
+    scale: 0,
+  ),
+));
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CSS Design Tokens (exposed as custom properties for tenant theming)
+// ─────────────────────────────────────────────────────────────────────────────
+:root {
+  // Surface colours
+  --sq-surface-dim:        #0d0d14;
+  --sq-surface:            #13131f;
+  --sq-surface-container:  #1a1a28;
+  --sq-surface-elevated:   #21212f;
+  --sq-surface-overlay:    rgba(255 255 255 / 0.05);
+
+  // Primary brand
+  --sq-primary:            #b39ddb;
+  --sq-primary-container:  #4527a0;
+  --sq-on-primary:         #12005e;
+  --sq-on-primary-cont:    #ede7f6;
+
+  // Accent
+  --sq-tertiary:           #4dd0e1;
+  --sq-tertiary-container: #00838f;
+
+  // Semantic
+  --sq-error:              #f28b82;
+  --sq-success:            #81c995;
+  --sq-warning:            #fdd663;
+
+  // Text
+  --sq-on-surface:         #e8e8f4;
+  --sq-on-surface-variant: #9e9eb8;
+  --sq-outline:            #3d3d55;
+  --sq-outline-variant:    #2a2a3f;
+
+  // Spacing scale
+  --sq-space-1:  4px;
+  --sq-space-2:  8px;
+  --sq-space-3:  12px;
+  --sq-space-4:  16px;
+  --sq-space-5:  20px;
+  --sq-space-6:  24px;
+  --sq-space-8:  32px;
+  --sq-space-10: 40px;
+  --sq-space-12: 48px;
+  --sq-space-16: 64px;
+
+  // Border radii
+  --sq-radius-xs: 4px;
+  --sq-radius-sm: 8px;
+  --sq-radius-md: 12px;
+  --sq-radius-lg: 16px;
+  --sq-radius-xl: 24px;
+  --sq-radius-full: 9999px;
+
+  // Elevation shadows
+  --sq-shadow-sm: 0 1px 3px rgba(0 0 0 / 0.3), 0 1px 2px rgba(0 0 0 / 0.2);
+  --sq-shadow-md: 0 4px 12px rgba(0 0 0 / 0.4), 0 2px 4px rgba(0 0 0 / 0.3);
+  --sq-shadow-lg: 0 8px 32px rgba(0 0 0 / 0.5), 0 4px 8px rgba(0 0 0 / 0.4);
+
+  // Transitions
+  --sq-transition-fast:   150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --sq-transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --sq-transition-slow:   400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  // Chat layout
+  --sq-chat-max-width:  760px;
+  --sq-sidebar-width:   280px;
+  --sq-topbar-height:   64px;
+  --sq-input-height:    56px;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Apply M3 theme to Angular Material
+// ─────────────────────────────────────────────────────────────────────────────
+html {
+  @include mat.theme($synaptiq-primary);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Global resets & base styles
+// ─────────────────────────────────────────────────────────────────────────────
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  min-height: 100dvh;
+  background-color: var(--sq-surface-dim);
+  color: var(--sq-on-surface);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Scrollbar styling
+// ─────────────────────────────────────────────────────────────────────────────
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--sq-outline);
+  border-radius: var(--sq-radius-full);
+  &:hover { background: var(--sq-on-surface-variant); }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Utility classes
+// ─────────────────────────────────────────────────────────────────────────────
+.sq-card {
+  background: var(--sq-surface-container);
+  border: 1px solid var(--sq-outline-variant);
+  border-radius: var(--sq-radius-lg);
+  box-shadow: var(--sq-shadow-sm);
+}
+
+.sq-glass {
+  background: rgba(255 255 255 / 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255 255 255 / 0.08);
+}
+
+.sq-gradient-text {
+  background: linear-gradient(135deg, var(--sq-primary) 0%, var(--sq-tertiary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.sq-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Animations
+// ─────────────────────────────────────────────────────────────────────────────
+@keyframes sq-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes sq-slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes sq-pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(179, 157, 219, 0); }
+  50%       { box-shadow: 0 0 0 4px rgba(179, 157, 219, 0.25); }
+}
+
+.sq-animate-in    { animation: sq-fade-in var(--sq-transition-normal) both; }
+.sq-animate-slide { animation: sq-slide-up var(--sq-transition-normal) both; }

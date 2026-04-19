@@ -1,21 +1,28 @@
 {
   "compilerOptions": {
-    "composite": true,
+    "composite": false,
     "declarationMap": true,
-    "emitDeclarationOnly": true,
     "importHelpers": true,
     "isolatedModules": true,
-    "lib": ["es2022"],
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "noEmitOnError": true,
+    "lib": ["es2022", "dom", "dom.iterable"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "noFallthroughCasesInSwitch": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
-    "noUnusedLocals": true,
     "skipLibCheck": true,
     "strict": true,
     "target": "es2022",
-    "customConditions": ["@org/source"]
+    "useDefineForClassFields": false,
+    "paths": {
+      "@synaptiq/ui":            ["libs/frontend/ui/src/index.ts"],
+      "@synaptiq/chat":          ["libs/frontend/chat/src/index.ts"],
+      "@synaptiq/dsl-renderer":  ["libs/frontend/dsl-renderer/src/index.ts"],
+      "@synaptiq/theme":         ["libs/frontend/theme/src/index.ts"],
+      "@synaptiq/types":         ["libs/shared/types/src/index.ts"],
+      "@synaptiq/utils":         ["libs/shared/utils/src/index.ts"],
+      "@synaptiq/constants":     ["libs/shared/constants/src/index.ts"],
+      "@synaptiq/angular-sdk":   ["libs/shared/sdks/angular-sdk/src/index.ts"]
+    }
   }
 }

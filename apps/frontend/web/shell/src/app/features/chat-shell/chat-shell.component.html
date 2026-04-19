@@ -1,0 +1,108 @@
+<div class="chat-layout" [class.sidebar-open]="sidebarOpen()" [class.is-mobile]="isMobile()">
+
+  <!-- ── Sidebar ───────────────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand">
+        <span class="brand-icon">⚡</span>
+        <span class="brand-name sq-gradient-text">Synaptiq</span>
+      </div>
+      <button mat-icon-button (click)="toggleSidebar()" matTooltip="Close sidebar" class="sidebar-close">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <button class="new-chat-btn" (click)="messages.set([])">
+      <mat-icon>add</mat-icon>
+      New conversation
+    </button>
+
+    <div class="sidebar-section-label">Recent</div>
+    <div class="history-list">
+      <div class="history-item active">
+        <mat-icon class="history-icon">chat_bubble_outline</mat-icon>
+        <span class="history-title">Product catalog search</span>
+      </div>
+      <div class="history-item">
+        <mat-icon class="history-icon">chat_bubble_outline</mat-icon>
+        <span class="history-title">Compare SKUs</span>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="tenant-badge">
+        <span class="tenant-dot"></span>
+        <span class="tenant-name">Demo Tenant</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Main content ──────────────────────────────────────────────────── -->
+  <div class="main">
+
+    <!-- Topbar -->
+    <header class="topbar sq-glass">
+      @if (!sidebarOpen() || isMobile()) {
+        <button mat-icon-button (click)="toggleSidebar()" matTooltip="Open sidebar">
+          <mat-icon>menu</mat-icon>
+        </button>
+      }
+      <div class="topbar-title">Catalog Discovery</div>
+      <div class="topbar-actions">
+        <button mat-icon-button matTooltip="Settings">
+          <mat-icon>settings</mat-icon>
+        </button>
+      </div>
+    </header>
+
+    <!-- Messages -->
+    <div class="messages-area">
+      @for (msg of messages(); track trackById($index, msg)) {
+        <div class="message sq-animate-in" [class.user]="msg.role === 'user'" [class.assistant]="msg.role === 'assistant'">
+          @if (msg.role === 'assistant') {
+            <div class="avatar">
+              <span class="avatar-icon">⚡</span>
+            </div>
+          }
+          <div class="bubble">
+            <p class="bubble-text">{{ msg.content }}</p>
+            <span class="bubble-time">{{ msg.timestamp | date:'HH:mm' }}</span>
+          </div>
+        </div>
+      }
+
+      @if (isLoading()) {
+        <div class="message assistant sq-animate-in">
+          <div class="avatar"><span class="avatar-icon">⚡</span></div>
+          <div class="bubble typing-indicator">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+      }
+
+      <div #messagesEnd></div>
+    </div>
+
+    <!-- Input bar -->
+    <div class="input-bar sq-glass">
+      <textarea
+        class="chat-input"
+        placeholder="Ask about your catalog…"
+        rows="1"
+        [value]="inputValue()"
+        (input)="inputValue.set($any($event.target).value)"
+        (keydown)="onKeydown($event)"
+      ></textarea>
+      <button
+        mat-icon-button
+        class="send-btn"
+        [disabled]="!inputValue().trim() || isLoading()"
+        (click)="sendMessage()"
+        matTooltip="Send (Enter)"
+      >
+        <mat-icon>send</mat-icon>
+      </button>
+    </div>
+
+  </div>
+</div>
