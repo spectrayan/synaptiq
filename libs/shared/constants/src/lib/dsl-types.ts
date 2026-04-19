@@ -174,6 +174,10 @@ export interface FormFieldDef {
   currency_code?: string;
   /** Accepted file types for file fields (e.g. ".csv,.xlsx"). */
   accept?: string;
+  /** Whether the file input accepts multiple files. */
+  multiple?: boolean;
+  /** Maximum file size in MB (display hint + client-side validation). */
+  max_size_mb?: number;
   /** Conditional visibility predicate — field is hidden until this evaluates true. */
   visible_when?: VisibleWhenPredicate;
 }
@@ -188,6 +192,7 @@ export interface ItemCardSpec {
   variant?: ItemCardVariant;
   actions?: string[];
   suggestions?: AISuggestion[];
+  clickable?: boolean;
 }
 
 export interface ItemGridSpec {
@@ -195,6 +200,7 @@ export interface ItemGridSpec {
   items: CatalogItemData[];
   columns?: 2 | 3 | 4 | 5 | 6;
   suggestions?: AISuggestion[];
+  clickable?: boolean;
 }
 
 export interface ItemDetailSpec {

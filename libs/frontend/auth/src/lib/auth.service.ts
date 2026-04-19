@@ -2,16 +2,21 @@
  * AuthService — signals-based Firebase authentication (T1.5)
  *
  * Provides reactive auth state via Angular signals:
- *   - currentUser()  → Firebase User | null
+ *   - currentUser()  → AuthUser | null
  *   - isLoggedIn()   → boolean
  *   - userRole()     → UserRole | null
  *   - tenantId()     → string | null
  *   - isLoading()    → boolean
  *
+ * Supports:
+ *   - Email/password sign-in & sign-up
+ *   - Google OAuth popup
+ *   - Anonymous (guest) sign-in for conversational onboarding
+ *   - Firebase Auth Emulator in development mode
+ *
  * All auth operations return Promises and automatically update signals.
- * No NgRx needed — signals provide fine-grained reactivity.
  */
-import { computed, effect, Injectable, signal, PLATFORM_ID, inject } from '@angular/core';
+import { computed, Injectable, signal, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import {
@@ -20,17 +25,22 @@ import {
 } from 'firebase/app';
 import {
   getAuth,
+  connectAuthEmulator,
   Auth,
   User,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithPopup,
+  signInAnonymously,
   GoogleAuthProvider,
   signOut,
   getIdTokenResult,
   IdTokenResult,
   Unsubscribe,
+  linkWithCredential,
+  EmailAuthProvider,
+  linkWithPopup,
 } from 'firebase/auth';
 import { ENVIRONMENT } from '@synaptiq/utils';
 import { CLAIM_KEYS, type UserRole } from '@synaptiq/constants';
@@ -43,6 +53,7 @@ export interface AuthUser {
   emailVerified: boolean;
   role: UserRole | null;
   tenantId: string | null;
+  isAnonymous: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -63,8 +74,17 @@ export class AuthService {
   /** Current authenticated user */
   readonly currentUser = this._user.asReadonly();
 
-  /** Whether a user is currently logged in */
+  /** Whether a user is currently logged in (including anonymous) */
   readonly isLoggedIn = computed(() => this._user() !== null);
+
+  /** Whether user is a real (non-anonymous) authenticated user */
+  readonly isAuthenticated = computed(() => {
+    const user = this._user();
+    return user !== null && !user.isAnonymous;
+  });
+
+  /** Whether user is an anonymous guest */
+  readonly isGuest = computed(() => this._user()?.isAnonymous ?? false);
 
   /** Current user's role from custom claims */
   readonly userRole = computed(() => this._user()?.role ?? null);
@@ -100,6 +120,16 @@ export class AuthService {
       this.firebaseApp = initializeApp(this.env.firebase);
       this.auth = getAuth(this.firebaseApp);
 
+      // Connect to Firebase Auth Emulator in development
+      if (this.env.useEmulators) {
+        const host = this.env.emulators?.authHost ?? 'localhost';
+        const port = this.env.emulators?.authPort ?? 9099;
+        connectAuthEmulator(this.auth, `http://${host}:${port}`, {
+          disableWarnings: true,
+        });
+        console.log(`🔧 Firebase Auth Emulator connected → http://${host}:${port}`);
+      }
+
       // Listen to auth state changes
       this.unsubscribe = onAuthStateChanged(this.auth, async (user) => {
         if (user) {
@@ -120,7 +150,31 @@ export class AuthService {
   // ─── Auth Operations ───────────────────────────────────────────
 
   /**
+   * Sign in anonymously — allows immediate chat access as a guest.
+   * The guest session can later be upgraded to a full account via linkWithCredential.
+   */
+  async signInAsGuest(): Promise<AuthUser> {
+    this.clearError();
+    this._isLoading.set(true);
+
+    try {
+      const auth = this.getAuth();
+      const credential = await signInAnonymously(auth);
+      const authUser = await this.mapFirebaseUser(credential.user);
+      this._user.set(authUser);
+      return authUser;
+    } catch (e: any) {
+      const msg = this.parseFirebaseError(e);
+      this._error.set(msg);
+      throw new Error(msg);
+    } finally {
+      this._isLoading.set(false);
+    }
+  }
+
+  /**
    * Sign up with email and password.
+   * If user is currently anonymous, upgrades the anonymous account.
    */
   async signUp(email: string, password: string): Promise<AuthUser> {
     this.clearError();
@@ -128,6 +182,16 @@ export class AuthService {
 
     try {
       const auth = this.getAuth();
+
+      // If currently anonymous, link credentials to upgrade the account
+      if (auth.currentUser?.isAnonymous) {
+        const credential = EmailAuthProvider.credential(email, password);
+        const result = await linkWithCredential(auth.currentUser, credential);
+        const authUser = await this.mapFirebaseUser(result.user);
+        this._user.set(authUser);
+        return authUser;
+      }
+
       const credential = await createUserWithEmailAndPassword(auth, email, password);
       const authUser = await this.mapFirebaseUser(credential.user);
       this._user.set(authUser);
@@ -165,6 +229,7 @@ export class AuthService {
 
   /**
    * Sign in with Google OAuth popup.
+   * If user is currently anonymous, upgrades via linkWithPopup.
    */
   async signInWithGoogle(): Promise<AuthUser> {
     this.clearError();
@@ -173,6 +238,15 @@ export class AuthService {
     try {
       const auth = this.getAuth();
       const provider = new GoogleAuthProvider();
+
+      // If currently anonymous, link to upgrade the account
+      if (auth.currentUser?.isAnonymous) {
+        const result = await linkWithPopup(auth.currentUser, provider);
+        const authUser = await this.mapFirebaseUser(result.user);
+        this._user.set(authUser);
+        return authUser;
+      }
+
       const credential = await signInWithPopup(auth, provider);
       const authUser = await this.mapFirebaseUser(credential.user);
       this._user.set(authUser);
@@ -194,7 +268,6 @@ export class AuthService {
       const auth = this.getAuth();
       await signOut(auth);
       this._user.set(null);
-      this.router.navigate(['/login']);
     } catch (e: any) {
       this._error.set('Failed to sign out');
     }
@@ -254,6 +327,7 @@ export class AuthService {
       emailVerified: user.emailVerified,
       role,
       tenantId,
+      isAnonymous: user.isAnonymous,
     };
   }
 
@@ -268,6 +342,7 @@ export class AuthService {
       'auth/too-many-requests': 'Too many attempts. Please try again later.',
       'auth/popup-closed-by-user': 'Sign-in popup was closed.',
       'auth/network-request-failed': 'Network error. Please check your connection.',
+      'auth/credential-already-in-use': 'This account is already linked to another user.',
     };
     return errorMap[code] ?? 'An unexpected authentication error occurred.';
   }

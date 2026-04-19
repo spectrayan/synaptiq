@@ -22,6 +22,13 @@ export interface AppEnvironment {
     readonly appId: string;
   };
   readonly tenantId: string;
+  /** When true, connect Firebase services to local emulators. */
+  readonly useEmulators?: boolean;
+  /** Firebase Auth Emulator config (default: localhost:9099). */
+  readonly emulators?: {
+    readonly authHost?: string;
+    readonly authPort?: number;
+  };
 }
 
 export const ENVIRONMENT = new InjectionToken<AppEnvironment>('AppEnvironment');
