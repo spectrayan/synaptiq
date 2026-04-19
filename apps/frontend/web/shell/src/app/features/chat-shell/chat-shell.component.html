@@ -12,7 +12,7 @@
       </button>
     </div>
 
-    <button class="new-chat-btn" (click)="messages.set([])">
+    <button class="new-chat-btn" (click)="newConversation()">
       <mat-icon>add</mat-icon>
       New conversation
     </button>
@@ -49,6 +49,9 @@
       }
       <div class="topbar-title">Catalog Discovery</div>
       <div class="topbar-actions">
+        <span class="mode-badge" [class.live]="useBackend()">
+          {{ useBackend() ? '● Live' : '○ Demo' }}
+        </span>
         <button mat-icon-button matTooltip="Settings">
           <mat-icon>settings</mat-icon>
         </button>
@@ -64,8 +67,33 @@
               <span class="avatar-icon">⚡</span>
             </div>
           }
-          <div class="bubble">
-            <p class="bubble-text">{{ msg.content }}</p>
+          <div class="bubble-group">
+            <!-- Text content -->
+            @if (msg.content) {
+              <div class="bubble">
+                <p class="bubble-text">{{ msg.content }}</p>
+              </div>
+            }
+
+            <!-- DSL Components rendered inline -->
+            @if (msg.uiComponents?.length) {
+              <div class="dsl-block" [class.form-submitted]="msg.formSubmitted">
+                @for (comp of msg.uiComponents; track $index) {
+                  <syn-dsl-renderer
+                    [spec]="comp"
+                    (suggestionClicked)="onSuggestionClicked($event)"
+                    (formSubmitted)="onFormSubmitted($event, msg.id)"
+                    (actionClicked)="onActionClicked($event)"
+                    (itemClicked)="onSuggestionClicked('Show details for item ' + $event)"
+                  />
+                }
+              </div>
+            }
+
+            @if (msg.statusText) {
+              <div class="status-text">{{ msg.statusText }}</div>
+            }
+
             <span class="bubble-time">{{ msg.timestamp | date:'HH:mm' }}</span>
           </div>
         </div>
@@ -74,8 +102,10 @@
       @if (isLoading()) {
         <div class="message assistant sq-animate-in">
           <div class="avatar"><span class="avatar-icon">⚡</span></div>
-          <div class="bubble typing-indicator">
-            <span></span><span></span><span></span>
+          <div class="bubble-group">
+            <div class="bubble typing-indicator">
+              <span></span><span></span><span></span>
+            </div>
           </div>
         </div>
       }

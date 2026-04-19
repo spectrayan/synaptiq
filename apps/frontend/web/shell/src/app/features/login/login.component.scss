@@ -1,0 +1,204 @@
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 1.5rem;
+  background: var(--sq-bg-primary, #0a0a0f);
+  background-image:
+    radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.06) 0%, transparent 50%);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 2.5rem;
+  border-radius: 1.25rem;
+  background: var(--sq-surface-1, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--sq-border, rgba(255, 255, 255, 0.08));
+  backdrop-filter: blur(20px);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.03),
+    0 24px 48px rgba(0, 0, 0, 0.4);
+}
+
+// ─── Header ───────────────────────────────────────────────────
+.login-header {
+  text-align: center;
+  margin-bottom: 2rem;
+
+  .logo-mark {
+    display: inline-flex;
+    margin-bottom: 0.75rem;
+  }
+
+  .brand-name {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--sq-text-primary, #f0f0f5);
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+
+  .brand-tagline {
+    font-size: 0.875rem;
+    color: var(--sq-text-secondary, rgba(255, 255, 255, 0.5));
+    margin: 0.25rem 0 0;
+  }
+}
+
+// ─── Error Banner ─────────────────────────────────────────────
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  border-radius: 0.75rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  font-size: 0.8125rem;
+
+  mat-icon:first-child {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: #ef4444;
+  }
+
+  span {
+    flex: 1;
+  }
+
+  button {
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+  }
+}
+
+// ─── Mode Toggle ──────────────────────────────────────────────
+.mode-toggle {
+  display: flex;
+  gap: 0;
+  margin-bottom: 1.5rem;
+  border-radius: 0.625rem;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+
+  button {
+    flex: 1;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    background: transparent;
+    color: var(--sq-text-secondary, rgba(255, 255, 255, 0.5));
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &.active {
+      background: var(--sq-primary, #6366f1);
+      color: white;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+    }
+
+    &:hover:not(.active) {
+      color: var(--sq-text-primary, #f0f0f5);
+    }
+  }
+}
+
+// ─── Form ─────────────────────────────────────────────────────
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.submit-btn {
+  margin-top: 0.5rem;
+  height: 48px;
+  border-radius: 0.75rem !important;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  background: var(--sq-primary, #6366f1) !important;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: var(--sq-primary-hover, #5558e6) !important;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+  }
+}
+
+// ─── Divider ──────────────────────────────────────────────────
+mat-divider {
+  margin: 1.5rem 0;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.social-section {
+  text-align: center;
+}
+
+.divider-text {
+  font-size: 0.8125rem;
+  color: var(--sq-text-secondary, rgba(255, 255, 255, 0.4));
+  margin-bottom: 1rem;
+}
+
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  height: 44px;
+  border-radius: 0.75rem !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: var(--sq-text-primary, #f0f0f5) !important;
+  font-weight: 500;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+  }
+
+  .google-icon {
+    flex-shrink: 0;
+  }
+}
+
+// ─── Footer ───────────────────────────────────────────────────
+.footer-text {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--sq-text-tertiary, rgba(255, 255, 255, 0.3));
+  margin-top: 1.5rem;
+  line-height: 1.5;
+}
+
+// ─── Material Overrides (dark theme) ──────────────────────────
+::ng-deep {
+  .mat-mdc-form-field {
+    --mdc-outlined-text-field-outline-color: rgba(255, 255, 255, 0.12);
+    --mdc-outlined-text-field-hover-outline-color: rgba(255, 255, 255, 0.2);
+    --mdc-outlined-text-field-focus-outline-color: var(--sq-primary, #6366f1);
+    --mdc-outlined-text-field-input-text-color: var(--sq-text-primary, #f0f0f5);
+    --mdc-outlined-text-field-label-text-color: var(--sq-text-secondary, rgba(255, 255, 255, 0.5));
+    --mdc-outlined-text-field-input-text-placeholder-color: rgba(255, 255, 255, 0.25);
+  }
+}
