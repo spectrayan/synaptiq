@@ -11,7 +11,7 @@ from synaptiq_api.core.redis import connect_redis, disconnect_redis
 from synaptiq_api.middleware.auth import AuthMiddleware
 from synaptiq_api.middleware.rate_limit import RateLimitMiddleware
 from synaptiq_api.middleware.tenant import TenantMiddleware
-from synaptiq_api.routers import actions, auth, catalog, chat, health, tenants
+from synaptiq_api.routers import actions, analytics, auth, branding, catalog, chat, config, health, tenants
 
 
 @asynccontextmanager
@@ -57,3 +57,6 @@ app.include_router(chat.router, prefix="/api/v1/chat", tags=["chat"])
 app.include_router(catalog.router, prefix="/api/v1/catalog", tags=["catalog"])
 app.include_router(tenants.router, prefix="/api/v1/tenants", tags=["tenants"])
 app.include_router(actions.router, prefix="/api/v1/actions", tags=["actions"])
+app.include_router(config.router, prefix="/api/v1/config", tags=["config"])
+app.include_router(branding.router, prefix="/api/v1/config", tags=["branding"])
+app.include_router(analytics.router, prefix="/api/v1/analytics", tags=["analytics"])
