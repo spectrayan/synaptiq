@@ -68,3 +68,35 @@
     color: #f87171;
   }
 }
+
+// ─── Light Theme Overrides ─────────────────────────────────────────────────
+:host-context([data-theme="light"]) {
+  .banner-title {
+    color: #1e293b;
+    font-weight: 600;
+  }
+
+  .banner-message {
+    color: #475569;
+  }
+
+  .variant-info {
+    border-color: rgba(79, 70, 229, 0.2);
+    background: rgba(79, 70, 229, 0.06);
+  }
+
+  .variant-success {
+    border-color: rgba(16, 185, 129, 0.2);
+    background: rgba(16, 185, 129, 0.06);
+  }
+
+  .variant-warning {
+    border-color: rgba(245, 158, 11, 0.2);
+    background: rgba(245, 158, 11, 0.06);
+  }
+
+  .variant-error {
+    border-color: rgba(239, 68, 68, 0.2);
+    background: rgba(239, 68, 68, 0.06);
+  }
+}

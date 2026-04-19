@@ -1,8 +1,9 @@
 <div class="item-grid" [style.--grid-cols]="spec().columns || 3">
   @for (item of spec().items; track item.item_id) {
     <syn-item-card
-      [spec]="{ type: 'item_card', item: item }"
+      [spec]="{ type: 'item_card', item: item, clickable: spec().clickable }"
       (actionClicked)="onItemAction($event)"
+      (itemClicked)="onItemClick($event)"
     />
   }
 </div>

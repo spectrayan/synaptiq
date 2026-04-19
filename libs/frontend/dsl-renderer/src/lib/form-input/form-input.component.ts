@@ -194,4 +194,29 @@ export class FormInputComponent implements OnInit {
   onSuggestion(prompt: string) {
     this.suggestionClicked.emit(prompt);
   }
+
+  // ── File handling ─────────────────────────────────────────────────────
+
+  /** Handle file input change event */
+  onFilesSelected(event: Event, fieldKey: string): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.getControl(fieldKey).setValue(input.files);
+    }
+  }
+
+  /** Handle drag-and-drop file event */
+  onFilesDrop(event: DragEvent, fieldKey: string): void {
+    const files = event.dataTransfer?.files;
+    if (files && files.length > 0) {
+      this.getControl(fieldKey).setValue(files);
+    }
+  }
+
+  /** Get display names for selected files */
+  getFileNames(fieldKey: string): string {
+    const files = this.getControl(fieldKey)?.value as FileList | null;
+    if (!files || files.length === 0) return '';
+    return Array.from(files).map((f) => f.name).join(', ');
+  }
 }

@@ -1,4 +1,9 @@
-<mat-card [class]="'item-card variant-' + (spec().variant || 'standard')" appearance="outlined">
+<mat-card 
+  [class]="'item-card variant-' + (spec().variant || 'standard')" 
+  [class.is-clickable]="spec().clickable" 
+  appearance="outlined"
+  (click)="onCardClick()"
+>
   @if (imageUrl()) {
     <img mat-card-image [src]="imageUrl()" [alt]="title()" loading="lazy" />
   }
@@ -26,7 +31,7 @@
   @if (spec().actions?.length) {
     <mat-card-actions align="end">
       @for (action of spec().actions; track action) {
-        <button mat-stroked-button color="primary" (click)="onAction(action)">
+        <button mat-stroked-button color="primary" (click)="onAction(action, $event)">
           {{ action }}
         </button>
       }
@@ -36,5 +41,6 @@
   <syn-suggestion-bar
     [suggestions]="spec().suggestions || []"
     (suggestionClicked)="onSuggestion($event)"
+    (click)="$event.stopPropagation()"
   />
 </mat-card>

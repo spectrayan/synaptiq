@@ -26,8 +26,15 @@ export class ItemGridComponent {
 
   onItemAction(event: { action: string; item_id?: string }) {
     if (event.item_id) {
+      // Actually, actionClicked shouldn't implicitly emit itemClicked, 
+      // but maybe it was designed this way before. Let's keep it to not break existing usage,
+      // but we also add onItemClick for the explicit card click.
       this.itemClicked.emit(event.item_id);
     }
+  }
+
+  onItemClick(item_id: string) {
+    this.itemClicked.emit(item_id);
   }
 
   onSuggestion(prompt: string) {

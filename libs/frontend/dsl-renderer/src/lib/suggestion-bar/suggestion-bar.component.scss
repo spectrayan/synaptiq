@@ -30,15 +30,18 @@
 // Material chip overrides for chat-embedded context
 .suggestion-chip {
   cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.15s ease;
+  border: none !important;
+  transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.25s ease, background-color 0.2s;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(129, 140, 248, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(129, 140, 248, 0.25);
   }
 
   &:active {
-    transform: translateY(0);
+    transform: translateY(0) scale(0.97);
   }
 }
 
@@ -49,13 +52,33 @@
 }
 
 .variant-secondary {
-  --mdc-chip-elevated-container-color: var(--syn-surface-elevated, #252538);
+  --mdc-chip-elevated-container-color: rgba(255, 255, 255, 0.08);
   --mdc-chip-label-text-color: var(--syn-text, #e2e8f0);
-  --mdc-chip-outline-color: var(--syn-border, rgba(255, 255, 255, 0.1));
+  --mdc-chip-outline-color: transparent;
+  
+  &:hover {
+    --mdc-chip-elevated-container-color: rgba(255, 255, 255, 0.12);
+  }
 }
 
 .variant-outline {
-  --mdc-chip-elevated-container-color: transparent;
+  --mdc-chip-elevated-container-color: rgba(129, 140, 248, 0.05);
   --mdc-chip-label-text-color: var(--syn-primary, #818cf8);
-  --mdc-chip-outline-color: var(--syn-primary, #818cf8);
+  --mdc-chip-outline-color: transparent;
+  
+  &:hover {
+    --mdc-chip-elevated-container-color: rgba(129, 140, 248, 0.1);
+  }
+}
+
+// ─── Light Theme Overrides ─────────────────────────────────────────────────
+:host-context([data-theme="light"]) {
+  .variant-secondary {
+    --mdc-chip-elevated-container-color: rgba(0, 0, 0, 0.05);
+    --mdc-chip-label-text-color: #1e293b;
+    
+    &:hover {
+      --mdc-chip-elevated-container-color: rgba(0, 0, 0, 0.08);
+    }
+  }
 }

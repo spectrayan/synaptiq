@@ -33,6 +33,7 @@ export class ItemCardComponent {
   readonly spec = input.required<ItemCardSpec>();
   readonly actionClicked = output<{ action: string; item_id?: string }>();
   readonly suggestionClicked = output<string>();
+  readonly itemClicked = output<string>();
 
   readonly title = computed(() => this._findDesignator('primary_label') || this._findFirst('string') || '');
   readonly imageUrl = computed(() => this._findDesignator('image') || '');
@@ -48,12 +49,21 @@ export class ItemCardComponent {
     return [];
   });
 
-  onAction(action: string) {
+  onAction(action: string, event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
     this.actionClicked.emit({ action, item_id: this.spec().item?.item_id });
   }
 
   onSuggestion(prompt: string) {
     this.suggestionClicked.emit(prompt);
+  }
+
+  onCardClick() {
+    if (this.spec().clickable && this.spec().item?.item_id) {
+      this.itemClicked.emit(this.spec().item.item_id);
+    }
   }
 
   private _findDesignator(designator: string): string {

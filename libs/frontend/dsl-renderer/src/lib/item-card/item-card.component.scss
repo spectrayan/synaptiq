@@ -3,20 +3,38 @@
 }
 
 .item-card {
-  --mdc-outlined-card-container-color: var(--syn-surface, #1e1e2e);
-  --mdc-outlined-card-outline-color: var(--syn-border, rgba(255, 255, 255, 0.08));
-  border-radius: 14px;
+  --mdc-outlined-card-container-color: var(--syn-surface, rgba(30, 30, 46, 0.7));
+  --mdc-outlined-card-outline-color: transparent;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
   overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.3s cubic-bezier(0.2, 0, 0, 1), background-color 0.3s ease;
 
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  &.is-clickable {
+    cursor: pointer;
+    
+    &:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      --mdc-outlined-card-container-color: var(--syn-surface-hover, rgba(255, 255, 255, 0.06));
+    }
+    
+    &:active {
+      transform: translateY(-1px) scale(0.99);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
   }
 
   img[mat-card-image] {
     height: 180px;
     object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+  
+  &.is-clickable:hover img[mat-card-image] {
+    transform: scale(1.05);
   }
 }
 
@@ -27,7 +45,8 @@
 }
 
 .variant-featured {
-  --mdc-outlined-card-outline-color: var(--syn-primary, #818cf8);
+  border-color: var(--syn-primary, rgba(129, 140, 248, 0.5));
+  box-shadow: 0 0 20px rgba(129, 140, 248, 0.15);
 
   img[mat-card-image] {
     height: 220px;
@@ -60,4 +79,19 @@ mat-card-title {
   --mdc-chip-elevated-container-color: var(--syn-primary-alpha, rgba(129, 140, 248, 0.1));
   --mdc-chip-label-text-color: var(--syn-primary, #818cf8);
   font-size: 0.72rem;
+  transition: background-color 0.2s;
+}
+
+// ─── Light Theme Overrides ─────────────────────────────────────────────────
+:host-context([data-theme="light"]) {
+  .item-card {
+    --mdc-outlined-card-container-color: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    
+    &.is-clickable:hover {
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.05);
+      --mdc-outlined-card-container-color: rgba(255, 255, 255, 0.95);
+    }
+  }
 }

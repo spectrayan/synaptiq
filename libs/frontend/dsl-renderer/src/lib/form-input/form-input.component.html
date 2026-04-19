@@ -147,18 +147,28 @@
           @case ('file') {
             <div class="form-field form-field--file">
               <label class="file-label" [for]="'file-' + field.field">{{ field.label }}</label>
-              <button mat-stroked-button type="button"
-                      (click)="fileInput.click()">
-                <mat-icon>upload_file</mat-icon>
-                Choose file
-              </button>
+              <div class="file-drop-zone"
+                   (click)="fileInput.click()"
+                   (dragover)="$event.preventDefault()"
+                   (drop)="$event.preventDefault(); onFilesDrop($event, field.field)">
+                <mat-icon class="file-icon">cloud_upload</mat-icon>
+                @if (getFileNames(field.field); as names) {
+                  <span class="file-selected">{{ names }}</span>
+                } @else {
+                  <span class="file-placeholder">Drop files here or click to browse</span>
+                }
+              </div>
               <input #fileInput type="file"
                      [id]="'file-' + field.field"
                      [accept]="field.accept ?? ''"
+                     [multiple]="field.multiple ?? false"
                      hidden
-                     (change)="getControl(field.field).setValue($any($event.target).files)" />
+                     (change)="onFilesSelected($event, field.field)" />
               @if (field.hint) {
                 <span class="file-hint">{{ field.hint }}</span>
+              }
+              @if (field.max_size_mb) {
+                <span class="file-hint">Max file size: {{ field.max_size_mb }}MB</span>
               }
             </div>
           }
