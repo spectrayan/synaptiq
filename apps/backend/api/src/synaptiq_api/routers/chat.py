@@ -22,6 +22,8 @@ class ChatMessageRequest(BaseModel):
     session_id: str = Field(..., description="Client-generated session UUID")
     message: str = Field(..., min_length=1, max_length=4000)
     model_override: str | None = None
+    plan_confirmed: bool = Field(default=False, description="Set true to execute a previously emitted plan")
+    plan_id: str | None = Field(default=None, description="Plan ID to confirm (from plan_confirm event)")
 
 
 class SessionCreateRequest(BaseModel):
@@ -98,6 +100,8 @@ async def post_chat_message(body: ChatMessageRequest, request: Request):
             user_message=body.message,
             model_override=body.model_override,
             user_role=user_role,
+            plan_confirmed=body.plan_confirmed,
+            plan_id=body.plan_id,
         ),
         media_type="text/event-stream",
         headers={

@@ -75,7 +75,7 @@
           <mat-icon>menu</mat-icon>
         </button>
       }
-      <div class="topbar-title">{{ isAdminMode() ? 'Admin Console' : 'Catalog Discovery' }}</div>
+      <div class="topbar-title">{{ isAdminMode() ? 'Admin Console' : 'AI Assistant' }}</div>
       <div class="topbar-actions">
         @if (isAdminMode()) {
           <span class="mode-badge admin">⚙ Admin</span>
@@ -97,6 +97,41 @@
         </button>
       </div>
     </header>
+
+    <!-- ── Pinned Views Surface ─────────────────────────────────────────── -->
+    @if (pinnedViews().length) {
+      <div class="pinned-views-strip">
+        <div class="pinned-tabs">
+          @for (pv of pinnedViews(); track pv.view_id; let i = $index) {
+            <button class="pinned-tab"
+                    [class.active]="activePinnedView() === pv.view_id"
+                    (click)="activePinnedView.set(pv.view_id)">
+              <mat-icon class="pinned-tab-icon">{{ pv.icon || 'dashboard' }}</mat-icon>
+              <span class="pinned-tab-label">{{ pv.title }}</span>
+              <button class="pinned-close" mat-icon-button (click)="unpinView(pv.view_id, $event)">
+                <mat-icon>close</mat-icon>
+              </button>
+            </button>
+          }
+        </div>
+        <button class="pinned-collapse-btn" mat-icon-button
+                (click)="pinnedExpanded.set(!pinnedExpanded())">
+          <mat-icon>{{ pinnedExpanded() ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </button>
+      </div>
+
+      @if (pinnedExpanded() && activePinnedViewSpec()) {
+        <div class="pinned-view-panel">
+          <syn-dsl-renderer
+            [spec]="activePinnedViewSpec()!"
+            (suggestionClicked)="onSuggestionClicked($event)"
+            (formSubmitted)="onFormSubmitted($event, '')"
+            (actionClicked)="onActionClicked($event)"
+            (itemClicked)="onSuggestionClicked('Show details for item ' + $event)"
+          />
+        </div>
+      }
+    }
 
     <!-- Messages -->
     <div class="messages-area" role="log" aria-label="Chat messages" aria-live="polite">
@@ -132,6 +167,15 @@
             @if (msg.content) {
               <div class="bubble">
                 <p class="bubble-text" [innerHTML]="msg.content | markdown"></p>
+              </div>
+            } @else if (msg.statusText && !msg.uiComponents?.length) {
+              <!-- Streaming placeholder while AI is working -->
+              <div class="bubble streaming-bubble">
+                <div class="streaming-indicator">
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                  <span class="typing-dot"></span>
+                </div>
               </div>
             }
 
@@ -546,7 +590,7 @@
           <div class="settings-about">
             <span class="brand-icon">⚡</span>
             <span class="settings-brand sq-gradient-text">Synaptiq</span>
-            <span class="settings-version">v0.1.0 — AI-Native Catalog Discovery</span>
+            <span class="settings-version">v0.1.0 — AI-Native Platform</span>
           </div>
         </div>
       </aside>
@@ -556,7 +600,7 @@
     <div class="input-bar sq-glass" role="form" aria-label="Message input">
       <textarea
         class="chat-input"
-        [placeholder]="isAdminMode() ? 'Manage your catalog, schema, or view analytics…' : 'Ask about your catalog…'"
+        [placeholder]="isAdminMode() ? 'Manage your workspace, data, or view analytics…' : 'Ask me anything…'"
         rows="1"
         [value]="inputValue()"
         (input)="inputValue.set($any($event.target).value)"

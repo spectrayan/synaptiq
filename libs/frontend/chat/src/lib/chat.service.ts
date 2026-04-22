@@ -51,13 +51,28 @@ export interface SseTextReplaceEvent {
   readonly text: string;
 }
 
+export interface SseStepStartEvent {
+  readonly type: 'step_start';
+  readonly step_id: string;
+  readonly action: string;
+  readonly description: string;
+}
+
+export interface SseStepCompleteEvent {
+  readonly type: 'step_complete';
+  readonly step_id: string;
+  readonly action: string;
+}
+
 export type ChatSseEvent =
   | SseTokenEvent
   | SseComponentEvent
   | SseStatusEvent
   | SseDoneEvent
   | SseErrorEvent
-  | SseTextReplaceEvent;
+  | SseTextReplaceEvent
+  | SseStepStartEvent
+  | SseStepCompleteEvent;
 
 // ---------------------------------------------------------------------------
 // Chat request payload
@@ -82,6 +97,10 @@ export interface ChatStreamCallbacks {
   onStatus?: (message: string) => void;
   /** Called when the backend replaces streamed text with cleaned version (strips raw JSON). */
   onTextReplace?: (text: string) => void;
+  /** Called when a tool invocation starts (e.g., query_collection). */
+  onStepStart?: (event: SseStepStartEvent) => void;
+  /** Called when a tool invocation completes. */
+  onStepComplete?: (event: SseStepCompleteEvent) => void;
   /** Called once the stream completes successfully. */
   onDone?: (event: SseDoneEvent) => void;
   /** Called on any error (network, backend, parse). */
@@ -260,6 +279,19 @@ export class ChatService {
           return { type: 'status', message: data.message ?? '' };
         case 'text_replace':
           return { type: 'text_replace', text: data.text ?? '' };
+        case 'step_start':
+          return {
+            type: 'step_start',
+            step_id: data.step_id ?? '',
+            action: data.action ?? '',
+            description: data.description ?? '',
+          };
+        case 'step_complete':
+          return {
+            type: 'step_complete',
+            step_id: data.step_id ?? '',
+            action: data.action ?? '',
+          };
         case 'done':
           return {
             type: 'done',
@@ -293,6 +325,12 @@ export class ChatService {
         break;
       case 'text_replace':
         callbacks.onTextReplace?.(event.text);
+        break;
+      case 'step_start':
+        callbacks.onStepStart?.(event);
+        break;
+      case 'step_complete':
+        callbacks.onStepComplete?.(event);
         break;
       case 'done':
         callbacks.onDone?.(event);

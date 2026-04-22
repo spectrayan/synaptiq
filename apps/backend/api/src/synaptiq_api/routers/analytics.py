@@ -204,7 +204,7 @@ async def _aggregate_conversations(
 
     total_actions = sum(action_rates.values())
 
-    return {
+    result = {
         "total_conversations": conversation_count,
         "total_messages": total_messages,
         "total_tokens_input": msg_data.get("total_tokens_input", 0),
@@ -218,11 +218,29 @@ async def _aggregate_conversations(
         "daily_messages": [
             DailyMetric(date=d["_id"], value=d["count"]) for d in daily_msgs
         ],
-        "top_queried_items": [],  # TODO: implement search log tracking
+        "top_queried_items": [],  # Will be filled from search_logs below
         "top_intents": [],
         "zero_result_queries": [],
         "action_rates": action_rates,
     }
+
+    # ── Search analytics from search_logs (T12.1) ─────────────────────
+    try:
+        from synaptiq_api.services.aggregation_job import _aggregate_search_metrics
+        search_metrics = await _aggregate_search_metrics(db, tenant_id, from_dt, to_dt)
+        result["top_queried_items"] = [
+            TopItem(item_id=i["item_id"], name=i.get("name", ""), query_count=i["query_count"])
+            for i in search_metrics.get("top_queried_items", [])
+        ]
+        result["top_intents"] = [
+            TopIntent(intent=i["intent"], count=i["count"])
+            for i in search_metrics.get("top_intents", [])
+        ]
+        result["zero_result_queries"] = search_metrics.get("zero_result_queries", [])
+    except Exception:
+        logger.debug("Search metrics aggregation failed (non-critical)")
+
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -489,3 +507,43 @@ async def get_platform_rollup(
         platform_managed_tenants=platform_managed_count,
         per_tenant=per_tenant,
     )
+
+
+# ---------------------------------------------------------------------------
+# T12.1 — Manual aggregation trigger
+# ---------------------------------------------------------------------------
+
+class AggregationResult(BaseModel):
+    """Result of a daily aggregation run."""
+    date: str
+    tenants_processed: int = 0
+    succeeded: int = 0
+    failed: int = 0
+
+
+@router.post(
+    "/aggregate",
+    response_model=AggregationResult,
+    dependencies=[Depends(require_platform_admin)],
+)
+async def trigger_aggregation(
+    target_date: str | None = Query(None, alias="date", description="Target date YYYY-MM-DD (default: yesterday)"),
+):
+    """
+    Trigger daily analytics aggregation (platform admin only).
+
+    Pre-aggregates metrics for all active tenants into ``analytics_daily``.
+    Can be called by Cloud Scheduler or manually via API.
+    """
+    from datetime import date
+    from synaptiq_api.services.aggregation_job import run_daily_aggregation
+
+    parsed_date = None
+    if target_date:
+        try:
+            parsed_date = date.fromisoformat(target_date)
+        except ValueError:
+            pass
+
+    result = await run_daily_aggregation(parsed_date)
+    return AggregationResult(**result)

@@ -1,4 +1,5 @@
 @switch (spec()?.type) {
+  <!-- ── Catalog-specific (MVP) ── -->
   @case ('item_card') {
     <syn-item-card
       [spec]="$any(spec())"
@@ -75,6 +76,47 @@
       (suggestionClicked)="onSuggestion($event)"
     />
   }
+
+  <!-- ── Universal primitives (Platform) ── -->
+  @case ('kpi_card') {
+    <syn-kpi-card [spec]="$any(spec())" />
+  }
+  @case ('chart') {
+    <syn-chart [spec]="$any(spec())" />
+  }
+  @case ('stat_grid') {
+    <syn-stat-grid [spec]="$any(spec())" />
+  }
+  @case ('kanban') {
+    <syn-kanban [spec]="$any(spec())" />
+  }
+  @case ('timeline') {
+    <syn-timeline [spec]="$any(spec())" />
+  }
+  @case ('metric_table') {
+    <syn-metric-table [spec]="$any(spec())" />
+  }
+  @case ('progress_tracker') {
+    <syn-progress-tracker [spec]="$any(spec())" />
+  }
+  @case ('launchpad') {
+    <syn-launchpad
+      [spec]="$any(spec())"
+      (tileClicked)="onSuggestion($event)"
+    />
+  }
+
+  <!-- ── Composable layout ── -->
+  @case ('view') {
+    <syn-view
+      [spec]="$any(spec())"
+      (actionClicked)="onAction($event)"
+      (itemClicked)="onItemClick($event)"
+      (suggestionClicked)="onSuggestion($event)"
+      (formSubmitted)="onFormSubmit($event)"
+    />
+  }
+
   @default {
     <div class="dsl-unknown">Unknown component type: {{ spec()?.type }}</div>
   }

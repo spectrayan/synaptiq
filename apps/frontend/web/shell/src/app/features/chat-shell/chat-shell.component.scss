@@ -335,6 +335,152 @@
   }
 }
 
+// ─── Pinned Views Surface ───────────────────────────────────────────────────
+.pinned-views-strip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 16px;
+  background: var(--sq-surface-dim);
+  border-bottom: 1px solid var(--sq-outline-variant);
+  min-height: 40px;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+.pinned-tabs {
+  display: flex;
+  gap: 2px;
+  flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar { display: none; }
+}
+
+.pinned-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: none;
+  background: transparent;
+  color: var(--sq-on-surface-variant);
+  font-size: 0.8rem;
+  font-weight: 500;
+  border-radius: var(--sq-radius-sm) var(--sq-radius-sm) 0 0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  position: relative;
+
+  &:hover {
+    background: var(--sq-surface-overlay);
+    color: var(--sq-on-surface);
+  }
+
+  &.active {
+    background: var(--sq-surface-container);
+    color: var(--sq-primary);
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--sq-primary);
+      border-radius: 1px 1px 0 0;
+    }
+  }
+}
+
+.pinned-tab-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.pinned-tab-label {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pinned-close {
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  color: var(--sq-on-surface-variant);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  padding: 0;
+
+  .pinned-tab:hover & {
+    opacity: 0.7;
+  }
+
+  &:hover {
+    opacity: 1 !important;
+    background: var(--sq-surface-overlay);
+  }
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.pinned-collapse-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.pinned-view-panel {
+  background: var(--sq-surface-dim);
+  border-bottom: 1px solid var(--sq-outline-variant);
+  padding: 16px 20px;
+  max-height: 50vh;
+  overflow-y: auto;
+  animation: pinnedPanelIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  // Centre the view on wide screens
+  > * {
+    max-width: var(--sq-chat-max-width);
+    margin: 0 auto;
+  }
+}
+
+@keyframes pinnedPanelIn {
+  from {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 50vh;
+    padding-top: 16px;
+    padding-bottom: 16px;
+  }
+}
+
 // ─── Messages ───────────────────────────────────────────────────────────────
 .messages-area {
   overflow-y: auto;
@@ -356,9 +502,11 @@
   display: flex;
   gap: var(--sq-space-3);
   align-items: flex-start;
+  animation: msg-slide-in-left 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 
   &.user {
     flex-direction: row-reverse;
+    animation-name: msg-slide-in-right;
 
     .bubble {
       background: var(--sq-primary-container);
@@ -373,6 +521,28 @@
 
   &.assistant .bubble {
     border-bottom-left-radius: var(--sq-radius-xs);
+  }
+}
+
+@keyframes msg-slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-12px) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+  }
+}
+
+@keyframes msg-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(12px) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
   }
 }
 
@@ -514,6 +684,21 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+// Streaming bubble — shown while tool is executing (before text arrives)
+.streaming-bubble {
+  background: var(--sq-surface-container) !important;
+  border: 1px solid var(--sq-outline-variant);
+  animation: typing-fade-in 0.3s ease-out;
+}
+
+.streaming-indicator {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  padding: 4px 8px;
+  min-width: 48px;
+}
+
 // ─── Input bar ──────────────────────────────────────────────────────────────
 .input-bar {
   display: flex;
@@ -592,12 +777,46 @@
 
 // ─── Status text (streaming indicator) ──────────────────────────────────────
 .status-text {
-  font-size: 11px;
-  color: var(--sq-on-surface-variant);
-  padding: 2px 0;
-  font-style: italic;
-  opacity: 0.8;
-  animation: sq-pulse 1.8s ease-in-out infinite;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--sq-primary);
+  padding: 8px 14px;
+  margin-top: 4px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  border-radius: var(--sq-radius-md);
+  background: linear-gradient(
+    90deg,
+    rgba(179, 157, 219, 0.06) 0%,
+    rgba(179, 157, 219, 0.14) 50%,
+    rgba(179, 157, 219, 0.06) 100%
+  );
+  background-size: 200% 100%;
+  animation: status-shimmer 2s ease-in-out infinite;
+  border: 1px solid rgba(179, 157, 219, 0.12);
+
+  // Animated pulsing dot before the text
+  &::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--sq-primary);
+    animation: status-dot-pulse 1.4s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+}
+
+@keyframes status-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes status-dot-pulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50%      { opacity: 1;   transform: scale(1.2); }
 }
 
 @keyframes sq-pulse {

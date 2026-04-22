@@ -3,6 +3,7 @@
 Supports:
   - Gemini (Vertex AI) — default platform-managed provider
   - OpenAI (GPT-4o / GPT-4o-mini) — BYOK
+  - Anthropic (Claude Sonnet / Haiku) — BYOK
   - Circuit breaker pattern (50% error / 30s window → open; 60s cooldown)
   - Keyword search fallback when circuit is open
 """
@@ -165,6 +166,58 @@ class OpenAIAdapter(LLMProvider):
 
 
 # ---------------------------------------------------------------------------
+# T6.3c — Anthropic Claude Adapter
+# ---------------------------------------------------------------------------
+
+class AnthropicAdapter(LLMProvider):
+    """Anthropic Claude (Sonnet / Haiku) adapter (REQ-AI-P3). Supports BYOK."""
+
+    DEFAULT_MODEL = "claude-sonnet-4-20250514"
+
+    def __init__(self, api_key: str = ""):
+        self._api_key = api_key or settings.anthropic_api_key
+
+    async def stream_chat(
+        self,
+        messages: list[dict],
+        system_prompt: str,
+        model_id: str = "",
+        temperature: float = 0.7,
+        max_tokens: int = 2048,
+    ) -> AsyncIterator[str]:
+        from anthropic import AsyncAnthropic
+
+        client = AsyncAnthropic(api_key=self._api_key)
+        model = model_id or self.DEFAULT_MODEL
+
+        # Anthropic expects messages without a system role —
+        # system prompt is passed as a top-level parameter.
+        anthropic_messages = []
+        for msg in messages:
+            role = msg["role"]
+            if role == "system":
+                continue  # Skip — handled via system= param
+            # Anthropic only supports "user" and "assistant" roles
+            if role not in ("user", "assistant"):
+                role = "user"
+            anthropic_messages.append({"role": role, "content": msg["content"]})
+
+        async with client.messages.stream(
+            model=model,
+            system=system_prompt,
+            messages=anthropic_messages,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        ) as stream:
+            async for text in stream.text_stream:
+                yield text
+
+    async def count_tokens(self, text: str) -> int:
+        # Claude: ~3.5 chars per token (slightly more efficient than GPT)
+        return int(len(text) / 3.5)
+
+
+# ---------------------------------------------------------------------------
 # T6.3b — Dev Echo Adapter (local development without LLM keys)
 # ---------------------------------------------------------------------------
 
@@ -240,16 +293,20 @@ class PlatformManagedAdapter(LLMProvider):
 
         if provider == "openai" and settings.openai_api_key:
             self._delegate = OpenAIAdapter(api_key=settings.openai_api_key)
-        elif provider == "vertexai" and settings.vertexai_project:
+        elif provider == "anthropic" and settings.anthropic_api_key:
+            self._delegate = AnthropicAdapter(api_key=settings.anthropic_api_key)
+        elif provider in ("gemini", "vertexai") and (settings.gemini_api_key or settings.vertexai_project):
             self._delegate = GeminiAdapter()
         elif settings.openai_api_key:
             self._delegate = OpenAIAdapter(api_key=settings.openai_api_key)
-        elif settings.vertexai_project:
+        elif settings.anthropic_api_key:
+            self._delegate = AnthropicAdapter(api_key=settings.anthropic_api_key)
+        elif settings.gemini_api_key or settings.vertexai_project:
             self._delegate = GeminiAdapter()
         else:
             logger.warning(
                 "No LLM credentials configured — using DevEchoAdapter. "
-                "Set VERTEXAI_PROJECT or OPENAI_API_KEY for real AI responses."
+                "Set VERTEXAI_PROJECT, OPENAI_API_KEY, or ANTHROPIC_API_KEY for real AI responses."
             )
             self._delegate = DevEchoAdapter()
 
@@ -363,7 +420,52 @@ def get_provider(llm_config: dict, byok_key: str = "") -> LLMProvider:
 
     if provider_type == "openai" and byok_key:
         return OpenAIAdapter(api_key=byok_key)
+    elif provider_type == "anthropic" and byok_key:
+        return AnthropicAdapter(api_key=byok_key)
+    elif provider_type == "anthropic":
+        return AnthropicAdapter()
     elif provider_type == "gemini":
         return GeminiAdapter()
     else:
         return PlatformManagedAdapter()
+
+from langchain_core.language_models.chat_models import BaseChatModel
+
+def get_langchain_model(llm_config: dict, byok_key: str = "", model_override: str = "") -> BaseChatModel:
+    """
+    Resolve the LangChain BaseChatModel from tenant config for the LangGraph agent.
+    """
+    provider_type = llm_config.get("provider", "platform_managed")
+
+    if provider_type == "openai" or settings.openai_api_key:
+        from langchain_openai import ChatOpenAI
+        return ChatOpenAI(
+            model=model_override or llm_config.get("model_id", "gpt-4o-mini"),
+            api_key=byok_key or settings.openai_api_key,
+            temperature=0.7,
+            streaming=True
+        )
+    elif provider_type == "anthropic" or settings.anthropic_api_key:
+        from langchain_anthropic import ChatAnthropic
+        return ChatAnthropic(
+            model=model_override or llm_config.get("model_id", "claude-3-5-sonnet-latest"),
+            api_key=byok_key or settings.anthropic_api_key,
+            temperature=0.7,
+            streaming=True
+        )
+    else:
+        # Default Google Vertex AI / Gemini
+        from langchain_google_genai import ChatGoogleGenerativeAI
+        import os
+        model_name = model_override or llm_config.get("model_id", settings.gemini_model)
+        if "gemini-3" in model_name or "gemini-1.5-pro" in model_name:
+            model_name = "gemini-2.5-flash"
+            
+        api_key = settings.gemini_api_key or os.environ.get("GOOGLE_API_KEY")
+        
+        return ChatGoogleGenerativeAI(
+            model=model_name,
+            google_api_key=api_key,
+            temperature=0.7,
+            streaming=True
+        )

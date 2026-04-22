@@ -1,4 +1,4 @@
-import { Component, signal, inject, ElementRef, viewChild, effect } from '@angular/core';
+import { Component, signal, inject, ElementRef, viewChild, effect, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,7 +9,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import {
   ComponentSpec,
-  type FormInputSpec,
+  type ViewSpec,
 } from '@synaptiq/constants';
 import { DslRendererComponent, FormSubmitEvent } from '@synaptiq/dsl-renderer';
 import {
@@ -64,90 +64,6 @@ export interface ChatMessage {
   analyticsData?: { summary?: AnalyticsSummary; tokens?: TokenUsageSummary };
   /** Whether this is a typing indicator placeholder. */
   isTyping?: boolean;
-}
-
-// ---------------------------------------------------------------------------
-// Demo specs — used as offline fallback when backend is unavailable
-// ---------------------------------------------------------------------------
-
-const DEMO_COMPONENTS: Record<string, ComponentSpec[]> = {
-  add: [
-    {
-      type: 'form_input',
-      title: 'Add New Product',
-      description: 'Fill in the details below to create a catalog item.',
-      fields: [
-        { field: 'name', label: 'Product Name', type: 'text', required: true, placeholder: 'e.g. Widget Pro' },
-        { field: 'price', label: 'Price', type: 'currency', currency_code: 'USD', required: true },
-        {
-          field: 'category', label: 'Category', type: 'select', options: [
-            { label: 'Electronics', value: 'electronics' },
-            { label: 'Clothing', value: 'clothing' },
-            { label: 'Home & Garden', value: 'home_garden' },
-          ],
-        },
-        { field: 'description', label: 'Description', type: 'textarea', placeholder: 'Short product description…' },
-        { field: 'in_stock', label: 'In Stock', type: 'toggle', default_value: true },
-      ],
-      submit_action: 'create_item',
-      submit_label: 'Add Product',
-      cancellable: true,
-      suggestions: [
-        { label: 'Import from CSV', prompt: 'Import products from CSV', icon: 'upload_file' },
-      ],
-    } satisfies FormInputSpec,
-  ],
-  compare: [
-    {
-      type: 'comparison_table',
-      items: [
-        { item_id: 'sku-001', data: { name: 'Widget Pro', price: 29.99, rating: 4.5 } },
-        { item_id: 'sku-002', data: { name: 'Widget Max', price: 49.99, rating: 4.8 } },
-        { item_id: 'sku-003', data: { name: 'Widget Lite', price: 14.99, rating: 4.1 } },
-      ],
-      fields: ['name', 'price', 'rating'],
-      suggestions: [
-        { label: 'Sort by price ↑', prompt: 'Sort products by price ascending' },
-        { label: 'Show top rated', prompt: 'Show me the top rated products' },
-      ],
-    },
-  ],
-  search: [
-    {
-      type: 'result_count',
-      shown: 3,
-      total: 42,
-      suggestions: [
-        { label: 'Narrow by category', prompt: 'Filter by category electronics' },
-        { label: 'Show all results', prompt: 'Show all 42 results' },
-      ],
-    },
-    {
-      type: 'item_grid',
-      items: [
-        { item_id: 'sku-101', data: { name: 'Smart Speaker', price: 79.99, image: '' } },
-        { item_id: 'sku-102', data: { name: 'Wireless Charger', price: 34.99, image: '' } },
-        { item_id: 'sku-103', data: { name: 'USB-C Hub', price: 24.99, image: '' } },
-      ],
-      columns: 3,
-      suggestions: [
-        { label: 'View as table', prompt: 'Show results as a table' },
-        { label: 'Compare these', prompt: 'Compare these 3 items' },
-      ],
-    },
-  ],
-};
-
-/**
- * Resolve a user message to demo components by keyword matching.
- * Returns undefined if no demo data matches (fallback to text reply).
- */
-function resolveDemoComponents(text: string): ComponentSpec[] | undefined {
-  const lower = text.toLowerCase();
-  if (lower.includes('add') || lower.includes('new product') || lower.includes('create')) return DEMO_COMPONENTS['add'];
-  if (lower.includes('compare') || lower.includes('versus') || lower.includes('vs')) return DEMO_COMPONENTS['compare'];
-  if (lower.includes('search') || lower.includes('find') || lower.includes('show')) return DEMO_COMPONENTS['search'];
-  return undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -209,37 +125,57 @@ export class ChatShellComponent {
 
   messages = signal<ChatMessage[]>([]);
 
+  /** Pinned views — persistent surfaces above the chat stream */
+  readonly pinnedViews = signal<ViewSpec[]>([]);
+  readonly activePinnedView = signal<string>('');
+  readonly pinnedExpanded = signal(true);
+  readonly activePinnedViewSpec = computed(() => {
+    const views = this.pinnedViews();
+    const activeId = this.activePinnedView();
+    return views.find(v => v.view_id === activeId) || null;
+  });
+
   /** Whether the authenticated user has admin/owner privileges. */
   readonly isAdminMode = this.auth.isAdmin;
 
-  /** Build the welcome message based on user role and auth state. */
+  /** Loaded AI persona config from tenant — drives welcome message & starter prompts */
+  private personaName = 'Synaptiq';
+  private personaWelcome = '';
+  private personaStarters: string[] = [];
+
+  /** Build the welcome message based on user role and loaded persona config. */
   private _buildInitialMessages(): ChatMessage[] {
     const isAdmin = this.auth.isAdmin();
     const isGuest = this.auth.isGuest();
     const isLoggedIn = this.auth.isLoggedIn();
     const user = this.auth.currentUser();
+    const name = this.personaName || 'Synaptiq';
+
+    // Build starter prompt chips from persona config
+    const starterChips: Array<{ label: string; prompt: string }> = this.personaStarters.map(
+      (prompt) => ({ label: prompt, prompt }),
+    );
 
     // Not logged in at all (emulator down, first visit, etc.)
     if (!isLoggedIn) {
+      const welcomeText = this.personaWelcome
+        || `Hi! 👋 I'm **${name}** — your AI-powered assistant. Sign in to save your conversations and access all features, or start exploring right away!`;
       return [
         {
           id: '1',
           role: 'assistant',
-          content:
-            "Hi! \uD83D\uDC4B I'm **Synaptiq** \u2014 your AI-powered catalog assistant. Sign in to save your conversations and access all features, or start exploring right away!",
+          content: welcomeText,
           timestamp: new Date(),
           uiComponents: [
             {
               type: 'info_banner',
               title: 'Quick start',
-              body: 'Try the suggestions below to explore the catalog, or sign in via the topbar.',
+              body: 'Try the suggestions below to explore, or sign in via the topbar.',
               style: 'info',
               suggestions: [
                 { label: 'Sign in', prompt: '__SIGN_IN__' },
                 { label: 'Sign up', prompt: '__SIGN_UP__' },
-                { label: '\uD83D\uDD0D Search catalog', prompt: 'Search electronics' },
-                { label: '\u2795 Add a product', prompt: 'Add a new product' },
-                { label: '\u26A1 Compare items', prompt: 'Compare widgets' },
+                ...starterChips,
               ],
             },
           ],
@@ -253,13 +189,13 @@ export class ChatShellComponent {
           id: '1',
           role: 'assistant',
           content:
-            `Welcome back${user?.displayName ? ', ' + user.displayName : ''}! I'm Synaptiq in **admin mode**. I can help you manage your catalog schema, onboard products, view usage analytics, and more — all through this chat.\n\nWhat would you like to do?`,
+            `Welcome back${user?.displayName ? ', ' + user.displayName : ''}! I'm ${name} in **admin mode**. I can help you manage your data, configure your workspace, view analytics, and more — all through this chat.\n\nWhat would you like to do?`,
           timestamp: new Date(),
           uiComponents: [
             {
               type: 'info_banner',
               title: 'Admin Actions',
-              body: 'Manage your catalog schema, import products, or check usage analytics.',
+              body: 'Configure your workspace, manage data, or check usage analytics.',
               style: 'info',
               suggestions: [
                 { label: '📊 Analytics', prompt: '__ANALYTICS_DASHBOARD__' },
@@ -271,7 +207,7 @@ export class ChatShellComponent {
                 { label: '🎨 Branding', prompt: '__CONFIG_BRANDING__' },
                 { label: '🎭 Themes', prompt: '__CONFIG_THEMES__' },
                 { label: '👤 Personalization', prompt: '__CONFIG_PERSONALIZATION__' },
-                { label: '📋 View Schema', prompt: 'Show my catalog schema' },
+                { label: '📋 View Schema', prompt: 'Show my schema' },
               ],
             },
           ],
@@ -280,25 +216,24 @@ export class ChatShellComponent {
     }
 
     if (isGuest) {
+      const welcomeText = this.personaWelcome
+        || `👋 Hi! I'm **${name}** — your AI-powered assistant. You're currently browsing as a **guest**.\n\nYou can explore and chat right away. To save your conversations and unlock admin features, sign in anytime.`;
       return [
         {
           id: '1',
           role: 'assistant',
-          content:
-            "👋 Hi! I'm **Synaptiq** — your AI-powered catalog assistant. You're currently browsing as a **guest**.\n\nYou can explore and chat right away. To save your conversations and unlock admin features, sign in anytime.",
+          content: welcomeText,
           timestamp: new Date(),
           uiComponents: [
             {
               type: 'info_banner',
               title: 'Quick start',
-              body: 'Try any of these to explore the catalog:',
+              body: 'Try any of these to get started:',
               style: 'info',
               suggestions: [
                 { label: 'Sign in', prompt: '__SIGN_IN__' },
                 { label: 'Sign up', prompt: '__SIGN_UP__' },
-                { label: '🔍 Search catalog', prompt: 'Search electronics' },
-                { label: '➕ Add a product', prompt: 'Add a new product' },
-                { label: '⚡ Compare items', prompt: 'Compare widgets' },
+                ...starterChips,
               ],
             },
           ],
@@ -307,24 +242,21 @@ export class ChatShellComponent {
     }
 
     // Authenticated non-admin user
+    const welcomeText = this.personaWelcome
+      || `Hi${user?.displayName ? ' ' + user.displayName : ''}! 👋 I'm ${name}. Ask me anything — I can search, analyse, and visualise your data for you.`;
     return [
       {
         id: '1',
         role: 'assistant',
-        content:
-          `Hi${user?.displayName ? ' ' + user.displayName : ''}! 👋 I'm Synaptiq. Ask me anything about your product catalog — I can search, compare, and analyse items for you.`,
+        content: welcomeText,
         timestamp: new Date(),
         uiComponents: [
           {
             type: 'info_banner',
             title: 'Quick start',
-            body: 'Say \"add a product\", \"search electronics\", or \"compare widgets\" to see rich components.',
+            body: 'Try the suggestions below to get started.',
             style: 'info',
-            suggestions: [
-              { label: 'Add a product', prompt: 'Add a new product' },
-              { label: 'Search catalog', prompt: 'Search electronics' },
-              { label: 'Compare items', prompt: 'Compare widgets' },
-            ],
+            suggestions: starterChips,
           },
         ],
       },
@@ -338,26 +270,47 @@ export class ChatShellComponent {
       setTimeout(() => this.messagesEnd()?.nativeElement?.scrollIntoView({ behavior: 'smooth' }), 50);
     });
 
+    // Fetch public tenant persona config (welcome message + starter prompts)
+    const personaReady = this._loadPersona();
+
     // Watch for auth readiness — auto-sign-in as guest and show welcome
     effect(() => {
       const loading = this.auth.isLoading();
       if (!loading && this.messages().length === 0) {
-        // Auth finished loading
+        // Auth finished loading — wait for persona config before building messages
         if (!this.auth.isLoggedIn()) {
           // No user at all — sign in anonymously for immediate access
-          this.auth.signInAsGuest().then(() => {
-            this.messages.set(this._buildInitialMessages());
-          }).catch(() => {
-            // Emulator might not be running — show welcome anyway
-            this.messages.set(this._buildInitialMessages());
-          });
+          this.auth.signInAsGuest()
+            .then(() => personaReady)
+            .then(() => this.messages.set(this._buildInitialMessages()))
+            .catch(() => {
+              // Emulator might not be running — show welcome anyway
+              this.messages.set(this._buildInitialMessages());
+            });
         } else {
           // User already authenticated (page refresh, etc.)
-          this.messages.set(this._buildInitialMessages());
-          this.loadSessionHistory();
+          personaReady.then(() => {
+            this.messages.set(this._buildInitialMessages());
+            this.loadSessionHistory();
+          });
         }
       }
     });
+  }
+
+  /** Load public AI persona config from the backend (no auth required). */
+  private async _loadPersona(): Promise<void> {
+    try {
+      const config = await this.configService.getPublicBranding();
+      const persona = config.ai_persona;
+      if (persona) {
+        this.personaName = persona.display_name || 'Synaptiq';
+        this.personaWelcome = persona.welcome_message || '';
+        this.personaStarters = persona.starter_prompts || [];
+      }
+    } catch {
+      // Backend unreachable — keep defaults
+    }
   }
 
   // ── Session management ───────────────────────────────────────────────
@@ -548,8 +501,8 @@ export class ChatShellComponent {
             body: `Logged in as ${user?.email ?? 'user'}`,
             style: 'success',
             suggestions: [
-              { label: '🔍 Search catalog', prompt: 'Search electronics' },
-              { label: '➕ Add a product', prompt: 'Add a new product' },
+              { label: '🔍 Search', prompt: 'Search electronics' },
+              { label: '➕ Add item', prompt: 'Add a new item' },
             ],
           },
         ],
@@ -641,6 +594,24 @@ export class ChatShellComponent {
         },
 
         onComponent: (component) => {
+          // Check if this is a pinned view — hoist it to the pinned views strip
+          if (component.type === 'view' && (component as any).pinned) {
+            const viewSpec = component as any;
+            this.pinnedViews.update(views => {
+              // Replace existing view with same ID, or add new
+              const existing = views.findIndex(v => v.view_id === viewSpec.view_id);
+              if (existing >= 0) {
+                const updated = [...views];
+                updated[existing] = viewSpec;
+                return updated;
+              }
+              return [...views, viewSpec];
+            });
+            this.activePinnedView.set(viewSpec.view_id);
+            this.pinnedExpanded.set(true);
+            return; // Don't add pinned views to inline components
+          }
+
           // Push DSL component into the assistant message
           this.messages.update((msgs) =>
             msgs.map((m) =>
@@ -669,6 +640,28 @@ export class ChatShellComponent {
           );
         },
 
+        onStepStart: (event) => {
+          // Show tool invocation as a status indicator on the message
+          this.messages.update((msgs) =>
+            msgs.map((m) =>
+              m.id === assistantMsgId
+                ? { ...m, statusText: event.description }
+                : m,
+            ),
+          );
+        },
+
+        onStepComplete: () => {
+          // Clear the step status — the model will stream text next
+          this.messages.update((msgs) =>
+            msgs.map((m) =>
+              m.id === assistantMsgId
+                ? { ...m, statusText: undefined }
+                : m,
+            ),
+          );
+        },
+
         onDone: () => {
           // Clear status text and loading state
           this.messages.update((msgs) =>
@@ -689,15 +682,9 @@ export class ChatShellComponent {
         },
 
         onError: (errorMessage) => {
-          // Show error as info_banner, fallback to demo if backend unreachable
+          // Show error as info_banner
           if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
-            // Backend is down — switch to demo mode
-            this.useBackend.set(false);
-            // Remove the empty placeholder
-            this.messages.update((msgs) => msgs.filter((m) => m.id !== assistantMsgId));
-            // Retry with demo mode
-            this.sendViaDemo(msg);
-            return;
+            errorMessage = 'Backend is offline. Please start the API server and try again.';
           }
 
           this.messages.update((msgs) =>
@@ -728,7 +715,7 @@ export class ChatShellComponent {
     );
   }
 
-  // ── Demo/offline fallback ────────────────────────────────────────────
+  // ── Offline fallback ─────────────────────────────────────────────────
 
   private async sendViaDemo(msg: string, typingId?: string): Promise<void> {
     // Simulate network delay
@@ -737,22 +724,37 @@ export class ChatShellComponent {
     // Remove typing indicator
     if (typingId) this._removeTyping(typingId);
 
-    const components = resolveDemoComponents(msg);
-    const replyText = components
-      ? "Here's what I found:"
-      : `I searched the catalog for: "${msg}" — the backend isn't connected yet. Try "add a product", "search electronics", or "compare widgets".`;
-
     this.messages.update((msgs) => [
       ...msgs,
       {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: replyText,
+        content: '',
         timestamp: new Date(),
-        uiComponents: components,
+        uiComponents: [
+          {
+            type: 'info_banner' as const,
+            title: 'Backend Offline',
+            body: 'The API server is not connected. Please start the backend to use Synaptiq.',
+            style: 'warning' as const,
+            suggestions: [
+              { label: 'Retry', prompt: msg },
+            ],
+          },
+        ],
       },
     ]);
     this.isLoading.set(false);
+  }
+
+  /** Remove a pinned view and select the next one if needed. */
+  unpinView(viewId: string, event: Event): void {
+    event.stopPropagation();
+    this.pinnedViews.update(views => views.filter(v => v.view_id !== viewId));
+    if (this.activePinnedView() === viewId) {
+      const remaining = this.pinnedViews();
+      this.activePinnedView.set(remaining.length > 0 ? remaining[0].view_id : '');
+    }
   }
 
   onKeydown(event: KeyboardEvent): void {
@@ -814,8 +816,8 @@ export class ChatShellComponent {
       });
 
       const suggestions = response.suggestions ?? [
-        { label: 'Add another', prompt: 'Add a new product' },
-        { label: 'View catalog', prompt: 'Show all products' },
+        { label: 'Add another', prompt: 'Add a new item' },
+        { label: 'View all', prompt: 'Show all items' },
       ];
 
       this.messages.update((msgs) => [

@@ -15,7 +15,7 @@ export const environment = {
     messagingSenderId: '000000000000',
     appId: '1:000000000000:web:0000000000000000',
   },
-  tenantId: 'acme-demo', // Default tenant for local dev
+  tenantId: 'demo-tenant', // Default tenant for local dev (matches seed_e2e_data.py)
   useEmulators: true,
   emulators: {
     authHost: 'localhost',

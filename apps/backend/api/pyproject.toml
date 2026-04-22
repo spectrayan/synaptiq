@@ -44,9 +44,11 @@ dependencies = [
     "jsonref>=1.1.0",
     "pyyaml>=6.0.0",
     "google-genai>=1.0.0",
+    "anthropic>=0.40.0",
     "openai>=1.50.0",
     "email-validator>=2.3.0",
     "python-multipart>=0.0.26",
+    "langchain-google-genai>=4.2.2",
 ]
 
 [tool.hatch.build.targets.wheel]

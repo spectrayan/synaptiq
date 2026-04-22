@@ -15,10 +15,13 @@ from synaptiq_api.core.config import settings
 from synaptiq_api.core.mongodb import get_db
 from synaptiq_api.core.redis import get_redis
 from synaptiq_api.services.embedding_service import generate_embedding
+from synaptiq_api.services.stream_buffer import StreamBuffer
+# We deprecated IntentPlanner for the new LangGraph agent
 from synaptiq_api.services.llm_provider import (
     CircuitBreaker,
     get_circuit_breaker,
     get_provider,
+    get_langchain_model,
 )
 from synaptiq_api.services.prompt_service import build_system_prompt
 from synaptiq_api.services.search_service import catalog_search, keyword_search
@@ -61,6 +64,21 @@ def _sse_error(message: str) -> str:
     return _sse_event("error", {"message": message})
 
 
+def _sse_plan(plan_data: dict) -> str:
+    """Emit a multi-step plan for frontend rendering."""
+    return _sse_event("plan", plan_data)
+
+
+def _sse_step(event_data: dict) -> str:
+    """Emit a step progress event (start/complete/error)."""
+    return _sse_event(event_data["event"], event_data)
+
+
+def _sse_plan_confirm(plan_id: str) -> str:
+    """Request user confirmation before executing write steps."""
+    return _sse_event("plan_confirm", {"plan_id": plan_id})
+
+
 # ---------------------------------------------------------------------------
 # T6.8 — Main chat stream pipeline
 # ---------------------------------------------------------------------------
@@ -71,6 +89,8 @@ async def chat_stream(
     user_message: str,
     model_override: str | None = None,
     user_role: str = "user",
+    plan_confirmed: bool = False,
+    plan_id: str | None = None,
 ) -> AsyncIterator[str]:
     """
     Full chat pipeline yielding SSE events (REQ-C7, REQ-AI11–AI16, REQ-NF2).
@@ -102,53 +122,89 @@ async def chat_stream(
     # -- Step 3: Build system prompt (cached)
     system_prompt = await build_system_prompt(tenant_id, user_role=user_role)
 
-    # -- Step 4: Search for relevant catalog items
-    cb = get_circuit_breaker(tenant_id)
-    search_results: list[dict] = []
-
-    if cb.is_open:
-        # T6.7 — keyword fallback
-        logger.warning("Circuit open for %s — using keyword fallback", tenant_id)
-        search_results = await keyword_search(tenant_id, user_message, top_k=5)
-        yield _sse_event("status", {"message": "Using keyword search (AI temporarily unavailable)"})
-    else:
-        try:
-            query_embedding = await generate_embedding(user_message)
-            if query_embedding:
-                search_results = await catalog_search(
-                    tenant_id=tenant_id,
-                    query_embedding=query_embedding,
-                    top_k=8,
-                    min_score=0.3,
-                )
-        except Exception as e:
-            logger.warning("Embedding/search failed: %s — proceeding without context", e)
-
-    # -- Step 5: Build LLM messages with search context
-    context_msg = _build_context_message(search_results)
-    messages = history.copy()
-    if context_msg:
-        messages.append({"role": "user", "content": context_msg})
-    messages.append({"role": "user", "content": user_message})
-
-    # -- Step 6: Stream LLM
+    # -- Step 3.5: Setup LangGraph Context
     tenant = await db["tenants"].find_one({"tenant_id": tenant_id})
     llm_config = (tenant.get("config", {}) if tenant else {}).get("llm_provider", {})
-    provider = get_provider(llm_config)
     model_id = model_override or llm_config.get("model_id", "")
+    
+    cb = get_circuit_breaker(tenant_id)
+    if cb.is_open:
+        yield _sse_error("I'm having trouble responding right now (circuit open). Please try again later.")
+        return
 
+    from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
+    from synaptiq_api.services.agent.graph import agent_graph
+
+    # Map history to LangChain messages
+    lc_messages = [SystemMessage(content=system_prompt)]
+    for msg in history:
+        if msg["role"] == "user":
+            lc_messages.append(HumanMessage(content=msg["content"]))
+        else:
+            lc_messages.append(AIMessage(content=msg["content"]))
+    lc_messages.append(HumanMessage(content=user_message))
+
+    # Initialize model
+    model = get_langchain_model(llm_config, model_override=model_id)
+
+    config = {
+        "configurable": {
+            "tenant_id": tenant_id,
+            "session_id": session_id,
+            "model": model,
+        }
+    }
+
+    # -- Step 6: Stream LLM using LangGraph
     full_response = ""
     tokens_out = 0
+    stream_buffer = StreamBuffer()
 
     try:
-        async for token in provider.stream_chat(
-            messages=messages,
-            system_prompt=system_prompt,
-            model_id=model_id,
+        async for event in agent_graph.astream_events(
+            {"messages": lc_messages, "tenant_id": tenant_id, "session_id": session_id},
+            config=config,
+            version="v2",
         ):
-            full_response += token
-            tokens_out += 1
-            yield _sse_token(token)
+            kind = event["event"]
+            if kind == "on_chat_model_stream":
+                chunk = event["data"]["chunk"]
+                if chunk.content:
+                    content_val = chunk.content
+                    if isinstance(content_val, list):
+                        content_str = "".join([c.get("text", "") for c in content_val if isinstance(c, dict) and "text" in c])
+                    else:
+                        content_str = str(content_val)
+
+                    if content_str:
+                        full_response += content_str
+                        tokens_out += 1
+                        
+                        to_yield = stream_buffer.process_chunk(content_str)
+                        if to_yield:
+                            yield _sse_token(to_yield)
+            elif kind == "on_tool_start":
+                tool_name = event["name"]
+                yield _sse_step({
+                    "event": "step_start",
+                    "step_id": event["run_id"],
+                    "action": tool_name,
+                    "description": f"Running tool: {tool_name}..."
+                })
+            elif kind == "on_tool_end":
+                tool_name = event["name"]
+                yield _sse_step({
+                    "event": "step_complete",
+                    "step_id": event["run_id"],
+                    "action": tool_name,
+                    "result": {"status": "success"}
+                })
+                
+        # Flush stream buffer at the end
+        final_yield = stream_buffer.flush()
+        if final_yield:
+            yield _sse_token(final_yield)
+            
         cb.record_success()
 
     except Exception as e:
@@ -184,9 +240,8 @@ async def chat_stream(
 
     # -- Step 8: Calculate metrics and finalize
     latency_ms = int((time.time() - start_time) * 1000)
-    tokens_in = await provider.count_tokens(
-        system_prompt + " ".join(m["content"] for m in messages),
-    )
+    # Estimate tokens in since we are not using the generic token counter
+    tokens_in = len(system_prompt + " ".join(m["content"] for m in history)) // 4
 
     yield _sse_done(turn_id, tokens_in, tokens_out)
 
@@ -201,7 +256,7 @@ async def chat_stream(
         components=components,
         tokens_in=tokens_in,
         tokens_out=tokens_out,
-        model_id=model_id or provider.__class__.__name__,
+        model_id=model_id or "langchain-agent",
         latency_ms=latency_ms,
     ))
 
@@ -276,9 +331,16 @@ import re
 
 # Known DSL component types
 _COMPONENT_TYPES = {
+    # Core catalog
     "item_card", "item_grid", "item_detail", "comparison_table",
     "filter_summary", "result_count", "empty_state", "action_confirm",
     "info_banner", "data_table", "form_input",
+    # Dashboard / analytics
+    "kpi_card", "chart", "stat_grid", "metric_table",
+    # Project management
+    "kanban", "timeline", "progress_tracker",
+    # Layout / composite
+    "launchpad", "view", "dashboard", "tabs",
 }
 
 
@@ -311,18 +373,20 @@ def _extract_components(response: str) -> tuple[list[dict], str]:
             if isinstance(comp, dict) and comp.get("type") in _COMPONENT_TYPES:
                 components.append(comp)
                 cleaned = cleaned.replace(match.group(0), "")
+            elif isinstance(comp, list):
+                # LLM sometimes wraps multiple components in an array
+                for item in comp:
+                    if isinstance(item, dict) and item.get("type") in _COMPONENT_TYPES:
+                        components.append(item)
+                if any(isinstance(item, dict) and item.get("type") in _COMPONENT_TYPES for item in comp):
+                    cleaned = cleaned.replace(match.group(0), "")
         except json.JSONDecodeError:
             logger.debug("Failed to parse fenced JSON: %s", raw[:100])
 
     # Pattern 3: Bare JSON objects with a "type" field (no fences)
     # Only try this if no fenced components were found
     if not components:
-        # Match JSON objects that start with {"type": "component_type"
-        bare_pattern = re.compile(
-            r'\{[^{}]*"type"\s*:\s*"(' + "|".join(_COMPONENT_TYPES) + r')"[^{}]*(?:\{[^{}]*\}[^{}]*)*\}',
-        )
-        for match in bare_pattern.finditer(response):
-            raw = match.group(0)
+        for raw, start, end in _find_bare_json_objects(response):
             try:
                 comp = json.loads(raw)
                 if isinstance(comp, dict) and comp.get("type") in _COMPONENT_TYPES:
@@ -338,6 +402,49 @@ def _extract_components(response: str) -> tuple[list[dict], str]:
     components = [_normalize_component(c) for c in components]
 
     return components, cleaned
+
+
+def _find_bare_json_objects(text: str) -> list[tuple[str, int, int]]:
+    """
+    Find bare JSON objects in text using brace-counting.
+    Handles arbitrarily nested objects/arrays — unlike regex.
+    
+    Returns list of (json_str, start_idx, end_idx) tuples.
+    """
+    results = []
+    i = 0
+    while i < len(text):
+        if text[i] == '{':
+            # Check if this looks like a component (has "type" nearby)
+            preview = text[i:i+100]
+            if '"type"' not in preview:
+                i += 1
+                continue
+
+            depth = 0
+            in_string = False
+            escape = False
+            start = i
+            j = i
+            while j < len(text):
+                c = text[j]
+                if escape:
+                    escape = False
+                elif c == '\\' and in_string:
+                    escape = True
+                elif c == '"' and not escape:
+                    in_string = not in_string
+                elif not in_string:
+                    if c in ('{', '['):
+                        depth += 1
+                    elif c in ('}', ']'):
+                        depth -= 1
+                        if depth == 0:
+                            results.append((text[start:j+1], start, j+1))
+                            break
+                j += 1
+        i += 1
+    return results
 
 
 def _normalize_component(comp: dict) -> dict:
@@ -527,11 +634,16 @@ def _estimate_cost(tokens_in: int, tokens_out: int, model_id: str) -> float:
       - gemini-2.0-flash: $0.10 input, $0.40 output
       - gpt-4o-mini: $0.15 input, $0.60 output
       - gpt-4o: $2.50 input, $10.00 output
+      - claude-sonnet: $3.00 input, $15.00 output
+      - claude-haiku: $0.25 input, $1.25 output
     """
     rates = {
         "gemini": (0.10, 0.40),
         "gpt-4o-mini": (0.15, 0.60),
         "gpt-4o": (2.50, 10.00),
+        "claude-haiku": (0.25, 1.25),
+        "claude-sonnet": (3.00, 15.00),
+        "claude": (3.00, 15.00),  # Default Claude to Sonnet pricing
     }
 
     for key, (in_rate, out_rate) in rates.items():

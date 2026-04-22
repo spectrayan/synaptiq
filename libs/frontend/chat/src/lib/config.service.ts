@@ -108,11 +108,18 @@ export interface PersonalizationConfig {
   allow_bubble_style: boolean;
 }
 
+export interface PublicAIPersona {
+  display_name: string;
+  welcome_message: string;
+  starter_prompts: string[];
+}
+
 export interface PublicBrandingResponse {
   branding: BrandingConfig;
   personalization: PersonalizationConfig;
   themes: ThemePreset[];
   default_theme: ThemePreset | null;
+  ai_persona: PublicAIPersona;
 }
 
 // ---------------------------------------------------------------------------

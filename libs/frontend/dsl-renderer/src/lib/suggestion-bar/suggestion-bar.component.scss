@@ -1,10 +1,13 @@
+// ─── Suggestion Bar — polished chip pills ────────────────────────────────────
+// Borderless, colored chips with staggered entrance animations.
+// Colors are driven by --sq-chip-N-{bg,text,glow} tokens from the global theme.
+
 .suggestion-bar {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
   padding: 10px 0 4px;
-  border-top: 1px solid var(--syn-border, rgba(255, 255, 255, 0.06));
   margin-top: 8px;
 }
 
@@ -13,72 +16,144 @@
   align-items: center;
   gap: 4px;
   font-size: 0.7rem;
-  color: var(--syn-text-muted, #94a3b8);
+  color: var(--sq-on-surface-variant, #94a3b8);
   text-transform: uppercase;
   letter-spacing: 0.6px;
   font-weight: 500;
   white-space: nowrap;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .sparkle-icon {
   font-size: 14px;
   width: 14px;
   height: 14px;
-  color: var(--syn-primary, #818cf8);
+  color: var(--sq-primary, #818cf8);
+  animation: sparkle 2s ease-in-out infinite;
 }
 
-// Material chip overrides for chat-embedded context
+// ─── Global chip border overrides via ::ng-deep ──────────────────────────────
+
+::ng-deep mat-chip-set .mdc-evolution-chip {
+  border: none !important;
+  --mdc-chip-outline-width: 0 !important;
+  --mdc-chip-flat-outline-width: 0 !important;
+  --mdc-chip-outline-color: transparent !important;
+  --mdc-chip-flat-outline-color: transparent !important;
+
+  &,
+  .mdc-evolution-chip__cell,
+  .mdc-evolution-chip__action,
+  .mdc-evolution-chip__action--primary,
+  .mat-mdc-chip-action-label {
+    border: none !important;
+    outline: none !important;
+  }
+
+  .mat-mdc-chip-ripple {
+    border: none !important;
+  }
+}
+
+::ng-deep .suggestion-chip.mat-mdc-chip {
+  border: none !important;
+  --mdc-chip-outline-width: 0 !important;
+  --mdc-chip-outline-color: transparent !important;
+  --mdc-chip-flat-outline-color: transparent !important;
+  --mdc-chip-elevated-container-shape: 16px;
+}
+
+// ─── Base chip styling ──────────────────────────────────────────────────────
+
 .suggestion-chip {
   cursor: pointer;
+  font-weight: 500;
+  letter-spacing: 0.2px;
   border: none !important;
-  transition: transform 0.25s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.25s ease, background-color 0.2s;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  outline: none !important;
+  transition:
+    transform 0.22s cubic-bezier(0.2, 0, 0, 1),
+    box-shadow 0.22s ease,
+    filter 0.22s ease;
+
+  // Staggered entrance animation
+  opacity: 0;
+  animation: chipSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+  @for $i from 1 through 8 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{$i * 60}ms;
+    }
+  }
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(129, 140, 248, 0.25);
+    transform: translateY(-2px) scale(1.04);
+    filter: brightness(1.12);
   }
 
   &:active {
-    transform: translateY(0) scale(0.97);
+    transform: translateY(0) scale(0.96);
+    transition-duration: 0.1s;
   }
 }
 
-.variant-primary {
-  --mdc-chip-elevated-container-color: var(--syn-primary, #818cf8);
-  --mdc-chip-label-text-color: #fff;
-  --mdc-chip-elevated-selected-container-color: var(--syn-primary, #818cf8);
-}
+// ─── Position-based coloring via theme tokens ───────────────────────────────
+// Each chip reads --sq-chip-N-{bg,text,glow} from the global :root / [data-theme].
+// This keeps all color values in the design system, not in the component.
 
-.variant-secondary {
-  --mdc-chip-elevated-container-color: rgba(255, 255, 255, 0.08);
-  --mdc-chip-label-text-color: var(--syn-text, #e2e8f0);
-  --mdc-chip-outline-color: transparent;
-  
-  &:hover {
-    --mdc-chip-elevated-container-color: rgba(255, 255, 255, 0.12);
-  }
-}
+@for $i from 1 through 8 {
+  .suggestion-chip:nth-child(#{$i}) {
+    --mdc-chip-elevated-container-color: var(--sq-chip-#{$i}-bg) !important;
+    --mdc-chip-label-text-color: var(--sq-chip-#{$i}-text) !important;
+    --mdc-chip-elevated-selected-container-color: var(--sq-chip-#{$i}-bg) !important;
+    --mdc-chip-outline-color: transparent !important;
 
-.variant-outline {
-  --mdc-chip-elevated-container-color: rgba(129, 140, 248, 0.05);
-  --mdc-chip-label-text-color: var(--syn-primary, #818cf8);
-  --mdc-chip-outline-color: transparent;
-  
-  &:hover {
-    --mdc-chip-elevated-container-color: rgba(129, 140, 248, 0.1);
-  }
-}
-
-// ─── Light Theme Overrides ─────────────────────────────────────────────────
-:host-context([data-theme="light"]) {
-  .variant-secondary {
-    --mdc-chip-elevated-container-color: rgba(0, 0, 0, 0.05);
-    --mdc-chip-label-text-color: #1e293b;
-    
     &:hover {
-      --mdc-chip-elevated-container-color: rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 16px var(--sq-chip-#{$i}-glow);
     }
   }
+
+  // Force through Material's internal DOM layers
+  ::ng-deep .suggestion-chip:nth-child(#{$i}) .mdc-evolution-chip__cell--primary .mdc-evolution-chip__action--primary {
+    background: var(--sq-chip-#{$i}-bg) !important;
+
+    .mdc-evolution-chip__text-label {
+      color: var(--sq-chip-#{$i}-text) !important;
+    }
+  }
+}
+
+// ─── Primary variant override (uses brand primary from theme) ────────────────
+
+.variant-primary {
+  --mdc-chip-elevated-container-color: var(--sq-primary, #7c3aed) !important;
+  --mdc-chip-label-text-color: var(--sq-on-primary, #fff) !important;
+  --mdc-chip-elevated-selected-container-color: var(--sq-primary, #7c3aed) !important;
+
+  &:hover {
+    box-shadow: 0 4px 18px rgba(124, 58, 237, 0.45) !important;
+  }
+}
+
+// ─── Keyframes ───────────────────────────────────────────────────────────────
+
+@keyframes chipSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.15); }
 }

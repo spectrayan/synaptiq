@@ -15,6 +15,7 @@ from typing import Any
 
 from synaptiq_api.core.mongodb import get_db
 from synaptiq_api.core.redis import get_redis
+from synaptiq_api.services.schema_registry import SchemaRegistry
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +66,13 @@ async def build_system_prompt(
         {"tenant_id": tenant_id, "is_active": True},
     )
 
+    # Load schema registry context (Phase 3 — dynamic data awareness)
+    schema_context = ""
+    try:
+        schema_context = await SchemaRegistry.build_schema_context(tenant_id)
+    except Exception:
+        logger.warning("Schema registry context failed for tenant: %s", tenant_id)
+
     prompt = _compile_prompt(
         persona=persona,
         guardrails=guardrails,
@@ -72,6 +80,7 @@ async def build_system_prompt(
         components=components,
         actions_config=actions_config,
         user_role=user_role,
+        schema_context=schema_context,
     )
 
     # Cache the compiled prompt (T5.6)
@@ -92,6 +101,7 @@ def _compile_prompt(
     components: dict[str, Any],
     actions_config: dict[str, Any],
     user_role: str = "user",
+    schema_context: str = "",
 ) -> str:
     """Assemble the full system prompt from config pieces."""
     sections: list[str] = []
@@ -154,13 +164,20 @@ Use these field names when filtering, displaying, or comparing items.""")
     enabled_components = [k for k, v in components.items() if v is True]
     if not enabled_components:
         enabled_components = [
+            # Catalog-specific
             "item_card", "item_grid", "item_detail",
             "comparison_table", "filter_summary", "result_count",
-            "empty_state", "action_confirm", "info_banner",
+            "empty_state", "action_confirm", "info_banner", "data_table",
+            # Universal primitives
+            "kpi_card", "chart", "stat_grid", "kanban",
+            "timeline", "metric_table", "progress_tracker",
+            "launchpad",
+            # Composable layout
+            "view",
         ]
 
     sections.append(f"""## Response Components (DSL)
-When responding with catalog data, emit structured JSON components that the UI will render.
+When responding with data, emit structured JSON components that the UI will render.
 Wrap each component in a ```component code fence.
 
 Available component types: {', '.join(enabled_components)}
@@ -171,7 +188,7 @@ Every catalog item MUST use this exact structure:
 The `data` field is a nested object containing ALL the item's fields (name, price, category, description, etc.).
 Do NOT put fields directly on the item — they MUST be nested inside `data`.
 
-### Component Formats:
+### Catalog Component Formats:
 - item_card: {{"type": "item_card", "item": {{"item_id": "id", "data": {{...}}}}, "variant": "standard|compact|featured", "clickable": true}}
 - item_grid: {{"type": "item_grid", "items": [{{"item_id": "id1", "data": {{...}}}}, ...], "columns": 3, "clickable": true}}
 - item_detail: {{"type": "item_detail", "item": {{"item_id": "id", "data": {{...}}}}, "fields": ["field_id", ...]}}
@@ -183,13 +200,42 @@ Do NOT put fields directly on the item — they MUST be nested inside `data`.
 - info_banner: {{"type": "info_banner", "title": "...", "body": "...", "style": "info|warning|success"}}
 - data_table: {{"type": "data_table", "columns": [...], "rows": [...], "selectable": bool, "actions": [...]}}
 
+### Universal Dashboard Components:
+- kpi_card: {{"type": "kpi_card", "label": "Revenue", "value": "$124,500", "trend": "up", "trend_value": "12.5%", "period": "vs last month", "icon": "payments"}}
+- chart: {{"type": "chart", "chart_type": "bar|line|pie|donut|area|scatter|heatmap|radar|funnel|gauge", "title": "...", "option": {{...ECharts option...}}, "height": 320}}
+- stat_grid: {{"type": "stat_grid", "title": "Overview", "stats": [{{"label": "...", "value": "...", "trend": "up", "trend_value": "5%"}}]}}
+- kanban: {{"type": "kanban", "title": "...", "columns": [{{"column_id": "...", "title": "...", "status": "default|active|done|blocked", "cards": [{{"card_id": "...", "title": "...", "priority": "low|medium|high|urgent"}}]}}]}}
+- timeline: {{"type": "timeline", "title": "...", "entries": [{{"entry_id": "...", "timestamp": "...", "title": "...", "entry_type": "event|milestone|alert|note"}}]}}
+- metric_table: {{"type": "metric_table", "title": "...", "columns": [{{"field": "...", "label": "...", "type": "text|number|currency|percentage|date|badge", "sortable": true, "aggregate": "sum|avg|min|max|count"}}], "rows": [...], "show_aggregates": true}}
+- progress_tracker: {{"type": "progress_tracker", "title": "...", "steps": [{{"step_id": "...", "label": "...", "status": "pending|active|completed|failed|skipped"}}], "orientation": "horizontal|vertical"}}
+
+### Composable Views (Dashboard Assembly):
+Use the `view` component to assemble multi-component layouts:
+- view: {{"type": "view", "view_id": "unique-id", "title": "Dashboard Title", "layout": "stack|columns|grid|tabs|sidebar", "layout_config": {{"columns": 2, "column_widths": ["2fr", "1fr"], "gap": "16px", "tab_labels": ["Tab 1", "Tab 2"]}}, "children": [...array of any component specs...], "pinned": true, "icon": "dashboard"}}
+
+When the user asks for dashboards, reports, or multi-metric views, use `view` with nested components.
+Set `pinned: true` for dashboards that should stay visible above the chat.
+Views can be nested — a view can contain other views.
+
 ### Rules:
 1. Use the ACTUAL item_id values from the search context (e.g., "SKU-PHONE-001").
 2. Include all relevant data fields from the search results inside the `data` object.
 3. Always pair components with a brief natural language explanation.
 4. For search results, prefer `item_grid` with 3 columns.
 5. For single items, use `item_card` with variant "featured".
-6. Always include a `result_count` component after any grid or list.""")
+6. Always include a `result_count` component after any grid or list.
+7. For dashboards, use `view` with `pinned: true` and compose stat_grid + chart + metric_table.
+8. For the chart component, emit full ECharts options including xAxis, yAxis, series, etc.
+9. When asked for a home/launchpad view, use the `launchpad` component.
+
+### Tool Calling & Dynamic Data Queries:
+- If you need to fetch sales metrics, tasks, support tickets, or other data, you MUST use the `query_collection` tool.
+- Formulate a MongoDB aggregation pipeline to summarize heavy datasets.
+- After the tool returns the data, format the data into the DSL components described above without generating raw markdown JSON tables. Do not stall!""")
+
+    # -- Schema Registry Context (Phase 3 — dynamic data awareness)
+    if schema_context:
+        sections.append(schema_context)
 
     # -- Actions (REQ-A1–A5)
     actions = actions_config.get("actions", [])

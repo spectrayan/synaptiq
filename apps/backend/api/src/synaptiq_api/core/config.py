@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     firebase_project_id: str = ""
     firebase_service_account_json: str = ""  # Base64-encoded service account JSON
     firebase_api_key: str = ""  # Web API key for client-side Firebase
+    firebase_auth_emulator_host: str = ""  # e.g. "localhost:9099" for emulator mode
     
     # --- LLM ---
     default_llm_provider: str = "vertexai"  # vertexai | openai | anthropic

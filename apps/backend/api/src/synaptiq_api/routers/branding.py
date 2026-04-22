@@ -465,7 +465,7 @@ async def patch_personalization(
 )
 async def get_public_branding(request: Request) -> dict[str, Any]:
     """
-    Returns the tenant's branding config for end-user theme injection.
+    Returns the tenant's branding config and AI persona for end-user rendering.
     This endpoint only requires a valid tenant context (header/subdomain),
     not admin authentication.
     """
@@ -477,6 +477,7 @@ async def get_public_branding(request: Request) -> dict[str, Any]:
     branding = doc.get("branding", {})
     personalization = doc.get("personalization", {})
     themes = doc.get("themes", [])
+    ai_persona = doc.get("ai_persona", {})
 
     # Find default theme if any
     default_theme = next((t for t in themes if t.get("is_default")), None)
@@ -486,4 +487,9 @@ async def get_public_branding(request: Request) -> dict[str, Any]:
         "personalization": personalization,
         "themes": themes,
         "default_theme": default_theme,
+        "ai_persona": {
+            "display_name": ai_persona.get("display_name", "Synaptiq"),
+            "welcome_message": ai_persona.get("welcome_message", ""),
+            "starter_prompts": ai_persona.get("starter_prompts", []),
+        },
     }

@@ -12,6 +12,7 @@ from synaptiq_api.middleware.auth import AuthMiddleware
 from synaptiq_api.middleware.rate_limit import RateLimitMiddleware
 from synaptiq_api.middleware.tenant import TenantMiddleware
 from synaptiq_api.routers import actions, analytics, auth, branding, catalog, chat, config, health, tenants
+from synaptiq_api.routers import schema_registry as schema_reg
 
 
 @asynccontextmanager
@@ -60,3 +61,4 @@ app.include_router(actions.router, prefix="/api/v1/actions", tags=["actions"])
 app.include_router(config.router, prefix="/api/v1/config", tags=["config"])
 app.include_router(branding.router, prefix="/api/v1/config", tags=["branding"])
 app.include_router(analytics.router, prefix="/api/v1/analytics", tags=["analytics"])
+app.include_router(schema_reg.router, prefix="/api/v1", tags=["schema-registry"])

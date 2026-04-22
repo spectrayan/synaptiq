@@ -12,7 +12,29 @@ logger = logging.getLogger(__name__)
 
 
 def initialize_firebase() -> None:
-    """Initialize Firebase Admin SDK with service account credentials."""
+    """Initialize Firebase Admin SDK with service account credentials.
+
+    When FIREBASE_AUTH_EMULATOR_HOST is set, initializes in emulator mode
+    without requiring real credentials.
+    """
+    import os
+
+    emulator_host = settings.firebase_auth_emulator_host or os.environ.get("FIREBASE_AUTH_EMULATOR_HOST")
+
+    if emulator_host:
+        # Ensure the env var is set for firebase-admin SDK to detect
+        os.environ["FIREBASE_AUTH_EMULATOR_HOST"] = emulator_host
+        try:
+            firebase_admin.initialize_app(options={"projectId": settings.firebase_project_id})
+            logger.info(
+                "Firebase Admin SDK initialized in EMULATOR mode (host=%s, project=%s)",
+                emulator_host, settings.firebase_project_id,
+            )
+        except ValueError:
+            # Already initialized
+            logger.info("Firebase Admin SDK already initialized")
+        return
+
     if not settings.firebase_service_account_json:
         logger.warning("Firebase service account JSON not configured. Auth features disabled.")
         return

@@ -31,8 +31,8 @@
   @if (spec().actions?.length) {
     <mat-card-actions align="end">
       @for (action of spec().actions; track action) {
-        <button mat-stroked-button color="primary" (click)="onAction(action, $event)">
-          {{ action }}
+        <button mat-stroked-button color="primary" (click)="onAction($any(action).action || action, $event)">
+          {{ $any(action).label || action }}
         </button>
       }
     </mat-card-actions>

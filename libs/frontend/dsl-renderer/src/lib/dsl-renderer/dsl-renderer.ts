@@ -10,6 +10,7 @@ import { Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ComponentSpec } from '@synaptiq/constants';
 
+// ── Catalog-specific (MVP) ──
 import { ItemCardComponent } from '../item-card/item-card.component';
 import { ItemGridComponent } from '../item-grid/item-grid.component';
 import { ItemDetailComponent } from '../item-detail/item-detail.component';
@@ -22,11 +23,25 @@ import { InfoBannerComponent } from '../info-banner/info-banner.component';
 import { DataTableComponent } from '../data-table/data-table.component';
 import { FormInputComponent, FormSubmitEvent } from '../form-input/form-input.component';
 
+// ── Universal primitives (Platform) ──
+import { KPICardComponent } from '../kpi-card/kpi-card.component';
+import { ChartComponent } from '../chart/chart.component';
+import { StatGridComponent } from '../stat-grid/stat-grid.component';
+import { KanbanComponent } from '../kanban/kanban.component';
+import { TimelineComponent } from '../timeline/timeline.component';
+import { MetricTableComponent } from '../metric-table/metric-table.component';
+import { ProgressTrackerComponent } from '../progress-tracker/progress-tracker.component';
+import { LaunchpadComponent } from '../launchpad/launchpad.component';
+
+// ── Composable layout ──
+import { ViewRendererComponent } from '../view-renderer/view-renderer.component';
+
 @Component({
   selector: 'syn-dsl-renderer',
   standalone: true,
   imports: [
     CommonModule,
+    // Catalog-specific
     ItemCardComponent,
     ItemGridComponent,
     ItemDetailComponent,
@@ -38,6 +53,17 @@ import { FormInputComponent, FormSubmitEvent } from '../form-input/form-input.co
     InfoBannerComponent,
     DataTableComponent,
     FormInputComponent,
+    // Universal primitives
+    KPICardComponent,
+    ChartComponent,
+    StatGridComponent,
+    KanbanComponent,
+    TimelineComponent,
+    MetricTableComponent,
+    ProgressTrackerComponent,
+    LaunchpadComponent,
+    // Composable layout
+    ViewRendererComponent,
   ],
   templateUrl: './dsl-renderer.html',
   styleUrl: './dsl-renderer.scss',

@@ -19,6 +19,7 @@ PUBLIC_ROUTES = [
     "/api/v1/auth/login",
     "/api/v1/auth/refresh",
     "/api/v1/chat/",  # Chat is public for public-access tenants
+    "/api/v1/config/branding/public",  # Public persona/branding config (no auth)
 ]
 
 
