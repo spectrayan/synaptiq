@@ -1,0 +1,130 @@
+.metric-table-container {
+  background: var(--sq-surface-container);
+  border-radius: var(--sq-radius-lg);
+  overflow: hidden;
+  animation: tableIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 0;
+}
+
+.table-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--sq-on-surface);
+  margin: 0;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.metric-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+
+  th, td {
+    padding: 10px 16px;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  th {
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--sq-on-surface-variant);
+    border-bottom: 1px solid var(--sq-outline-variant);
+    position: sticky;
+    top: 0;
+    background: var(--sq-surface-container);
+
+    &.sortable {
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.15s;
+
+      &:hover {
+        color: var(--sq-primary);
+      }
+    }
+  }
+
+  td {
+    color: var(--sq-on-surface);
+    border-bottom: 1px solid var(--sq-surface-overlay);
+  }
+
+  tbody tr {
+    transition: background 0.15s;
+    animation: rowFade 0.25s ease both;
+
+    &:hover {
+      background: var(--sq-surface-overlay);
+    }
+  }
+}
+
+.sort-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  vertical-align: middle;
+  margin-left: 2px;
+  opacity: 0.4;
+
+  &.active {
+    opacity: 1;
+    color: var(--sq-primary);
+  }
+}
+
+.col-type-number, .col-type-currency, .col-type-percentage {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.cell-currency {
+  font-weight: 600;
+  color: var(--sq-success);
+}
+
+.cell-percentage {
+  font-weight: 500;
+}
+
+.cell-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--sq-radius-full);
+  background: var(--sq-surface-overlay);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.aggregate-cell {
+  font-weight: 700;
+  color: var(--sq-primary);
+  border-top: 2px solid var(--sq-outline-variant);
+  background: var(--sq-surface-elevated);
+}
+
+.aggregate-value {
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes tableIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes rowFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

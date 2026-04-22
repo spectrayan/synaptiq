@@ -1,0 +1,124 @@
+.kpi-card {
+  background: var(--sq-surface-container);
+  border-radius: var(--sq-radius-lg);
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  animation: kpiSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--sq-shadow-md);
+  }
+
+  &.has-sparkline {
+    padding-bottom: 48px;
+  }
+}
+
+.kpi-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kpi-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: var(--sq-primary);
+  opacity: 0.8;
+}
+
+.kpi-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--sq-on-surface-variant);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.kpi-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--sq-on-surface);
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+}
+
+.kpi-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kpi-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--sq-radius-full);
+
+  &.trend-up {
+    color: var(--sq-success);
+    background: rgba(129, 201, 149, 0.12);
+  }
+
+  &.trend-down {
+    color: var(--sq-error);
+    background: rgba(242, 139, 130, 0.12);
+  }
+
+  &.trend-flat {
+    color: var(--sq-on-surface-variant);
+    background: var(--sq-surface-overlay);
+  }
+}
+
+.trend-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.trend-value {
+  font-size: 0.8rem;
+}
+
+.kpi-period {
+  font-size: 0.75rem;
+  color: var(--sq-on-surface-variant);
+  opacity: 0.7;
+}
+
+.kpi-sparkline {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  opacity: 0.3;
+  color: var(--sq-primary);
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+@keyframes kpiSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

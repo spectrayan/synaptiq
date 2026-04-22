@@ -1,0 +1,124 @@
+.timeline-container {
+  animation: timelineIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.timeline-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--sq-on-surface);
+  margin: 0 0 16px;
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-entry {
+  display: flex;
+  gap: 16px;
+  animation: entrySlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.entry-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.marker-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--sq-surface-container);
+  border: 2px solid var(--sq-outline-variant);
+  flex-shrink: 0;
+
+  .entry-type-milestone & {
+    background: rgba(179, 157, 219, 0.2);
+    border-color: var(--sq-primary);
+  }
+
+  .entry-type-alert & {
+    background: rgba(242, 139, 130, 0.2);
+    border-color: var(--sq-error);
+  }
+}
+
+.marker-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  color: var(--sq-on-surface-variant);
+
+  .entry-type-milestone & { color: var(--sq-primary); }
+  .entry-type-alert & { color: var(--sq-error); }
+}
+
+.marker-line {
+  width: 2px;
+  flex: 1;
+  min-height: 24px;
+  background: var(--sq-outline-variant);
+}
+
+.entry-content {
+  padding-bottom: 24px;
+  flex: 1;
+  min-width: 0;
+}
+
+.entry-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.entry-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--sq-on-surface);
+}
+
+.entry-time {
+  font-size: 0.75rem;
+  color: var(--sq-on-surface-variant);
+  white-space: nowrap;
+}
+
+.entry-desc {
+  font-size: 0.82rem;
+  color: var(--sq-on-surface-variant);
+  line-height: 1.5;
+  margin: 4px 0 0;
+}
+
+.entry-actor {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--sq-on-surface-variant);
+  margin-top: 6px;
+}
+
+.actor-icon {
+  font-size: 13px;
+  width: 13px;
+  height: 13px;
+}
+
+@keyframes timelineIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes entrySlideIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}

@@ -1,0 +1,136 @@
+.view-container {
+  background: var(--sq-surface-container);
+  border-radius: var(--sq-radius-lg);
+  overflow: hidden;
+  animation: viewSlideIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.view-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--sq-outline-variant);
+}
+
+.view-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: var(--sq-primary);
+}
+
+.view-title {
+  flex: 1;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--sq-on-surface);
+  margin: 0;
+}
+
+.view-actions {
+  display: flex;
+  gap: 4px;
+
+  button {
+    width: 32px;
+    height: 32px;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+// ── Stack layout ──
+
+.view-stack {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 20px;
+}
+
+// ── Columns layout ──
+
+.view-columns {
+  display: grid;
+  gap: 16px;
+  padding: 16px 20px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.view-column {
+  min-width: 0; // prevent grid blowout
+}
+
+// ── Grid layout ──
+
+.view-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-cols, 2), 1fr);
+  gap: 16px;
+  padding: 16px 20px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.view-grid-item {
+  min-width: 0;
+}
+
+// ── Tabs layout ──
+
+.view-tabs {
+  .tab-content {
+    padding: 16px 20px;
+  }
+}
+
+// ── Sidebar layout ──
+
+.view-sidebar-layout {
+  display: grid;
+  grid-template-columns: var(--sidebar-w, 280px) 1fr;
+  min-height: 300px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.view-sidebar {
+  padding: 16px;
+  border-right: 1px solid var(--sq-outline-variant);
+
+  @media (max-width: 768px) {
+    border-right: none;
+    border-bottom: 1px solid var(--sq-outline-variant);
+  }
+}
+
+.view-main {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// ── Animations ──
+
+@keyframes viewSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

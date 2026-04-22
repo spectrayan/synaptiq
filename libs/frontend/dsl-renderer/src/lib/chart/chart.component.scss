@@ -1,0 +1,30 @@
+.chart-container {
+  background: var(--sq-surface-container);
+  border-radius: var(--sq-radius-lg);
+  padding: 20px;
+  animation: chartFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.chart-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--sq-on-surface);
+  margin: 0 0 12px;
+  letter-spacing: -0.2px;
+}
+
+.chart-canvas {
+  width: 100%;
+  min-height: 200px;
+}
+
+@keyframes chartFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
