@@ -116,4 +116,25 @@ export class SessionService {
       this.http.delete<void>(`${this.baseUrl}/sessions/${sessionId}`),
     );
   }
+
+  // ── P0-B: Pinned views persistence ────────────────────────────────────
+
+  /**
+   * Save pinned views to the backend session document.
+   */
+  async savePinnedViews(sessionId: string, views: unknown[]): Promise<void> {
+    await firstValueFrom(
+      this.http.put(`${this.baseUrl}/sessions/${sessionId}/pinned_views`, { views }),
+    );
+  }
+
+  /**
+   * Load pinned views from the backend session document.
+   */
+  async loadPinnedViews(sessionId: string): Promise<unknown[]> {
+    const res = await firstValueFrom(
+      this.http.get<{ views: unknown[] }>(`${this.baseUrl}/sessions/${sessionId}/pinned_views`),
+    );
+    return res.views ?? [];
+  }
 }

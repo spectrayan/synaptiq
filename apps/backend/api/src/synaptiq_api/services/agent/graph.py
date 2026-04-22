@@ -7,13 +7,19 @@ from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
 
 from synaptiq_api.services.agent.state import AgentState
-from synaptiq_api.services.agent.tools import search_catalog, query_collection
+from synaptiq_api.services.agent.tools import (
+    search_catalog,
+    query_collection,
+    update_tenant_config,
+    manage_schema_field,
+    create_catalog_item,
+)
 from synaptiq_api.services.llm_provider import get_provider
 
 logger = logging.getLogger(__name__)
 
-# Compile tools
-tools = [search_catalog, query_collection]
+# Compile tools — includes catalog, data query, and admin mutation tools (P1-A)
+tools = [search_catalog, query_collection, update_tenant_config, manage_schema_field, create_catalog_item]
 tool_node = ToolNode(tools)
 
 async def call_model(state: AgentState, config: RunnableConfig):

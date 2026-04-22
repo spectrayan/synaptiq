@@ -24,6 +24,7 @@ class ChatMessageRequest(BaseModel):
     model_override: str | None = None
     plan_confirmed: bool = Field(default=False, description="Set true to execute a previously emitted plan")
     plan_id: str | None = Field(default=None, description="Plan ID to confirm (from plan_confirm event)")
+    background: bool = Field(default=False, description="P1-B: If true, skip session history persistence (for auto-refresh)")
 
 
 class SessionCreateRequest(BaseModel):
@@ -102,6 +103,7 @@ async def post_chat_message(body: ChatMessageRequest, request: Request):
             user_role=user_role,
             plan_confirmed=body.plan_confirmed,
             plan_id=body.plan_id,
+            background=body.background,
         ),
         media_type="text/event-stream",
         headers={
@@ -354,3 +356,68 @@ async def delete_session(session_id: str, request: Request):
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Session {session_id} not found",
         )
+
+
+# ---------------------------------------------------------------------------
+# P0-B — Pinned views persistence
+# ---------------------------------------------------------------------------
+
+class PinnedViewsRequest(BaseModel):
+    """PUT /chat/sessions/{session_id}/pinned_views body."""
+    views: list[dict] = Field(default_factory=list, description="Array of ViewSpec JSON objects")
+
+
+@router.put(
+    "/sessions/{session_id}/pinned_views",
+    summary="Save pinned views for a session (P0-B)",
+)
+async def save_pinned_views(
+    session_id: str,
+    body: PinnedViewsRequest,
+    request: Request,
+) -> dict:
+    """Persist pinned dashboard views to the session document."""
+    tenant_id: str = request.state.tenant_id
+    db = get_db()
+
+    result = await db["sessions"].update_one(
+        {"session_id": session_id, "tenant_id": tenant_id},
+        {
+            "$set": {
+                "pinned_views": body.views,
+                "updated_at": datetime.utcnow(),
+            },
+        },
+    )
+
+    if result.matched_count == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Session {session_id} not found",
+        )
+
+    return {"success": True, "count": len(body.views)}
+
+
+@router.get(
+    "/sessions/{session_id}/pinned_views",
+    summary="Load pinned views for a session (P0-B)",
+)
+async def get_pinned_views(session_id: str, request: Request) -> dict:
+    """Retrieve pinned dashboard views from the session document."""
+    tenant_id: str = request.state.tenant_id
+    db = get_db()
+
+    session = await db["sessions"].find_one(
+        {"session_id": session_id, "tenant_id": tenant_id},
+        {"pinned_views": 1},
+    )
+
+    if not session:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Session {session_id} not found",
+        )
+
+    return {"views": session.get("pinned_views", [])}
+

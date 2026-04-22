@@ -14,13 +14,14 @@ services:
   # ── MongoDB Atlas Local ────────────────────────────────────────────────
   mongodb:
     image: mongodb/mongodb-atlas-local:8.0
+    pull_policy: if_not_present
     container_name: synaptiq-mongo
     ports:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -28,7 +29,8 @@ services:
 
   # ── Redis ──────────────────────────────────────────────────────────────
   redis:
-    image: redis:7-alpine
+    image: redis:8.6.1
+    pull_policy: if_not_present
     container_name: synaptiq-redis
     ports:
       - "6379:6379"
@@ -36,7 +38,7 @@ services:
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
       timeout: 3s
       retries: 3
@@ -44,23 +46,25 @@ services:
   # ── Firebase Auth Emulator ─────────────────────────────────────────────
   firebase-auth:
     image: node:22-alpine
+    pull_policy: if_not_present
     container_name: synaptiq-firebase-auth
     working_dir: /srv/firebase
     entrypoint: /bin/sh
     command:
       - -c
       - |
+        printf '{"emulators":{"auth":{"host":"0.0.0.0","port":9099},"ui":{"enabled":true,"host":"0.0.0.0","port":4000},"hub":{"host":"0.0.0.0","port":4400}}}' > firebase.json &&
         npm install -g firebase-tools@latest &&
         firebase emulators:start --only auth --project synaptiq-dev
     ports:
-      - "9099:9099"   # Auth Emulator
-      - "4000:4000"   # Emulator Suite UI
+      - "9099:9099" # Auth Emulator
+      - "4000:4000" # Emulator Suite UI
     environment:
       - FIREBASE_CONFIG={"projectId":"synaptiq-dev"}
     volumes:
       - firebase_data:/srv/firebase
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:9099/"]
+      test: [ "CMD", "wget", "-qO-", "http://localhost:9099/" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -103,7 +107,7 @@ services:
       context: ./apps/backend/api
       dockerfile: Dockerfile
     container_name: synaptiq-seed
-    entrypoint: ["uv", "run", "python", "-m", "synaptiq_api.scripts.seed_dev"]
+    entrypoint: [ "uv", "run", "python", "-m", "synaptiq_api.scripts.seed_dev" ]
     environment:
       - MONGODB_URI=mongodb://mongodb:27017
       - REDIS_URL=redis://redis:6379
@@ -119,4 +123,5 @@ volumes:
   mongo_data:
   redis_data:
   firebase_data:
+
 

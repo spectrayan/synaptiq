@@ -57,3 +57,42 @@ mat-checkbox {
   --mdc-checkbox-selected-icon-color: var(--syn-primary, #818cf8);
   --mdc-checkbox-unselected-icon-color: var(--syn-text-muted, #94a3b8);
 }
+
+// ── Pagination ──────────────────────────────────────────────────────
+.table-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-top: 1px solid var(--syn-border, rgba(255, 255, 255, 0.06));
+  font-size: 0.78rem;
+  color: var(--syn-text-muted, #94a3b8);
+}
+
+.pagination-buttons {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+
+  button {
+    --mdc-icon-button-state-layer-size: 32px;
+    --mdc-icon-button-icon-size: 18px;
+    color: var(--syn-text-muted, #94a3b8);
+
+    &:disabled {
+      opacity: 0.3;
+    }
+  }
+}
+
+.pagination-page {
+  font-size: 0.78rem;
+  color: var(--syn-text, #e2e8f0);
+  padding: 0 8px;
+  white-space: nowrap;
+}
+
+.pagination-range {
+  white-space: nowrap;
+}
+

@@ -3,7 +3,7 @@
     <h4 class="table-title">{{ spec().title }}</h4>
   }
 
-  <table mat-table [dataSource]="spec().rows" class="syn-table">
+  <table mat-table [dataSource]="paginatedRows()" class="syn-table">
 
     <!-- Select column -->
     @if (spec().selectable) {
@@ -64,6 +64,48 @@
         [class.selected]="selection.isSelected(i)"
     ></tr>
   </table>
+
+  <!-- Pagination controls -->
+  @if (showPagination()) {
+    <div class="table-pagination">
+      <span class="pagination-range">{{ rangeLabel() }}</span>
+      <div class="pagination-buttons">
+        <button
+          mat-icon-button
+          [disabled]="currentPage() === 0"
+          (click)="goToPage(0)"
+          aria-label="First page"
+        >
+          <mat-icon>first_page</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          [disabled]="currentPage() === 0"
+          (click)="prevPage()"
+          aria-label="Previous page"
+        >
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <span class="pagination-page">Page {{ currentPage() + 1 }} of {{ totalPages() }}</span>
+        <button
+          mat-icon-button
+          [disabled]="currentPage() >= totalPages() - 1"
+          (click)="nextPage()"
+          aria-label="Next page"
+        >
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          [disabled]="currentPage() >= totalPages() - 1"
+          (click)="goToPage(totalPages() - 1)"
+          aria-label="Last page"
+        >
+          <mat-icon>last_page</mat-icon>
+        </button>
+      </div>
+    </div>
+  }
 
   <syn-suggestion-bar
     [suggestions]="spec().suggestions || []"

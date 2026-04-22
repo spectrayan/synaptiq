@@ -30,12 +30,18 @@ class TenantService:
 
     @staticmethod
     async def get_tenant(tenant_id: str) -> dict | None:
-        """Get tenant by tenant_id. Checks Redis cache first."""
-        # Try Redis cache
+        """Get full tenant document by tenant_id.
+
+        Uses a dedicated 'tenant:full:*' cache key so it doesn't collide
+        with the lightweight projection cached by TenantMiddleware.
+        """
+        cache_key = f"tenant:full:{tenant_id}"
+
+        # Try Redis cache (full document)
         try:
             from synaptiq_api.core.redis import get_redis
             redis = get_redis()
-            cached = await redis.get(f"tenant:{tenant_id}")
+            cached = await redis.get(cache_key)
             if cached:
                 return json.loads(cached)
         except Exception:
@@ -48,6 +54,15 @@ class TenantService:
 
         # Serialize ObjectId
         doc["_id"] = str(doc["_id"])
+
+        # Cache the full document for 5 minutes
+        try:
+            from synaptiq_api.core.redis import get_redis
+            redis = get_redis()
+            await redis.setex(cache_key, 300, json.dumps(doc, default=str))
+        except Exception:
+            pass
+
         return doc
 
     @staticmethod
@@ -86,10 +101,10 @@ class TenantService:
 
     @staticmethod
     async def _invalidate_cache(tenant_id: str) -> None:
-        """Remove tenant from Redis cache."""
+        """Remove tenant from Redis cache (both middleware + full document)."""
         try:
             from synaptiq_api.core.redis import get_redis
             redis = get_redis()
-            await redis.delete(f"tenant:{tenant_id}")
+            await redis.delete(f"tenant:{tenant_id}", f"tenant:full:{tenant_id}")
         except Exception:
             pass

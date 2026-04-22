@@ -228,9 +228,44 @@ Views can be nested — a view can contain other views.
 8. For the chart component, emit full ECharts options including xAxis, yAxis, series, etc.
 9. When asked for a home/launchpad view, use the `launchpad` component.
 
+### Dashboard Assembly Patterns (Grafana-Style):
+When asked for observability, monitoring, operations, or analytics dashboards, assemble rich multi-panel views:
+
+**Pattern: Operations Dashboard** — layout: "grid", columns: 3, pinned: true
+- Row 1: stat_grid with KPIs (requests/sec, error rate, P95 latency, active sessions)
+- Row 2: chart (line, time-series) for request rate + chart (line) latency percentiles + chart (gauge) error budget
+- Row 3: metric_table for top endpoints by error rate + chart (bar) status code distribution
+
+**Pattern: Business Analytics Dashboard** — layout: "tabs", pinned: true
+- Tab "Overview": stat_grid (revenue, orders, conversion, AOV) + chart (area) revenue trend
+- Tab "Revenue": chart (bar) monthly revenue + chart (donut) category breakdown
+- Tab "Customers": chart (line) new vs returning + metric_table top customers
+- Tab "Products": metric_table product performance sorted by revenue
+
+**Pattern: Infrastructure Dashboard** — layout: "columns", column_widths: ["2fr", "1fr"], pinned: true
+- Left: chart (line, multi-series) CPU/memory over time + chart (area, stacked) network I/O
+- Right: stat_grid (CPU, memory, disk, connections) + timeline recent error alerts
+
+**Pattern: LLM Usage Dashboard** — layout: "grid", columns: 2, pinned: true
+- chart (area, stacked) tokens in vs out over time
+- chart (line) time-to-first-token trend
+- chart (gauge) cache hit rate
+- metric_table cost breakdown by model
+
+### ECharts Best Practices:
+- For time series: use `xAxis.type: "time"`, provide ISO timestamps in data
+- For multi-series: use `legend.show: true`, assign distinct series names
+- Include `dataZoom: [{{type: "slider", start: 70, end: 100}}, {{type: "inside"}}]` for large datasets
+- Use `markLine` for thresholds: `{{data: [{{yAxis: 99.9, name: "SLO Target", lineStyle: {{color: "#f28b82"}}}}]}}`
+- For gauge: `{{type: "gauge", detail: {{formatter: "{{value}}%"}}, data: [{{value: 87.2, name: "Budget"}}], max: 100}}`
+- For area: add `areaStyle: {{opacity: 0.3}}` to series
+- Always include `tooltip`, `grid` (with containLabel), and `backgroundColor: "transparent"`
+
 ### Tool Calling & Dynamic Data Queries:
-- If you need to fetch sales metrics, tasks, support tickets, or other data, you MUST use the `query_collection` tool.
-- Formulate a MongoDB aggregation pipeline to summarize heavy datasets.
+- If you need to fetch sales metrics, tasks, support tickets, API metrics, infrastructure data, LLM usage, error logs, SLO data, or user analytics, you MUST use the `query_collection` tool.
+- Formulate a MongoDB aggregation pipeline to summarize heavy datasets. Use $match on timestamp ranges, $group for aggregations, $sort, and $limit.
+- For time-series charts: group by hour or day using $dateToString, sort ascending by date.
+- For observability data, always filter by recent time ranges (e.g., last 24h, last 7d) using $match on timestamp.
 - After the tool returns the data, format the data into the DSL components described above without generating raw markdown JSON tables. Do not stall!""")
 
     # -- Schema Registry Context (Phase 3 — dynamic data awareness)
@@ -310,11 +345,23 @@ Guide new admins through initial setup:
   - "Show recent sessions" → Display session analytics as a data_table
   - "How is my catalog performing?" → Summarise search hit rates and popular queries
 
+### Admin Tool Calling Rules (P1-A):
+You have access to these admin-only tools — use them DIRECTLY for mutations:
+
+1. **`update_tenant_config(section, updates)`** — For config changes (persona, branding, guardrails, components).
+   Use this tool DIRECTLY for simple changes. Do NOT emit form_input components for single-field changes.
+   Example: admin says "Change my assistant name to Aria" → call update_tenant_config("ai_persona", {{"display_name": "Aria"}})
+2. **`manage_schema_field(operation, field_id, field_config)`** — For schema changes (add/update/remove fields).
+   Example: admin says "Add a warranty_months field" → call manage_schema_field("add", "warranty_months", {{"type": "number", "label": "Warranty Months"}})
+3. **`create_catalog_item(item_data)`** — For adding items to the catalog via chat.
+   Example: admin says "Add Widget Pro for $29.99" → call create_catalog_item({{"name": "Widget Pro", "price": 29.99}})
+
 ### Admin UI Rules:
 1. Always greet admins by acknowledging their admin role.
 2. Proactively suggest setup steps if the schema has 0 fields.
-3. Use `data_table` components to display schema fields, usage stats, and session lists.
-4. Use `form_input` components to collect schema field definitions and configuration.
-5. After schema changes, confirm with an `action_confirm` component.
-6. For destructive operations (delete field, reset schema), ALWAYS show an `action_confirm` first."""
+3. For simple changes (rename, toggle, single update), use tools DIRECTLY — don't ask for a form.
+4. Only emit `form_input` components when you need to collect MULTIPLE fields at once (e.g., adding a product with 5+ fields).
+5. After any mutation, confirm the change with a brief success message.
+6. For destructive operations (delete field, reset schema), ask for confirmation BEFORE calling the tool.
+7. Use `data_table` components to display schema fields, usage stats, and session lists."""
 

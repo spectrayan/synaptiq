@@ -4,6 +4,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MetricTableSpec, MetricTableColumn } from '@synaptiq/constants';
 
+/** Default number of rows per page */
+const PAGE_SIZE = 10;
+
 @Component({
   selector: 'syn-metric-table',
   standalone: true,
@@ -39,7 +42,7 @@ import { MetricTableSpec, MetricTableColumn } from '@synaptiq/constants';
             </tr>
           </thead>
           <tbody>
-            @for (row of sortedRows(); track $index; let i = $index) {
+            @for (row of paginatedRows(); track $index; let i = $index) {
               <tr [style.animation-delay.ms]="i * 30">
                 @for (col of spec().columns; track col.field) {
                   <td [class]="'col-type-' + (col.type || 'text')">
@@ -77,6 +80,28 @@ import { MetricTableSpec, MetricTableColumn } from '@synaptiq/constants';
           }
         </table>
       </div>
+
+      <!-- Pagination controls -->
+      @if (showPagination()) {
+        <div class="table-pagination">
+          <span class="pagination-range">{{ rangeLabel() }}</span>
+          <div class="pagination-buttons">
+            <button mat-icon-button [disabled]="currentPage() === 0" (click)="goToPage(0)" aria-label="First page">
+              <mat-icon>first_page</mat-icon>
+            </button>
+            <button mat-icon-button [disabled]="currentPage() === 0" (click)="prevPage()" aria-label="Previous page">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+            <span class="pagination-page">Page {{ currentPage() + 1 }} of {{ totalPages() }}</span>
+            <button mat-icon-button [disabled]="currentPage() >= totalPages() - 1" (click)="nextPage()" aria-label="Next page">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+            <button mat-icon-button [disabled]="currentPage() >= totalPages() - 1" (click)="goToPage(totalPages() - 1)" aria-label="Last page">
+              <mat-icon>last_page</mat-icon>
+            </button>
+          </div>
+        </div>
+      }
     </div>
   `,
   styleUrl: './metric-table.component.scss',
@@ -87,6 +112,10 @@ export class MetricTableComponent {
 
   readonly sortField = signal<string>('');
   readonly sortDir = signal<'asc' | 'desc'>('asc');
+
+  /** Current page index (0-based) */
+  readonly currentPage = signal(0);
+  readonly pageSize = PAGE_SIZE;
 
   readonly sortedRows = computed(() => {
     const rows = [...(this.spec().rows || [])];
@@ -101,6 +130,31 @@ export class MetricTableComponent {
     });
   });
 
+  /** Total number of rows (after sorting) */
+  readonly totalRows = computed(() => this.sortedRows().length);
+
+  /** Total number of pages */
+  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.totalRows() / this.pageSize)));
+
+  /** Whether pagination should be shown (more than one page of data) */
+  readonly showPagination = computed(() => this.totalRows() > this.pageSize);
+
+  /** Current page of sorted rows */
+  readonly paginatedRows = computed(() => {
+    const rows = this.sortedRows();
+    const start = this.currentPage() * this.pageSize;
+    return rows.slice(start, start + this.pageSize);
+  });
+
+  /** Display range text (e.g. "1–10 of 90") */
+  readonly rangeLabel = computed(() => {
+    const total = this.totalRows();
+    if (total === 0) return '0 items';
+    const start = this.currentPage() * this.pageSize + 1;
+    const end = Math.min(start + this.pageSize - 1, total);
+    return `${start}–${end} of ${total}`;
+  });
+
   toggleSort(field: string) {
     if (this.sortField() === field) {
       this.sortDir.set(this.sortDir() === 'asc' ? 'desc' : 'asc');
@@ -108,6 +162,22 @@ export class MetricTableComponent {
       this.sortField.set(field);
       this.sortDir.set('asc');
     }
+    // Reset to first page when sort changes
+    this.currentPage.set(0);
+  }
+
+  // ── Pagination controls ───────────────────────────────────────────
+
+  goToPage(page: number): void {
+    this.currentPage.set(Math.max(0, Math.min(page, this.totalPages() - 1)));
+  }
+
+  nextPage(): void {
+    this.goToPage(this.currentPage() + 1);
+  }
+
+  prevPage(): void {
+    this.goToPage(this.currentPage() - 1);
   }
 
   computeAggregate(col: MetricTableColumn): string {

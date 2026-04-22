@@ -91,6 +91,7 @@ async def chat_stream(
     user_role: str = "user",
     plan_confirmed: bool = False,
     plan_id: str | None = None,
+    background: bool = False,
 ) -> AsyncIterator[str]:
     """
     Full chat pipeline yielding SSE events (REQ-C7, REQ-AI11–AI16, REQ-NF2).
@@ -246,19 +247,21 @@ async def chat_stream(
     yield _sse_done(turn_id, tokens_in, tokens_out)
 
     # -- Step 9: Async persist (fire-and-forget)
-    import asyncio
-    asyncio.create_task(_persist_turn(
-        tenant_id=tenant_id,
-        session_id=session_id,
-        turn_id=turn_id,
-        user_message=user_message,
-        assistant_response=cleaned_text if components else full_response,
-        components=components,
-        tokens_in=tokens_in,
-        tokens_out=tokens_out,
-        model_id=model_id or "langchain-agent",
-        latency_ms=latency_ms,
-    ))
+    # P1-B: Skip persistence for background auto-refresh queries
+    if not background:
+        import asyncio
+        asyncio.create_task(_persist_turn(
+            tenant_id=tenant_id,
+            session_id=session_id,
+            turn_id=turn_id,
+            user_message=user_message,
+            assistant_response=cleaned_text if components else full_response,
+            components=components,
+            tokens_in=tokens_in,
+            tokens_out=tokens_out,
+            model_id=model_id or "langchain-agent",
+            latency_ms=latency_ms,
+        ))
 
 
 # ---------------------------------------------------------------------------

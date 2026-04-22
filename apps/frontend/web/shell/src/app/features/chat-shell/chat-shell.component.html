@@ -17,35 +17,78 @@
       New conversation
     </button>
 
-    <div class="sidebar-section-label">Recent</div>
-    <div class="history-list">
-      @for (session of sessionHistory(); track session.session_id) {
-        <div
-          class="history-item"
-          [class.active]="activeSessionId() === session.session_id"
-          (click)="loadSession(session)"
-        >
-          <mat-icon class="history-icon">chat_bubble_outline</mat-icon>
-          <span class="history-title">{{ session.title }}</span>
-          <span class="history-meta">{{ session.turn_count }}</span>
-          <button
-            class="history-delete"
-            mat-icon-button
-            (click)="deleteSession(session, $event)"
-            matTooltip="Delete"
-          >
-            <mat-icon>close</mat-icon>
-          </button>
-        </div>
-      }
-
-      @if (!sessionHistory().length) {
-        <div class="history-empty">
-          <mat-icon>forum</mat-icon>
-          <span>No conversations yet</span>
-        </div>
-      }
+    <!-- Sidebar Tabs: Recent / Pinned -->
+    <div class="sidebar-tabs">
+      <button class="sidebar-tab" [class.active]="sidebarTab() === 'recent'" (click)="sidebarTab.set('recent')">
+        <mat-icon>chat_bubble_outline</mat-icon> Recent
+      </button>
+      <button class="sidebar-tab" [class.active]="sidebarTab() === 'pinned'" (click)="sidebarTab.set('pinned')">
+        <mat-icon>push_pin</mat-icon> Pinned
+        @if (pinnedViews().length) {
+          <span class="sidebar-tab-badge">{{ pinnedViews().length }}</span>
+        }
+      </button>
     </div>
+
+    @if (sidebarTab() === 'recent') {
+      <div class="history-list">
+        @for (session of sessionHistory(); track session.session_id) {
+          <div
+            class="history-item"
+            [class.active]="activeSessionId() === session.session_id"
+            (click)="loadSession(session)"
+          >
+            <mat-icon class="history-icon">chat_bubble_outline</mat-icon>
+            <span class="history-title">{{ session.title }}</span>
+            <span class="history-meta">{{ session.turn_count }}</span>
+            <button
+              class="history-delete"
+              mat-icon-button
+              (click)="deleteSession(session, $event)"
+              matTooltip="Delete"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        }
+
+        @if (!sessionHistory().length) {
+          <div class="history-empty">
+            <mat-icon>forum</mat-icon>
+            <span>No conversations yet</span>
+          </div>
+        }
+      </div>
+    } @else {
+      <!-- Pinned Views List -->
+      <div class="pinned-list">
+        @for (pv of pinnedViews(); track pv.view_id) {
+          <div
+            class="pinned-item"
+            [class.active]="activePinnedView() === pv.view_id"
+            (click)="selectPinnedView(pv.view_id)"
+          >
+            <mat-icon class="pinned-item-icon">{{ pv.icon || 'dashboard' }}</mat-icon>
+            <span class="pinned-item-title">{{ pv.title }}</span>
+            <button
+              class="pinned-item-close"
+              mat-icon-button
+              (click)="unpinView(pv.view_id, $event)"
+              matTooltip="Unpin"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        }
+
+        @if (!pinnedViews().length) {
+          <div class="history-empty">
+            <mat-icon>push_pin</mat-icon>
+            <span>No pinned views yet</span>
+          </div>
+        }
+      </div>
+    }
 
     <div class="sidebar-footer">
       @if (!auth.isAuthenticated()) {
@@ -98,40 +141,7 @@
       </div>
     </header>
 
-    <!-- ── Pinned Views Surface ─────────────────────────────────────────── -->
-    @if (pinnedViews().length) {
-      <div class="pinned-views-strip">
-        <div class="pinned-tabs">
-          @for (pv of pinnedViews(); track pv.view_id; let i = $index) {
-            <button class="pinned-tab"
-                    [class.active]="activePinnedView() === pv.view_id"
-                    (click)="activePinnedView.set(pv.view_id)">
-              <mat-icon class="pinned-tab-icon">{{ pv.icon || 'dashboard' }}</mat-icon>
-              <span class="pinned-tab-label">{{ pv.title }}</span>
-              <button class="pinned-close" mat-icon-button (click)="unpinView(pv.view_id, $event)">
-                <mat-icon>close</mat-icon>
-              </button>
-            </button>
-          }
-        </div>
-        <button class="pinned-collapse-btn" mat-icon-button
-                (click)="pinnedExpanded.set(!pinnedExpanded())">
-          <mat-icon>{{ pinnedExpanded() ? 'expand_less' : 'expand_more' }}</mat-icon>
-        </button>
-      </div>
 
-      @if (pinnedExpanded() && activePinnedViewSpec()) {
-        <div class="pinned-view-panel">
-          <syn-dsl-renderer
-            [spec]="activePinnedViewSpec()!"
-            (suggestionClicked)="onSuggestionClicked($event)"
-            (formSubmitted)="onFormSubmitted($event, '')"
-            (actionClicked)="onActionClicked($event)"
-            (itemClicked)="onSuggestionClicked('Show details for item ' + $event)"
-          />
-        </div>
-      }
-    }
 
     <!-- Messages -->
     <div class="messages-area" role="log" aria-label="Chat messages" aria-live="polite">
@@ -143,16 +153,16 @@
              [attr.aria-label]="msg.role === 'user' ? 'Your message' : 'Assistant response'"
              role="article">
           @if (msg.isTyping) {
-            <!-- Typing indicator (Phase 13) -->
+            <!-- Typing indicator -->
             <div class="avatar">
               <span class="avatar-icon">⚡</span>
             </div>
             <div class="bubble-group">
               <div class="bubble typing-bubble">
-                <div class="typing-indicator" aria-label="Assistant is typing">
-                  <span class="typing-dot"></span>
-                  <span class="typing-dot"></span>
-                  <span class="typing-dot"></span>
+                <div class="typing-dots" aria-label="Assistant is typing">
+                  <span></span>
+                  <span></span>
+                  <span></span>
                 </div>
               </div>
             </div>

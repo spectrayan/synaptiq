@@ -18,11 +18,11 @@ logger = logging.getLogger(__name__)
 
 
 DEMO_TENANT = {
-    "tenant_id": "acme-demo",
-    "name": "Acme Demo Store",
-    "slug": "acme-demo",
+    "tenant_id": "demo-tenant",
+    "name": "Demo Store",
+    "slug": "demo-tenant",
     "status": "active",
-    "owner_email": "admin@acme-demo.com",
+    "owner_email": "admin@demo-tenant.com",
     "created_at": datetime.now(timezone.utc).isoformat(),
     "config": {
         "llm_provider": {
@@ -32,7 +32,7 @@ DEMO_TENANT = {
         "branding": {
             "primary_color": "#b39ddb",
             "logo_url": "",
-            "company_name": "Acme Demo Store",
+            "company_name": "Demo Store",
         },
     },
     "limits": {
@@ -41,7 +41,7 @@ DEMO_TENANT = {
         "max_catalog_items": 5000,
     },
     "schema": {
-        "schema_id": "acme-electronics-v1",
+        "schema_id": "demo-electronics-v1",
         "fields": [
             {"name": "name", "type": "string", "label": "Product Name", "required": True, "searchable": True},
             {"name": "description", "type": "string", "label": "Description", "searchable": True},
@@ -58,7 +58,7 @@ DEMO_TENANT = {
 
 DEMO_CATALOG_ITEMS = [
     {
-        "tenant_id": "acme-demo",
+        "tenant_id": "demo-tenant",
         "item_id": "sku-101",
         "data": {
             "name": "Smart Speaker Pro",
@@ -73,7 +73,7 @@ DEMO_CATALOG_ITEMS = [
         "created_at": datetime.now(timezone.utc).isoformat(),
     },
     {
-        "tenant_id": "acme-demo",
+        "tenant_id": "demo-tenant",
         "item_id": "sku-102",
         "data": {
             "name": "Wireless Charger Pad",
@@ -88,7 +88,7 @@ DEMO_CATALOG_ITEMS = [
         "created_at": datetime.now(timezone.utc).isoformat(),
     },
     {
-        "tenant_id": "acme-demo",
+        "tenant_id": "demo-tenant",
         "item_id": "sku-103",
         "data": {
             "name": "USB-C Hub 7-in-1",
@@ -103,7 +103,7 @@ DEMO_CATALOG_ITEMS = [
         "created_at": datetime.now(timezone.utc).isoformat(),
     },
     {
-        "tenant_id": "acme-demo",
+        "tenant_id": "demo-tenant",
         "item_id": "sku-104",
         "data": {
             "name": "Noise Cancelling Earbuds",
@@ -118,7 +118,7 @@ DEMO_CATALOG_ITEMS = [
         "created_at": datetime.now(timezone.utc).isoformat(),
     },
     {
-        "tenant_id": "acme-demo",
+        "tenant_id": "demo-tenant",
         "item_id": "sku-105",
         "data": {
             "name": "Mechanical Keyboard",
@@ -133,7 +133,7 @@ DEMO_CATALOG_ITEMS = [
         "created_at": datetime.now(timezone.utc).isoformat(),
     },
     {
-        "tenant_id": "acme-demo",
+        "tenant_id": "demo-tenant",
         "item_id": "sku-106",
         "data": {
             "name": "Portable Monitor 15.6\"",
@@ -148,7 +148,7 @@ DEMO_CATALOG_ITEMS = [
         "created_at": datetime.now(timezone.utc).isoformat(),
     },
     {
-        "tenant_id": "acme-demo",
+        "tenant_id": "demo-tenant",
         "item_id": "sku-107",
         "data": {
             "name": "Ergonomic Mouse",
@@ -163,7 +163,7 @@ DEMO_CATALOG_ITEMS = [
         "created_at": datetime.now(timezone.utc).isoformat(),
     },
     {
-        "tenant_id": "acme-demo",
+        "tenant_id": "demo-tenant",
         "item_id": "sku-108",
         "data": {
             "name": "Running Shoes UltraLight",
@@ -178,7 +178,7 @@ DEMO_CATALOG_ITEMS = [
         "created_at": datetime.now(timezone.utc).isoformat(),
     },
     {
-        "tenant_id": "acme-demo",
+        "tenant_id": "demo-tenant",
         "item_id": "sku-109",
         "data": {
             "name": "Standing Desk Converter",
@@ -193,7 +193,7 @@ DEMO_CATALOG_ITEMS = [
         "created_at": datetime.now(timezone.utc).isoformat(),
     },
     {
-        "tenant_id": "acme-demo",
+        "tenant_id": "demo-tenant",
         "item_id": "sku-110",
         "data": {
             "name": "Smart LED Bulb (4-pack)",

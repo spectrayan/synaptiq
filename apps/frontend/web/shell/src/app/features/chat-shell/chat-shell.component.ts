@@ -1,4 +1,4 @@
-import { Component, signal, inject, ElementRef, viewChild, effect, computed } from '@angular/core';
+import { Component, signal, inject, ElementRef, viewChild, effect, computed, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -77,7 +77,7 @@ export interface ChatMessage {
   templateUrl: './chat-shell.component.html',
   styleUrl: './chat-shell.component.scss',
 })
-export class ChatShellComponent {
+export class ChatShellComponent implements OnDestroy {
   private readonly breakpoints = inject(BreakpointObserver);
   private readonly actionsService = inject(ActionsService);
   private readonly analyticsService = inject(AnalyticsService);
@@ -122,17 +122,42 @@ export class ChatShellComponent {
   /** Session history for the sidebar */
   sessionHistory = signal<SessionListItem[]>([]);
   activeSessionId = signal<string>('');
+  /** Sidebar tab: 'recent' (session list) or 'pinned' (pinned views) */
+  readonly sidebarTab = signal<'recent' | 'pinned'>('recent');
 
   messages = signal<ChatMessage[]>([]);
 
-  /** Pinned views — persistent surfaces above the chat stream */
-  readonly pinnedViews = signal<ViewSpec[]>([]);
+  /** Pinned views — persistent surfaces above the chat stream (P0-B) */
+  private readonly PINNED_VIEWS_KEY = 'synaptiq:pinned_views';
+  readonly pinnedViews = signal<ViewSpec[]>(this._loadPinnedViews());
   readonly activePinnedView = signal<string>('');
   readonly pinnedExpanded = signal(true);
   readonly activePinnedViewSpec = computed(() => {
     const views = this.pinnedViews();
     const activeId = this.activePinnedView();
     return views.find(v => v.view_id === activeId) || null;
+  });
+
+  /** P0-B: Auto-persist pinned views to localStorage + debounced backend sync. */
+  private _pinnedSyncTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly _pinnedViewsPersist = effect(() => {
+    const views = this.pinnedViews();
+    // Immediate localStorage save
+    try {
+      if (views.length > 0) {
+        localStorage.setItem(this.PINNED_VIEWS_KEY, JSON.stringify(views));
+      } else {
+        localStorage.removeItem(this.PINNED_VIEWS_KEY);
+      }
+    } catch { /* storage full — ignore */ }
+
+    // Debounced backend sync (500ms)
+    if (this._pinnedSyncTimer) clearTimeout(this._pinnedSyncTimer);
+    if (this.sessionPersisted) {
+      this._pinnedSyncTimer = setTimeout(() => {
+        this.sessionService.savePinnedViews(this.sessionId, views).catch(() => {});
+      }, 500);
+    }
   });
 
   /** Whether the authenticated user has admin/owner privileges. */
@@ -395,6 +420,9 @@ export class ChatShellComponent {
     this.messages.set(this._buildInitialMessages());
     this.isLoading.set(false);
     this.authFormMessageId.set(null);
+    // P0-B: Clear pinned views for the new conversation
+    this.pinnedViews.set([]);
+    this.activePinnedView.set('');
   }
 
   // ── Conversational Auth (inline in chat stream) ─────────────────────
@@ -562,21 +590,29 @@ export class ChatShellComponent {
   // ── Backend SSE streaming ───────────────────────────────────────────
 
   private async sendViaBackend(msg: string, typingId?: string): Promise<void> {
-    // Remove typing indicator — we'll show real content now
-    if (typingId) this._removeTyping(typingId);
-
-    // Create a placeholder assistant message that we'll update with streaming tokens
+    // Keep typing indicator visible — we'll swap it when first content arrives
     const assistantMsgId = crypto.randomUUID();
-    this.messages.update((msgs) => [
-      ...msgs,
-      {
-        id: assistantMsgId,
-        role: 'assistant',
-        content: '',
-        timestamp: new Date(),
-        uiComponents: [],
-      },
-    ]);
+    let typingCleared = false;
+
+    /** Swap the typing indicator for the real assistant message on first data. */
+    const ensureAssistantMessage = () => {
+      if (typingCleared) return;
+      typingCleared = true;
+      // Replace typing indicator with the real assistant message in one update
+      this.messages.update((msgs) => {
+        const filtered = typingId ? msgs.filter((m) => m.id !== typingId) : msgs;
+        return [
+          ...filtered,
+          {
+            id: assistantMsgId,
+            role: 'assistant' as const,
+            content: '',
+            timestamp: new Date(),
+            uiComponents: [],
+          },
+        ];
+      });
+    };
 
     await this.chatService.streamMessage(
       {
@@ -585,6 +621,7 @@ export class ChatShellComponent {
       },
       {
         onToken: (token) => {
+          ensureAssistantMessage();
           // Append token to the assistant message content (typewriter effect)
           this.messages.update((msgs) =>
             msgs.map((m) =>
@@ -594,11 +631,11 @@ export class ChatShellComponent {
         },
 
         onComponent: (component) => {
-          // Check if this is a pinned view — hoist it to the pinned views strip
+          ensureAssistantMessage();
+          // If this is a pinned view, add to pinned list (but still render inline)
           if (component.type === 'view' && (component as any).pinned) {
             const viewSpec = component as any;
             this.pinnedViews.update(views => {
-              // Replace existing view with same ID, or add new
               const existing = views.findIndex(v => v.view_id === viewSpec.view_id);
               if (existing >= 0) {
                 const updated = [...views];
@@ -608,8 +645,12 @@ export class ChatShellComponent {
               return [...views, viewSpec];
             });
             this.activePinnedView.set(viewSpec.view_id);
-            this.pinnedExpanded.set(true);
-            return; // Don't add pinned views to inline components
+
+            // P1-B: Start auto-refresh if the view has a refresh interval
+            if (viewSpec.refresh_interval && viewSpec.refresh_interval > 0) {
+              this._startAutoRefresh(viewSpec.view_id, viewSpec.refresh_interval, msg);
+            }
+            // Fall through — view still renders inline in the chat
           }
 
           // Push DSL component into the assistant message
@@ -623,6 +664,7 @@ export class ChatShellComponent {
         },
 
         onStatus: (statusMessage) => {
+          ensureAssistantMessage();
           // Update status text on the assistant message
           this.messages.update((msgs) =>
             msgs.map((m) =>
@@ -632,6 +674,7 @@ export class ChatShellComponent {
         },
 
         onTextReplace: (text) => {
+          ensureAssistantMessage();
           // Replace streamed text with cleaned version (raw JSON stripped out)
           this.messages.update((msgs) =>
             msgs.map((m) =>
@@ -641,6 +684,7 @@ export class ChatShellComponent {
         },
 
         onStepStart: (event) => {
+          ensureAssistantMessage();
           // Show tool invocation as a status indicator on the message
           this.messages.update((msgs) =>
             msgs.map((m) =>
@@ -663,6 +707,7 @@ export class ChatShellComponent {
         },
 
         onDone: () => {
+          ensureAssistantMessage();
           // Clear status text and loading state
           this.messages.update((msgs) =>
             msgs.map((m) =>
@@ -682,6 +727,7 @@ export class ChatShellComponent {
         },
 
         onError: (errorMessage) => {
+          ensureAssistantMessage();
           // Show error as info_banner
           if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
             errorMessage = 'Backend is offline. Please start the API server and try again.';
@@ -750,10 +796,24 @@ export class ChatShellComponent {
   /** Remove a pinned view and select the next one if needed. */
   unpinView(viewId: string, event: Event): void {
     event.stopPropagation();
+    this._stopAutoRefresh(viewId); // P1-B: stop any running timer
     this.pinnedViews.update(views => views.filter(v => v.view_id !== viewId));
     if (this.activePinnedView() === viewId) {
       const remaining = this.pinnedViews();
       this.activePinnedView.set(remaining.length > 0 ? remaining[0].view_id : '');
+    }
+    // Switch back to recent tab if no pinned views left
+    if (this.pinnedViews().length === 0) {
+      this.sidebarTab.set('recent');
+    }
+  }
+
+  /** Navigate to a pinned view — scrolls to find it in the chat stream. */
+  selectPinnedView(viewId: string): void {
+    this.activePinnedView.set(viewId);
+    // On mobile, close sidebar after selection
+    if (this.isMobile()) {
+      this.sidebarOpen.set(false);
     }
   }
 
@@ -867,17 +927,94 @@ export class ChatShellComponent {
 
   /**
    * Generic action handler — save, share, view external, etc.
+   * P0-A: Wired to ActionsService for real backend execution.
    */
-  onActionClicked(event: { action: string; item_id?: string }): void {
-    this.messages.update((msgs) => [
-      ...msgs,
-      {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: `Action "${event.action}" triggered${event.item_id ? ` for item ${event.item_id}` : ''}.`,
-        timestamp: new Date(),
-      },
-    ]);
+  async onActionClicked(event: { action: string; item_id?: string }): Promise<void> {
+    // Client-side-only actions — no backend call needed
+    if (event.action === 'view_external') {
+      return;
+    }
+    if (event.action === 'share_item') {
+      if (event.item_id) {
+        await navigator.clipboard?.writeText(`${window.location.origin}/item/${event.item_id}`);
+        this.messages.update((msgs) => [
+          ...msgs,
+          {
+            id: crypto.randomUUID(),
+            role: 'assistant' as const,
+            content: '',
+            timestamp: new Date(),
+            uiComponents: [
+              {
+                type: 'info_banner' as const,
+                title: 'Link Copied',
+                body: 'A shareable link has been copied to your clipboard.',
+                style: 'success' as const,
+              },
+            ],
+          },
+        ]);
+      }
+      return;
+    }
+
+    this.isLoading.set(true);
+
+    try {
+      const response = await this.actionsService.execute({
+        action: event.action,
+        values: event.item_id ? { item_id: event.item_id } : {},
+        metadata: { session_id: this.sessionId },
+      });
+
+      const suggestions = response.suggestions?.length
+        ? response.suggestions
+        : [
+            { label: 'Continue browsing', prompt: 'Search products' },
+          ];
+
+      this.messages.update((msgs) => [
+        ...msgs,
+        {
+          id: crypto.randomUUID(),
+          role: 'assistant' as const,
+          content: '',
+          timestamp: new Date(),
+          uiComponents: [
+            {
+              type: 'info_banner' as const,
+              title: response.success ? 'Action Complete' : 'Action Failed',
+              body: response.message,
+              style: (response.success ? 'success' : 'error') as 'success' | 'error',
+              suggestions,
+            },
+          ],
+        },
+      ]);
+    } catch (err: unknown) {
+      const errorMsg =
+        err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+      this.messages.update((msgs) => [
+        ...msgs,
+        {
+          id: crypto.randomUUID(),
+          role: 'assistant' as const,
+          content: '',
+          timestamp: new Date(),
+          uiComponents: [
+            {
+              type: 'info_banner' as const,
+              title: 'Action Failed',
+              body: errorMsg,
+              style: 'error' as const,
+              suggestions: [{ label: 'Try again', prompt: `Retry: ${event.action}` }],
+            },
+          ],
+        },
+      ]);
+    } finally {
+      this.isLoading.set(false);
+    }
   }
 
   // ── Admin Config Panels (T9.6) ──────────────────────────────────────
@@ -1279,5 +1416,71 @@ export class ChatShellComponent {
         ),
       );
     }
+  }
+
+  // ── P0-B: Pinned View Persistence Helpers ─────────────────────────────
+
+  /** Load pinned views from localStorage (called during signal initialization). */
+  private _loadPinnedViews(): ViewSpec[] {
+    try {
+      const stored = localStorage.getItem('synaptiq:pinned_views');
+      if (stored) {
+        const views = JSON.parse(stored) as ViewSpec[];
+        if (Array.isArray(views) && views.length > 0) {
+          // Defer setting the active view to avoid signal-in-signal-init
+          queueMicrotask(() => this.activePinnedView.set(views[0].view_id));
+          return views;
+        }
+      }
+    } catch { /* ignore corrupt data */ }
+    return [];
+  }
+
+  // ── P1-B: Auto-Refresh Timers ────────────────────────────────────────
+
+  private readonly _refreshTimers = new Map<string, ReturnType<typeof setInterval>>();
+
+  /**
+   * Start periodic auto-refresh for a pinned view.
+   * Re-sends the original prompt as a background query (not persisted).
+   */
+  private _startAutoRefresh(viewId: string, intervalSec: number, sourcePrompt: string): void {
+    this._stopAutoRefresh(viewId);
+    const timer = setInterval(async () => {
+      try {
+        await this.chatService.streamMessage(
+          { session_id: this.sessionId, message: sourcePrompt, background: true },
+          {
+            onComponent: (comp) => {
+              if (comp.type === 'view' && (comp as any).view_id === viewId) {
+                this.pinnedViews.update(views =>
+                  views.map(v => v.view_id === viewId ? (comp as ViewSpec) : v),
+                );
+              }
+            },
+          },
+        );
+      } catch { /* background refresh failed — silent */ }
+    }, intervalSec * 1000);
+    this._refreshTimers.set(viewId, timer);
+  }
+
+  /** Stop auto-refresh for a specific view. */
+  private _stopAutoRefresh(viewId: string): void {
+    const timer = this._refreshTimers.get(viewId);
+    if (timer) {
+      clearInterval(timer);
+      this._refreshTimers.delete(viewId);
+    }
+  }
+
+  /** Stop all auto-refresh timers. */
+  private _stopAllAutoRefresh(): void {
+    this._refreshTimers.forEach((_, viewId) => this._stopAutoRefresh(viewId));
+  }
+
+  ngOnDestroy(): void {
+    this._stopAllAutoRefresh();
+    if (this._pinnedSyncTimer) clearTimeout(this._pinnedSyncTimer);
   }
 }

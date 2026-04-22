@@ -82,6 +82,8 @@ export interface ChatRequest {
   readonly session_id: string;
   readonly message: string;
   readonly model_override?: string;
+  /** P1-B: If true, the turn is not persisted to session history (for auto-refresh). */
+  readonly background?: boolean;
 }
 
 // ---------------------------------------------------------------------------
