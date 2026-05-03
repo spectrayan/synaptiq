@@ -19,6 +19,9 @@ import {
   ConfigService,
   SessionService,
   SessionListItem,
+  WorkflowService,
+  WorkflowCanvasComponent,
+  type WorkflowSpec,
   type AnalyticsSummary,
   type TokenUsageSummary,
   type AIPersonaConfig,
@@ -73,7 +76,7 @@ export interface ChatMessage {
 @Component({
   selector: 'sq-chat-shell',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MatButtonModule, MatTooltipModule, DslRendererComponent, MarkdownPipe],
+  imports: [CommonModule, FormsModule, MatIconModule, MatButtonModule, MatTooltipModule, DslRendererComponent, WorkflowCanvasComponent, MarkdownPipe],
   templateUrl: './chat-shell.component.html',
   styleUrl: './chat-shell.component.scss',
 })
@@ -84,6 +87,7 @@ export class ChatShellComponent implements OnDestroy {
   private readonly chatService = inject(ChatService);
   private readonly configService = inject(ConfigService);
   private readonly sessionService = inject(SessionService);
+  private readonly workflowService = inject(WorkflowService);
   readonly auth = inject(AuthService);
   private readonly env = inject(ENVIRONMENT);
   readonly themeService = inject(ThemeService);
@@ -124,6 +128,15 @@ export class ChatShellComponent implements OnDestroy {
   activeSessionId = signal<string>('');
   /** Sidebar tab: 'recent' (session list) or 'pinned' (pinned views) */
   readonly sidebarTab = signal<'recent' | 'pinned'>('recent');
+
+  /** Main content tab: chat or workflow canvas */
+  readonly mainTab = signal<'chat' | 'workflow'>('chat');
+  /** Current workflow spec being visualized */
+  readonly currentWorkflow = signal<WorkflowSpec | null>(null);
+  /** Status message during workflow generation */
+  readonly workflowStatus = signal<string>('');
+  /** Whether workflow generation is in progress */
+  readonly workflowGenerating = signal(false);
 
   messages = signal<ChatMessage[]>([]);
 
@@ -554,6 +567,81 @@ export class ChatShellComponent implements OnDestroy {
     this.newConversation();
   }
 
+  // ── Workflow ─────────────────────────────────────────────────────────
+
+  /** Generate a workflow from a natural language prompt. */
+  async generateWorkflow(prompt: string): Promise<void> {
+    this.workflowGenerating.set(true);
+    this.workflowStatus.set('Starting workflow generation...');
+    this.currentWorkflow.set(null);
+
+    const authToken = (await this.auth.getIdToken().catch(() => undefined)) ?? undefined;
+
+    await this.workflowService.streamGenerate(
+      prompt,
+      {
+        onStatus: (message) => {
+          this.workflowStatus.set(message);
+        },
+        onComponent: (spec) => {
+          this.currentWorkflow.set(spec);
+          this.mainTab.set('workflow');
+          this.workflowStatus.set('');
+        },
+        onText: (text) => {
+          // Add the summary as a chat message
+          this.messages.update((msgs) => [
+            ...msgs,
+            {
+              id: crypto.randomUUID(),
+              role: 'assistant',
+              content: text,
+              timestamp: new Date(),
+            },
+          ]);
+        },
+        onDone: () => {
+          this.workflowGenerating.set(false);
+          this.workflowStatus.set('');
+        },
+        onError: (message) => {
+          this.workflowGenerating.set(false);
+          this.workflowStatus.set('');
+          this.messages.update((msgs) => [
+            ...msgs,
+            {
+              id: crypto.randomUUID(),
+              role: 'assistant',
+              content: `❌ Workflow generation failed: ${message}`,
+              timestamp: new Date(),
+            },
+          ]);
+        },
+      },
+      authToken,
+    );
+  }
+
+  /** Switch to the workflow tab to view the current workflow. */
+  viewWorkflow(): void {
+    if (this.currentWorkflow()) {
+      this.mainTab.set('workflow');
+    }
+  }
+
+  /** Load a template as the current workflow. */
+  loadWorkflowTemplate(template: WorkflowSpec): void {
+    this.currentWorkflow.set(template);
+    this.mainTab.set('workflow');
+  }
+
+  /** Detect if a message is a workflow intent. */
+  private isWorkflowIntent(msg: string): boolean {
+    const lower = msg.toLowerCase();
+    const keywords = ['workflow', 'agent flow', 'build a flow', 'create a workflow', 'design a workflow', 'agent pipeline', 'multi-agent'];
+    return keywords.some(k => lower.includes(k));
+  }
+
   // ── Messaging ────────────────────────────────────────────────────────
 
   async sendMessage(text?: string): Promise<void> {
@@ -566,6 +654,16 @@ export class ChatShellComponent implements OnDestroy {
       { id: crypto.randomUUID(), role: 'user', content: msg, timestamp: new Date() },
     ]);
     this.inputValue.set('');
+
+    // ── Workflow intent detection ──
+    if (this.isWorkflowIntent(msg)) {
+      this.isLoading.set(true);
+      this.mainTab.set('chat'); // Stay on chat to show status
+      await this.generateWorkflow(msg);
+      this.isLoading.set(false);
+      return;
+    }
+
     this.isLoading.set(true);
 
     // Show typing indicator

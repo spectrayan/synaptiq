@@ -1,0 +1,353 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LangGraph Workflow Specification",
+  "description": "Comprehensive specification for LangGraph workflows supporting all workflow patterns including conditional routing, parallel execution, state management, and error handling.",
+  "type": "object",
+  "properties": {
+    "entry_point": {
+      "type": "string",
+      "description": "The name of the node where execution begins."
+    },
+    "nodes": {
+      "type": "object",
+      "description": "Dictionary of named nodes in the graph.",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "agent",
+              "tool",
+              "function",
+              "subgraph",
+              "conditional",
+              "parallel",
+              "end"
+            ],
+            "description": "The type of node: agent, tool, function, subgraph, conditional, parallel, or end."
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable description of the node's purpose."
+          },
+          "agent": {
+            "type": "string",
+            "description": "Reference to agent ID in settings (for type=agent)."
+          },
+          "function": {
+            "type": "string",
+            "description": "Python import path for function (for type=function)."
+          },
+          "tool_name": {
+            "type": "string",
+            "description": "Name of the tool to invoke (for type=tool)."
+          },
+          "subgraph": {
+            "type": "string",
+            "description": "Reference to subgraph workflow ID (for type=subgraph)."
+          },
+          "condition_function": {
+            "type": "string",
+            "description": "Python import path for condition evaluation function (for type=conditional)."
+          },
+          "parallel_branches": {
+            "type": "array",
+            "description": "List of node IDs to execute in parallel (for type=parallel).",
+            "items": { "type": "string" }
+          },
+          "input_mapping": {
+            "type": "object",
+            "description": "Maps state keys to node inputs.",
+            "additionalProperties": { "type": "string" }
+          },
+          "output_mapping": {
+            "type": "object",
+            "description": "Maps node outputs back to state keys.",
+            "additionalProperties": { "type": "string" }
+          },
+          "input_params": {
+            "type": "object",
+            "description": "Static parameters passed to the node.",
+            "additionalProperties": true
+          },
+          "retry_policy": {
+            "type": "object",
+            "description": "Retry configuration for node failures.",
+            "properties": {
+              "max_retries": { "type": "integer", "minimum": 0 },
+              "retry_delay_ms": { "type": "integer", "minimum": 0 },
+              "exponential_backoff": { "type": "boolean" }
+            }
+          },
+          "timeout_ms": {
+            "type": "integer",
+            "description": "Timeout for node execution in milliseconds.",
+            "minimum": 0
+          },
+          "interrupt_before": {
+            "type": "boolean",
+            "description": "Whether to interrupt execution before this node.",
+            "default": false
+          },
+          "interrupt_after": {
+            "type": "boolean",
+            "description": "Whether to interrupt execution after this node.",
+            "default": false
+          }
+        },
+        "required": ["type"]
+      }
+    },
+    "edges": {
+      "type": "array",
+      "description": "List of edges connecting nodes, supporting conditional routing.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "description": "Source node ID."
+          },
+          "to": {
+            "oneOf": [
+              { "type": "string" },
+              { "type": "array", "items": { "type": "string" } }
+            ],
+            "description": "Target node ID(s). Can be single node or array for conditional routing."
+          },
+          "condition": {
+            "type": "string",
+            "description": "Condition for edge traversal. Can be 'always', 'never', 'on_tool_calls', or Python import path."
+          },
+          "condition_mapping": {
+            "type": "object",
+            "description": "Maps condition results to target nodes for conditional edges.",
+            "additionalProperties": { "type": "string" }
+          },
+          "label": {
+            "type": "string",
+            "description": "Human-readable label for the edge."
+          }
+        },
+        "required": ["from", "to"]
+      }
+    },
+    "conditional_edges": {
+      "type": "array",
+      "description": "Conditional edges with complex routing logic.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "from": { "type": "string" },
+          "condition_function": {
+            "type": "string",
+            "description": "Python import path for condition evaluation function."
+          },
+          "condition_mapping": {
+            "type": "object",
+            "description": "Maps condition results to target nodes.",
+            "additionalProperties": { "type": "string" }
+          },
+          "default_target": {
+            "type": "string",
+            "description": "Default target if no condition matches."
+          }
+        },
+        "required": ["from", "condition_function", "condition_mapping"]
+      }
+    },
+    "state_schema": {
+      "type": "object",
+      "description": "Schema definition for workflow state.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["MessagesState", "TypedDict", "custom"],
+          "description": "Type of state schema to use."
+        },
+        "fields": {
+          "type": "object",
+          "description": "Field definitions for TypedDict state.",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string" },
+              "description": { "type": "string" },
+              "default": true,
+              "required": { "type": "boolean" }
+            }
+          }
+        },
+        "custom_class": {
+          "type": "string",
+          "description": "Python import path for custom state class."
+        }
+      }
+    },
+    "initial_state": {
+      "type": "object",
+      "description": "Initial state values for the workflow."
+    },
+    "checkpointing": {
+      "type": "object",
+      "description": "Configuration for workflow checkpointing and persistence.",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "checkpoint_ns": { "type": "string" },
+        "saver_type": {
+          "type": "string",
+          "enum": ["memory", "sqlite", "postgres", "custom"]
+        },
+        "saver_config": {
+          "type": "object",
+          "description": "Configuration for the checkpoint saver."
+        }
+      }
+    },
+    "interrupts": {
+      "type": "object",
+      "description": "Global interrupt configuration.",
+      "properties": {
+        "interrupt_before": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Node IDs to interrupt before execution."
+        },
+        "interrupt_after": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Node IDs to interrupt after execution."
+        }
+      }
+    },
+    "error_handling": {
+      "type": "object",
+      "description": "Global error handling configuration.",
+      "properties": {
+        "default_retry_policy": {
+          "type": "object",
+          "properties": {
+            "max_retries": { "type": "integer" },
+            "retry_delay_ms": { "type": "integer" },
+            "exponential_backoff": { "type": "boolean" }
+          }
+        },
+        "error_node": {
+          "type": "string",
+          "description": "Node to route to on unhandled errors."
+        },
+        "continue_on_error": { "type": "boolean" }
+      }
+    },
+    "settings": {
+      "type": "object",
+      "description": "Runtime settings and configuration for the workflow.",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "entrypoint": { "type": "string" },
+        "agents": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "system_prompt": { "type": "string" },
+              "instructions": { "type": "string" },
+              "llm": {
+                "type": "object",
+                "properties": {
+                  "provider": {
+                    "type": "string",
+                    "enum": ["vertexai", "openai", "anthropic"]
+                  },
+                  "model": { "type": "string" },
+                  "temperature": { "type": "number" },
+                  "max_tokens": { "type": "integer" },
+                  "streaming": { "type": "boolean" },
+                  "params": { "type": "object" }
+                },
+                "required": ["provider", "model"]
+              },
+              "tools": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string" },
+                    "type": {
+                      "type": "string",
+                      "enum": ["python", "mcp", "langchain"]
+                    },
+                    "name": { "type": "string" },
+                    "import_path": { "type": "string" },
+                    "mcp_server": { "type": "string" },
+                    "mcp_tool": { "type": "string" },
+                    "params": { "type": "object" }
+                  },
+                  "required": ["id", "type"]
+                }
+              }
+            },
+            "required": ["id", "llm"]
+          }
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "source": { "type": "string" },
+              "target": { "type": "string" },
+              "condition": { "type": "string" }
+            }
+          }
+        },
+        "mcp_servers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "transport": {
+                "type": "string",
+                "enum": ["stdio", "http", "ws"]
+              },
+              "command": { "type": "string" },
+              "args": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "env": { "type": "object" },
+              "url": { "type": "string" }
+            },
+            "required": ["id", "transport"]
+          }
+        },
+        "policy": {
+          "type": "object",
+          "properties": {
+            "deterministic": { "type": "boolean" },
+            "seed": { "type": "integer" },
+            "resources": {
+              "type": "object",
+              "properties": {
+                "total_timeout_ms": { "type": "integer" },
+                "step_timeout_ms": { "type": "integer" },
+                "max_tokens": { "type": "integer" },
+                "rate_limit_rps": { "type": "number" }
+              }
+            }
+          }
+        },
+        "flowType": {
+          "type": "string",
+          "enum": ["static", "dynamic", "hybrid"]
+        }
+      }
+    }
+  },
+  "required": ["entry_point", "nodes"]
+}

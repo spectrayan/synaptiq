@@ -1,0 +1,49 @@
+{
+  "id": "simple-weather-agent",
+  "name": "Simple Weather Agent",
+  "entrypoint": "agent",
+  "agents": [
+    {
+      "id": "agent",
+      "name": "Assistant",
+      "system_prompt": "You are a helpful AI assistant.",
+      "llm": {
+        "provider": "vertexai",
+        "model": "gemini-2.5-flash",
+        "temperature": 0.0,
+        "max_tokens": 1024,
+        "streaming": true,
+        "params": {
+          "location": "global"
+        }
+      },
+      "tools": [
+        {
+          "id": "search",
+          "type": "python",
+          "name": "search",
+          "import_path": "agent_flow.tools.weather:search",
+          "params": {}
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "agent",
+      "target": "",
+      "condition": "on_tool_calls"
+    }
+  ],
+  "mcp_servers": [],
+  "policy": {
+    "deterministic": false,
+    "seed": null,
+    "resources": {
+      "total_timeout_ms": null,
+      "step_timeout_ms": null,
+      "max_tokens": null,
+      "rate_limit_rps": null
+    }
+  }
+}

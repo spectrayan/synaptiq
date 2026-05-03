@@ -1,0 +1,192 @@
+{
+  "entry_point": "coordinator_agent",
+  "nodes": {
+    "coordinator_agent": {
+      "type": "agent",
+      "agent": "coordinator_agent",
+      "description": "Main coordinator agent that decides workflow generation and execution strategy",
+      "timeout_ms": 60000,
+      "retry_policy": {
+        "max_retries": 2,
+        "retry_delay_ms": 1000,
+        "exponential_backoff": true
+      }
+    },
+    "decision_router": {
+      "type": "conditional",
+      "description": "Routes based on coordinator decision",
+      "condition_function": "agent_flow.coordinator.routing:route_coordinator_decision"
+    },
+    "workflow_executor": {
+      "type": "function",
+      "description": "Executes generated workflows",
+      "function": "agent_flow.coordinator.execution:execute_workflow",
+      "timeout_ms": 180000
+    },
+    "termination_node": {
+      "type": "end",
+      "description": "Workflow termination point"
+    }
+  },
+  "edges": [
+    {
+      "from": "coordinator_agent",
+      "to": "decision_router",
+      "condition": "always",
+      "label": "Route coordinator decision"
+    }
+  ],
+  "conditional_edges": [
+    {
+      "from": "decision_router",
+      "condition_function": "agent_flow.coordinator.routing:route_coordinator_decision",
+      "condition_mapping": {
+        "execute": "workflow_executor",
+        "terminate": "termination_node",
+        "continue": "coordinator_agent"
+      },
+      "default_target": "termination_node"
+    },
+    {
+      "from": "workflow_executor",
+      "condition_function": "agent_flow.coordinator.routing:check_iteration_limit",
+      "condition_mapping": {
+        "continue": "coordinator_agent",
+        "terminate": "termination_node"
+      },
+      "default_target": "coordinator_agent"
+    }
+  ],
+  "state_schema": {
+    "type": "TypedDict",
+    "fields": {
+      "messages": {
+        "type": "List[BaseMessage]",
+        "description": "Conversation messages",
+        "required": true
+      },
+      "workflow_context": {
+        "type": "Dict[str, Any]",
+        "description": "Current workflow context and metadata",
+        "required": true
+      },
+      "execution_history": {
+        "type": "List[Dict[str, Any]]",
+        "description": "History of workflow executions",
+        "required": true
+      },
+      "iteration_count": {
+        "type": "int",
+        "description": "Current iteration number",
+        "default": 0,
+        "required": true
+      },
+      "max_iterations": {
+        "type": "int", 
+        "description": "Maximum allowed iterations",
+        "default": 5,
+        "required": true
+      },
+      "should_continue": {
+        "type": "bool",
+        "description": "Whether to continue execution",
+        "default": true,
+        "required": true
+      },
+      "current_workflow_spec": {
+        "type": "Optional[Dict[str, Any]]",
+        "description": "Current workflow specification",
+        "required": false
+      },
+      "coordinator_decision": {
+        "type": "Optional[str]",
+        "description": "Last coordinator decision",
+        "required": false
+      }
+    }
+  },
+  "initial_state": {
+    "messages": [],
+    "workflow_context": {},
+    "execution_history": [],
+    "iteration_count": 0,
+    "max_iterations": 5,
+    "should_continue": true,
+    "current_workflow_spec": null,
+    "coordinator_decision": null
+  },
+  "error_handling": {
+    "default_retry_policy": {
+      "max_retries": 2,
+      "retry_delay_ms": 1000,
+      "exponential_backoff": true
+    },
+    "error_node": "termination_node",
+    "continue_on_error": false
+  },
+  "interrupts": {
+    "interrupt_before": ["coordinator_agent"],
+    "interrupt_after": ["workflow_executor"]
+  },
+  "settings": {
+    "id": "coordinator-workflow",
+    "name": "Coordinator Workflow",
+    "entrypoint": "coordinator_agent",
+    "agents": [
+      {
+        "id": "coordinator_agent",
+        "name": "Workflow Coordinator",
+        "system_prompt": "You are a workflow coordinator responsible for managing multi-agent workflow execution. Your tasks:\n\n1. ANALYZE user input and execution context\n2. DECIDE whether to generate new workflows, modify existing ones, or terminate\n3. USE available tools to generate workflows and manage execution\n4. MAINTAIN execution state and provide clear reasoning\n\nAvailable tools:\n- generate_workflow: Create new workflow specifications from user requirements\n- build_workflow: Build executable workflows from specifications\n- analyze_execution: Analyze execution results and determine next steps\n\nDecision criteria:\n- Generate new workflow if user request requires different capabilities\n- Continue execution if current workflow is progressing well\n- Terminate if objectives are met or maximum iterations reached\n\nYour response should include:\n1. Analysis of current situation\n2. Decision (execute/terminate/continue)\n3. Reasoning for the decision\n4. Next steps\n\nFormat your final decision as: DECISION: [execute|terminate|continue]",
+        "llm": {
+          "provider": "openai",
+          "model": "gpt-4o",
+          "temperature": 0.1,
+          "max_tokens": 2048,
+          "streaming": true,
+          "params": {}
+        },
+        "tools": [
+          {
+            "id": "generate_workflow",
+            "type": "python",
+            "name": "generate_workflow",
+            "import_path": "agent_flow.tools.generator_tools:generate_workflow",
+            "params": {}
+          },
+          {
+            "id": "build_workflow",
+            "type": "python", 
+            "name": "build_workflow",
+            "import_path": "agent_flow.tools.builder_tools:build_workflow_tool",
+            "params": {}
+          },
+          {
+            "id": "analyze_execution",
+            "type": "python",
+            "name": "analyze_execution", 
+            "import_path": "agent_flow.tools.generator_tools:analyze_execution",
+            "params": {}
+          }
+        ]
+      }
+    ],
+    "edges": [
+      {
+        "source": "coordinator_agent",
+        "target": "decision_router",
+        "condition": "always"
+      }
+    ],
+    "mcp_servers": [],
+    "policy": {
+      "deterministic": false,
+      "resources": {
+        "total_timeout_ms": 300000,
+        "step_timeout_ms": 60000,
+        "max_tokens": 10000,
+        "rate_limit_rps": 5.0
+      }
+    },
+    "flowType": "static"
+  }
+}

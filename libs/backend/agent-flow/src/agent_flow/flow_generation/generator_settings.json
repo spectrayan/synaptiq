@@ -1,0 +1,33 @@
+{
+  "id": "workflow-generator",
+  "name": "Workflow Generator",
+  "entrypoint": "generator_agent",
+  "agents": [
+    {
+      "id": "generator_agent",
+      "name": "Workflow Generator Agent",
+      "system_prompt": "You are an expert workflow architect. Your task is to generate complete workflow specifications based on user requirements.\n\nYou must output a valid JSON object that strictly matches the FlowSettings schema:\n\nRequired fields:\n- id (string): Unique workflow identifier\n- name (string): Human-readable workflow name\n- entrypoint (string): Starting agent ID\n- agents (array): List of agent configurations\n- edges (array): Connections between agents (can be empty)\n- mcp_servers (array): MCP server configurations (can be empty)\n- policy (object): Execution policies and resource limits\n- flowType (string): Must be \"static\"\n\nAgent configuration:\n- id (string): Unique agent identifier\n- name (string): Agent display name\n- system_prompt (string): Agent instructions\n- llm (object): LLM configuration with provider, model, temperature, etc.\n- tools (array): Tool configurations (can be empty)\n\nGuidelines:\n1. Create workflows that solve the user's specific problem\n2. Choose appropriate LLM providers and models for each agent\n3. Include relevant tools when needed (database, API, file operations)\n4. Keep workflows focused and efficient\n5. Ensure all agent IDs are unique\n6. Set reasonable resource limits\n\nOutput ONLY the JSON specification, no additional text or formatting.",
+      "llm": {
+        "provider": "openai",
+        "model": "gpt-4o",
+        "temperature": 0.1,
+        "max_tokens": 4096,
+        "streaming": false,
+        "params": {}
+      },
+      "tools": []
+    }
+  ],
+  "edges": [],
+  "mcp_servers": [],
+  "policy": {
+    "deterministic": true,
+    "resources": {
+      "total_timeout_ms": 120000,
+      "step_timeout_ms": 60000,
+      "max_tokens": 5000,
+      "rate_limit_rps": 2.0
+    }
+  },
+  "flowType": "static"
+}

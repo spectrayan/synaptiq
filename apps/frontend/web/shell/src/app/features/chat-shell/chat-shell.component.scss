@@ -273,7 +273,7 @@
 // ─── Main area ──────────────────────────────────────────────────────────────
 .main {
   display: grid;
-  grid-template-rows: var(--sq-topbar-height) 1fr auto;
+  grid-template-rows: var(--sq-topbar-height) auto 1fr auto;
   overflow: hidden;
   background: var(--sq-surface-dim);
   position: relative;
@@ -454,6 +454,112 @@
     font-size: 14px;
     width: 14px;
     height: 14px;
+  }
+}
+// ─── Main Tab Strip (Chat | Workflow) ───────────────────────────────────────
+.main-tab-strip {
+  display: flex;
+  gap: 2px;
+  padding: 0 var(--sq-space-4);
+  background: var(--sq-surface-container);
+  border-bottom: 1px solid var(--sq-outline-variant);
+  z-index: 9;
+}
+
+.main-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  color: var(--sq-on-surface-variant);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  position: relative;
+  transition: all var(--sq-transition-fast);
+  border-bottom: 2px solid transparent;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover:not(:disabled) {
+    color: var(--sq-on-surface);
+    background: var(--sq-surface-overlay);
+  }
+
+  &.active {
+    color: var(--sq-primary);
+    border-bottom-color: var(--sq-primary);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.tab-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--sq-primary);
+  animation: tab-pulse-anim 1.2s ease-in-out infinite;
+}
+
+@keyframes tab-pulse-anim {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.7); }
+}
+
+.tab-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+}
+
+// ─── Workflow Area ──────────────────────────────────────────────────────────
+.workflow-area {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.workflow-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sq-space-3);
+  color: var(--sq-on-surface-variant);
+  padding: var(--sq-space-8);
+  text-align: center;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    opacity: 0.3;
+  }
+
+  p {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .workflow-empty-hint {
+    font-size: 13px;
+    opacity: 0.7;
+    max-width: 320px;
   }
 }
 

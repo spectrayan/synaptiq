@@ -141,8 +141,34 @@
       </div>
     </header>
 
+    <!-- Tab strip: Chat | Workflow -->
+    <nav class="main-tab-strip" aria-label="Main content tabs">
+      <button
+        class="main-tab"
+        [class.active]="mainTab() === 'chat'"
+        (click)="mainTab.set('chat')"
+      >
+        <mat-icon>chat</mat-icon>
+        <span>Chat</span>
+      </button>
+      <button
+        class="main-tab"
+        [class.active]="mainTab() === 'workflow'"
+        (click)="mainTab.set('workflow')"
+        [disabled]="!currentWorkflow()"
+      >
+        <mat-icon>account_tree</mat-icon>
+        <span>Workflow</span>
+        @if (workflowGenerating()) {
+          <span class="tab-pulse"></span>
+        }
+        @if (currentWorkflow()) {
+          <span class="tab-dot"></span>
+        }
+      </button>
+    </nav>
 
-
+    @if (mainTab() === 'chat') {
     <!-- Messages -->
     <div class="messages-area" role="log" aria-label="Chat messages" aria-live="polite">
       @for (msg of messages(); track trackById($index, msg)) {
@@ -628,6 +654,22 @@
         <mat-icon>send</mat-icon>
       </button>
     </div>
+    } <!-- end @if mainTab chat -->
+
+    @if (mainTab() === 'workflow') {
+    <!-- Workflow Canvas -->
+    <div class="workflow-area">
+      @if (currentWorkflow(); as wf) {
+        <sq-workflow-canvas [spec]="wf"></sq-workflow-canvas>
+      } @else {
+        <div class="workflow-empty">
+          <mat-icon>account_tree</mat-icon>
+          <p>No workflow generated yet.</p>
+          <p class="workflow-empty-hint">Type something like <strong>"Create a workflow for..."</strong> in the chat to generate one.</p>
+        </div>
+      }
+    </div>
+    }
 
   </div>
 </div>
