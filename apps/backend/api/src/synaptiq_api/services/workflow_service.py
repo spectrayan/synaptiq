@@ -223,6 +223,30 @@ Rules:
 Output ONLY the JSON object, no markdown fencing or extra text."""
 
 
+# ── Prompt Regeneration System Prompt ────────────────────────────────────────
+
+PROMPT_REGENERATION_SYSTEM_PROMPT = """You are an expert prompt engineer specializing in AI agent system prompts.
+
+Your task is to IMPROVE a system prompt for an agent node in a workflow graph.
+
+You will receive:
+- The agent's label, description, and role in the workflow
+- The current system prompt
+- An optional user instruction for how to improve it
+- Context about the overall workflow
+
+Guidelines for improvement:
+1. Be specific and actionable — avoid vague instructions
+2. Include clear output format expectations
+3. Add error handling / edge case instructions where appropriate
+4. Use structured formatting (numbered steps, headers) for complex prompts
+5. Keep the persona and tone appropriate for the agent's role
+6. Preserve any domain-specific terminology from the original prompt
+7. If the user asked for a specific change, focus on that
+
+Output ONLY the improved system prompt text. No explanations, no markdown fencing, no JSON — just the raw prompt text."""
+
+
 # ── Service ───────────────────────────────────────────────────────────────────
 
 class WorkflowService:
@@ -443,6 +467,71 @@ class WorkflowService:
             {"run_id": run_id, "tenant_id": tenant_id},
             {"_id": 0},
         )
+
+    @staticmethod
+    async def regenerate_prompt(
+        *,
+        node_id: str,
+        node_label: str,
+        node_description: str,
+        current_prompt: str,
+        instruction: str,
+        workflow_context: dict[str, Any],
+        tenant_id: str,
+    ) -> str:
+        """Use an LLM to improve a node's system prompt based on context."""
+        db = await get_database()
+        tenant_doc = await db["tenants"].find_one({"tenant_id": tenant_id}) or {}
+        llm_config = tenant_doc.get("llm_provider", {})
+        byok_key = tenant_doc.get("byok_key", "")
+
+        llm = get_langchain_model(llm_config, byok_key)
+
+        # Build context for the LLM
+        workflow_name = workflow_context.get("name", "Unknown Workflow")
+        workflow_desc = workflow_context.get("description", "")
+        agents_summary = []
+        for agent in workflow_context.get("agents", []):
+            agents_summary.append(f"- {agent.get('label', agent.get('id', '?'))}: {agent.get('description', '')}")
+        agents_str = "\n".join(agents_summary) if agents_summary else "No other agents."
+
+        user_message = f"""## Agent to Improve
+- **ID**: {node_id}
+- **Label**: {node_label}
+- **Description**: {node_description}
+
+## Current System Prompt
+{current_prompt or "(empty — generate from scratch)"}
+
+## Workflow Context
+- **Workflow**: {workflow_name}
+- **Description**: {workflow_desc}
+- **All agents in this workflow**:
+{agents_str}
+
+## User Instruction
+{instruction or "Improve the prompt: make it clearer, more specific, and more effective."}
+
+Now output ONLY the improved system prompt:"""
+
+        messages = [
+            {"role": "system", "content": PROMPT_REGENERATION_SYSTEM_PROMPT},
+            {"role": "user", "content": user_message},
+        ]
+
+        response = await llm.ainvoke(messages)
+        content = response.content if hasattr(response, "content") else str(response)
+
+        # Strip any accidental markdown fencing
+        import re
+        content = re.sub(r"^```(?:text|markdown)?\s*\n?", "", content.strip())
+        content = re.sub(r"\n?```\s*$", "", content.strip())
+
+        logger.info(
+            "[workflow] regenerate_prompt: improved prompt for node=%s (%d → %d chars)",
+            node_id, len(current_prompt), len(content),
+        )
+        return content.strip()
 
 
 def _extract_json(text: str) -> dict[str, Any] | None:

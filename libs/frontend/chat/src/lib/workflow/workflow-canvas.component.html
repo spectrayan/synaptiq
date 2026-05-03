@@ -330,10 +330,11 @@
 
         <!-- Editable System Prompt -->
         <div class="detail-section">
-          <sq-prompt-editor
+          <sq-prompt-editor #promptEditorRef
             label="System Prompt"
             [content]="selectedNode()!.systemPrompt"
             (contentChange)="onSystemPromptChange($event)"
+            (regenerateRequest)="onRegeneratePrompt($event)"
           />
         </div>
 

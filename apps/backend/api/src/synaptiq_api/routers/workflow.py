@@ -45,6 +45,16 @@ class ExecuteWorkflowRequest(BaseModel):
     dry_run: bool = Field(default=False, description="Simulate execution without calling LLMs")
 
 
+class RegeneratePromptRequest(BaseModel):
+    """POST /workflow/regenerate-prompt — ask AI to improve a node's system prompt."""
+    node_id: str = Field(..., description="ID of the node whose prompt to improve")
+    node_label: str = Field(default="", description="Label of the node for context")
+    node_description: str = Field(default="", description="Description of the node")
+    current_prompt: str = Field(default="", description="The current system prompt to improve")
+    instruction: str = Field(default="", description="User instruction: 'Make more concise', 'Add error handling', etc.")
+    workflow_context: dict[str, Any] = Field(default_factory=dict, description="Full workflow spec for context")
+
+
 # ---------------------------------------------------------------------------
 # SSE Generation endpoint
 # ---------------------------------------------------------------------------
@@ -88,6 +98,40 @@ async def generate_workflow(body: GenerateWorkflowRequest, request: Request):
             "X-Accel-Buffering": "no",
         },
     )
+
+
+# ---------------------------------------------------------------------------
+# Prompt Regeneration
+# ---------------------------------------------------------------------------
+
+@router.post(
+    "/regenerate-prompt",
+    summary="Regenerate a node's system prompt using AI",
+)
+async def regenerate_prompt(body: RegeneratePromptRequest, request: Request):
+    """Use an LLM to improve or regenerate a specific node's system prompt."""
+    tenant_id: str = request.state.tenant_id
+    logger.info(
+        "[workflow] regenerate_prompt node=%s instruction=%s tenant=%s",
+        body.node_id, body.instruction[:50], tenant_id,
+    )
+    try:
+        improved = await workflow_service.regenerate_prompt(
+            node_id=body.node_id,
+            node_label=body.node_label,
+            node_description=body.node_description,
+            current_prompt=body.current_prompt,
+            instruction=body.instruction,
+            workflow_context=body.workflow_context,
+            tenant_id=tenant_id,
+        )
+        return {"improved_prompt": improved, "success": True}
+    except Exception as exc:
+        logger.error("[workflow] regenerate_prompt failed: %s", exc)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Prompt regeneration failed: {exc!s}",
+        )
 
 
 # ---------------------------------------------------------------------------

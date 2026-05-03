@@ -415,6 +415,38 @@ export class WorkflowService {
     console.log(`[WorkflowService] deleteWorkflow: done`);
   }
 
+  /** Ask AI to improve a node's system prompt. */
+  async regeneratePrompt(
+    payload: {
+      node_id: string;
+      node_label: string;
+      node_description: string;
+      current_prompt: string;
+      instruction: string;
+      workflow_context: Record<string, unknown>;
+    },
+    authToken?: string,
+  ): Promise<string> {
+    console.log(`[WorkflowService] regeneratePrompt: node=${payload.node_id}`);
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (this.env.tenantId) headers['X-Tenant-ID'] = this.env.tenantId;
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+
+    const response = await fetch(`${this.baseUrl}/regenerate-prompt`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      const err = await response.text().catch(() => 'Unknown error');
+      console.error(`[WorkflowService] regeneratePrompt failed: ${response.status} — ${err}`);
+      throw new Error(`Failed to regenerate prompt: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log(`[WorkflowService] regeneratePrompt: got ${data.improved_prompt?.length ?? 0} chars`);
+    return data.improved_prompt;
+  }
+
   /** Duplicate a workflow, returns the new workflow ID. */
   async duplicateWorkflow(workflowId: string, authToken?: string): Promise<string> {
     console.log(`[WorkflowService] duplicateWorkflow: ${workflowId}`);

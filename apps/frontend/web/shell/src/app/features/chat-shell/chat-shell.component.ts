@@ -1135,6 +1135,40 @@ export class ChatShellComponent implements OnDestroy {
     }, ChatShellComponent.AUTO_SAVE_DELAY);
   }
 
+  // ── AI Prompt Regeneration ────────────────────────────────────────────
+
+  async onRegeneratePrompt(event: {
+    nodeId: string;
+    nodeLabel: string;
+    nodeDescription: string;
+    currentPrompt: string;
+    instruction: string;
+  }): Promise<void> {
+    const wf = this.currentWorkflow();
+    if (!wf) return;
+
+    console.log(`[ChatShell] regenerate prompt for node=${event.nodeId}, instruction="${event.instruction.slice(0, 50)}"`);
+    try {
+      const token = await this.auth.getIdToken();
+      const improved = await this.workflowService.regeneratePrompt(
+        {
+          node_id: event.nodeId,
+          node_label: event.nodeLabel,
+          node_description: event.nodeDescription,
+          current_prompt: event.currentPrompt,
+          instruction: event.instruction,
+          workflow_context: wf as unknown as Record<string, unknown>,
+        },
+        token ?? undefined,
+      );
+      console.log(`[ChatShell] regenerated prompt: ${improved.length} chars`);
+      this._workflowCanvas()?.applyRegeneratedPrompt(event.nodeId, improved);
+    } catch (e) {
+      console.error('[ChatShell] prompt regeneration failed:', e);
+      this._workflowCanvas()?.regenerationFailed();
+    }
+  }
+
   // ── Delete / Duplicate Workflow ────────────────────────────────────────
 
   async onDeleteWorkflow(workflowId: string): Promise<void> {

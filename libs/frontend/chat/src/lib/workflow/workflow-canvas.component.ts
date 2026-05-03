@@ -25,7 +25,7 @@ import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MarkdownViewerComponent } from './markdown-viewer.component';
-import { PromptEditorComponent } from './prompt-editor.component';
+import { PromptEditorComponent, RegeneratePromptEvent } from './prompt-editor.component';
 import {
   FFlowModule,
   FCanvasComponent,
@@ -125,6 +125,16 @@ export class WorkflowCanvasComponent {
   readonly selectRun = output<string>();
   readonly deleteWorkflowRequest = output<string>();
   readonly duplicateWorkflowRequest = output<string>();
+  readonly regeneratePromptRequest = output<{
+    nodeId: string;
+    nodeLabel: string;
+    nodeDescription: string;
+    currentPrompt: string;
+    instruction: string;
+  }>();
+
+  // ── Child refs ──────────────────────────────────────────────────────────
+  protected readonly promptEditorRef = viewChild<PromptEditorComponent>('promptEditorRef');
 
   // ── State ───────────────────────────────────────────────────────────────
   readonly selectedNodeId = signal<string | null>(null);
@@ -182,6 +192,41 @@ export class WorkflowCanvasComponent {
       agents: s.agents.map(a => a.id === nodeId ? { ...a, system_prompt: newPrompt } : a),
     };
     this.specChange.emit(updated);
+  }
+
+  /** Inspector: regenerate system prompt with AI */
+  onRegeneratePrompt(event: RegeneratePromptEvent): void {
+    const s = this.spec();
+    const nodeId = this.selectedNodeId();
+    if (!s || !nodeId) return;
+    const node = s.agents.find(a => a.id === nodeId);
+    if (!node) return;
+
+    this.promptEditorRef()?.setRegenerating(true);
+    this.regeneratePromptRequest.emit({
+      nodeId: node.id,
+      nodeLabel: node.label,
+      nodeDescription: node.description,
+      currentPrompt: node.system_prompt,
+      instruction: event.instruction,
+    });
+  }
+
+  /** Called by parent after regeneration completes. */
+  applyRegeneratedPrompt(nodeId: string, newPrompt: string): void {
+    const s = this.spec();
+    if (!s) return;
+    const updated: WorkflowSpec = {
+      ...s,
+      agents: s.agents.map(a => a.id === nodeId ? { ...a, system_prompt: newPrompt } : a),
+    };
+    this.specChange.emit(updated);
+    this.promptEditorRef()?.setRegenerating(false);
+  }
+
+  /** Called by parent if regeneration fails. */
+  regenerationFailed(): void {
+    this.promptEditorRef()?.setRegenerating(false);
   }
 
   // ── Graph Editing ────────────────────────────────────────────────────────
