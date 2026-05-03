@@ -123,6 +123,7 @@
           (deleteWorkflowRequest)="onDeleteWorkflow($event)"
           (duplicateWorkflowRequest)="onDuplicateWorkflow($event)"
           (regeneratePromptRequest)="onRegeneratePrompt($event)"
+          (runFromNode)="onRunFromNode($event)"
         ></sq-workflow-canvas>
       } @else {
         <div class="workflow-empty">

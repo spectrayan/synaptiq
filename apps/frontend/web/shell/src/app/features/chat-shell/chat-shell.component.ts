@@ -1112,6 +1112,39 @@ export class ChatShellComponent implements OnDestroy {
     });
   }
 
+  /** Execute the workflow starting from a specific node (partial re-execution). */
+  onRunFromNode(nodeId: string): void {
+    const spec = this.currentWorkflow();
+    const canvas = this._workflowCanvas();
+    if (!spec || !canvas) return;
+
+    console.log(`[ChatShell] partial re-exec from node "${nodeId}"`);
+    canvas.resetExecution();
+    canvas.setExecutionStatus('running');
+    this._execAbort = new AbortController();
+
+    this.workflowService.streamExecute(spec, '', {
+      onExecutionStart: () => canvas.setExecutionStatus('running'),
+      onNodeStart: (nId: string) => canvas.setNodeStatus(nId, 'running'),
+      onNodeComplete: (nId: string, _label: string, durationMs: number) => {
+        canvas.setNodeStatus(nId, 'completed', durationMs);
+      },
+      onNodeError: (nId: string, _label: string, error: string) => {
+        canvas.setNodeStatus(nId, 'error');
+        console.error(`Node ${nId} error:`, error);
+      },
+      onExecutionComplete: () => {
+        canvas.setExecutionStatus('completed');
+        this.loadRunHistory();
+      },
+      onExecutionError: (err: string) => {
+        canvas.setExecutionStatus('error');
+        console.error('Partial execution error:', err);
+        this.loadRunHistory();
+      },
+    }, undefined, false, nodeId);
+  }
+
   /** Abort a running workflow execution. */
   onStopExecution(): void {
     this._execAbort?.abort();

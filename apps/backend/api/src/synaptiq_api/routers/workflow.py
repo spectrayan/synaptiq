@@ -44,6 +44,8 @@ class ExecuteWorkflowRequest(BaseModel):
     spec: dict[str, Any] = Field(..., description="Complete workflow specification JSON")
     input_text: str = Field(default="", description="Initial input text for the workflow")
     dry_run: bool = Field(default=False, description="Simulate execution without calling LLMs")
+    start_node_id: str | None = Field(default=None, description="Start execution from this node (partial re-execution)")
+    prior_context: str = Field(default="", description="Context to use when starting from a non-entry node")
 
 
 class RegeneratePromptRequest(BaseModel):
@@ -291,6 +293,8 @@ async def execute_workflow(body: ExecuteWorkflowRequest, request: Request):
             input_text=body.input_text,
             tenant_id=tenant_id,
             dry_run=body.dry_run,
+            start_node_id=body.start_node_id,
+            prior_context=body.prior_context,
         ):
             data = event.data
             if isinstance(data, dict):

@@ -236,6 +236,15 @@
             <button class="sq-node-entry-btn" (click)="setEntryPoint(node.id); $event.stopPropagation()">▶</button>
           }
 
+          <!-- Run from here button (hover) -->
+          @if (hoveredNodeId() === node.id && executionStatus() !== 'running') {
+            <button class="sq-node-run-btn"
+                    (click)="runFromNode.emit(node.id); $event.stopPropagation()"
+                    matTooltip="Run from this node">
+              <mat-icon>play_circle</mat-icon>
+            </button>
+          }
+
           <!-- Input port (left side) -->
           <div fNodeInput [fInputId]="node.id + '-input'" fInputConnectableSide="left" class="sq-port sq-port-input"></div>
 

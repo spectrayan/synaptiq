@@ -138,6 +138,8 @@ class WorkflowExecutor:
         input_text: str = "",
         tenant_id: str = "",
         dry_run: bool = False,
+        start_node_id: str | None = None,
+        prior_context: str = "",
     ) -> AsyncIterator[SSEEvent]:
         """Execute a workflow and yield SSE events for each step.
 
@@ -208,8 +210,26 @@ class WorkflowExecutor:
         # Build execution order via topological sort
         execution_order = _build_execution_order(spec)
 
+        # Partial re-execution: skip nodes before start_node_id
+        if start_node_id:
+            if start_node_id not in {a.id for a in agents}:
+                yield SSEEvent(event="execution_error", data={
+                    "run_id": run_id,
+                    "error": f"Start node '{start_node_id}' not found in workflow",
+                })
+                return
+            # Find index of start node and mark predecessors as skipped
+            try:
+                start_idx = execution_order.index(start_node_id)
+            except ValueError:
+                start_idx = 0
+            for skipped_id in execution_order[:start_idx]:
+                node_statuses[skipped_id]["status"] = "skipped"
+            execution_order = execution_order[start_idx:]
+            logger.info("[executor] partial re-exec from '%s', skipping %d nodes", start_node_id, start_idx)
+
         # Execute each node in order
-        accumulated_context = input_text or f"Execute workflow: {spec.name}"
+        accumulated_context = prior_context or input_text or f"Execute workflow: {spec.name}"
 
         for node_id in execution_order:
             agent = next((a for a in agents if a.id == node_id), None)

@@ -513,6 +513,8 @@ export class WorkflowService {
     callbacks: ExecutionCallbacks,
     authToken?: string,
     dryRun = false,
+    startNodeId?: string,
+    priorContext?: string,
   ): Promise<void> {
     this.abort();
 
@@ -530,7 +532,13 @@ export class WorkflowService {
       const response = await fetch(`${this.baseUrl}/execute`, {
         method: 'POST',
         headers,
-        body: JSON.stringify({ spec, input_text: inputText, dry_run: dryRun }),
+        body: JSON.stringify({
+          spec,
+          input_text: inputText,
+          dry_run: dryRun,
+          ...(startNodeId ? { start_node_id: startNodeId } : {}),
+          ...(priorContext ? { prior_context: priorContext } : {}),
+        }),
         signal: controller.signal,
       });
 

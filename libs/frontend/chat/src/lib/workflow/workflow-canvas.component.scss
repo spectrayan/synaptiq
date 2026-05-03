@@ -222,6 +222,19 @@
   &:hover { background: #22c55e; }
 }
 
+.sq-node-run-btn {
+  position: absolute; bottom: -8px; right: 4px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: rgba(99, 102, 241, 0.8); color: white;
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 10;
+  padding: 0;
+  transition: background 0.15s ease, transform 0.15s ease;
+  mat-icon { font-size: 14px; width: 14px; height: 14px; }
+  &:hover { background: #6366f1; transform: scale(1.15); }
+}
+
 /* ── Ports ─────────────────────────────────────────────────────────────── */
 
 .sq-port {

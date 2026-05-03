@@ -133,6 +133,7 @@ export class WorkflowCanvasComponent {
     currentPrompt: string;
     instruction: string;
   }>();
+  readonly runFromNode = output<string>();
 
   // ── Child refs ──────────────────────────────────────────────────────────
   protected readonly promptEditorRef = viewChild<PromptEditorComponent>('promptEditorRef');
