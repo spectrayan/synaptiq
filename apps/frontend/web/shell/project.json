@@ -20,7 +20,10 @@
             "input": "apps/frontend/web/shell/public"
           }
         ],
-        "styles": ["apps/frontend/web/shell/src/styles.scss"],
+        "styles": [
+          "node_modules/@foblex/flow/styles/default.scss",
+          "apps/frontend/web/shell/src/styles.scss"
+        ],
         "server": "apps/frontend/web/shell/src/main.server.ts",
         "ssr": {
           "entry": "apps/frontend/web/shell/src/server.ts"

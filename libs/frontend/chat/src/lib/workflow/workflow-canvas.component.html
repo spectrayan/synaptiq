@@ -1,4 +1,4 @@
-<div class="workflow-canvas-wrapper" #canvasWrapper>
+<div class="workflow-canvas-wrapper">
   <!-- Toolbar -->
   <div class="canvas-toolbar">
     <div class="toolbar-left">
@@ -82,15 +82,6 @@
         <mat-icon>play_arrow</mat-icon>
       </button>
       <span class="toolbar-sep"></span>
-      <button class="toolbar-btn" (click)="zoomIn()" matTooltip="Zoom in">
-        <mat-icon>zoom_in</mat-icon>
-      </button>
-      <button class="toolbar-btn" (click)="zoomOut()" matTooltip="Zoom out">
-        <mat-icon>zoom_out</mat-icon>
-      </button>
-      <button class="toolbar-btn" (click)="resetView()" matTooltip="Fit to screen">
-        <mat-icon>fit_screen</mat-icon>
-      </button>
       <!-- 3-dot menu -->
       <div class="toolbar-more">
         <button class="toolbar-btn" (click)="showToolbar3Dot.update(v => !v)" matTooltip="More actions">
@@ -143,220 +134,124 @@
     </div>
   }
 
-  <!-- SVG Canvas -->
-  <svg
-    class="workflow-svg"
-    [attr.viewBox]="viewBox()"
-    (mousedown)="onPanStart($event)"
-    (mousemove)="onPanMove($event)"
-    (mouseup)="onPanEnd()"
-    (mouseleave)="onPanEnd()"
-    (wheel)="onWheel($event)"
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       Foblex Flow Canvas — replaces old custom SVG graph
+       ═══════════════════════════════════════════════════════════════════════ -->
+  <f-flow
+    fDraggable
+    (fFullRendered)="onFlowRendered()"
+    (fCreateConnection)="onConnectionCreated($event)"
+    class="flow-host"
   >
-    <defs>
-      <!-- Arrow marker -->
-      <marker id="arrow" viewBox="0 0 10 6" refX="10" refY="3"
-              markerWidth="10" markerHeight="6" orient="auto-start-reverse">
-        <path d="M 0 0 L 10 3 L 0 6 Z" fill="var(--sq-text-secondary, #94a3b8)" />
-      </marker>
-      <marker id="arrow-active" viewBox="0 0 10 6" refX="10" refY="3"
-              markerWidth="10" markerHeight="6" orient="auto-start-reverse">
-        <path d="M 0 0 L 10 3 L 0 6 Z" fill="#6366f1" />
-      </marker>
+    <f-canvas fZoom>
+      <!-- Background grid -->
+      <f-background></f-background>
 
-      <!-- Glow filter -->
-      <filter id="node-glow" x="-20%" y="-20%" width="140%" height="140%">
-        <feGaussianBlur stdDeviation="6" result="blur" />
-        <feComposite in="SourceGraphic" in2="blur" operator="over" />
-      </filter>
+      <!-- Drag-to-connect preview line -->
+      <f-connection-for-create fBehavior="fixed" fType="segment">
+      </f-connection-for-create>
 
-      <!-- Background grid pattern -->
-      <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
-        <path d="M 24 0 L 0 0 0 24" fill="none" stroke="var(--sq-border, rgba(148,163,184,0.1))" stroke-width="0.5"/>
-      </pattern>
-    </defs>
+      <!-- ── Connections ──────────────────────────────────────────────── -->
+      @for (edge of foblexEdges(); track edge.id) {
+        <f-connection
+          [fConnectionId]="edge.id"
+          [fOutputId]="edge.sourceOutputId"
+          [fInputId]="edge.targetInputId"
+          fBehavior="fixed"
+          fType="segment"
+          [class.sq-edge-conditional]="edge.isConditional"
+          [class.sq-edge-active]="getNodeExecStatus(edge.sourceOutputId.replace('-output', '')) === 'completed'"
+        >
+        </f-connection>
+      }
 
-    <!-- Grid background -->
-    <rect width="100%" height="100%" fill="url(#grid)" />
+      <!-- ── Agent Nodes ─────────────────────────────────────────────── -->
+      @for (node of layoutNodes(); track node.id) {
+        <div
+          fNode
+          [fNodePosition]="{ x: node.x, y: node.y }"
+          fDragHandle
+          [fConnectOnNode]="false"
+          class="sq-node"
+          [class.sq-node-selected]="selectedNodeId() === node.id"
+          [class.sq-node-entry]="spec()?.entry_point === node.id"
+          [class.sq-node-running]="node.executionStatus === 'running'"
+          [class.sq-node-completed]="node.executionStatus === 'completed'"
+          [class.sq-node-error]="node.executionStatus === 'error'"
+          [class.sq-node-skipped]="node.executionStatus === 'skipped'"
+          (click)="selectNode(node.id)"
+          (mouseenter)="hoveredNodeId.set(node.id)"
+          (mouseleave)="hoveredNodeId.set(null)"
+        >
+          <!-- Color accent bar -->
+          <div class="sq-node-accent" [style.background]="node.color"></div>
 
-    <!-- Edges -->
-    @for (edge of layoutEdges(); track edge.id) {
-      <g class="edge-group"
-         [class.edge-conditional]="edge.isConditional"
-         [class.edge-highlighted]="selectedNodeId() === edge.source || selectedNodeId() === edge.target"
-         [class.edge-active]="getNodeExecStatus(edge.source) === 'completed' && (getNodeExecStatus(edge.target) === 'running' || getNodeExecStatus(edge.target) === 'completed')">
-        <path
-          class="edge-path"
-          [attr.d]="edge.path"
-          fill="none"
-          stroke="var(--sq-text-secondary, #94a3b8)"
-          stroke-width="2"
-          [attr.marker-end]="(selectedNodeId() === edge.source || selectedNodeId() === edge.target) ? 'url(#arrow-active)' : 'url(#arrow)'"
-          [attr.stroke-dasharray]="edge.isConditional ? '6,4' : 'none'"
-        />
-        @if (edge.label) {
-          <rect
-            [attr.x]="edge.labelX - 40"
-            [attr.y]="edge.labelY - 10"
-            width="80"
-            height="20"
-            rx="4"
-            fill="var(--sq-surface, #1e293b)"
-            stroke="var(--sq-border, rgba(148,163,184,0.15))"
-            stroke-width="1"
-          />
-          <text
-            class="edge-label"
-            [attr.x]="edge.labelX"
-            [attr.y]="edge.labelY + 4"
-            text-anchor="middle"
-          >{{ edge.label | slice:0:12 }}</text>
-        }
-      </g>
-    }
+          <!-- Entry point badge -->
+          @if (spec()?.entry_point === node.id) {
+            <div class="sq-node-entry-badge"></div>
+          }
 
-    <!-- Nodes -->
-    @for (node of layoutNodes(); track node.id) {
-      <g class="node-group"
-         [class.node-selected]="selectedNodeId() === node.id"
-         [class.node-entry]="spec()?.entry_point === node.id"
-         [class.node-running]="node.executionStatus === 'running'"
-         [class.node-completed]="node.executionStatus === 'completed'"
-         [class.node-error]="node.executionStatus === 'error'"
-         [class.node-skipped]="node.executionStatus === 'skipped'"
-         (click)="selectNode(node.id)"
-         (mouseenter)="hoveredNodeId.set(node.id)"
-         (mouseleave)="hoveredNodeId.set(null)"
-         [attr.transform]="'translate(' + node.x + ',' + node.y + ')'">
+          <!-- Icon circle -->
+          <div class="sq-node-icon" [style.background]="node.color + '22'" [style.border-color]="node.color">
+            <mat-icon [style.color]="node.color">{{ node.icon }}</mat-icon>
+          </div>
 
-        <!-- Node shadow -->
-        <rect
-          class="node-shadow"
-          [attr.x]="2"
-          [attr.y]="2"
-          [attr.width]="node.width"
-          [attr.height]="node.height"
-          rx="12"
-        />
+          <!-- Label + Type -->
+          <div class="sq-node-info">
+            <span class="sq-node-label">{{ node.label }}</span>
+            <span class="sq-node-type" [style.color]="node.color">{{ node.type }}</span>
+          </div>
 
-        <!-- Node background -->
-        <rect
-          class="node-bg"
-          x="0"
-          y="0"
-          [attr.width]="node.width"
-          [attr.height]="node.height"
-          rx="12"
-        />
+          <!-- Tools count -->
+          @if (node.tools.length) {
+            <div class="sq-node-tools-badge" [style.background]="node.color + '22'" [style.color]="node.color">
+              🔧{{ node.tools.length }}
+            </div>
+          }
 
-        <!-- Color accent bar -->
-        <rect
-          [attr.fill]="node.color"
-          x="0" y="0"
-          width="4"
-          [attr.height]="node.height"
-          rx="2"
-        />
+          <!-- Execution duration badge -->
+          @if (node.durationMs) {
+            <div class="sq-node-duration">{{ node.durationMs | number:'1.0-0' }}ms</div>
+          }
 
-        <!-- Entry point badge -->
-        @if (spec()?.entry_point === node.id) {
-          <circle
-            [attr.cx]="node.width - 12"
-            cy="12"
-            r="6"
-            fill="#22c55e"
-            stroke="var(--sq-surface, #1e293b)"
-            stroke-width="2"
-          />
-        }
+          <!-- Delete button (hover) -->
+          @if (hoveredNodeId() === node.id || selectedNodeId() === node.id) {
+            <button class="sq-node-delete-btn" (click)="showDeleteConfirm.set(true); selectNode(node.id); $event.stopPropagation()">×</button>
+          }
 
-        <!-- Icon circle -->
-        <circle
-          cx="32"
-          cy="40"
-          r="16"
-          [attr.fill]="node.color + '22'"
-          [attr.stroke]="node.color"
-          stroke-width="1.5"
-        />
+          <!-- Entry-point button (hover) -->
+          @if (hoveredNodeId() === node.id && spec()?.entry_point !== node.id) {
+            <button class="sq-node-entry-btn" (click)="setEntryPoint(node.id); $event.stopPropagation()">▶</button>
+          }
 
-        <!-- Label -->
-        <text class="node-label" x="56" y="34">{{ node.label }}</text>
+          <!-- Input port (left side) -->
+          <div fNodeInput [fInputId]="node.id + '-input'" fInputConnectableSide="left" class="sq-port sq-port-input"></div>
 
-        <!-- Type badge -->
-        <text class="node-type" x="56" y="52" [attr.fill]="node.color">{{ node.type }}</text>
+          <!-- Output port (right side) -->
+          <div fNodeOutput [fOutputId]="node.id + '-output'" [isSelfConnectable]="false" fOutputConnectableSide="right" class="sq-port sq-port-output"></div>
+        </div>
+      }
 
-        <!-- Tools count -->
-        @if (node.tools.length) {
-          <g transform="translate(0, 0)">
-            <rect
-              [attr.x]="node.width - 36"
-              [attr.y]="node.height - 24"
-              width="28"
-              height="16"
-              rx="8"
-              [attr.fill]="node.color + '22'"
-            />
-            <text
-              class="node-tools-count"
-              [attr.x]="node.width - 22"
-              [attr.y]="node.height - 13"
-              text-anchor="middle"
-              [attr.fill]="node.color"
-            >🔧{{ node.tools.length }}</text>
-          </g>
-        }
+      <!-- ── END Node ────────────────────────────────────────────────── -->
+      @if (hasEndNode()) {
+        <div
+          fNode
+          [fNodePosition]="endNodePos()"
+          class="sq-end-node"
+        >
+          <div class="sq-end-circle">
+            <div class="sq-end-inner"></div>
+          </div>
+          <span class="sq-end-label">END</span>
+          <!-- Input port for END -->
+          <div fNodeInput fInputId="END-input" fInputConnectableSide="left" class="sq-port sq-port-input"></div>
+        </div>
+      }
 
-        <!-- Delete node button (visible on hover) -->
-        @if (hoveredNodeId() === node.id || selectedNodeId() === node.id) {
-          <g class="node-delete-btn" (click)="showDeleteConfirm.set(true); selectNode(node.id); $event.stopPropagation()">
-            <circle [attr.cx]="node.width - 8" cy="8" r="10" fill="rgba(239,68,68,0.85)" />
-            <text [attr.x]="node.width - 8" y="12" text-anchor="middle" fill="white" font-size="12" font-weight="bold">×</text>
-          </g>
-        }
-
-        <!-- Entry-point button -->
-        @if (hoveredNodeId() === node.id && spec()?.entry_point !== node.id) {
-          <g class="node-entry-btn" (click)="setEntryPoint(node.id); $event.stopPropagation()">
-            <circle cx="12" [attr.cy]="node.height - 12" r="8" fill="rgba(34,197,94,0.7)" />
-            <text x="12" [attr.y]="node.height - 8" text-anchor="middle" fill="white" font-size="9" font-weight="600">▶</text>
-          </g>
-        }
-
-        <!-- Execution duration badge -->
-        @if (node.durationMs) {
-          <rect
-            [attr.x]="56"
-            [attr.y]="node.height - 24"
-            width="64"
-            height="16"
-            rx="8"
-            fill="rgba(34,197,94,0.15)"
-          />
-          <text
-            class="node-duration"
-            [attr.x]="88"
-            [attr.y]="node.height - 13"
-            text-anchor="middle"
-            fill="#22c55e"
-          >{{ node.durationMs | number:'1.0-0' }}ms</text>
-        }
-      </g>
-    }
-
-    <!-- END node -->
-    @if (hasEndNode()) {
-      <g class="node-group node-end"
-         [attr.transform]="'translate(' + endNodePos().x + ',' + endNodePos().y + ')'">
-        <circle cx="24" cy="24" r="24"
-                fill="var(--sq-surface, #1e293b)"
-                stroke="#ef4444"
-                stroke-width="2" />
-        <circle cx="24" cy="24" r="8" fill="#ef4444" />
-        <text class="end-label" x="24" y="64" text-anchor="middle">END</text>
-      </g>
-    }
-  </svg>
+      <!-- Minimap -->
+      <f-minimap></f-minimap>
+    </f-canvas>
+  </f-flow>
 
   <!-- Inspector Panel (slides in from right) -->
   @if (selectedNode()) {

@@ -1,13 +1,13 @@
 /**
- * WorkflowCanvasComponent — Interactive SVG-based workflow graph visualizer.
+ * WorkflowCanvasComponent — Interactive Foblex Flow-based workflow graph editor.
  *
- * Renders agent nodes and edges with auto-layout using a simple layered algorithm.
- * Features:
- *   - Auto-layout (topological sort + layered positioning)
- *   - Node hover/click to inspect agent details
- *   - Animated edges with directional arrows
- *   - Zoom & pan via scroll/drag
- *   - Responsive sizing
+ * Renders agent nodes and edges using @foblex/flow for rich interactivity:
+ *   - Drag-to-connect via output/input ports
+ *   - Drag-to-reposition nodes
+ *   - Zoom & pan via scroll/drag (built-in)
+ *   - Minimap for large graphs
+ *   - Bezier curve connections
+ *   - Node inspection panel with config/output tabs
  */
 import {
   Component,
@@ -17,15 +17,20 @@ import {
   computed,
   effect,
   ChangeDetectionStrategy,
-  ElementRef,
   viewChild,
-  HostListener,
+  OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MarkdownViewerComponent } from './markdown-viewer.component';
+import {
+  FFlowModule,
+  FCanvasComponent,
+  FCreateConnectionEvent,
+  FZoomDirective,
+} from '@foblex/flow';
 import type {
   WorkflowSpec, AgentNodeSpec, EdgeSpec, ConditionalEdgeSpec, NodeExecutionStatus,
   WorkflowRunSummary, WorkflowRunNodeDetail,
@@ -44,25 +49,20 @@ interface LayoutNode {
   tools: string[];
   x: number;
   y: number;
-  width: number;
-  height: number;
-  layer: number;
   color: string;
   icon: string;
   executionStatus: NodeExecutionStatus | 'idle';
   durationMs?: number;
 }
 
-interface LayoutEdge {
+/** Edge model for Foblex connections (connector-to-connector). */
+interface FoblexEdge {
   id: string;
-  source: string;
-  target: string;
+  sourceOutputId: string;
+  targetInputId: string;
   label: string;
-  condition: string;
   isConditional: boolean;
-  path: string;
-  labelX: number;
-  labelY: number;
+  condition: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -96,12 +96,23 @@ const NODE_ICONS: Record<string, string> = {
 @Component({
   selector: 'sq-workflow-canvas',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MatTooltipModule, MarkdownViewerComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatIconModule,
+    MatTooltipModule,
+    MarkdownViewerComponent,
+    FFlowModule,
+    FZoomDirective,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './workflow-canvas.component.html',
   styleUrl: './workflow-canvas.component.scss',
 })
 export class WorkflowCanvasComponent {
+  // ── Foblex canvas reference ────────────────────────────────────────────
+  protected readonly fCanvas = viewChild(FCanvasComponent);
+
   // ── Inputs ──────────────────────────────────────────────────────────────
   readonly spec = input<WorkflowSpec | null>(null);
 
@@ -136,13 +147,6 @@ export class WorkflowCanvasComponent {
 
   /** Per-node execution state, keyed by node ID. */
   readonly nodeExecState = signal<Record<string, { status: NodeExecutionStatus; durationMs?: number }>>({});
-
-  private zoom = signal(1);
-  private panX = signal(0);
-  private panY = signal(0);
-  private isPanning = false;
-  private lastPanX = 0;
-  private lastPanY = 0;
 
   // ── Execution API (called from parent) ─────────────────────────────────
 
@@ -286,6 +290,43 @@ export class WorkflowCanvasComponent {
     });
   }
 
+  // ── Foblex Event Handlers ──────────────────────────────────────────────
+
+  /** Called when the graph first renders — fit canvas to content. */
+  onFlowRendered(): void {
+    this.fCanvas()?.resetScaleAndCenter(false);
+  }
+
+  /** Handle drag-to-connect: user drew from an output port to an input port. */
+  onConnectionCreated(event: FCreateConnectionEvent): void {
+    const s = this.spec();
+    if (!s) return;
+
+    // Connector IDs follow the pattern: `{nodeId}-output` and `{nodeId}-input`
+    const sourceNodeId = event.fOutputId.replace(/-output$/, '');
+    const targetNodeId = event.fInputId?.replace(/-input$/, '');
+
+    if (!targetNodeId) return;
+
+    // Prevent duplicate edges
+    const exists = (s.edges ?? []).some(e => e.from === sourceNodeId && e.to === targetNodeId);
+    if (exists) return;
+
+    const updated: WorkflowSpec = {
+      ...s,
+      edges: [...(s.edges ?? []), { from: sourceNodeId, to: targetNodeId, condition: 'always', label: '' }],
+    };
+    this.specChange.emit(updated);
+  }
+
+  /** Handle node position change after user drags a node. */
+  onNodePositionChanged(nodeId: string, position: { x: number; y: number }): void {
+    // Store position in our layout. Since Foblex manages the visual drag,
+    // we only emit a spec change if we're persisting positions.
+    // For now, positions are auto-computed from the layout algorithm,
+    // so we absorb this event silently.
+  }
+
   // ── Validation ───────────────────────────────────────────────────────────
 
   readonly validationErrors = computed(() => {
@@ -376,7 +417,7 @@ export class WorkflowCanvasComponent {
            d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   }
 
-  // ── Layout computation ──────────────────────────────────────────────────
+  // ── Layout computation (positions for Foblex fNodePosition) ────────────
 
   readonly layoutNodes = computed<LayoutNode[]>(() => {
     const s = this.spec();
@@ -384,11 +425,11 @@ export class WorkflowCanvasComponent {
     return this.computeLayout(s);
   });
 
-  readonly layoutEdges = computed<LayoutEdge[]>(() => {
+  /** Foblex edge model — maps spec edges to connector-id pairs. */
+  readonly foblexEdges = computed<FoblexEdge[]>(() => {
     const s = this.spec();
-    const nodes = this.layoutNodes();
-    if (!s || !nodes.length) return [];
-    return this.computeEdges(s, nodes);
+    if (!s) return [];
+    return this.computeFoblexEdges(s);
   });
 
   readonly hasEndNode = computed(() => {
@@ -400,7 +441,7 @@ export class WorkflowCanvasComponent {
   readonly endNodePos = computed(() => {
     const nodes = this.layoutNodes();
     if (!nodes.length) return { x: 400, y: 200 };
-    const maxX = Math.max(...nodes.map(n => n.x + n.width));
+    const maxX = Math.max(...nodes.map(n => n.x + NODE_WIDTH));
     const avgY = nodes.reduce((sum, n) => sum + n.y, 0) / nodes.length;
     return { x: maxX + 100, y: avgY + NODE_HEIGHT / 2 - 24 };
   });
@@ -411,72 +452,10 @@ export class WorkflowCanvasComponent {
     return this.layoutNodes().find(n => n.id === id) || null;
   });
 
-  readonly viewBox = computed(() => {
-    const nodes = this.layoutNodes();
-    const end = this.endNodePos();
-    if (!nodes.length) return '0 0 800 400';
-
-    const z = this.zoom();
-    const px = this.panX();
-    const py = this.panY();
-
-    const maxX = Math.max(end.x + 100, ...nodes.map(n => n.x + n.width)) + PADDING;
-    const maxY = Math.max(end.y + 80, ...nodes.map(n => n.y + n.height)) + PADDING;
-
-    const w = maxX / z;
-    const h = maxY / z;
-
-    return `${-px / z} ${-py / z} ${w} ${h}`;
-  });
-
   // ── Interactions ────────────────────────────────────────────────────────
 
   selectNode(id: string): void {
     this.selectedNodeId.set(this.selectedNodeId() === id ? null : id);
-  }
-
-  zoomIn(): void {
-    this.zoom.update(z => Math.min(z * 1.2, 3));
-  }
-
-  zoomOut(): void {
-    this.zoom.update(z => Math.max(z / 1.2, 0.3));
-  }
-
-  resetView(): void {
-    this.zoom.set(1);
-    this.panX.set(0);
-    this.panY.set(0);
-  }
-
-  onWheel(event: WheelEvent): void {
-    event.preventDefault();
-    if (event.deltaY < 0) {
-      this.zoomIn();
-    } else {
-      this.zoomOut();
-    }
-  }
-
-  onPanStart(event: MouseEvent): void {
-    if (event.button !== 0) return;
-    this.isPanning = true;
-    this.lastPanX = event.clientX;
-    this.lastPanY = event.clientY;
-  }
-
-  onPanMove(event: MouseEvent): void {
-    if (!this.isPanning) return;
-    const dx = event.clientX - this.lastPanX;
-    const dy = event.clientY - this.lastPanY;
-    this.panX.update(x => x + dx);
-    this.panY.update(y => y + dy);
-    this.lastPanX = event.clientX;
-    this.lastPanY = event.clientY;
-  }
-
-  onPanEnd(): void {
-    this.isPanning = false;
   }
 
   // ── Layout Algorithm ────────────────────────────────────────────────────
@@ -582,9 +561,6 @@ export class WorkflowCanvasComponent {
           tools: agent.tools || [],
           x: PADDING + layer * LAYER_GAP_X,
           y: startY + idx * (NODE_HEIGHT + NODE_GAP_Y),
-          width: NODE_WIDTH,
-          height: NODE_HEIGHT,
-          layer,
           color: NODE_COLORS[type] || NODE_COLORS['default'],
           icon: NODE_ICONS[type] || NODE_ICONS['default'],
           executionStatus: execState?.status ?? 'idle',
@@ -596,80 +572,34 @@ export class WorkflowCanvasComponent {
     return layoutNodes;
   }
 
-  private computeEdges(spec: WorkflowSpec, nodes: LayoutNode[]): LayoutEdge[] {
-    const nodeMap = new Map(nodes.map(n => [n.id, n]));
-    const endPos = this.endNodePos();
-    const edges: LayoutEdge[] = [];
+  /** Build Foblex edge models from spec edges + conditional edges. */
+  private computeFoblexEdges(spec: WorkflowSpec): FoblexEdge[] {
+    const edges: FoblexEdge[] = [];
 
     // Regular edges
     for (const e of spec.edges ?? []) {
-      const source = nodeMap.get(e.from);
-      if (!source) continue;
-
-      if (e.to === 'END') {
-        const sx = source.x + source.width;
-        const sy = source.y + source.height / 2;
-        const ex = endPos.x;
-        const ey = endPos.y + 24;
-        const midX = (sx + ex) / 2;
-        edges.push({
-          id: `${e.from}-END`,
-          source: e.from,
-          target: 'END',
-          label: e.label || '',
-          condition: e.condition || 'always',
-          isConditional: false,
-          path: `M ${sx} ${sy} C ${midX} ${sy} ${midX} ${ey} ${ex} ${ey}`,
-          labelX: midX,
-          labelY: (sy + ey) / 2,
-        });
-      } else {
-        const target = nodeMap.get(e.to);
-        if (!target) continue;
-        const sx = source.x + source.width;
-        const sy = source.y + source.height / 2;
-        const ex = target.x;
-        const ey = target.y + target.height / 2;
-        const midX = (sx + ex) / 2;
-        edges.push({
-          id: `${e.from}-${e.to}`,
-          source: e.from,
-          target: e.to,
-          label: e.label || '',
-          condition: e.condition || 'always',
-          isConditional: false,
-          path: `M ${sx} ${sy} C ${midX} ${sy} ${midX} ${ey} ${ex} ${ey}`,
-          labelX: midX,
-          labelY: (sy + ey) / 2,
-        });
-      }
+      const targetId = e.to === 'END' ? 'END' : e.to;
+      edges.push({
+        id: `${e.from}-${targetId}`,
+        sourceOutputId: `${e.from}-output`,
+        targetInputId: `${targetId}-input`,
+        label: (e as any).label || '',
+        isConditional: false,
+        condition: (e as any).condition || 'always',
+      });
     }
 
     // Conditional edges
     for (const ce of spec.conditional_edges ?? []) {
-      const source = nodeMap.get(ce.from);
-      if (!source) continue;
-
       for (const [condition, targetId] of Object.entries(ce.condition_mapping)) {
-        if (targetId === 'END') continue;
-        const target = nodeMap.get(targetId);
-        if (!target) continue;
-
-        const sx = source.x + source.width;
-        const sy = source.y + source.height / 2;
-        const ex = target.x;
-        const ey = target.y + target.height / 2;
-        const midX = (sx + ex) / 2;
+        const actualTarget = targetId === 'END' ? 'END' : targetId;
         edges.push({
-          id: `${ce.from}-${targetId}-${condition}`,
-          source: ce.from,
-          target: targetId,
+          id: `${ce.from}-${actualTarget}-${condition}`,
+          sourceOutputId: `${ce.from}-output`,
+          targetInputId: `${actualTarget}-input`,
           label: condition,
-          condition,
           isConditional: true,
-          path: `M ${sx} ${sy} C ${midX} ${sy} ${midX} ${ey} ${ex} ${ey}`,
-          labelX: midX,
-          labelY: (sy + ey) / 2,
+          condition,
         });
       }
     }
