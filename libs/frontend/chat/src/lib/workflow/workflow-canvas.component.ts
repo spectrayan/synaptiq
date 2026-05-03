@@ -25,6 +25,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MarkdownViewerComponent } from './markdown-viewer.component';
 import type {
   WorkflowSpec, AgentNodeSpec, EdgeSpec, ConditionalEdgeSpec, NodeExecutionStatus,
   WorkflowRunSummary, WorkflowRunNodeDetail,
@@ -95,7 +96,7 @@ const NODE_ICONS: Record<string, string> = {
 @Component({
   selector: 'sq-workflow-canvas',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MatTooltipModule],
+  imports: [CommonModule, FormsModule, MatIconModule, MatTooltipModule, MarkdownViewerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './workflow-canvas.component.html',
   styleUrl: './workflow-canvas.component.scss',
@@ -109,6 +110,8 @@ export class WorkflowCanvasComponent {
   readonly stopExecution = output<void>();
   readonly specChange = output<WorkflowSpec>();
   readonly selectRun = output<string>();
+  readonly deleteWorkflowRequest = output<string>();
+  readonly duplicateWorkflowRequest = output<string>();
 
   // ── State ───────────────────────────────────────────────────────────────
   readonly selectedNodeId = signal<string | null>(null);
@@ -116,6 +119,12 @@ export class WorkflowCanvasComponent {
   readonly executionStatus = signal<'idle' | 'running' | 'completed' | 'error'>('idle');
   readonly totalDurationMs = signal(0);
   readonly inspectorTab = signal<'config' | 'output'>('config');
+  readonly saveStatus = signal<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  readonly isEditingName = signal(false);
+  readonly editingName = signal('');
+  readonly showAddNodeForm = signal(false);
+  readonly showDeleteConfirm = signal(false);
+  readonly showToolbar3Dot = signal(false);
 
   /** Run history for the current workflow */
   readonly runHistory = signal<WorkflowRunSummary[]>([]);
@@ -168,6 +177,150 @@ export class WorkflowCanvasComponent {
     };
     this.specChange.emit(updated);
   }
+
+  // ── Graph Editing ────────────────────────────────────────────────────────
+
+  /** Delete a node and all connected edges. */
+  deleteNode(nodeId: string): void {
+    const s = this.spec();
+    if (!s) return;
+    const updated: WorkflowSpec = {
+      ...s,
+      agents: s.agents.filter(a => a.id !== nodeId),
+      edges: (s.edges ?? []).filter(e => e.from !== nodeId && e.to !== nodeId),
+      conditional_edges: (s.conditional_edges ?? []).filter(ce => ce.from !== nodeId),
+      entry_point: s.entry_point === nodeId
+        ? (s.agents.find(a => a.id !== nodeId)?.id ?? '')
+        : s.entry_point,
+    };
+    this.selectedNodeId.set(null);
+    this.showDeleteConfirm.set(false);
+    this.specChange.emit(updated);
+  }
+
+  /** Delete an edge by its source→target pair. */
+  deleteEdge(source: string, target: string): void {
+    const s = this.spec();
+    if (!s) return;
+    const updated: WorkflowSpec = {
+      ...s,
+      edges: (s.edges ?? []).filter(e => !(e.from === source && e.to === target)),
+    };
+    this.specChange.emit(updated);
+  }
+
+  /** Add a new agent node to the workflow. */
+  addNode(label: string, type = 'agent', description = ''): void {
+    const s = this.spec();
+    if (!s) return;
+    const id = label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    if (s.agents.some(a => a.id === id)) return; // Prevent duplicates
+
+    const newAgent: AgentNodeSpec = {
+      id,
+      type,
+      label,
+      description,
+      system_prompt: `You are a ${label}. ${description}`,
+      tools: [],
+    };
+    const updated: WorkflowSpec = {
+      ...s,
+      agents: [...s.agents, newAgent],
+    };
+    this.showAddNodeForm.set(false);
+    this.specChange.emit(updated);
+  }
+
+  /** Set a node as the workflow entry point. */
+  setEntryPoint(nodeId: string): void {
+    const s = this.spec();
+    if (!s) return;
+    this.specChange.emit({ ...s, entry_point: nodeId });
+  }
+
+  /** Update a node's label. */
+  onNodeLabelChange(newLabel: string): void {
+    this._updateSelectedNode({ label: newLabel });
+  }
+
+  /** Update a node's description. */
+  onNodeDescriptionChange(newDescription: string): void {
+    this._updateSelectedNode({ description: newDescription });
+  }
+
+  /** Update a node's type. */
+  onNodeTypeChange(newType: string): void {
+    this._updateSelectedNode({ type: newType });
+  }
+
+  /** Start inline name editing */
+  startNameEdit(): void {
+    this.editingName.set(this.spec()?.name ?? '');
+    this.isEditingName.set(true);
+  }
+
+  /** Commit inline name edit */
+  commitNameEdit(): void {
+    const s = this.spec();
+    if (!s) return;
+    const name = this.editingName().trim();
+    if (name && name !== s.name) {
+      this.specChange.emit({ ...s, name });
+    }
+    this.isEditingName.set(false);
+  }
+
+  /** Cancel inline name edit */
+  cancelNameEdit(): void {
+    this.isEditingName.set(false);
+  }
+
+  private _updateSelectedNode(patch: Partial<AgentNodeSpec>): void {
+    const s = this.spec();
+    const nodeId = this.selectedNodeId();
+    if (!s || !nodeId) return;
+    this.specChange.emit({
+      ...s,
+      agents: s.agents.map(a => a.id === nodeId ? { ...a, ...patch } : a),
+    });
+  }
+
+  // ── Validation ───────────────────────────────────────────────────────────
+
+  readonly validationErrors = computed(() => {
+    const s = this.spec();
+    if (!s) return [];
+    const errors: string[] = [];
+    if (!s.entry_point) errors.push('No entry point set');
+    if (s.entry_point && !s.agents.some(a => a.id === s.entry_point)) {
+      errors.push(`Entry point "${s.entry_point}" references a non-existent node`);
+    }
+    for (const a of s.agents) {
+      if (a.type === 'agent' && !a.system_prompt?.trim()) {
+        errors.push(`Agent "${a.label}" has no system prompt`);
+      }
+    }
+    const nodeIds = new Set(s.agents.map(a => a.id));
+    nodeIds.add('END');
+    for (const e of s.edges ?? []) {
+      if (!nodeIds.has(e.from)) errors.push(`Edge references non-existent source "${e.from}"`);
+      if (!nodeIds.has(e.to)) errors.push(`Edge references non-existent target "${e.to}"`);
+    }
+    // Orphan nodes (no edges at all)
+    const connectedNodes = new Set<string>();
+    for (const e of s.edges ?? []) { connectedNodes.add(e.from); connectedNodes.add(e.to); }
+    for (const ce of s.conditional_edges ?? []) {
+      connectedNodes.add(ce.from);
+      Object.values(ce.condition_mapping).forEach(t => connectedNodes.add(t));
+    }
+    for (const a of s.agents) {
+      if (a.id !== s.entry_point && !connectedNodes.has(a.id)) {
+        errors.push(`Agent "${a.label}" is disconnected (no edges)`);
+      }
+    }
+    return errors;
+  });
 
   // ── Run History API ─────────────────────────────────────────────────────
 

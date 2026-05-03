@@ -2,11 +2,36 @@
   <!-- Toolbar -->
   <div class="canvas-toolbar">
     <div class="toolbar-left">
-      <span class="workflow-name">{{ spec()?.name || 'Workflow' }}</span>
+      @if (isEditingName()) {
+        <input
+          class="workflow-name-input"
+          [ngModel]="editingName()"
+          (ngModelChange)="editingName.set($event)"
+          (keydown.enter)="commitNameEdit()"
+          (keydown.escape)="cancelNameEdit()"
+          (blur)="commitNameEdit()"
+          #nameInput
+        />
+      } @else {
+        <span class="workflow-name" (dblclick)="startNameEdit()"
+              matTooltip="Double-click to rename">{{ spec()?.name || 'Workflow' }}</span>
+      }
       <span class="workflow-badge" [attr.data-type]="spec()?.flow_type">{{ spec()?.flow_type || 'static' }}</span>
       <span class="agent-count">{{ layoutNodes().length }} agents</span>
+      <!-- Save status -->
+      @if (saveStatus() === 'saving') {
+        <span class="save-status save-status--saving">Saving…</span>
+      } @else if (saveStatus() === 'saved') {
+        <span class="save-status save-status--saved">✓ Saved</span>
+      } @else if (saveStatus() === 'error') {
+        <span class="save-status save-status--error">Save failed</span>
+      }
     </div>
     <div class="toolbar-right">
+      <!-- Add Node -->
+      <button class="toolbar-btn toolbar-btn--add" (click)="showAddNodeForm.update(v => !v)" matTooltip="Add agent node">
+        <mat-icon>add_circle</mat-icon>
+      </button>
       <!-- Run History dropdown -->
       @if (runHistory().length) {
         <div class="run-history-dropdown">
@@ -66,8 +91,57 @@
       <button class="toolbar-btn" (click)="resetView()" matTooltip="Fit to screen">
         <mat-icon>fit_screen</mat-icon>
       </button>
+      <!-- 3-dot menu -->
+      <div class="toolbar-more">
+        <button class="toolbar-btn" (click)="showToolbar3Dot.update(v => !v)" matTooltip="More actions">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        @if (showToolbar3Dot()) {
+          <div class="toolbar-dropdown">
+            <button class="dropdown-item" (click)="duplicateWorkflowRequest.emit(spec()?.id ?? ''); showToolbar3Dot.set(false)">
+              <mat-icon>content_copy</mat-icon> Duplicate
+            </button>
+            <button class="dropdown-item dropdown-item--danger" (click)="deleteWorkflowRequest.emit(spec()?.id ?? ''); showToolbar3Dot.set(false)">
+              <mat-icon>delete</mat-icon> Delete
+            </button>
+          </div>
+        }
+      </div>
     </div>
   </div>
+
+  <!-- Validation warnings -->
+  @if (validationErrors().length) {
+    <div class="validation-bar">
+      <mat-icon>warning_amber</mat-icon>
+      <span>{{ validationErrors()[0] }}</span>
+      @if (validationErrors().length > 1) {
+        <span class="validation-more">+{{ validationErrors().length - 1 }} more</span>
+      }
+    </div>
+  }
+
+  <!-- Add Node overlay -->
+  @if (showAddNodeForm()) {
+    <div class="add-node-overlay">
+      <div class="add-node-form">
+        <h4>Add Agent Node</h4>
+        <input class="add-node-input" placeholder="Node label (e.g. 'Summarizer')" #addNodeLabel />
+        <select class="add-node-select" #addNodeType>
+          <option value="agent">Agent</option>
+          <option value="tool">Tool</option>
+          <option value="retriever">Retriever</option>
+          <option value="human_input">Human Input</option>
+          <option value="condition">Condition</option>
+        </select>
+        <input class="add-node-input" placeholder="Description (optional)" #addNodeDesc />
+        <div class="add-node-actions">
+          <button class="add-node-cancel" (click)="showAddNodeForm.set(false)">Cancel</button>
+          <button class="add-node-submit" (click)="addNode(addNodeLabel.value, addNodeType.value, addNodeDesc.value)">Add</button>
+        </div>
+      </div>
+    </div>
+  }
 
   <!-- SVG Canvas -->
   <svg
@@ -233,6 +307,22 @@
           </g>
         }
 
+        <!-- Delete node button (visible on hover) -->
+        @if (hoveredNodeId() === node.id || selectedNodeId() === node.id) {
+          <g class="node-delete-btn" (click)="showDeleteConfirm.set(true); selectNode(node.id); $event.stopPropagation()">
+            <circle [attr.cx]="node.width - 8" cy="8" r="10" fill="rgba(239,68,68,0.85)" />
+            <text [attr.x]="node.width - 8" y="12" text-anchor="middle" fill="white" font-size="12" font-weight="bold">×</text>
+          </g>
+        }
+
+        <!-- Entry-point button -->
+        @if (hoveredNodeId() === node.id && spec()?.entry_point !== node.id) {
+          <g class="node-entry-btn" (click)="setEntryPoint(node.id); $event.stopPropagation()">
+            <circle cx="12" [attr.cy]="node.height - 12" r="8" fill="rgba(34,197,94,0.7)" />
+            <text x="12" [attr.y]="node.height - 8" text-anchor="middle" fill="white" font-size="9" font-weight="600">▶</text>
+          </g>
+        }
+
         <!-- Execution duration badge -->
         @if (node.durationMs) {
           <rect
@@ -307,12 +397,37 @@
       </div>
 
       @if (inspectorTab() === 'config') {
-        @if (selectedNode()!.description) {
-          <div class="detail-section">
-            <span class="detail-label">Description</span>
-            <p class="detail-value">{{ selectedNode()!.description }}</p>
-          </div>
-        }
+        <!-- Editable Label -->
+        <div class="detail-section">
+          <span class="detail-label">Label</span>
+          <input class="inspector-input"
+                 [ngModel]="selectedNode()!.label"
+                 (ngModelChange)="onNodeLabelChange($event)"
+                 placeholder="Node label" />
+        </div>
+
+        <!-- Editable Description -->
+        <div class="detail-section">
+          <span class="detail-label">Description</span>
+          <input class="inspector-input"
+                 [ngModel]="selectedNode()!.description"
+                 (ngModelChange)="onNodeDescriptionChange($event)"
+                 placeholder="Brief description" />
+        </div>
+
+        <!-- Editable Type -->
+        <div class="detail-section">
+          <span class="detail-label">Type</span>
+          <select class="inspector-select"
+                  [ngModel]="selectedNode()!.type"
+                  (ngModelChange)="onNodeTypeChange($event)">
+            <option value="agent">Agent</option>
+            <option value="tool">Tool</option>
+            <option value="retriever">Retriever</option>
+            <option value="human_input">Human Input</option>
+            <option value="condition">Condition</option>
+          </select>
+        </div>
 
         <!-- Editable System Prompt -->
         <div class="detail-section">
@@ -322,7 +437,7 @@
             [ngModel]="selectedNode()!.systemPrompt"
             (ngModelChange)="onSystemPromptChange($event)"
             placeholder="Enter system prompt…"
-            rows="4"
+            rows="5"
           ></textarea>
         </div>
 
@@ -341,12 +456,32 @@
           <span class="detail-label">Node ID</span>
           <code class="detail-code">{{ selectedNode()!.id }}</code>
         </div>
+
+        <!-- Actions -->
+        <div class="detail-section detail-actions">
+          @if (spec()?.entry_point !== selectedNode()!.id) {
+            <button class="action-btn action-btn--entry" (click)="setEntryPoint(selectedNode()!.id)">
+              <mat-icon>login</mat-icon> Set as Entry Point
+            </button>
+          }
+          @if (showDeleteConfirm()) {
+            <div class="delete-confirm">
+              <span>Delete this node?</span>
+              <button class="action-btn action-btn--danger" (click)="deleteNode(selectedNode()!.id)">Yes, Delete</button>
+              <button class="action-btn" (click)="showDeleteConfirm.set(false)">Cancel</button>
+            </div>
+          } @else {
+            <button class="action-btn action-btn--danger" (click)="showDeleteConfirm.set(true)">
+              <mat-icon>delete</mat-icon> Delete Node
+            </button>
+          }
+        </div>
       } @else {
         <!-- Output tab -->
         @if (getNodeOutput(selectedNode()!.id); as nodeOutput) {
           <div class="detail-section">
             <span class="detail-label">Execution Output</span>
-            <pre class="node-output-pre">{{ nodeOutput }}</pre>
+            <sq-markdown-viewer [content]="nodeOutput" />
           </div>
         } @else {
           <div class="detail-section detail-section--empty">
