@@ -362,6 +362,60 @@ class WorkflowService:
         return await cursor.to_list(length=limit)
 
     @staticmethod
+    async def update_workflow(
+        workflow_id: str, spec_updates: dict[str, Any], tenant_id: str,
+    ) -> float:
+        """Update an existing workflow specification (partial or full)."""
+        logger = logging.getLogger(__name__)
+        db = await get_database()
+        now = time.time()
+        spec_updates["updated_at"] = now
+        spec_updates.pop("_id", None)  # Never write _id
+
+        result = await db["workflows"].update_one(
+            {"id": workflow_id, "tenant_id": tenant_id},
+            {"$set": spec_updates},
+        )
+        if result.matched_count == 0:
+            raise ValueError(f"Workflow {workflow_id} not found for tenant {tenant_id}")
+        logger.info("[workflow_service] updated workflow %s (modified=%d)", workflow_id, result.modified_count)
+        return now
+
+    @staticmethod
+    async def delete_workflow(workflow_id: str, tenant_id: str) -> None:
+        """Delete a workflow and all associated execution runs."""
+        logger = logging.getLogger(__name__)
+        db = await get_database()
+        result = await db["workflows"].delete_one({"id": workflow_id, "tenant_id": tenant_id})
+        if result.deleted_count == 0:
+            raise ValueError(f"Workflow {workflow_id} not found for tenant {tenant_id}")
+        # Cascade-delete associated runs
+        run_result = await db["workflow_runs"].delete_many({"workflow_id": workflow_id, "tenant_id": tenant_id})
+        logger.info(
+            "[workflow_service] deleted workflow %s and %d associated runs",
+            workflow_id, run_result.deleted_count,
+        )
+
+    @staticmethod
+    async def duplicate_workflow(workflow_id: str, tenant_id: str) -> str:
+        """Duplicate an existing workflow with a new ID and name."""
+        logger = logging.getLogger(__name__)
+        db = await get_database()
+        original = await db["workflows"].find_one(
+            {"id": workflow_id, "tenant_id": tenant_id},
+            {"_id": 0},
+        )
+        if not original:
+            raise ValueError(f"Workflow {workflow_id} not found for tenant {tenant_id}")
+
+        new_id = str(uuid.uuid4())
+        now = time.time()
+        clone = {**original, "id": new_id, "name": f"{original.get('name', 'Workflow')} (Copy)", "created_at": now, "updated_at": now}
+        await db["workflows"].insert_one(clone)
+        logger.info("[workflow_service] duplicated workflow %s → %s", workflow_id, new_id)
+        return new_id
+
+    @staticmethod
     async def list_workflow_runs(
         workflow_id: str, tenant_id: str, limit: int = 20,
     ) -> list[dict[str, Any]]:

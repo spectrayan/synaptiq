@@ -33,6 +33,11 @@ class SaveWorkflowRequest(BaseModel):
     spec: dict = Field(..., description="Complete workflow specification JSON")
 
 
+class UpdateWorkflowRequest(BaseModel):
+    """PATCH /workflow/{workflow_id} — update an existing workflow spec."""
+    spec: dict[str, Any] = Field(..., description="Full or partial workflow specification updates")
+
+
 class ExecuteWorkflowRequest(BaseModel):
     """POST /workflow/execute — execute a workflow spec step-by-step."""
     spec: dict[str, Any] = Field(..., description="Complete workflow specification JSON")
@@ -145,6 +150,55 @@ async def get_workflow(workflow_id: str, request: Request):
         )
     logger.info("[workflow] get_workflow found: name=%s agents=%d", workflow.get('name', '?'), len(workflow.get('agents', [])))
     return workflow
+
+
+@router.patch(
+    "/{workflow_id}",
+    summary="Update an existing workflow",
+)
+async def update_workflow(workflow_id: str, body: UpdateWorkflowRequest, request: Request):
+    """Partially or fully update a saved workflow spec."""
+    tenant_id: str = request.state.tenant_id
+    logger.info("[workflow] update_workflow id=%s tenant=%s", workflow_id, tenant_id)
+    try:
+        updated_at = await workflow_service.update_workflow(workflow_id, body.spec, tenant_id)
+        logger.info("[workflow] update_workflow %s updated_at=%s", workflow_id, updated_at)
+        return {"id": workflow_id, "success": True, "updated_at": updated_at}
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+
+@router.delete(
+    "/{workflow_id}",
+    summary="Delete a workflow and its execution history",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete_workflow(workflow_id: str, request: Request):
+    """Delete a saved workflow and all associated runs."""
+    tenant_id: str = request.state.tenant_id
+    logger.info("[workflow] delete_workflow id=%s tenant=%s", workflow_id, tenant_id)
+    try:
+        await workflow_service.delete_workflow(workflow_id, tenant_id)
+        logger.info("[workflow] delete_workflow %s done", workflow_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+
+@router.post(
+    "/{workflow_id}/duplicate",
+    summary="Duplicate an existing workflow",
+    status_code=status.HTTP_201_CREATED,
+)
+async def duplicate_workflow(workflow_id: str, request: Request):
+    """Create a copy of an existing workflow with a new ID."""
+    tenant_id: str = request.state.tenant_id
+    logger.info("[workflow] duplicate_workflow id=%s tenant=%s", workflow_id, tenant_id)
+    try:
+        new_id = await workflow_service.duplicate_workflow(workflow_id, tenant_id)
+        logger.info("[workflow] duplicate_workflow %s → %s", workflow_id, new_id)
+        return {"id": new_id, "success": True}
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
 
 
 # ---------------------------------------------------------------------------
