@@ -33,36 +33,43 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if not tenant_id:
             return await call_next(request)
 
-        # Get tenant-specific limit from cached tenant_info
-        tenant_info = getattr(request.state, "tenant_info", {})
-        limits = tenant_info.get("limits", {})
-        tenant_limit = limits.get("max_requests_per_minute", 60)
+        # Rate limiting requires Redis — skip gracefully if unavailable
+        try:
+            # Get tenant-specific limit from cached tenant_info
+            tenant_info = getattr(request.state, "tenant_info", {})
+            limits = tenant_info.get("limits", {})
+            tenant_limit = limits.get("max_requests_per_minute", 60)
 
-        # 1. Check per-tenant rate limit (REQ-NF-RL1)
-        tenant_result = await RateLimiter.check_tenant(tenant_id, limit=tenant_limit)
-        if not tenant_result.allowed:
-            await self._log_rate_limit_event(request, "tenant", tenant_result)
-            return self._graceful_response(
-                message="We're handling a lot of requests right now. Please try again in a moment.",
-                retry_after=tenant_result.retry_after_seconds,
-            )
-
-        # 2. Check per-session rate limit (REQ-NF-RL2)
-        session_id = self._extract_session_id(request)
-        if session_id:
-            session_result = await RateLimiter.check_session(session_id, limit=10)
-            if not session_result.allowed:
-                await self._log_rate_limit_event(request, "session", session_result)
+            # 1. Check per-tenant rate limit (REQ-NF-RL1)
+            tenant_result = await RateLimiter.check_tenant(tenant_id, limit=tenant_limit)
+            if not tenant_result.allowed:
+                await self._log_rate_limit_event(request, "tenant", tenant_result)
                 return self._graceful_response(
-                    message="You're sending messages a bit quickly. Take a breath and try again shortly.",
-                    retry_after=session_result.retry_after_seconds,
+                    message="We're handling a lot of requests right now. Please try again in a moment.",
+                    retry_after=tenant_result.retry_after_seconds,
                 )
 
-        # Attach rate limit headers for observability
-        response = await call_next(request)
-        response.headers["X-RateLimit-Remaining"] = str(tenant_result.remaining)
-        response.headers["X-RateLimit-Limit"] = str(tenant_result.limit)
-        return response
+            # 2. Check per-session rate limit (REQ-NF-RL2)
+            session_id = self._extract_session_id(request)
+            if session_id:
+                session_result = await RateLimiter.check_session(session_id, limit=10)
+                if not session_result.allowed:
+                    await self._log_rate_limit_event(request, "session", session_result)
+                    return self._graceful_response(
+                        message="You're sending messages a bit quickly. Take a breath and try again shortly.",
+                        retry_after=session_result.retry_after_seconds,
+                    )
+
+            # Attach rate limit headers for observability
+            response = await call_next(request)
+            response.headers["X-RateLimit-Remaining"] = str(tenant_result.remaining)
+            response.headers["X-RateLimit-Limit"] = str(tenant_result.limit)
+            return response
+
+        except (RuntimeError, ConnectionError, OSError) as e:
+            # Redis unavailable — skip rate limiting, let request through
+            logger.debug("Rate limiting skipped (Redis unavailable): %s", e)
+            return await call_next(request)
 
     @staticmethod
     def _graceful_response(message: str, retry_after: float) -> JSONResponse:

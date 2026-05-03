@@ -28,7 +28,19 @@ TENANT_EXEMPT_ROUTES = (
     "/api/v1/auth/signup",
     "/api/v1/auth/login",
     "/api/v1/auth/refresh",
+    "/api/v1/auth/change-password",
 )
+
+
+def _cors_json(status_code: int, content: dict, request: Request) -> JSONResponse:
+    """Return a JSONResponse with CORS headers so the browser doesn't block it."""
+    origin = request.headers.get("origin", "")
+    headers: dict[str, str] = {}
+    allowed = settings.cors_origins
+    if origin and (origin in allowed or "*" in allowed):
+        headers["access-control-allow-origin"] = origin
+        headers["access-control-allow-credentials"] = "true"
+    return JSONResponse(status_code=status_code, content=content, headers=headers)
 
 
 class TenantMiddleware(BaseHTTPMiddleware):
@@ -54,24 +66,19 @@ class TenantMiddleware(BaseHTTPMiddleware):
                 tenant_id = host.removesuffix(f".{base}").split(":")[0]
 
         if not tenant_id:
-            return JSONResponse(
-                status_code=400,
-                content={"detail": "Unable to resolve tenant from request"},
+            return _cors_json(
+                400,
+                {"detail": "Unable to resolve tenant from request"},
+                request,
             )
 
         # 3. Validate tenant exists (Redis cache → MongoDB fallback)
         tenant_info = await self._resolve_tenant(tenant_id)
         if not tenant_info:
-            return JSONResponse(
-                status_code=404,
-                content={"detail": f"Tenant '{tenant_id}' not found"},
-            )
+            return _cors_json(404, {"detail": f"Tenant '{tenant_id}' not found"}, request)
 
         if tenant_info.get("status") == "suspended":
-            return JSONResponse(
-                status_code=403,
-                content={"detail": "Tenant is suspended"},
-            )
+            return _cors_json(403, {"detail": "Tenant is suspended"}, request)
 
         # Attach to request state
         request.state.tenant_id = tenant_id

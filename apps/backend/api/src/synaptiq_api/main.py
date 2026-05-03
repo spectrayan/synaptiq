@@ -19,7 +19,13 @@ from synaptiq_api.routers import schema_registry as schema_reg
 async def lifespan(app: FastAPI):  # noqa: ARG001
     await connect_db()
     await connect_redis()
-    initialize_firebase()
+    if settings.auth_provider == "firebase":
+        initialize_firebase()
+    else:
+        import logging
+        logging.getLogger(__name__).info(
+            "Auth provider: builtin (Firebase SDK skipped)"
+        )
     yield
     await disconnect_redis()
     await disconnect_db()

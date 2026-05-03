@@ -18,6 +18,11 @@ class Settings(BaseSettings):
     chat_session_ttl_seconds: int = 7200  # 2 hours
 
     # --- Auth ---
+    auth_provider: str = "builtin"  # "builtin" (MongoDB + JWT) or "firebase"
+    jwt_secret: str = "synaptiq-local-dev-secret-change-in-prod"  # HMAC key for builtin JWT
+    jwt_expiry_hours: int = 24  # Token lifetime in hours
+
+    # --- Firebase (used when auth_provider=firebase) ---
     firebase_project_id: str = ""
     firebase_service_account_json: str = ""  # Base64-encoded service account JSON
     firebase_api_key: str = ""  # Web API key for client-side Firebase

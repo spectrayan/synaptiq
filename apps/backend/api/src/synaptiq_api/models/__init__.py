@@ -9,6 +9,7 @@ from synaptiq_api.models.auth import (
     UserClaimsRequest,
     UserResponse,
 )
+from synaptiq_api.models.user import BuiltinTokenResponse, ChangePasswordRequest, UserDocument
 from synaptiq_api.models.base import MongoBaseModel, PyObjectId, TenantScopedMixin, TimestampMixin
 from synaptiq_api.models.catalog import (
     CatalogItem,
@@ -55,6 +56,10 @@ __all__ = [
     "TokenResponse",
     "UserClaimsRequest",
     "UserResponse",
+    # Auth — Builtin
+    "BuiltinTokenResponse",
+    "ChangePasswordRequest",
+    "UserDocument",
     # Tenant
     "AccessMode",
     "ActionsConfig",

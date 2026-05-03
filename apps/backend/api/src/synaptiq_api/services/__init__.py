@@ -1,11 +1,13 @@
 """Synaptiq services — re-exports."""
 from synaptiq_api.services.auth_service import AuthService
+from synaptiq_api.services.builtin_auth_service import BuiltinAuthService
 from synaptiq_api.services.catalog_service import CatalogService
 from synaptiq_api.services.schema_service import SchemaService
 from synaptiq_api.services.tenant_service import TenantService
 
 __all__ = [
     "AuthService",
+    "BuiltinAuthService",
     "CatalogService",
     "SchemaService",
     "TenantService",
