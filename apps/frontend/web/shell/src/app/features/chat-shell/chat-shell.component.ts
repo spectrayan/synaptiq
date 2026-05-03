@@ -1101,9 +1101,79 @@ export class ChatShellComponent implements OnDestroy {
     this._workflowCanvas()?.setExecutionStatus('idle');
   }
 
+  // ── Debounced Auto-Save ────────────────────────────────────────────────
+
+  private _autoSaveTimer: ReturnType<typeof setTimeout> | null = null;
+  private static readonly AUTO_SAVE_DELAY = 1500;
+
+  /** Handle spec changes from the canvas — update local state and debounce persist. */
+  onWorkflowSpecChange(updated: WorkflowSpec): void {
+    this.currentWorkflow.set(updated);
+    this._scheduleAutoSave(updated);
+  }
+
+  private _scheduleAutoSave(spec: WorkflowSpec): void {
+    if (this._autoSaveTimer) clearTimeout(this._autoSaveTimer);
+
+    const canvas = this._workflowCanvas();
+    canvas?.saveStatus.set('idle');
+
+    this._autoSaveTimer = setTimeout(async () => {
+      if (!spec.id) return; // Not yet persisted
+      canvas?.saveStatus.set('saving');
+      try {
+        const token = await this.auth.getIdToken();
+        await this.workflowService.updateWorkflow(spec.id, spec, token ?? undefined);
+        canvas?.saveStatus.set('saved');
+        console.log(`[ChatShell] auto-saved workflow ${spec.id}`);
+        // Reset "saved" indicator after 3s
+        setTimeout(() => canvas?.saveStatus.set('idle'), 3000);
+      } catch (e) {
+        console.error('[ChatShell] auto-save failed:', e);
+        canvas?.saveStatus.set('error');
+      }
+    }, ChatShellComponent.AUTO_SAVE_DELAY);
+  }
+
+  // ── Delete / Duplicate Workflow ────────────────────────────────────────
+
+  async onDeleteWorkflow(workflowId: string): Promise<void> {
+    if (!workflowId) return;
+    if (!confirm('Delete this workflow and all execution history? This cannot be undone.')) return;
+
+    try {
+      const token = await this.auth.getIdToken();
+      await this.workflowService.deleteWorkflow(workflowId, token ?? undefined);
+      console.log(`[ChatShell] deleted workflow ${workflowId}`);
+      // Clear current workflow & switch to chat
+      this.currentWorkflow.set(null);
+      this.mainTab.set('chat');
+      // Refresh sidebar list
+      this.loadSavedWorkflows();
+    } catch (e) {
+      console.error('[ChatShell] delete failed:', e);
+    }
+  }
+
+  async onDuplicateWorkflow(workflowId: string): Promise<void> {
+    if (!workflowId) return;
+    try {
+      const token = await this.auth.getIdToken();
+      const newId = await this.workflowService.duplicateWorkflow(workflowId, token ?? undefined);
+      console.log(`[ChatShell] duplicated workflow ${workflowId} → ${newId}`);
+      // Load the duplicate
+      this.loadSavedWorkflow(newId);
+      // Refresh sidebar list
+      this.loadSavedWorkflows();
+    } catch (e) {
+      console.error('[ChatShell] duplicate failed:', e);
+    }
+  }
+
   ngOnDestroy(): void {
     this._stopAllAutoRefresh();
     if (this._pinnedSyncTimer) clearTimeout(this._pinnedSyncTimer);
+    if (this._autoSaveTimer) clearTimeout(this._autoSaveTimer);
     this._execAbort?.abort();
   }
 }

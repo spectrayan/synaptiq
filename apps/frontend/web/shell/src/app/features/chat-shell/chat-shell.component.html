@@ -118,8 +118,10 @@
           [spec]="wf"
           (runWorkflow)="onRunWorkflow()"
           (stopExecution)="onStopExecution()"
-          (specChange)="currentWorkflow.set($event)"
+          (specChange)="onWorkflowSpecChange($event)"
           (selectRun)="onSelectRun($event)"
+          (deleteWorkflowRequest)="onDeleteWorkflow($event)"
+          (duplicateWorkflowRequest)="onDuplicateWorkflow($event)"
         ></sq-workflow-canvas>
       } @else {
         <div class="workflow-empty">
