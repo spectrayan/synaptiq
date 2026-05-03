@@ -1,0 +1,28 @@
+<header class="topbar sq-glass">
+  @if (!sidebarOpen() || isMobile()) {
+    <button mat-icon-button (click)="toggleSidebar.emit()" matTooltip="Open sidebar">
+      <mat-icon>menu</mat-icon>
+    </button>
+  }
+  <div class="topbar-title">{{ isAdminMode() ? 'Admin Console' : 'AI Assistant' }}</div>
+  <div class="topbar-actions">
+    @if (isAdminMode()) {
+      <span class="mode-badge admin">⚙ Admin</span>
+    }
+    @if (!isAuthenticated()) {
+      <button class="auth-btn-inline" (click)="openAuth.emit('signin')">Sign in</button>
+      <button class="auth-btn-inline signup" (click)="openAuth.emit('signup')">Sign up</button>
+    }
+    <span class="mode-badge" [class.live]="useBackend()">
+      {{ useBackend() ? '● Live' : '○ Demo' }}
+    </span>
+    <button mat-icon-button
+            [matTooltip]="isDark() ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+            (click)="toggleTheme.emit()">
+      <mat-icon>{{ isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+    </button>
+    <button mat-icon-button matTooltip="Settings" (click)="openSettings.emit()">
+      <mat-icon>settings</mat-icon>
+    </button>
+  </div>
+</header>

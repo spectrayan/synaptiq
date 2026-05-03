@@ -1,0 +1,114 @@
+:host {
+  display: block;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--sq-space-3);
+  padding: 0 var(--sq-space-4);
+  border-bottom: 1px solid var(--sq-outline-variant);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: var(--sq-topbar-height);
+}
+
+.topbar-title {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--sq-on-surface);
+}
+
+.topbar-actions {
+  display: flex;
+  gap: var(--sq-space-1);
+  align-items: center;
+}
+
+.auth-btn-inline {
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  border-radius: var(--sq-radius-full, 999px);
+  border: 1px solid var(--sq-outline-variant);
+  background: transparent;
+  color: var(--sq-on-surface);
+  cursor: pointer;
+  transition: all var(--sq-transition-fast);
+
+  &:hover {
+    background: var(--sq-surface-overlay);
+    border-color: var(--sq-primary);
+    color: var(--sq-primary);
+  }
+
+  &.signup {
+    background: var(--sq-primary);
+    color: var(--sq-on-primary);
+    border-color: var(--sq-primary);
+
+    &:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+  }
+}
+
+.mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  border-radius: var(--sq-radius-full, 999px);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--sq-on-surface-variant);
+  border: 1px solid var(--sq-outline-variant);
+  transition: all var(--sq-transition-fast);
+
+  &.live {
+    background: rgba(76, 175, 80, 0.12);
+    color: #66bb6a;
+    border-color: rgba(76, 175, 80, 0.3);
+  }
+
+  &.admin {
+    background: rgba(179, 157, 219, 0.15);
+    color: #b39ddb;
+    border-color: rgba(179, 157, 219, 0.35);
+  }
+}
+
+// ─── Light Theme ────────────────────────────────────────────────────────────
+:host-context([data-theme="light"]) {
+  .topbar {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-color: var(--sq-outline-variant);
+  }
+
+  .mode-badge {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--sq-on-surface-variant);
+    border-color: var(--sq-outline-variant);
+
+    &.live {
+      background: rgba(46, 125, 50, 0.08);
+      color: #2e7d32;
+      border-color: rgba(46, 125, 50, 0.2);
+    }
+
+    &.admin {
+      background: rgba(124, 77, 255, 0.08);
+      color: #7c4dff;
+      border-color: rgba(124, 77, 255, 0.2);
+    }
+  }
+}

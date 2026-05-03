@@ -1,0 +1,250 @@
+<div class="config-panel sq-animate-in">
+  <!-- Persona Config -->
+  @if (configPanel() === 'persona') {
+    @let persona = $any(configData());
+    <div class="config-field">
+      <label>Display Name</label>
+      <input type="text" [value]="persona.display_name"
+        (change)="onSaveField('display_name', $any($event.target).value)" />
+    </div>
+    <div class="config-field">
+      <label>Tone</label>
+      <select [value]="persona.tone"
+        (change)="onSaveField('tone', $any($event.target).value)">
+        <option value="professional">Professional</option>
+        <option value="friendly">Friendly</option>
+        <option value="concise">Concise</option>
+        <option value="enthusiastic">Enthusiastic</option>
+        <option value="formal">Formal</option>
+      </select>
+    </div>
+    <div class="config-field">
+      <label>Welcome Message</label>
+      <textarea rows="2" [value]="persona.welcome_message"
+        (change)="onSaveField('welcome_message', $any($event.target).value)"></textarea>
+    </div>
+    <div class="config-field">
+      <label>Custom Instruction</label>
+      <textarea rows="2" [value]="persona.custom_instruction"
+        (change)="onSaveField('custom_instruction', $any($event.target).value)"></textarea>
+    </div>
+  }
+
+  <!-- Provider Config -->
+  @if (configPanel() === 'provider') {
+    @let provider = $any(configData());
+    <div class="config-field">
+      <label>Provider</label>
+      <select [value]="provider.provider"
+        (change)="onSaveField('provider', $any($event.target).value)">
+        <option value="platform_managed">Platform Managed</option>
+        <option value="openai">OpenAI</option>
+        <option value="gemini">Gemini</option>
+        <option value="anthropic">Anthropic</option>
+      </select>
+    </div>
+    <div class="config-field">
+      <label>Model ID</label>
+      <input type="text" [value]="provider.model_id"
+        (change)="onSaveField('model_id', $any($event.target).value)" />
+    </div>
+    <div class="config-field config-toggle-row">
+      <label>Bring Your Own Key (BYOK)</label>
+      <div class="config-toggle" [class.active]="provider.is_byok"
+        (click)="onSaveField('is_byok', !provider.is_byok)"></div>
+    </div>
+    @if (provider.is_byok) {
+      <div class="config-field">
+        <label>API Key {{ provider.has_key ? '(set)' : '(not set)' }}</label>
+        <input type="password" placeholder="Enter API key"
+          (change)="onSaveField('byok_encrypted_key', $any($event.target).value)" />
+      </div>
+    }
+  }
+
+  <!-- Guardrails Config -->
+  @if (configPanel() === 'guardrails') {
+    @let guardrails = $any(configData());
+    <div class="config-field">
+      <label>Out-of-scope Message</label>
+      <textarea rows="2" [value]="guardrails.out_of_scope_message"
+        (change)="onSaveField('out_of_scope_message', $any($event.target).value)"></textarea>
+    </div>
+    <div class="config-field config-toggle-row">
+      <label>Recommendation Mode</label>
+      <div class="config-toggle" [class.active]="guardrails.recommendation_mode"
+        (click)="onSaveField('recommendation_mode', !guardrails.recommendation_mode)"></div>
+    </div>
+    <div class="config-field">
+      <label>Language (ISO 639-1)</label>
+      <input type="text" [value]="guardrails.language" maxlength="10"
+        (change)="onSaveField('language', $any($event.target).value)" />
+    </div>
+  }
+
+  <!-- Components Config -->
+  @if (configPanel() === 'components') {
+    @let comps = $any(configData());
+    @for (field of componentFields; track field) {
+      <div class="config-field config-toggle-row">
+        <label>{{ formatFieldName(field) }}</label>
+        <div class="config-toggle" [class.active]="comps[field]"
+          (click)="onSaveField(field, !comps[field])"></div>
+      </div>
+    }
+    <div class="config-field config-toggle-row config-locked">
+      <label>Action Confirm <span class="config-lock-badge">locked</span></label>
+      <div class="config-toggle active"></div>
+    </div>
+  }
+
+  <!-- Actions Config -->
+  @if (configPanel() === 'actions') {
+    @let actCfg = $any(configData());
+    @for (action of actCfg.actions; track action.action_id) {
+      <div class="config-action-row">
+        <div class="config-toggle" [class.active]="action.enabled"
+          (click)="onSaveField('actions', toggleAction(actCfg.actions, action.action_id))"></div>
+        <span class="config-action-id">{{ action.action_id }}</span>
+        <input type="text" class="config-action-label" [value]="action.label"
+          (change)="onSaveField('actions', updateActionLabel(actCfg.actions, action.action_id, $any($event.target).value))" />
+      </div>
+    }
+    <div class="config-field">
+      <label>Enquiry Webhook URL</label>
+      <input type="url" [value]="actCfg.enquiry_webhook_url"
+        (change)="onSaveField('enquiry_webhook_url', $any($event.target).value)" />
+    </div>
+    <div class="config-field">
+      <label>Enquiry Email</label>
+      <input type="email" [value]="actCfg.enquiry_email"
+        (change)="onSaveField('enquiry_email', $any($event.target).value)" />
+    </div>
+  }
+
+  <!-- Branding Config (T10) -->
+  @if (configPanel() === 'branding') {
+    @let brand = $any(configData());
+    <div class="config-field">
+      <label>Primary Color</label>
+      <div class="config-color-row">
+        <input type="color" [value]="brand.primary_color"
+          (change)="onSaveField('primary_color', $any($event.target).value)" />
+        <span class="config-color-hex">{{ brand.primary_color }}</span>
+      </div>
+    </div>
+    <div class="config-field">
+      <label>Secondary Color</label>
+      <div class="config-color-row">
+        <input type="color" [value]="brand.secondary_color"
+          (change)="onSaveField('secondary_color', $any($event.target).value)" />
+        <span class="config-color-hex">{{ brand.secondary_color }}</span>
+      </div>
+    </div>
+    <div class="config-field">
+      <label>Accent Color</label>
+      <div class="config-color-row">
+        <input type="color" [value]="brand.accent_color"
+          (change)="onSaveField('accent_color', $any($event.target).value)" />
+        <span class="config-color-hex">{{ brand.accent_color }}</span>
+      </div>
+    </div>
+    @if (contrastCheck()) {
+      <div class="config-contrast" [class.pass]="contrastCheck()!.passes" [class.fail]="!contrastCheck()!.passes">
+        <mat-icon>{{ contrastCheck()!.passes ? 'check_circle' : 'warning' }}</mat-icon>
+        <span>WCAG AA {{ contrastCheck()!.passes ? 'Pass' : 'Fail' }} — Ratio: {{ contrastCheck()!.ratio | number:'1.1-1' }}:1</span>
+      </div>
+    }
+    <div class="config-field">
+      <label>Font Family</label>
+      <input type="text" [value]="brand.font_family"
+        (change)="onSaveField('font_family', $any($event.target).value)" />
+    </div>
+    <div class="config-field">
+      <label>Background Style</label>
+      <select [value]="brand.background_style"
+        (change)="onSaveField('background_style', $any($event.target).value)">
+        <option value="dark">Dark</option>
+        <option value="light">Light</option>
+        <option value="gradient">Gradient</option>
+      </select>
+    </div>
+    <div class="config-field">
+      <label>Logo</label>
+      <div class="config-logo-row">
+        @if (brand.logo_url) {
+          <img [src]="brand.logo_url" alt="Tenant logo" class="config-logo-preview" />
+        }
+        <button class="config-btn" (click)="triggerLogoUpload.emit(messageId())">
+          <mat-icon>upload</mat-icon> Upload Logo
+        </button>
+      </div>
+    </div>
+    <div class="config-field">
+      <label>Favicon URL</label>
+      <input type="url" [value]="brand.favicon_url"
+        (change)="onSaveField('favicon_url', $any($event.target).value)" />
+    </div>
+  }
+
+  <!-- Themes Config (T10.5) -->
+  @if (configPanel() === 'themes') {
+    @let themes = $any(configData());
+    @if (themes.length === 0) {
+      <div class="config-empty">No theme presets yet. Create one to get started!</div>
+    }
+    @for (theme of themes; track theme.name) {
+      <div class="config-theme-card">
+        <div class="config-theme-header">
+          <strong>{{ theme.name }}</strong>
+          @if (theme.is_default) {
+            <span class="config-badge">Default</span>
+          }
+        </div>
+        <div class="config-theme-colors">
+          <span class="config-swatch" [style.background]="theme.primary_color"></span>
+          <span class="config-swatch" [style.background]="theme.secondary_color"></span>
+        </div>
+        <div class="config-theme-meta">{{ theme.heading_font || 'Default font' }} · {{ theme.background_style }}</div>
+      </div>
+    }
+  }
+
+  <!-- Personalization Config (T10.9) -->
+  @if (configPanel() === 'personalization') {
+    @let personalization = $any(configData());
+    <div class="config-field config-toggle-row">
+      <label>Allow User Theme Switching</label>
+      <div class="config-toggle" [class.active]="personalization.allow_theme_switching"
+        (click)="onSaveField('allow_theme_switching', !personalization.allow_theme_switching)"></div>
+    </div>
+    <div class="config-field config-toggle-row">
+      <label>Allow Font Size Override</label>
+      <div class="config-toggle" [class.active]="personalization.allow_font_size"
+        (click)="onSaveField('allow_font_size', !personalization.allow_font_size)"></div>
+    </div>
+    <div class="config-field config-toggle-row">
+      <label>Allow Bubble Style Override</label>
+      <div class="config-toggle" [class.active]="personalization.allow_bubble_style"
+        (click)="onSaveField('allow_bubble_style', !personalization.allow_bubble_style)"></div>
+    </div>
+    <div class="config-field">
+      <label>Default Font Size</label>
+      <select [value]="personalization.default_font_size"
+        (change)="onSaveField('default_font_size', $any($event.target).value)">
+        <option value="small">Small</option>
+        <option value="medium">Medium</option>
+        <option value="large">Large</option>
+      </select>
+    </div>
+    <div class="config-field">
+      <label>Default Bubble Style</label>
+      <select [value]="personalization.default_bubble_style"
+        (change)="onSaveField('default_bubble_style', $any($event.target).value)">
+        <option value="rounded">Rounded</option>
+        <option value="sharp">Sharp</option>
+        <option value="minimal">Minimal</option>
+      </select>
+    </div>
+  }
+</div>

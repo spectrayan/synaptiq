@@ -1,0 +1,78 @@
+@if (isOpen()) {
+  <div class="settings-overlay" (click)="close.emit()"></div>
+  <aside class="settings-panel">
+    <div class="settings-header">
+      <span class="settings-title">Settings</span>
+      <button mat-icon-button (click)="close.emit()" matTooltip="Close">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="settings-body">
+      <!-- Appearance -->
+      <div class="settings-group">
+        <div class="settings-label">Appearance</div>
+        <button class="settings-item clickable" (click)="toggleTheme.emit()">
+          <mat-icon>{{ isDark() ? 'dark_mode' : 'light_mode' }}</mat-icon>
+          <span>{{ isDark() ? 'Dark Mode' : 'Light Mode' }}</span>
+          <div class="settings-toggle" [class.active]="isDark()"></div>
+        </button>
+      </div>
+
+      <!-- Connection -->
+      <div class="settings-group">
+        <div class="settings-label">Connection</div>
+        <div class="settings-item">
+          <mat-icon>cloud</mat-icon>
+          <span>API Mode</span>
+          <span class="settings-value">{{ useBackend() ? '● Live' : '○ Demo' }}</span>
+        </div>
+        <div class="settings-item">
+          <mat-icon>link</mat-icon>
+          <span>Backend</span>
+          <span class="settings-value settings-url" [matTooltip]="apiBaseUrl()">{{ apiBaseUrl() }}</span>
+        </div>
+      </div>
+
+      <!-- Account -->
+      <div class="settings-group">
+        <div class="settings-label">Account</div>
+        @if (isAuthenticated()) {
+          <div class="settings-item">
+            <mat-icon>person</mat-icon>
+            <span>{{ userEmail() ?? 'Signed in' }}</span>
+          </div>
+          <button class="settings-item clickable" (click)="signOut.emit(); close.emit()">
+            <mat-icon>logout</mat-icon>
+            <span>Sign out</span>
+          </button>
+        } @else {
+          <button class="settings-item clickable" (click)="openAuth.emit('signin'); close.emit()">
+            <mat-icon>login</mat-icon>
+            <span>Sign in</span>
+          </button>
+          <button class="settings-item clickable" (click)="openAuth.emit('signup'); close.emit()">
+            <mat-icon>person_add</mat-icon>
+            <span>Create account</span>
+          </button>
+        }
+      </div>
+
+      <!-- Data -->
+      <div class="settings-group">
+        <div class="settings-label">Data</div>
+        <button class="settings-item clickable settings-danger" (click)="clearConversations.emit()">
+          <mat-icon>delete_outline</mat-icon>
+          <span>Clear all conversations</span>
+        </button>
+      </div>
+
+      <!-- About -->
+      <div class="settings-about">
+        <span class="brand-icon">⚡</span>
+        <span class="settings-brand sq-gradient-text">Synaptiq</span>
+        <span class="settings-version">v0.1.0 — AI-Native Platform</span>
+      </div>
+    </div>
+  </aside>
+}

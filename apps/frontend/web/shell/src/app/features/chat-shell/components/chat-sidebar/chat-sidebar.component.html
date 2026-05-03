@@ -1,0 +1,135 @@
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="brand">
+      <span class="brand-icon">⚡</span>
+      <span class="brand-name sq-gradient-text">Synaptiq</span>
+    </div>
+    <button mat-icon-button (click)="toggleSidebar.emit()" matTooltip="Close sidebar" class="sidebar-close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <button class="new-chat-btn" (click)="newConversation.emit()">
+    <mat-icon>add</mat-icon>
+    New conversation
+  </button>
+
+  <!-- Sidebar Tabs: Recent / Pinned / Workflows -->
+  <div class="sidebar-tabs">
+    <button class="sidebar-tab" [class.active]="sidebarTab() === 'recent'" (click)="sidebarTab.set('recent')">
+      <mat-icon>chat_bubble_outline</mat-icon> Recent
+    </button>
+    <button class="sidebar-tab" [class.active]="sidebarTab() === 'pinned'" (click)="sidebarTab.set('pinned')">
+      <mat-icon>push_pin</mat-icon> Pinned
+      @if (pinnedViews().length) {
+        <span class="sidebar-tab-badge">{{ pinnedViews().length }}</span>
+      }
+    </button>
+    <button class="sidebar-tab" [class.active]="sidebarTab() === 'workflows'" (click)="sidebarTab.set('workflows')">
+      <mat-icon>account_tree</mat-icon> Flows
+      @if (savedWorkflows().length) {
+        <span class="sidebar-tab-badge">{{ savedWorkflows().length }}</span>
+      }
+    </button>
+  </div>
+
+  @if (sidebarTab() === 'recent') {
+    <div class="history-list">
+      @for (session of sessionHistory(); track session.session_id) {
+        <div
+          class="history-item"
+          [class.active]="activeSessionId() === session.session_id"
+          (click)="loadSession.emit(session)"
+        >
+          <mat-icon class="history-icon">chat_bubble_outline</mat-icon>
+          <span class="history-title">{{ session.title }}</span>
+          <span class="history-meta">{{ session.turn_count }}</span>
+          <button
+            class="history-delete"
+            mat-icon-button
+            (click)="deleteSession.emit({ session, event: $event })"
+            matTooltip="Delete"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      }
+
+      @if (!sessionHistory().length) {
+        <div class="history-empty">
+          <mat-icon>forum</mat-icon>
+          <span>No conversations yet</span>
+        </div>
+      }
+    </div>
+  } @else if (sidebarTab() === 'pinned') {
+    <!-- Pinned Views List -->
+    <div class="pinned-list">
+      @for (pv of pinnedViews(); track pv.view_id) {
+        <div
+          class="pinned-item"
+          [class.active]="activePinnedView() === pv.view_id"
+          (click)="selectPinnedView.emit(pv.view_id)"
+        >
+          <mat-icon class="pinned-item-icon">{{ pv.icon || 'dashboard' }}</mat-icon>
+          <span class="pinned-item-title">{{ pv.title }}</span>
+          <button
+            class="pinned-item-close"
+            mat-icon-button
+            (click)="unpinView.emit({ viewId: pv.view_id, event: $event })"
+            matTooltip="Unpin"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      }
+
+      @if (!pinnedViews().length) {
+        <div class="history-empty">
+          <mat-icon>push_pin</mat-icon>
+          <span>No pinned views yet</span>
+        </div>
+      }
+    </div>
+  } @else {
+    <!-- Saved Workflows List -->
+    <div class="history-list">
+      @for (wf of savedWorkflows(); track wf.id) {
+        <div
+          class="history-item"
+          [class.active]="currentWorkflowId() === wf.id"
+          (click)="loadSavedWorkflow.emit(wf.id)"
+        >
+          <mat-icon class="history-icon">account_tree</mat-icon>
+          <span class="history-title">{{ wf.name || 'Untitled Workflow' }}</span>
+          <span class="history-meta">{{ wf.flow_type }}</span>
+        </div>
+      }
+
+      @if (!savedWorkflows().length) {
+        <div class="history-empty">
+          <mat-icon>account_tree</mat-icon>
+          <span>No workflows yet</span>
+          <span style="font-size: 11px; opacity: 0.6;">Ask the AI to create one!</span>
+        </div>
+      }
+    </div>
+  }
+
+  <div class="sidebar-footer">
+    @if (!isAuthenticated()) {
+      <button class="auth-sidebar-btn" (click)="openAuth.emit('signin')">
+        <mat-icon>login</mat-icon>
+        Sign in
+      </button>
+    } @else {
+      <div class="user-badge">
+        <span class="user-avatar">{{ userEmail()?.charAt(0)?.toUpperCase() ?? '?' }}</span>
+        <span class="user-email">{{ userEmail() ?? 'User' }}</span>
+        <button mat-icon-button matTooltip="Sign out" (click)="signOut.emit()">
+          <mat-icon>logout</mat-icon>
+        </button>
+      </div>
+    }
+  </div>
+</aside>

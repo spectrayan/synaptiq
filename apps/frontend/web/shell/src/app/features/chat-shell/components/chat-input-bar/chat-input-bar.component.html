@@ -1,0 +1,21 @@
+<div class="input-bar sq-glass" role="form" aria-label="Message input">
+  <textarea
+    class="chat-input"
+    [placeholder]="isAdminMode() ? 'Manage your workspace, data, or view analytics…' : 'Ask me anything…'"
+    rows="1"
+    [value]="inputValue()"
+    (input)="inputValue.set($any($event.target).value)"
+    (keydown)="onKeydown($event)"
+    aria-label="Type your message"
+  ></textarea>
+  <button
+    mat-icon-button
+    class="send-btn"
+    [disabled]="!inputValue().trim() || isLoading()"
+    (click)="send()"
+    matTooltip="Send (Enter)"
+    aria-label="Send message"
+  >
+    <mat-icon>send</mat-icon>
+  </button>
+</div>
