@@ -359,6 +359,7 @@ export class WorkflowCanvasComponent {
     // Topological sort (BFS) to compute layers
     const layers = new Map<string, number>();
     const queue: string[] = [];
+    const visited = new Set<string>();
 
     // Entry point is always layer 0
     if (spec.entry_point && inDeg.has(spec.entry_point)) {
@@ -373,13 +374,21 @@ export class WorkflowCanvasComponent {
       }
     }
 
-    while (queue.length > 0) {
+    // Guard: max iterations to prevent hangs in malformed graphs
+    const maxIterations = agents.length * agents.length + agents.length;
+    let iterations = 0;
+
+    while (queue.length > 0 && iterations < maxIterations) {
+      iterations++;
       const node = queue.shift()!;
+      if (visited.has(node)) continue;
+      visited.add(node);
+
       const currentLayer = layers.get(node) ?? 0;
       for (const next of adj.get(node) ?? []) {
         const nextLayer = Math.max(layers.get(next) ?? 0, currentLayer + 1);
         layers.set(next, nextLayer);
-        if (!queue.includes(next)) {
+        if (!visited.has(next)) {
           queue.push(next);
         }
       }

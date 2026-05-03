@@ -309,48 +309,70 @@ export class WorkflowService {
 
   /** Load all saved workflows for the current tenant. */
   async listWorkflows(authToken?: string): Promise<WorkflowSpec[]> {
+    console.log('[WorkflowService] listWorkflows: fetching...');
     const headers: Record<string, string> = {};
     if (this.env.tenantId) headers['X-Tenant-ID'] = this.env.tenantId;
     if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
 
     const response = await fetch(`${this.baseUrl}/list`, { headers });
-    if (!response.ok) return [];
+    if (!response.ok) {
+      console.warn(`[WorkflowService] listWorkflows failed: ${response.status}`);
+      return [];
+    }
     const data = await response.json();
+    console.log(`[WorkflowService] listWorkflows: got ${(data.workflows ?? []).length} workflows`);
     return data.workflows ?? [];
   }
 
   /** Get full workflow details by ID. */
   async getWorkflow(workflowId: string, authToken?: string): Promise<WorkflowSpec | null> {
+    console.log(`[WorkflowService] getWorkflow: ${workflowId}`);
     const headers: Record<string, string> = {};
     if (this.env.tenantId) headers['X-Tenant-ID'] = this.env.tenantId;
     if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
 
     const response = await fetch(`${this.baseUrl}/${workflowId}`, { headers });
-    if (!response.ok) return null;
-    return response.json();
+    if (!response.ok) {
+      console.warn(`[WorkflowService] getWorkflow ${workflowId} failed: ${response.status}`);
+      return null;
+    }
+    const data = await response.json();
+    console.log(`[WorkflowService] getWorkflow: loaded "${data?.name}" with ${data?.agents?.length ?? 0} agents`);
+    return data;
   }
 
   /** List past execution runs for a workflow. */
   async listRuns(workflowId: string, authToken?: string): Promise<WorkflowRunSummary[]> {
+    console.log(`[WorkflowService] listRuns: workflow=${workflowId}`);
     const headers: Record<string, string> = {};
     if (this.env.tenantId) headers['X-Tenant-ID'] = this.env.tenantId;
     if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
 
     const response = await fetch(`${this.baseUrl}/${workflowId}/runs`, { headers });
-    if (!response.ok) return [];
+    if (!response.ok) {
+      console.warn(`[WorkflowService] listRuns ${workflowId} failed: ${response.status}`);
+      return [];
+    }
     const data = await response.json();
+    console.log(`[WorkflowService] listRuns: got ${(data.runs ?? []).length} runs`);
     return data.runs ?? [];
   }
 
   /** Get full execution run details with all node outputs. */
   async getRunDetails(runId: string, authToken?: string): Promise<WorkflowRunDetail | null> {
+    console.log(`[WorkflowService] getRunDetails: ${runId}`);
     const headers: Record<string, string> = {};
     if (this.env.tenantId) headers['X-Tenant-ID'] = this.env.tenantId;
     if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
 
     const response = await fetch(`${this.baseUrl}/runs/${runId}`, { headers });
-    if (!response.ok) return null;
-    return response.json();
+    if (!response.ok) {
+      console.warn(`[WorkflowService] getRunDetails ${runId} failed: ${response.status}`);
+      return null;
+    }
+    const data = await response.json();
+    console.log(`[WorkflowService] getRunDetails: loaded run status=${data?.status}`);
+    return data;
   }
 
   abort(): void {

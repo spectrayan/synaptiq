@@ -1,6 +1,9 @@
 """Workflow router — SSE streaming workflow generation, execution + CRUD endpoints."""
 import json
+import logging
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 from fastapi import APIRouter, HTTPException, Request, status
 from fastapi.responses import StreamingResponse
@@ -119,7 +122,9 @@ async def save_workflow(body: SaveWorkflowRequest, request: Request):
 async def list_workflows(request: Request, limit: int = 20):
     """List all saved workflows for the current tenant."""
     tenant_id: str = request.state.tenant_id
+    logger.info("[workflow] list_workflows tenant=%s limit=%d", tenant_id, limit)
     workflows = await workflow_service.list_workflows(tenant_id, limit)
+    logger.info("[workflow] list_workflows returned %d workflows", len(workflows))
     return {"workflows": workflows}
 
 
@@ -130,12 +135,15 @@ async def list_workflows(request: Request, limit: int = 20):
 async def get_workflow(workflow_id: str, request: Request):
     """Retrieve a saved workflow by ID."""
     tenant_id: str = request.state.tenant_id
+    logger.info("[workflow] get_workflow id=%s tenant=%s", workflow_id, tenant_id)
     workflow = await workflow_service.get_workflow(workflow_id, tenant_id)
     if not workflow:
+        logger.warning("[workflow] get_workflow %s not found for tenant %s", workflow_id, tenant_id)
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Workflow {workflow_id} not found",
         )
+    logger.info("[workflow] get_workflow found: name=%s agents=%d", workflow.get('name', '?'), len(workflow.get('agents', [])))
     return workflow
 
 
@@ -199,7 +207,9 @@ async def list_workflow_runs(
 ):
     """List past runs (most recent first) for a specific workflow."""
     tenant_id: str = request.state.tenant_id
+    logger.info("[workflow] list_runs workflow_id=%s tenant=%s", workflow_id, tenant_id)
     runs = await workflow_service.list_workflow_runs(workflow_id, tenant_id, limit)
+    logger.info("[workflow] list_runs returned %d runs", len(runs))
     return {"runs": runs}
 
 
@@ -210,10 +220,13 @@ async def list_workflow_runs(
 async def get_workflow_run(run_id: str, request: Request):
     """Retrieve a full execution run including all node outputs."""
     tenant_id: str = request.state.tenant_id
+    logger.info("[workflow] get_run run_id=%s tenant=%s", run_id, tenant_id)
     run = await workflow_service.get_workflow_run(run_id, tenant_id)
     if not run:
+        logger.warning("[workflow] get_run %s not found for tenant %s", run_id, tenant_id)
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Run {run_id} not found",
         )
+    logger.info("[workflow] get_run found: status=%s", run.get('status', '?'))
     return run

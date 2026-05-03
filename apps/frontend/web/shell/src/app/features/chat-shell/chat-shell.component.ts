@@ -196,7 +196,9 @@ export class ChatShellComponent implements OnDestroy {
       const tab = this.mainTab();
       const wf = this.currentWorkflow();
       if (tab === 'workflow' && wf?.id) {
-        this.loadRunHistory();
+        // Use untracked to prevent the async work from re-triggering this effect
+        const workflowId = wf.id;
+        queueMicrotask(() => this._loadRunHistoryById(workflowId));
       }
     });
 
@@ -529,26 +531,32 @@ export class ChatShellComponent implements OnDestroy {
 
   /** Fetch saved workflows from the backend for the sidebar list. */
   async loadSavedWorkflows(): Promise<void> {
+    console.log('[ChatShell] loadSavedWorkflows: fetching list...');
     try {
       const authToken = (await this.auth.getIdToken().catch(() => undefined)) ?? undefined;
       const workflows = await this.workflowService.listWorkflows(authToken);
+      console.log(`[ChatShell] loadSavedWorkflows: got ${workflows.length} workflows`);
       this.savedWorkflows.set(workflows);
-    } catch {
-      // silently ignore — sidebar will show empty
+    } catch (err) {
+      console.warn('[ChatShell] loadSavedWorkflows failed:', err);
     }
   }
 
   /** Load a saved workflow by fetching its full spec and opening the canvas. */
   async loadSavedWorkflow(workflowId: string): Promise<void> {
+    console.log(`[ChatShell] loadSavedWorkflow: loading ${workflowId}...`);
     try {
       const authToken = (await this.auth.getIdToken().catch(() => undefined)) ?? undefined;
       const spec = await this.workflowService.getWorkflow(workflowId, authToken);
       if (spec) {
+        console.log(`[ChatShell] loadSavedWorkflow: loaded "${spec.name}" with ${spec.agents?.length ?? 0} agents`);
         this.currentWorkflow.set(spec);
         this.mainTab.set('workflow');
+      } else {
+        console.warn(`[ChatShell] loadSavedWorkflow: workflow ${workflowId} returned null`);
       }
-    } catch {
-      // silently ignore
+    } catch (err) {
+      console.error('[ChatShell] loadSavedWorkflow failed:', err);
     }
   }
 
@@ -558,13 +566,20 @@ export class ChatShellComponent implements OnDestroy {
   async loadRunHistory(): Promise<void> {
     const wf = this.currentWorkflow();
     if (!wf?.id) return;
+    return this._loadRunHistoryById(wf.id);
+  }
+
+  /** Internal: load run history by explicit ID (avoids re-reading signals inside effects). */
+  private async _loadRunHistoryById(workflowId: string): Promise<void> {
+    console.log(`[ChatShell] _loadRunHistoryById: ${workflowId}`);
     try {
       const authToken = (await this.auth.getIdToken().catch(() => undefined)) ?? undefined;
-      const runs = await this.workflowService.listRuns(wf.id, authToken);
+      const runs = await this.workflowService.listRuns(workflowId, authToken);
+      console.log(`[ChatShell] _loadRunHistoryById: got ${runs.length} runs`);
       this.workflowRunHistory.set(runs);
       this._workflowCanvas()?.setRunHistory(runs);
     } catch (err) {
-      console.error('Failed to load run history', err);
+      console.error('[ChatShell] Failed to load run history', err);
     }
   }
 
