@@ -375,6 +375,66 @@ export class WorkflowService {
     return data;
   }
 
+  /** Update an existing workflow spec (partial or full). */
+  async updateWorkflow(workflowId: string, spec: Partial<WorkflowSpec>, authToken?: string): Promise<{ updated_at: number }> {
+    console.log(`[WorkflowService] updateWorkflow: ${workflowId}`);
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (this.env.tenantId) headers['X-Tenant-ID'] = this.env.tenantId;
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+
+    const response = await fetch(`${this.baseUrl}/${workflowId}`, {
+      method: 'PATCH',
+      headers,
+      body: JSON.stringify({ spec }),
+    });
+    if (!response.ok) {
+      const err = await response.text().catch(() => 'Unknown error');
+      console.error(`[WorkflowService] updateWorkflow failed: ${response.status} — ${err}`);
+      throw new Error(`Failed to update workflow: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log(`[WorkflowService] updateWorkflow: updated_at=${data.updated_at}`);
+    return data;
+  }
+
+  /** Delete a workflow and its execution history. */
+  async deleteWorkflow(workflowId: string, authToken?: string): Promise<void> {
+    console.log(`[WorkflowService] deleteWorkflow: ${workflowId}`);
+    const headers: Record<string, string> = {};
+    if (this.env.tenantId) headers['X-Tenant-ID'] = this.env.tenantId;
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+
+    const response = await fetch(`${this.baseUrl}/${workflowId}`, {
+      method: 'DELETE',
+      headers,
+    });
+    if (!response.ok && response.status !== 204) {
+      console.error(`[WorkflowService] deleteWorkflow failed: ${response.status}`);
+      throw new Error(`Failed to delete workflow: ${response.status}`);
+    }
+    console.log(`[WorkflowService] deleteWorkflow: done`);
+  }
+
+  /** Duplicate a workflow, returns the new workflow ID. */
+  async duplicateWorkflow(workflowId: string, authToken?: string): Promise<string> {
+    console.log(`[WorkflowService] duplicateWorkflow: ${workflowId}`);
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (this.env.tenantId) headers['X-Tenant-ID'] = this.env.tenantId;
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+
+    const response = await fetch(`${this.baseUrl}/${workflowId}/duplicate`, {
+      method: 'POST',
+      headers,
+    });
+    if (!response.ok) {
+      console.error(`[WorkflowService] duplicateWorkflow failed: ${response.status}`);
+      throw new Error(`Failed to duplicate workflow: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log(`[WorkflowService] duplicateWorkflow: new id=${data.id}`);
+    return data.id;
+  }
+
   abort(): void {
     this.activeController?.abort();
     this.activeController = null;
