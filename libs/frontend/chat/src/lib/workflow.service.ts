@@ -64,6 +64,46 @@ export interface WorkflowTemplate {
 }
 
 // ---------------------------------------------------------------------------
+// Execution Run Types
+// ---------------------------------------------------------------------------
+
+export interface WorkflowRunSummary {
+  run_id: string;
+  status: 'running' | 'completed' | 'error';
+  dry_run: boolean;
+  started_at: number;
+  completed_at?: number;
+  total_duration_ms?: number;
+  workflow_name?: string;
+}
+
+export interface WorkflowRunNodeDetail {
+  node_id: string;
+  label?: string;
+  status: NodeExecutionStatus;
+  started_at?: number;
+  completed_at?: number;
+  duration_ms?: number;
+  output?: string;
+  error?: string;
+}
+
+export interface WorkflowRunDetail {
+  run_id: string;
+  workflow_id: string;
+  workflow_name: string;
+  tenant_id: string;
+  status: 'running' | 'completed' | 'error';
+  dry_run: boolean;
+  input_text: string;
+  started_at: number;
+  completed_at?: number;
+  total_duration_ms?: number;
+  nodes: Record<string, WorkflowRunNodeDetail>;
+  result?: string;
+}
+
+// ---------------------------------------------------------------------------
 // SSE Events
 // ---------------------------------------------------------------------------
 
@@ -108,6 +148,43 @@ export interface WorkflowStreamCallbacks {
   onText?: (text: string) => void;
   onDone?: () => void;
   onError?: (message: string) => void;
+}
+
+// ---------------------------------------------------------------------------
+// Execution Models
+// ---------------------------------------------------------------------------
+
+export type NodeExecutionStatus = 'pending' | 'running' | 'completed' | 'error' | 'skipped';
+
+export interface NodeStatusUpdate {
+  node_id: string;
+  status: NodeExecutionStatus;
+  started_at?: number;
+  completed_at?: number;
+  duration_ms?: number;
+  output?: string;
+  error?: string;
+}
+
+export interface ExecutionState {
+  run_id: string;
+  workflow_id?: string;
+  status: 'running' | 'completed' | 'error' | 'cancelled';
+  current_node: string | null;
+  nodes: Record<string, NodeStatusUpdate>;
+  started_at: number;
+  completed_at?: number;
+  total_duration_ms?: number;
+  result?: string;
+}
+
+export interface ExecutionCallbacks {
+  onExecutionStart?: (state: ExecutionState) => void;
+  onNodeStart?: (nodeId: string, label: string) => void;
+  onNodeComplete?: (nodeId: string, label: string, durationMs: number, output?: string) => void;
+  onNodeError?: (nodeId: string, label: string, error: string) => void;
+  onExecutionComplete?: (state: ExecutionState) => void;
+  onExecutionError?: (error: string, failedNode?: string) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -230,9 +307,128 @@ export class WorkflowService {
     return data.id;
   }
 
+  /** Load all saved workflows for the current tenant. */
+  async listWorkflows(authToken?: string): Promise<WorkflowSpec[]> {
+    const headers: Record<string, string> = {};
+    if (this.env.tenantId) headers['X-Tenant-ID'] = this.env.tenantId;
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+
+    const response = await fetch(`${this.baseUrl}/list`, { headers });
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.workflows ?? [];
+  }
+
+  /** Get full workflow details by ID. */
+  async getWorkflow(workflowId: string, authToken?: string): Promise<WorkflowSpec | null> {
+    const headers: Record<string, string> = {};
+    if (this.env.tenantId) headers['X-Tenant-ID'] = this.env.tenantId;
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+
+    const response = await fetch(`${this.baseUrl}/${workflowId}`, { headers });
+    if (!response.ok) return null;
+    return response.json();
+  }
+
+  /** List past execution runs for a workflow. */
+  async listRuns(workflowId: string, authToken?: string): Promise<WorkflowRunSummary[]> {
+    const headers: Record<string, string> = {};
+    if (this.env.tenantId) headers['X-Tenant-ID'] = this.env.tenantId;
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+
+    const response = await fetch(`${this.baseUrl}/${workflowId}/runs`, { headers });
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.runs ?? [];
+  }
+
+  /** Get full execution run details with all node outputs. */
+  async getRunDetails(runId: string, authToken?: string): Promise<WorkflowRunDetail | null> {
+    const headers: Record<string, string> = {};
+    if (this.env.tenantId) headers['X-Tenant-ID'] = this.env.tenantId;
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+
+    const response = await fetch(`${this.baseUrl}/runs/${runId}`, { headers });
+    if (!response.ok) return null;
+    return response.json();
+  }
+
   abort(): void {
     this.activeController?.abort();
     this.activeController = null;
+  }
+
+  /**
+   * Stream a workflow execution via SSE over POST.
+   * Emits real-time events for each node's lifecycle.
+   */
+  async streamExecute(
+    spec: WorkflowSpec,
+    inputText: string,
+    callbacks: ExecutionCallbacks,
+    authToken?: string,
+    dryRun = false,
+  ): Promise<void> {
+    this.abort();
+
+    const controller = new AbortController();
+    this.activeController = controller;
+
+    try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Accept': 'text/event-stream',
+      };
+      if (this.env.tenantId) headers['X-Tenant-ID'] = this.env.tenantId;
+      if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+
+      const response = await fetch(`${this.baseUrl}/execute`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ spec, input_text: inputText, dry_run: dryRun }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        const errorBody = await response.text().catch(() => 'Unknown error');
+        this.zone.run(() => callbacks.onExecutionError?.(`Server responded with ${response.status}: ${errorBody}`));
+        return;
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        this.zone.run(() => callbacks.onExecutionError?.('No response body'));
+        return;
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split('\n\n');
+        buffer = parts.pop() ?? '';
+
+        for (const part of parts) {
+          this.zone.run(() => this.dispatchExecutionEvent(part.trim(), callbacks));
+        }
+      }
+
+      if (buffer.trim()) {
+        this.zone.run(() => this.dispatchExecutionEvent(buffer.trim(), callbacks));
+      }
+    } catch (err: unknown) {
+      if (err instanceof DOMException && err.name === 'AbortError') return;
+      const message = err instanceof Error ? err.message : 'Network error';
+      this.zone.run(() => callbacks.onExecutionError?.(message));
+    } finally {
+      if (this.activeController === controller) {
+        this.activeController = null;
+      }
+    }
   }
 
   // ── Private helpers ─────────────────────────────────────────────────────
@@ -289,4 +485,71 @@ export class WorkflowService {
       case 'error': callbacks.onError?.(event.message); break;
     }
   }
+
+  private dispatchExecutionEvent(block: string, callbacks: ExecutionCallbacks): void {
+    const lines = block.split('\n');
+    let eventType = '';
+    let dataStr = '';
+
+    for (const line of lines) {
+      if (line.startsWith('event: ')) {
+        eventType = line.slice(7).trim();
+      } else if (line.startsWith('data: ')) {
+        dataStr += line.slice(6);
+      } else if (line.startsWith('data:')) {
+        dataStr += line.slice(5);
+      }
+    }
+
+    if (!eventType || !dataStr) return;
+
+    try {
+      const data = JSON.parse(dataStr);
+
+      switch (eventType) {
+        case 'execution_start':
+          callbacks.onExecutionStart?.({
+            run_id: data.run_id,
+            status: 'running',
+            current_node: null,
+            nodes: data.nodes ?? {},
+            started_at: data.started_at,
+          });
+          break;
+
+        case 'node_start':
+          callbacks.onNodeStart?.(data.node_id, data.label);
+          break;
+
+        case 'node_complete':
+          callbacks.onNodeComplete?.(data.node_id, data.label, data.duration_ms, data.output_preview);
+          break;
+
+        case 'node_error':
+          callbacks.onNodeError?.(data.node_id, data.label, data.error);
+          break;
+
+        case 'execution_complete':
+          callbacks.onExecutionComplete?.({
+            run_id: data.run_id,
+            workflow_id: data.workflow_id,
+            status: 'completed',
+            current_node: null,
+            nodes: data.nodes ?? {},
+            started_at: data.started_at,
+            completed_at: data.completed_at,
+            total_duration_ms: data.total_duration_ms,
+            result: data.result,
+          });
+          break;
+
+        case 'execution_error':
+          callbacks.onExecutionError?.(data.error, data.failed_node);
+          break;
+      }
+    } catch {
+      // Ignore malformed SSE data
+    }
+  }
 }
+

@@ -12,6 +12,7 @@
 import {
   Component,
   input,
+  output,
   signal,
   computed,
   effect,
@@ -21,9 +22,13 @@ import {
   HostListener,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import type { WorkflowSpec, AgentNodeSpec, EdgeSpec, ConditionalEdgeSpec } from '../workflow.service';
+import type {
+  WorkflowSpec, AgentNodeSpec, EdgeSpec, ConditionalEdgeSpec, NodeExecutionStatus,
+  WorkflowRunSummary, WorkflowRunNodeDetail,
+} from '../workflow.service';
 
 // ---------------------------------------------------------------------------
 // Layout Types
@@ -34,6 +39,7 @@ interface LayoutNode {
   label: string;
   type: string;
   description: string;
+  systemPrompt: string;
   tools: string[];
   x: number;
   y: number;
@@ -42,6 +48,8 @@ interface LayoutNode {
   layer: number;
   color: string;
   icon: string;
+  executionStatus: NodeExecutionStatus | 'idle';
+  durationMs?: number;
 }
 
 interface LayoutEdge {
@@ -87,256 +95,38 @@ const NODE_ICONS: Record<string, string> = {
 @Component({
   selector: 'sq-workflow-canvas',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatTooltipModule],
+  imports: [CommonModule, FormsModule, MatIconModule, MatTooltipModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div class="workflow-canvas-wrapper" #canvasWrapper>
-      <!-- Toolbar -->
-      <div class="canvas-toolbar">
-        <div class="toolbar-left">
-          <span class="workflow-name">{{ spec()?.name || 'Workflow' }}</span>
-          <span class="workflow-badge" [attr.data-type]="spec()?.flow_type">{{ spec()?.flow_type || 'static' }}</span>
-          <span class="agent-count">{{ layoutNodes().length }} agents</span>
-        </div>
-        <div class="toolbar-right">
-          <button class="toolbar-btn" (click)="zoomIn()" matTooltip="Zoom in">
-            <mat-icon>zoom_in</mat-icon>
-          </button>
-          <button class="toolbar-btn" (click)="zoomOut()" matTooltip="Zoom out">
-            <mat-icon>zoom_out</mat-icon>
-          </button>
-          <button class="toolbar-btn" (click)="resetView()" matTooltip="Fit to screen">
-            <mat-icon>fit_screen</mat-icon>
-          </button>
-        </div>
-      </div>
-
-      <!-- SVG Canvas -->
-      <svg
-        class="workflow-svg"
-        [attr.viewBox]="viewBox()"
-        (mousedown)="onPanStart($event)"
-        (mousemove)="onPanMove($event)"
-        (mouseup)="onPanEnd()"
-        (mouseleave)="onPanEnd()"
-        (wheel)="onWheel($event)"
-      >
-        <defs>
-          <!-- Arrow marker -->
-          <marker id="arrow" viewBox="0 0 10 6" refX="10" refY="3"
-                  markerWidth="10" markerHeight="6" orient="auto-start-reverse">
-            <path d="M 0 0 L 10 3 L 0 6 Z" fill="var(--sq-text-secondary, #94a3b8)" />
-          </marker>
-          <marker id="arrow-active" viewBox="0 0 10 6" refX="10" refY="3"
-                  markerWidth="10" markerHeight="6" orient="auto-start-reverse">
-            <path d="M 0 0 L 10 3 L 0 6 Z" fill="#6366f1" />
-          </marker>
-
-          <!-- Glow filter -->
-          <filter id="node-glow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="6" result="blur" />
-            <feComposite in="SourceGraphic" in2="blur" operator="over" />
-          </filter>
-
-          <!-- Background grid pattern -->
-          <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
-            <path d="M 24 0 L 0 0 0 24" fill="none" stroke="var(--sq-border, rgba(148,163,184,0.1))" stroke-width="0.5"/>
-          </pattern>
-        </defs>
-
-        <!-- Grid background -->
-        <rect width="100%" height="100%" fill="url(#grid)" />
-
-        <!-- Edges -->
-        @for (edge of layoutEdges(); track edge.id) {
-          <g class="edge-group"
-             [class.edge-conditional]="edge.isConditional"
-             [class.edge-highlighted]="selectedNodeId() === edge.source || selectedNodeId() === edge.target">
-            <path
-              class="edge-path"
-              [attr.d]="edge.path"
-              fill="none"
-              stroke="var(--sq-text-secondary, #94a3b8)"
-              stroke-width="2"
-              [attr.marker-end]="(selectedNodeId() === edge.source || selectedNodeId() === edge.target) ? 'url(#arrow-active)' : 'url(#arrow)'"
-              [attr.stroke-dasharray]="edge.isConditional ? '6,4' : 'none'"
-            />
-            @if (edge.label) {
-              <rect
-                [attr.x]="edge.labelX - 40"
-                [attr.y]="edge.labelY - 10"
-                width="80"
-                height="20"
-                rx="4"
-                fill="var(--sq-surface, #1e293b)"
-                stroke="var(--sq-border, rgba(148,163,184,0.15))"
-                stroke-width="1"
-              />
-              <text
-                class="edge-label"
-                [attr.x]="edge.labelX"
-                [attr.y]="edge.labelY + 4"
-                text-anchor="middle"
-              >{{ edge.label | slice:0:12 }}</text>
-            }
-          </g>
-        }
-
-        <!-- Nodes -->
-        @for (node of layoutNodes(); track node.id) {
-          <g class="node-group"
-             [class.node-selected]="selectedNodeId() === node.id"
-             [class.node-entry]="spec()?.entry_point === node.id"
-             (click)="selectNode(node.id)"
-             (mouseenter)="hoveredNodeId.set(node.id)"
-             (mouseleave)="hoveredNodeId.set(null)"
-             [attr.transform]="'translate(' + node.x + ',' + node.y + ')'">
-
-            <!-- Node shadow -->
-            <rect
-              class="node-shadow"
-              [attr.x]="2"
-              [attr.y]="2"
-              [attr.width]="node.width"
-              [attr.height]="node.height"
-              rx="12"
-            />
-
-            <!-- Node background -->
-            <rect
-              class="node-bg"
-              x="0"
-              y="0"
-              [attr.width]="node.width"
-              [attr.height]="node.height"
-              rx="12"
-            />
-
-            <!-- Color accent bar -->
-            <rect
-              [attr.fill]="node.color"
-              x="0" y="0"
-              width="4"
-              [attr.height]="node.height"
-              rx="2"
-            />
-
-            <!-- Entry point badge -->
-            @if (spec()?.entry_point === node.id) {
-              <circle
-                [attr.cx]="node.width - 12"
-                cy="12"
-                r="6"
-                fill="#22c55e"
-                stroke="var(--sq-surface, #1e293b)"
-                stroke-width="2"
-              />
-            }
-
-            <!-- Icon circle -->
-            <circle
-              cx="32"
-              cy="40"
-              r="16"
-              [attr.fill]="node.color + '22'"
-              [attr.stroke]="node.color"
-              stroke-width="1.5"
-            />
-
-            <!-- Label -->
-            <text class="node-label" x="56" y="34">{{ node.label }}</text>
-
-            <!-- Type badge -->
-            <text class="node-type" x="56" y="52" [attr.fill]="node.color">{{ node.type }}</text>
-
-            <!-- Tools count -->
-            @if (node.tools.length) {
-              <g transform="translate(0, 0)">
-                <rect
-                  [attr.x]="node.width - 36"
-                  [attr.y]="node.height - 24"
-                  width="28"
-                  height="16"
-                  rx="8"
-                  [attr.fill]="node.color + '22'"
-                />
-                <text
-                  class="node-tools-count"
-                  [attr.x]="node.width - 22"
-                  [attr.y]="node.height - 13"
-                  text-anchor="middle"
-                  [attr.fill]="node.color"
-                >🔧{{ node.tools.length }}</text>
-              </g>
-            }
-          </g>
-        }
-
-        <!-- END node -->
-        @if (hasEndNode()) {
-          <g class="node-group node-end"
-             [attr.transform]="'translate(' + endNodePos().x + ',' + endNodePos().y + ')'">
-            <circle cx="24" cy="24" r="24"
-                    fill="var(--sq-surface, #1e293b)"
-                    stroke="#ef4444"
-                    stroke-width="2" />
-            <circle cx="24" cy="24" r="8" fill="#ef4444" />
-            <text class="end-label" x="24" y="64" text-anchor="middle">END</text>
-          </g>
-        }
-      </svg>
-
-      <!-- Detail Panel (slides in from right) -->
-      @if (selectedNode()) {
-        <aside class="detail-panel">
-          <div class="detail-header">
-            <div class="detail-icon" [style.background]="selectedNode()!.color + '22'" [style.color]="selectedNode()!.color">
-              <mat-icon>{{ selectedNode()!.icon }}</mat-icon>
-            </div>
-            <div class="detail-title-group">
-              <h3 class="detail-title">{{ selectedNode()!.label }}</h3>
-              <span class="detail-type" [style.color]="selectedNode()!.color">{{ selectedNode()!.type }}</span>
-            </div>
-            <button class="detail-close" (click)="selectedNodeId.set(null)">
-              <mat-icon>close</mat-icon>
-            </button>
-          </div>
-
-          @if (selectedNode()!.description) {
-            <div class="detail-section">
-              <span class="detail-label">Description</span>
-              <p class="detail-value">{{ selectedNode()!.description }}</p>
-            </div>
-          }
-
-          @if (selectedNode()!.tools.length) {
-            <div class="detail-section">
-              <span class="detail-label">Tools</span>
-              <div class="detail-tools">
-                @for (tool of selectedNode()!.tools; track tool) {
-                  <span class="detail-tool-chip">🔧 {{ tool }}</span>
-                }
-              </div>
-            </div>
-          }
-
-          <div class="detail-section">
-            <span class="detail-label">Node ID</span>
-            <code class="detail-code">{{ selectedNode()!.id }}</code>
-          </div>
-        </aside>
-      }
-    </div>
-  `,
+  templateUrl: './workflow-canvas.component.html',
   styleUrl: './workflow-canvas.component.scss',
 })
 export class WorkflowCanvasComponent {
   // ── Inputs ──────────────────────────────────────────────────────────────
   readonly spec = input<WorkflowSpec | null>(null);
 
+  // ── Outputs ─────────────────────────────────────────────────────────────
+  readonly runWorkflow = output<void>();
+  readonly stopExecution = output<void>();
+  readonly specChange = output<WorkflowSpec>();
+  readonly selectRun = output<string>();
+
   // ── State ───────────────────────────────────────────────────────────────
   readonly selectedNodeId = signal<string | null>(null);
   readonly hoveredNodeId = signal<string | null>(null);
+  readonly executionStatus = signal<'idle' | 'running' | 'completed' | 'error'>('idle');
+  readonly totalDurationMs = signal(0);
+  readonly inspectorTab = signal<'config' | 'output'>('config');
+
+  /** Run history for the current workflow */
+  readonly runHistory = signal<WorkflowRunSummary[]>([]);
+  readonly selectedRunId = signal<string | null>(null);
+  readonly showRunHistory = signal(false);
+
+  /** Node outputs from a historical run (keyed by node_id) */
+  readonly historicalNodeOutputs = signal<Record<string, WorkflowRunNodeDetail>>({});
+
+  /** Per-node execution state, keyed by node ID. */
+  readonly nodeExecState = signal<Record<string, { status: NodeExecutionStatus; durationMs?: number }>>({});
 
   private zoom = signal(1);
   private panX = signal(0);
@@ -344,6 +134,94 @@ export class WorkflowCanvasComponent {
   private isPanning = false;
   private lastPanX = 0;
   private lastPanY = 0;
+
+  // ── Execution API (called from parent) ─────────────────────────────────
+
+  /** Mark a node as running/completed/error — called by parent via SSE callbacks. */
+  setNodeStatus(nodeId: string, status: NodeExecutionStatus, durationMs?: number): void {
+    this.nodeExecState.update(s => ({ ...s, [nodeId]: { status, durationMs } }));
+  }
+
+  setExecutionStatus(status: 'idle' | 'running' | 'completed' | 'error', durationMs?: number): void {
+    this.executionStatus.set(status);
+    if (durationMs != null) this.totalDurationMs.set(durationMs);
+  }
+
+  resetExecution(): void {
+    this.nodeExecState.set({});
+    this.executionStatus.set('idle');
+    this.totalDurationMs.set(0);
+  }
+
+  getNodeExecStatus(nodeId: string): NodeExecutionStatus | 'idle' {
+    return this.nodeExecState()[nodeId]?.status ?? 'idle';
+  }
+
+  /** Inspector: update system prompt on the spec */
+  onSystemPromptChange(newPrompt: string): void {
+    const s = this.spec();
+    const nodeId = this.selectedNodeId();
+    if (!s || !nodeId) return;
+    const updated: WorkflowSpec = {
+      ...s,
+      agents: s.agents.map(a => a.id === nodeId ? { ...a, system_prompt: newPrompt } : a),
+    };
+    this.specChange.emit(updated);
+  }
+
+  // ── Run History API ─────────────────────────────────────────────────────
+
+  /** Set the run history (called by parent after fetching from API). */
+  setRunHistory(runs: WorkflowRunSummary[]): void {
+    this.runHistory.set(runs);
+  }
+
+  /** Load historical node outputs from a completed run (called by parent). */
+  loadHistoricalRun(runId: string, nodes: Record<string, WorkflowRunNodeDetail>): void {
+    this.selectedRunId.set(runId);
+    this.historicalNodeOutputs.set(nodes);
+    this.showRunHistory.set(false);
+
+    // Apply the historical statuses to the node exec state for visual display
+    const execState: Record<string, { status: NodeExecutionStatus; durationMs?: number }> = {};
+    for (const [nodeId, detail] of Object.entries(nodes)) {
+      execState[nodeId] = { status: detail.status, durationMs: detail.duration_ms };
+    }
+    this.nodeExecState.set(execState);
+
+    // Calculate total duration from the run
+    const durations = Object.values(nodes).map(n => n.duration_ms ?? 0);
+    const total = durations.reduce((s, d) => s + d, 0);
+    this.totalDurationMs.set(total);
+    this.executionStatus.set('completed');
+  }
+
+  /** Clear historical state and return to live mode. */
+  clearSelectedRun(): void {
+    this.selectedRunId.set(null);
+    this.historicalNodeOutputs.set({});
+    this.showRunHistory.set(false);
+    this.resetExecution();
+  }
+
+  /** Toggle run history dropdown. */
+  toggleRunHistory(): void {
+    this.showRunHistory.update(v => !v);
+  }
+
+  /** Get node output — from historical data or live execution. */
+  getNodeOutput(nodeId: string): string | null {
+    const historical = this.historicalNodeOutputs();
+    if (historical[nodeId]?.output) return historical[nodeId].output!;
+    return null;
+  }
+
+  /** Format timestamp to readable time string. */
+  formatRunTime(ts: number): string {
+    const d = new Date(ts * 1000);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' +
+           d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  }
 
   // ── Layout computation ──────────────────────────────────────────────────
 
@@ -532,11 +410,13 @@ export class WorkflowCanvasComponent {
         if (!agent) return;
 
         const type = agent.type || 'agent';
+        const execState = this.nodeExecState()[agent.id];
         layoutNodes.push({
           id: agent.id,
           label: agent.label || agent.id,
           type,
           description: agent.description || '',
+          systemPrompt: agent.system_prompt || '',
           tools: agent.tools || [],
           x: PADDING + layer * LAYER_GAP_X,
           y: startY + idx * (NODE_HEIGHT + NODE_GAP_Y),
@@ -545,6 +425,8 @@ export class WorkflowCanvasComponent {
           layer,
           color: NODE_COLORS[type] || NODE_COLORS['default'],
           icon: NODE_ICONS[type] || NODE_ICONS['default'],
+          executionStatus: execState?.status ?? 'idle',
+          durationMs: execState?.durationMs,
         });
       });
     }
