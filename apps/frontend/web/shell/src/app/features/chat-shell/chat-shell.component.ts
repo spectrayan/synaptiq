@@ -1,20 +1,14 @@
-import { Component, signal, inject, ElementRef, viewChild, effect, computed, OnDestroy } from '@angular/core';
+import { Component, signal, inject, effect, computed, viewChild, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
-import {
-  ComponentSpec,
-  type ViewSpec,
-} from '@synaptiq/constants';
-import { DslRendererComponent, FormSubmitEvent } from '@synaptiq/dsl-renderer';
+import { type ComponentSpec, type ViewSpec } from '@synaptiq/constants';
+import { FormSubmitEvent } from '@synaptiq/dsl-renderer';
 import {
   ActionsService,
-  AnalyticsService,
   ChatService,
   ConfigService,
   SessionService,
@@ -22,52 +16,40 @@ import {
   WorkflowService,
   WorkflowCanvasComponent,
   type WorkflowSpec,
-  type AnalyticsSummary,
-  type TokenUsageSummary,
-  type AIPersonaConfig,
-  type LLMProviderConfig,
-  type AIGuardrailsConfig,
-  type ComponentEnablement,
-  type ActionsConfig,
+  type WorkflowRunSummary,
   type BrandingConfig,
-  type BrandingPatchResponse,
-  type ThemePreset,
-  type PersonalizationConfig,
-  type ContrastCheck,
 } from '@synaptiq/chat';
 import { AuthService } from '@synaptiq/auth';
 import { ENVIRONMENT } from '@synaptiq/utils';
 import { ThemeService } from '../../core/theme.service';
-import { MarkdownPipe } from '../../core/markdown.pipe';
+import { ChatMessage } from './chat-message.model';
+import { ChatSidebarComponent } from './components/chat-sidebar/chat-sidebar.component';
+import { ChatTopbarComponent } from './components/chat-topbar/chat-topbar.component';
+import { ChatMessageListComponent } from './components/chat-message-list/chat-message-list.component';
+import { ChatInputBarComponent } from './components/chat-input-bar/chat-input-bar.component';
+import { ChatSettingsDrawerComponent } from './components/chat-settings-drawer/chat-settings-drawer.component';
+import { ConfigFieldSaveEvent } from './components/admin-config-panel/admin-config-panel.component';
+import {
+  CMD_SIGN_IN,
+  CMD_SIGN_UP,
+  CMD_ANALYTICS_DASHBOARD,
+  CONFIG_CMD_MAP,
+  type ConfigPanelType,
+  PINNED_VIEWS_KEY,
+  DEFAULT_PERSONA_NAME,
+  MSG_SESSION_LOADED,
+  MSG_SESSION_LOAD_ERROR,
+  MSG_AUTH_SIGNUP,
+  MSG_AUTH_SIGNIN,
+  isWorkflowIntent,
+} from './chat-shell.constants';
+import { buildWelcomeMessages, type WelcomeMessageContext } from './welcome-message.builder';
+import { ChatStreamOrchestrator, type StreamCallbacks } from './services/chat-stream.orchestrator';
+import { ConfigPanelOrchestrator } from './services/config-panel.orchestrator';
+import { ChatAnalyticsOrchestrator } from './services/chat-analytics.orchestrator';
 
-// ---------------------------------------------------------------------------
-// Message model
-// ---------------------------------------------------------------------------
-
-export interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-  /** DSL components rendered inline (e.g. item cards, forms, tables). */
-  uiComponents?: ComponentSpec[];
-  /** True after a form within this message has been submitted. */
-  formSubmitted?: boolean;
-  /** Status message shown during streaming (e.g., "Using keyword search..."). */
-  statusText?: string;
-  /** Inline auth form embedded in this message. */
-  authForm?: 'signin' | 'signup';
-  /** Admin config panel type for inline rendering (T9.6). */
-  configPanel?: 'persona' | 'provider' | 'guardrails' | 'components' | 'actions' | 'branding' | 'themes' | 'personalization';
-  /** Loaded config data for an admin config panel. */
-  configData?: AIPersonaConfig | LLMProviderConfig | AIGuardrailsConfig | ComponentEnablement | ActionsConfig | BrandingConfig | ThemePreset[] | PersonalizationConfig;
-  /** WCAG contrast check result (branding panel). */
-  contrastCheck?: ContrastCheck;
-  /** Analytics dashboard data (Phase 12). */
-  analyticsData?: { summary?: AnalyticsSummary; tokens?: TokenUsageSummary };
-  /** Whether this is a typing indicator placeholder. */
-  isTyping?: boolean;
-}
+// Re-export ChatMessage from model file for external consumers
+export type { ChatMessage } from './chat-message.model';
 
 // ---------------------------------------------------------------------------
 // Component
@@ -76,14 +58,17 @@ export interface ChatMessage {
 @Component({
   selector: 'sq-chat-shell',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule, MatButtonModule, MatTooltipModule, DslRendererComponent, WorkflowCanvasComponent, MarkdownPipe],
+  imports: [
+    CommonModule, MatIconModule, MatButtonModule, WorkflowCanvasComponent,
+    ChatSidebarComponent, ChatTopbarComponent, ChatMessageListComponent,
+    ChatInputBarComponent, ChatSettingsDrawerComponent,
+  ],
   templateUrl: './chat-shell.component.html',
   styleUrl: './chat-shell.component.scss',
 })
 export class ChatShellComponent implements OnDestroy {
   private readonly breakpoints = inject(BreakpointObserver);
   private readonly actionsService = inject(ActionsService);
-  private readonly analyticsService = inject(AnalyticsService);
   private readonly chatService = inject(ChatService);
   private readonly configService = inject(ConfigService);
   private readonly sessionService = inject(SessionService);
@@ -91,10 +76,12 @@ export class ChatShellComponent implements OnDestroy {
   readonly auth = inject(AuthService);
   private readonly env = inject(ENVIRONMENT);
   readonly themeService = inject(ThemeService);
+  private readonly streamOrchestrator = inject(ChatStreamOrchestrator);
+  private readonly configPanelOrchestrator = inject(ConfigPanelOrchestrator);
+  private readonly analyticsOrchestrator = inject(ChatAnalyticsOrchestrator);
 
   /** Exposed for settings panel template */
   readonly apiBaseUrl = this.env.apiBaseUrl;
-  private messagesEnd = viewChild<ElementRef<HTMLDivElement>>('messagesEnd');
 
   /** Active session ID for the current conversation. */
   private sessionId: string = crypto.randomUUID();
@@ -107,7 +94,6 @@ export class ChatShellComponent implements OnDestroy {
   );
 
   sidebarOpen = signal(true);
-  inputValue = signal('');
   isLoading = signal(false);
   /** Whether the backend is reachable — enables SSE mode vs demo fallback.
    *  Defaults to `true`; auto-switches to demo on network failure (see onError). */
@@ -126,8 +112,8 @@ export class ChatShellComponent implements OnDestroy {
   /** Session history for the sidebar */
   sessionHistory = signal<SessionListItem[]>([]);
   activeSessionId = signal<string>('');
-  /** Sidebar tab: 'recent' (session list) or 'pinned' (pinned views) */
-  readonly sidebarTab = signal<'recent' | 'pinned'>('recent');
+  /** Sidebar tab: 'recent' (session list) or 'pinned' (pinned views) or 'workflows' */
+  readonly sidebarTab = signal<'recent' | 'pinned' | 'workflows'>('recent');
 
   /** Main content tab: chat or workflow canvas */
   readonly mainTab = signal<'chat' | 'workflow'>('chat');
@@ -137,11 +123,14 @@ export class ChatShellComponent implements OnDestroy {
   readonly workflowStatus = signal<string>('');
   /** Whether workflow generation is in progress */
   readonly workflowGenerating = signal(false);
+  /** Past execution runs for the current workflow */
+  readonly workflowRunHistory = signal<WorkflowRunSummary[]>([]);
+  /** Saved workflows list for the sidebar */
+  readonly savedWorkflows = signal<WorkflowSpec[]>([]);
 
   messages = signal<ChatMessage[]>([]);
 
   /** Pinned views — persistent surfaces above the chat stream (P0-B) */
-  private readonly PINNED_VIEWS_KEY = 'synaptiq:pinned_views';
   readonly pinnedViews = signal<ViewSpec[]>(this._loadPinnedViews());
   readonly activePinnedView = signal<string>('');
   readonly pinnedExpanded = signal(true);
@@ -158,9 +147,9 @@ export class ChatShellComponent implements OnDestroy {
     // Immediate localStorage save
     try {
       if (views.length > 0) {
-        localStorage.setItem(this.PINNED_VIEWS_KEY, JSON.stringify(views));
+        localStorage.setItem(PINNED_VIEWS_KEY, JSON.stringify(views));
       } else {
-        localStorage.removeItem(this.PINNED_VIEWS_KEY);
+        localStorage.removeItem(PINNED_VIEWS_KEY);
       }
     } catch { /* storage full — ignore */ }
 
@@ -177,139 +166,39 @@ export class ChatShellComponent implements OnDestroy {
   readonly isAdminMode = this.auth.isAdmin;
 
   /** Loaded AI persona config from tenant — drives welcome message & starter prompts */
-  private personaName = 'Synaptiq';
+  private personaName = DEFAULT_PERSONA_NAME;
   private personaWelcome = '';
   private personaStarters: string[] = [];
 
   /** Build the welcome message based on user role and loaded persona config. */
   private _buildInitialMessages(): ChatMessage[] {
-    const isAdmin = this.auth.isAdmin();
-    const isGuest = this.auth.isGuest();
-    const isLoggedIn = this.auth.isLoggedIn();
     const user = this.auth.currentUser();
-    const name = this.personaName || 'Synaptiq';
-
-    // Build starter prompt chips from persona config
-    const starterChips: Array<{ label: string; prompt: string }> = this.personaStarters.map(
-      (prompt) => ({ label: prompt, prompt }),
-    );
-
-    // Not logged in at all (emulator down, first visit, etc.)
-    if (!isLoggedIn) {
-      const welcomeText = this.personaWelcome
-        || `Hi! 👋 I'm **${name}** — your AI-powered assistant. Sign in to save your conversations and access all features, or start exploring right away!`;
-      return [
-        {
-          id: '1',
-          role: 'assistant',
-          content: welcomeText,
-          timestamp: new Date(),
-          uiComponents: [
-            {
-              type: 'info_banner',
-              title: 'Quick start',
-              body: 'Try the suggestions below to explore, or sign in via the topbar.',
-              style: 'info',
-              suggestions: [
-                { label: 'Sign in', prompt: '__SIGN_IN__' },
-                { label: 'Sign up', prompt: '__SIGN_UP__' },
-                ...starterChips,
-              ],
-            },
-          ],
-        },
-      ];
-    }
-
-    if (isAdmin) {
-      return [
-        {
-          id: '1',
-          role: 'assistant',
-          content:
-            `Welcome back${user?.displayName ? ', ' + user.displayName : ''}! I'm ${name} in **admin mode**. I can help you manage your data, configure your workspace, view analytics, and more — all through this chat.\n\nWhat would you like to do?`,
-          timestamp: new Date(),
-          uiComponents: [
-            {
-              type: 'info_banner',
-              title: 'Admin Actions',
-              body: 'Configure your workspace, manage data, or check usage analytics.',
-              style: 'info',
-              suggestions: [
-                { label: '📊 Analytics', prompt: '__ANALYTICS_DASHBOARD__' },
-                { label: '🤖 AI Config', prompt: '__CONFIG_PERSONA__' },
-                { label: '🔧 Provider', prompt: '__CONFIG_PROVIDER__' },
-                { label: '🛡️ Guardrails', prompt: '__CONFIG_GUARDRAILS__' },
-                { label: '🧩 Components', prompt: '__CONFIG_COMPONENTS__' },
-                { label: '⚡ Actions', prompt: '__CONFIG_ACTIONS__' },
-                { label: '🎨 Branding', prompt: '__CONFIG_BRANDING__' },
-                { label: '🎭 Themes', prompt: '__CONFIG_THEMES__' },
-                { label: '👤 Personalization', prompt: '__CONFIG_PERSONALIZATION__' },
-                { label: '📋 View Schema', prompt: 'Show my schema' },
-              ],
-            },
-          ],
-        },
-      ];
-    }
-
-    if (isGuest) {
-      const welcomeText = this.personaWelcome
-        || `👋 Hi! I'm **${name}** — your AI-powered assistant. You're currently browsing as a **guest**.\n\nYou can explore and chat right away. To save your conversations and unlock admin features, sign in anytime.`;
-      return [
-        {
-          id: '1',
-          role: 'assistant',
-          content: welcomeText,
-          timestamp: new Date(),
-          uiComponents: [
-            {
-              type: 'info_banner',
-              title: 'Quick start',
-              body: 'Try any of these to get started:',
-              style: 'info',
-              suggestions: [
-                { label: 'Sign in', prompt: '__SIGN_IN__' },
-                { label: 'Sign up', prompt: '__SIGN_UP__' },
-                ...starterChips,
-              ],
-            },
-          ],
-        },
-      ];
-    }
-
-    // Authenticated non-admin user
-    const welcomeText = this.personaWelcome
-      || `Hi${user?.displayName ? ' ' + user.displayName : ''}! 👋 I'm ${name}. Ask me anything — I can search, analyse, and visualise your data for you.`;
-    return [
-      {
-        id: '1',
-        role: 'assistant',
-        content: welcomeText,
-        timestamp: new Date(),
-        uiComponents: [
-          {
-            type: 'info_banner',
-            title: 'Quick start',
-            body: 'Try the suggestions below to get started.',
-            style: 'info',
-            suggestions: starterChips,
-          },
-        ],
-      },
-    ];
+    const ctx: WelcomeMessageContext = {
+      isLoggedIn: this.auth.isLoggedIn(),
+      isAdmin: this.auth.isAdmin(),
+      isGuest: this.auth.isGuest(),
+      displayName: user?.displayName,
+      email: user?.email,
+      personaName: this.personaName,
+      personaWelcome: this.personaWelcome,
+      personaStarters: this.personaStarters,
+    };
+    return buildWelcomeMessages(ctx);
   }
 
   constructor() {
-    // Auto-scroll to bottom on new messages
-    effect(() => {
-      this.messages();
-      setTimeout(() => this.messagesEnd()?.nativeElement?.scrollIntoView({ behavior: 'smooth' }), 50);
-    });
 
     // Fetch public tenant persona config (welcome message + starter prompts)
     const personaReady = this._loadPersona();
+
+    // Load workflow run history when the workflow tab opens or workflow changes
+    effect(() => {
+      const tab = this.mainTab();
+      const wf = this.currentWorkflow();
+      if (tab === 'workflow' && wf?.id) {
+        this.loadRunHistory();
+      }
+    });
 
     // Watch for auth readiness — auto-sign-in as guest and show welcome
     effect(() => {
@@ -330,6 +219,7 @@ export class ChatShellComponent implements OnDestroy {
           personaReady.then(() => {
             this.messages.set(this._buildInitialMessages());
             this.loadSessionHistory();
+            this.loadSavedWorkflows();
           });
         }
       }
@@ -342,7 +232,7 @@ export class ChatShellComponent implements OnDestroy {
       const config = await this.configService.getPublicBranding();
       const persona = config.ai_persona;
       if (persona) {
-        this.personaName = persona.display_name || 'Synaptiq';
+        this.personaName = persona.display_name || DEFAULT_PERSONA_NAME;
         this.personaWelcome = persona.welcome_message || '';
         this.personaStarters = persona.starter_prompts || [];
       }
@@ -390,7 +280,7 @@ export class ChatShellComponent implements OnDestroy {
           : [{
               id: crypto.randomUUID(),
               role: 'assistant',
-              content: 'Conversation loaded. How can I help?',
+              content: MSG_SESSION_LOADED,
               timestamp: new Date(),
             }],
       );
@@ -398,7 +288,7 @@ export class ChatShellComponent implements OnDestroy {
       this.messages.set([{
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: 'Could not load the conversation. Starting fresh.',
+        content: MSG_SESSION_LOAD_ERROR,
         timestamp: new Date(),
       }]);
     } finally {
@@ -456,8 +346,8 @@ export class ChatShellComponent implements OnDestroy {
         id: msgId,
         role: 'assistant',
         content: mode === 'signup'
-          ? '📝 Create your account below to save conversations and unlock all features.'
-          : '🔐 Sign in to your account below.',
+          ? MSG_AUTH_SIGNUP
+          : MSG_AUTH_SIGNIN,
         timestamp: new Date(),
         authForm: mode,
       },
@@ -475,8 +365,8 @@ export class ChatShellComponent implements OnDestroy {
       this.messages.update((msgs) =>
         msgs.map((m) => m.id === msgId
           ? { ...m, authForm: newMode, content: newMode === 'signup'
-              ? '📝 Create your account below to save conversations and unlock all features.'
-              : '🔐 Sign in to your account below.' }
+              ? MSG_AUTH_SIGNUP
+              : MSG_AUTH_SIGNIN }
           : m),
       );
     }
@@ -603,6 +493,8 @@ export class ChatShellComponent implements OnDestroy {
         onDone: () => {
           this.workflowGenerating.set(false);
           this.workflowStatus.set('');
+          // Refresh the sidebar workflow list since backend auto-saves generated workflows
+          this.loadSavedWorkflows();
         },
         onError: (message) => {
           this.workflowGenerating.set(false);
@@ -635,17 +527,71 @@ export class ChatShellComponent implements OnDestroy {
     this.mainTab.set('workflow');
   }
 
+  /** Fetch saved workflows from the backend for the sidebar list. */
+  async loadSavedWorkflows(): Promise<void> {
+    try {
+      const authToken = (await this.auth.getIdToken().catch(() => undefined)) ?? undefined;
+      const workflows = await this.workflowService.listWorkflows(authToken);
+      this.savedWorkflows.set(workflows);
+    } catch {
+      // silently ignore — sidebar will show empty
+    }
+  }
+
+  /** Load a saved workflow by fetching its full spec and opening the canvas. */
+  async loadSavedWorkflow(workflowId: string): Promise<void> {
+    try {
+      const authToken = (await this.auth.getIdToken().catch(() => undefined)) ?? undefined;
+      const spec = await this.workflowService.getWorkflow(workflowId, authToken);
+      if (spec) {
+        this.currentWorkflow.set(spec);
+        this.mainTab.set('workflow');
+      }
+    } catch {
+      // silently ignore
+    }
+  }
+
+  // ── Run History ──────────────────────────────────────────────────────
+
+  /** Load execution history for a workflow and push it to the canvas. */
+  async loadRunHistory(): Promise<void> {
+    const wf = this.currentWorkflow();
+    if (!wf?.id) return;
+    try {
+      const authToken = (await this.auth.getIdToken().catch(() => undefined)) ?? undefined;
+      const runs = await this.workflowService.listRuns(wf.id, authToken);
+      this.workflowRunHistory.set(runs);
+      this._workflowCanvas()?.setRunHistory(runs);
+    } catch (err) {
+      console.error('Failed to load run history', err);
+    }
+  }
+
+  /** Handle run selection from the canvas history dropdown. */
+  async onSelectRun(runId: string): Promise<void> {
+    const canvas = this._workflowCanvas();
+    if (!canvas) return;
+    try {
+      const authToken = (await this.auth.getIdToken().catch(() => undefined)) ?? undefined;
+      const detail = await this.workflowService.getRunDetails(runId, authToken);
+      if (detail) {
+        canvas.loadHistoricalRun(detail.run_id, detail.nodes);
+      }
+    } catch (err) {
+      console.error('Failed to load run detail', err);
+    }
+  }
+
   /** Detect if a message is a workflow intent. */
-  private isWorkflowIntent(msg: string): boolean {
-    const lower = msg.toLowerCase();
-    const keywords = ['workflow', 'agent flow', 'build a flow', 'create a workflow', 'design a workflow', 'agent pipeline', 'multi-agent'];
-    return keywords.some(k => lower.includes(k));
+  private _isWorkflowIntent(msg: string): boolean {
+    return isWorkflowIntent(msg);
   }
 
   // ── Messaging ────────────────────────────────────────────────────────
 
-  async sendMessage(text?: string): Promise<void> {
-    const msg = (text ?? this.inputValue()).trim();
+  async sendMessage(text: string): Promise<void> {
+    const msg = text.trim();
     if (!msg || this.isLoading()) return;
 
     // Add user message
@@ -653,10 +599,9 @@ export class ChatShellComponent implements OnDestroy {
       ...msgs,
       { id: crypto.randomUUID(), role: 'user', content: msg, timestamp: new Date() },
     ]);
-    this.inputValue.set('');
 
     // ── Workflow intent detection ──
-    if (this.isWorkflowIntent(msg)) {
+    if (this._isWorkflowIntent(msg)) {
       this.isLoading.set(true);
       this.mainTab.set('chat'); // Stay on chat to show status
       await this.generateWorkflow(msg);
@@ -688,207 +633,43 @@ export class ChatShellComponent implements OnDestroy {
   // ── Backend SSE streaming ───────────────────────────────────────────
 
   private async sendViaBackend(msg: string, typingId?: string): Promise<void> {
-    // Keep typing indicator visible — we'll swap it when first content arrives
-    const assistantMsgId = crypto.randomUUID();
-    let typingCleared = false;
-
-    /** Swap the typing indicator for the real assistant message on first data. */
-    const ensureAssistantMessage = () => {
-      if (typingCleared) return;
-      typingCleared = true;
-      // Replace typing indicator with the real assistant message in one update
-      this.messages.update((msgs) => {
-        const filtered = typingId ? msgs.filter((m) => m.id !== typingId) : msgs;
-        return [
-          ...filtered,
-          {
-            id: assistantMsgId,
-            role: 'assistant' as const,
-            content: '',
-            timestamp: new Date(),
-            uiComponents: [],
-          },
-        ];
-      });
+    const callbacks: StreamCallbacks = {
+      updateMessages: (fn) => this.messages.update(fn),
+      setLoading: (v) => this.isLoading.set(v),
+      updatePinnedViews: (fn) => this.pinnedViews.update(fn),
+      setActivePinnedView: (id) => this.activePinnedView.set(id),
+      startAutoRefresh: (viewId, interval, query) =>
+        this._startAutoRefresh(viewId, interval, query),
+      onSessionCreated: () => {
+        if (!this.sessionPersisted) {
+          this.sessionPersisted = true;
+          this.activeSessionId.set(this.sessionId);
+          this.sessionService.createSession(this.sessionId).catch(() => {});
+          this.loadSessionHistory();
+        }
+      },
     };
 
-    await this.chatService.streamMessage(
-      {
-        session_id: this.sessionId,
-        message: msg,
-      },
-      {
-        onToken: (token) => {
-          ensureAssistantMessage();
-          // Append token to the assistant message content (typewriter effect)
-          this.messages.update((msgs) =>
-            msgs.map((m) =>
-              m.id === assistantMsgId ? { ...m, content: m.content + token } : m,
-            ),
-          );
-        },
-
-        onComponent: (component) => {
-          ensureAssistantMessage();
-          // If this is a pinned view, add to pinned list (but still render inline)
-          if (component.type === 'view' && (component as any).pinned) {
-            const viewSpec = component as any;
-            this.pinnedViews.update(views => {
-              const existing = views.findIndex(v => v.view_id === viewSpec.view_id);
-              if (existing >= 0) {
-                const updated = [...views];
-                updated[existing] = viewSpec;
-                return updated;
-              }
-              return [...views, viewSpec];
-            });
-            this.activePinnedView.set(viewSpec.view_id);
-
-            // P1-B: Start auto-refresh if the view has a refresh interval
-            if (viewSpec.refresh_interval && viewSpec.refresh_interval > 0) {
-              this._startAutoRefresh(viewSpec.view_id, viewSpec.refresh_interval, msg);
-            }
-            // Fall through — view still renders inline in the chat
-          }
-
-          // Push DSL component into the assistant message
-          this.messages.update((msgs) =>
-            msgs.map((m) =>
-              m.id === assistantMsgId
-                ? { ...m, uiComponents: [...(m.uiComponents ?? []), component] }
-                : m,
-            ),
-          );
-        },
-
-        onStatus: (statusMessage) => {
-          ensureAssistantMessage();
-          // Update status text on the assistant message
-          this.messages.update((msgs) =>
-            msgs.map((m) =>
-              m.id === assistantMsgId ? { ...m, statusText: statusMessage } : m,
-            ),
-          );
-        },
-
-        onTextReplace: (text) => {
-          ensureAssistantMessage();
-          // Replace streamed text with cleaned version (raw JSON stripped out)
-          this.messages.update((msgs) =>
-            msgs.map((m) =>
-              m.id === assistantMsgId ? { ...m, content: text } : m,
-            ),
-          );
-        },
-
-        onStepStart: (event) => {
-          ensureAssistantMessage();
-          // Show tool invocation as a status indicator on the message
-          this.messages.update((msgs) =>
-            msgs.map((m) =>
-              m.id === assistantMsgId
-                ? { ...m, statusText: event.description }
-                : m,
-            ),
-          );
-        },
-
-        onStepComplete: () => {
-          // Clear the step status — the model will stream text next
-          this.messages.update((msgs) =>
-            msgs.map((m) =>
-              m.id === assistantMsgId
-                ? { ...m, statusText: undefined }
-                : m,
-            ),
-          );
-        },
-
-        onDone: () => {
-          ensureAssistantMessage();
-          // Clear status text and loading state
-          this.messages.update((msgs) =>
-            msgs.map((m) =>
-              m.id === assistantMsgId ? { ...m, statusText: undefined } : m,
-            ),
-          );
-          this.isLoading.set(false);
-
-          // Auto-persist session after first successful exchange
-          if (!this.sessionPersisted) {
-            this.sessionPersisted = true;
-            this.activeSessionId.set(this.sessionId);
-            this.sessionService.createSession(this.sessionId).catch(() => {});
-            // Refresh sidebar to show new session
-            this.loadSessionHistory();
-          }
-        },
-
-        onError: (errorMessage) => {
-          ensureAssistantMessage();
-          // Show error as info_banner
-          if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
-            errorMessage = 'Backend is offline. Please start the API server and try again.';
-          }
-
-          this.messages.update((msgs) =>
-            msgs.map((m) =>
-              m.id === assistantMsgId
-                ? {
-                    ...m,
-                    content: '',
-                    statusText: undefined,
-                    uiComponents: [
-                      {
-                        type: 'info_banner' as const,
-                        title: 'Error',
-                        body: errorMessage,
-                        style: 'error' as const,
-                        suggestions: [
-                          { label: 'Try again', prompt: msg },
-                        ],
-                      },
-                    ],
-                  }
-                : m,
-            ),
-          );
-          this.isLoading.set(false);
-        },
-      },
+    await this.streamOrchestrator.sendViaBackend(
+      msg,
+      this.sessionId,
+      typingId,
+      callbacks,
     );
   }
 
   // ── Offline fallback ─────────────────────────────────────────────────
 
   private async sendViaDemo(msg: string, typingId?: string): Promise<void> {
-    // Simulate network delay
-    await new Promise((r) => setTimeout(r, 600));
-
-    // Remove typing indicator
-    if (typingId) this._removeTyping(typingId);
-
-    this.messages.update((msgs) => [
-      ...msgs,
-      {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: '',
-        timestamp: new Date(),
-        uiComponents: [
-          {
-            type: 'info_banner' as const,
-            title: 'Backend Offline',
-            body: 'The API server is not connected. Please start the backend to use Synaptiq.',
-            style: 'warning' as const,
-            suggestions: [
-              { label: 'Retry', prompt: msg },
-            ],
-          },
-        ],
-      },
-    ]);
-    this.isLoading.set(false);
+    const callbacks: StreamCallbacks = {
+      updateMessages: (fn: (msgs: ChatMessage[]) => ChatMessage[]) => this.messages.update(fn),
+      setLoading: (v: boolean) => this.isLoading.set(v),
+      updatePinnedViews: () => {},
+      setActivePinnedView: () => {},
+      startAutoRefresh: () => {},
+      onSessionCreated: () => {},
+    };
+    await this.streamOrchestrator.sendViaDemo(msg, typingId, callbacks);
   }
 
   /** Remove a pinned view and select the next one if needed. */
@@ -915,15 +696,9 @@ export class ChatShellComponent implements OnDestroy {
     }
   }
 
-  onKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      this.sendMessage();
-    }
-  }
-
-  trackById(_: number, msg: ChatMessage): string {
-    return msg.id;
+  /** Bridge from AdminConfigPanelComponent save events to the existing saveConfigField method. */
+  onConfigFieldSave(event: ConfigFieldSaveEvent): void {
+    this.saveConfigField(event.panel, event.field, event.value, event.messageId);
   }
 
   // ── DSL component events ─────────────────────────────────────────────
@@ -933,25 +708,24 @@ export class ChatShellComponent implements OnDestroy {
    * inject the prompt into the chat input and auto-send it.
    */
   onSuggestionClicked(prompt: string): void {
-    if (prompt === '__SIGN_IN__') {
+    if (prompt === CMD_SIGN_IN) {
       this.openAuthForm('signin');
       return;
     }
-    if (prompt === '__SIGN_UP__') {
+    if (prompt === CMD_SIGN_UP) {
       this.openAuthForm('signup');
       return;
     }
-    // Analytics dashboard chip (Phase 12)
-    if (prompt === '__ANALYTICS_DASHBOARD__') { this.openAnalyticsDashboard(); return; }
-    // Admin config panel chips
-    if (prompt === '__CONFIG_PERSONA__') { this.openConfigPanel('persona'); return; }
-    if (prompt === '__CONFIG_PROVIDER__') { this.openConfigPanel('provider'); return; }
-    if (prompt === '__CONFIG_GUARDRAILS__') { this.openConfigPanel('guardrails'); return; }
-    if (prompt === '__CONFIG_COMPONENTS__') { this.openConfigPanel('components'); return; }
-    if (prompt === '__CONFIG_ACTIONS__') { this.openConfigPanel('actions'); return; }
-    if (prompt === '__CONFIG_BRANDING__') { this.openConfigPanel('branding'); return; }
-    if (prompt === '__CONFIG_THEMES__') { this.openConfigPanel('themes'); return; }
-    if (prompt === '__CONFIG_PERSONALIZATION__') { this.openConfigPanel('personalization'); return; }
+    if (prompt === CMD_ANALYTICS_DASHBOARD) {
+      this.openAnalyticsDashboard();
+      return;
+    }
+    // Admin config panel chips — lookup from constant map
+    const panelType = CONFIG_CMD_MAP[prompt];
+    if (panelType) {
+      this.openConfigPanel(panelType as ConfigPanelType);
+      return;
+    }
     this.sendMessage(prompt);
   }
 
@@ -1118,245 +892,33 @@ export class ChatShellComponent implements OnDestroy {
   // ── Admin Config Panels (T9.6) ──────────────────────────────────────
 
   /** Open an admin config panel inline in the chat */
-  async openConfigPanel(panel: 'persona' | 'provider' | 'guardrails' | 'components' | 'actions' | 'branding' | 'themes' | 'personalization'): Promise<void> {
-    const msgId = crypto.randomUUID();
-    const panelTitles: Record<string, string> = {
-      persona: '🤖 AI Persona Configuration',
-      provider: '🔧 LLM Provider Settings',
-      guardrails: '🛡️ AI Guardrails',
-      components: '🧩 Component Enablement',
-      actions: '⚡ Action Settings',
-      branding: '🎨 Branding & Colors',
-      themes: '🎭 Theme Presets',
-      personalization: '👤 End-User Personalization',
-    };
-
-    // Show loading state
-    this.messages.update((msgs) => [
-      ...msgs,
-      {
-        id: msgId,
-        role: 'assistant',
-        content: `Loading ${panelTitles[panel]}...`,
-        timestamp: new Date(),
-        configPanel: panel,
-      },
-    ]);
-
-    try {
-      let configData: AIPersonaConfig | LLMProviderConfig | AIGuardrailsConfig | ComponentEnablement | ActionsConfig | BrandingConfig | ThemePreset[] | PersonalizationConfig;
-      let contrastCheck: ContrastCheck | undefined;
-
-      switch (panel) {
-        case 'persona':
-          configData = await this.configService.getAIPersona();
-          break;
-        case 'provider':
-          configData = await this.configService.getLLMProvider();
-          break;
-        case 'guardrails':
-          configData = await this.configService.getAIGuardrails();
-          break;
-        case 'components':
-          configData = await this.configService.getComponents();
-          break;
-        case 'actions':
-          configData = await this.configService.getActions();
-          break;
-        case 'branding': {
-          const brandResp = await this.configService.getBranding();
-          configData = brandResp;
-          // Run inline contrast check
-          try {
-            contrastCheck = await this.configService.checkContrast(
-              brandResp.primary_color,
-              brandResp.background_style === 'light' ? 'light' : 'dark',
-            );
-          } catch { /* non-critical */ }
-          break;
-        }
-        case 'themes':
-          configData = await this.configService.getThemes();
-          break;
-        case 'personalization':
-          configData = await this.configService.getPersonalization();
-          break;
-      }
-
-      this.messages.update((msgs) =>
-        msgs.map((m) =>
-          m.id === msgId
-            ? {
-                ...m,
-                content: panelTitles[panel],
-                configData,
-                contrastCheck,
-                uiComponents: [
-                  {
-                    type: 'info_banner' as const,
-                    title: panelTitles[panel],
-                    body: 'Current settings loaded. Use the panel below to modify.',
-                    style: 'info' as const,
-                    suggestions: this._configSuggestions(panel),
-                  },
-                ],
-              }
-            : m,
-        ),
-      );
-    } catch (err: unknown) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to load configuration.';
-      this.messages.update((msgs) =>
-        msgs.map((m) =>
-          m.id === msgId
-            ? {
-                ...m,
-                content: '',
-                configPanel: undefined,
-                uiComponents: [
-                  {
-                    type: 'info_banner' as const,
-                    title: 'Config Error',
-                    body: errorMsg,
-                    style: 'error' as const,
-                    suggestions: [{ label: 'Retry', prompt: `__CONFIG_${panel.toUpperCase()}__` }],
-                  },
-                ],
-              }
-            : m,
-        ),
-      );
-    }
+  async openConfigPanel(panel: ConfigPanelType): Promise<void> {
+    await this.configPanelOrchestrator.openConfigPanel(panel, {
+      updateMessages: (fn: (msgs: ChatMessage[]) => ChatMessage[]) => this.messages.update(fn),
+      appendMessages: (msgs: ChatMessage[]) => this.messages.update((prev) => [...prev, ...msgs]),
+    });
   }
 
   /** Save a config panel field update */
   async saveConfigField(
-    panel: 'persona' | 'provider' | 'guardrails' | 'components' | 'actions' | 'branding' | 'themes' | 'personalization',
+    panel: ConfigPanelType,
     field: string,
     value: unknown,
     messageId: string,
   ): Promise<void> {
-    try {
-      let updated: AIPersonaConfig | LLMProviderConfig | AIGuardrailsConfig | ComponentEnablement | ActionsConfig | BrandingConfig | ThemePreset[] | PersonalizationConfig;
-      let contrastCheck: ContrastCheck | undefined;
-
-      switch (panel) {
-        case 'persona':
-          updated = await this.configService.patchAIPersona({ [field]: value } as Partial<AIPersonaConfig>);
-          break;
-        case 'provider':
-          updated = await this.configService.patchLLMProvider({ [field]: value } as Partial<LLMProviderConfig>);
-          break;
-        case 'guardrails':
-          updated = await this.configService.patchAIGuardrails({ [field]: value } as Partial<AIGuardrailsConfig>);
-          break;
-        case 'components':
-          updated = await this.configService.patchComponents({ [field]: value } as Partial<ComponentEnablement>);
-          break;
-        case 'actions':
-          updated = await this.configService.patchActions({ [field]: value } as Partial<ActionsConfig>);
-          break;
-        case 'branding': {
-          const resp = await this.configService.patchBranding({ [field]: value } as Partial<BrandingConfig>);
-          contrastCheck = resp.contrast_check;
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { contrast_check: _cc, ...brandingOnly } = resp;
-          updated = brandingOnly as BrandingConfig;
-          // Live-reload branding in the theme service
-          this.themeService.branding.set(updated as BrandingConfig);
-          break;
-        }
-        case 'themes':
-          updated = await this.configService.getThemes(); // refresh full list
-          break;
-        case 'personalization':
-          updated = await this.configService.patchPersonalization({ [field]: value } as Partial<PersonalizationConfig>);
-          break;
-      }
-
-      // Update the config data in the message
-      this.messages.update((msgs) =>
-        msgs.map((m) => m.id === messageId ? { ...m, configData: updated, contrastCheck } : m),
-      );
-
-      // Add a success confirmation message
-      this.messages.update((msgs) => [
-        ...msgs,
-        {
-          id: crypto.randomUUID(),
-          role: 'assistant',
-          content: `✅ Updated **${field}** successfully.`,
-          timestamp: new Date(),
-          uiComponents: [
-            {
-              type: 'info_banner' as const,
-              title: 'Config Saved',
-              body: `The ${field} setting has been updated.`,
-              style: 'success' as const,
-              suggestions: this._configSuggestions(panel),
-            },
-          ],
-        },
-      ]);
-    } catch (err: unknown) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to save configuration.';
-      this.messages.update((msgs) => [
-        ...msgs,
-        {
-          id: crypto.randomUUID(),
-          role: 'assistant',
-          content: '',
-          timestamp: new Date(),
-          uiComponents: [
-            {
-              type: 'info_banner' as const,
-              title: 'Save Failed',
-              body: errorMsg,
-              style: 'error' as const,
-              suggestions: [{ label: 'Retry', prompt: `__CONFIG_${panel.toUpperCase()}__` }],
-            },
-          ],
-        },
-      ]);
-    }
+    await this.configPanelOrchestrator.saveConfigField(panel, field, value, messageId, {
+      updateMessages: (fn: (msgs: ChatMessage[]) => ChatMessage[]) => this.messages.update(fn),
+      appendMessages: (msgs: ChatMessage[]) => this.messages.update((prev) => [...prev, ...msgs]),
+      applyBranding: (branding: BrandingConfig) => this.themeService.branding.set(branding),
+    });
   }
 
   /** Build suggestion chips relevant to a config panel */
   private _configSuggestions(currentPanel: string): Array<{ label: string; prompt: string }> {
-    const all = [
-      { label: '📊 Analytics', prompt: '__ANALYTICS_DASHBOARD__', key: 'analytics' },
-      { label: '🤖 AI Config', prompt: '__CONFIG_PERSONA__', key: 'persona' },
-      { label: '🔧 Provider', prompt: '__CONFIG_PROVIDER__', key: 'provider' },
-      { label: '🛡️ Guardrails', prompt: '__CONFIG_GUARDRAILS__', key: 'guardrails' },
-      { label: '🧩 Components', prompt: '__CONFIG_COMPONENTS__', key: 'components' },
-      { label: '⚡ Actions', prompt: '__CONFIG_ACTIONS__', key: 'actions' },
-      { label: '🎨 Branding', prompt: '__CONFIG_BRANDING__', key: 'branding' },
-      { label: '🎭 Themes', prompt: '__CONFIG_THEMES__', key: 'themes' },
-      { label: '👤 Personalization', prompt: '__CONFIG_PERSONALIZATION__', key: 'personalization' },
-    ];
-    return all.filter((s) => s.key !== currentPanel).map(({ label, prompt }) => ({ label, prompt }));
+    return this.configPanelOrchestrator.getConfigSuggestions(currentPanel);
   }
 
-  /** Toggle an action's enabled state (immutable list update for template) */
-  toggleAction(
-    actions: Array<{ action_id: string; enabled: boolean; label: string }>,
-    actionId: string,
-  ): Array<{ action_id: string; enabled: boolean; label: string }> {
-    return actions.map((a) =>
-      a.action_id === actionId ? { ...a, enabled: !a.enabled } : a,
-    );
-  }
 
-  /** Update an action's label (immutable list update for template) */
-  updateActionLabel(
-    actions: Array<{ action_id: string; enabled: boolean; label: string }>,
-    actionId: string,
-    newLabel: string,
-  ): Array<{ action_id: string; enabled: boolean; label: string }> {
-    return actions.map((a) =>
-      a.action_id === actionId ? { ...a, label: newLabel } : a,
-    );
-  }
 
   /** Upload a logo file (T10.2) */
   async uploadBrandingLogo(file: File, messageId: string): Promise<void> {
@@ -1411,109 +973,10 @@ export class ChatShellComponent implements OnDestroy {
 
   /** Open the analytics dashboard inline in the chat */
   async openAnalyticsDashboard(): Promise<void> {
-    const msgId = crypto.randomUUID();
-
-    // Show loading state
-    this.messages.update((msgs) => [
-      ...msgs,
-      {
-        id: msgId,
-        role: 'assistant',
-        content: '📊 Loading analytics dashboard…',
-        timestamp: new Date(),
-      },
-    ]);
-
-    try {
-      const [summary, tokens] = await Promise.all([
-        this.analyticsService.getSummary(),
-        this.analyticsService.getTokenUsage(),
-      ]);
-
-      // Build analytics DSL components
-      const analyticsComponents: ComponentSpec[] = [
-        {
-          type: 'info_banner' as const,
-          title: '📊 Usage Overview (Last 30 Days)',
-          body: [
-            `**${summary.total_conversations}** conversations · **${summary.total_messages}** messages`,
-            `**${summary.unique_users}** unique users · **${summary.avg_messages_per_session}** avg msgs/session`,
-            `**${summary.total_actions}** actions performed`,
-          ].join('\n'),
-          style: 'info' as const,
-          suggestions: [
-            { label: '🔄 Refresh', prompt: '__ANALYTICS_DASHBOARD__' },
-            { label: '🤖 AI Config', prompt: '__CONFIG_PERSONA__' },
-            { label: '🔧 Provider', prompt: '__CONFIG_PROVIDER__' },
-          ],
-        },
-        {
-          type: 'comparison_table' as const,
-          items: [
-            {
-              item_id: 'token-usage',
-              data: {
-                'Input Tokens': tokens.total_tokens_input.toLocaleString(),
-                'Output Tokens': tokens.total_tokens_output.toLocaleString(),
-                'Total Tokens': tokens.total_tokens.toLocaleString(),
-                'Est. Cost': `$${tokens.estimated_cost_usd.toFixed(4)}`,
-                'Plan Limit': tokens.plan_token_limit ? tokens.plan_token_limit.toLocaleString() : 'Unlimited',
-                'Usage': tokens.plan_token_limit ? `${tokens.usage_percent}%` : 'N/A',
-              },
-            },
-          ],
-          fields: ['Input Tokens', 'Output Tokens', 'Total Tokens', 'Est. Cost', 'Plan Limit', 'Usage'],
-          suggestions: [],
-        },
-      ];
-
-      // Add action breakdown if present
-      if (Object.keys(summary.action_rates).length > 0) {
-        analyticsComponents.push({
-          type: 'comparison_table' as const,
-          items: Object.entries(summary.action_rates).map(([action, count]) => ({
-            item_id: action,
-            data: { Action: action, Count: count },
-          })),
-          fields: ['Action', 'Count'],
-          suggestions: [],
-        });
-      }
-
-      this.messages.update((msgs) =>
-        msgs.map((m) =>
-          m.id === msgId
-            ? {
-                ...m,
-                content: '📊 **Analytics Dashboard**',
-                analyticsData: { summary, tokens },
-                uiComponents: analyticsComponents,
-              }
-            : m,
-        ),
-      );
-    } catch (err: unknown) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to load analytics.';
-      this.messages.update((msgs) =>
-        msgs.map((m) =>
-          m.id === msgId
-            ? {
-                ...m,
-                content: '',
-                uiComponents: [
-                  {
-                    type: 'info_banner' as const,
-                    title: 'Analytics Error',
-                    body: errorMsg,
-                    style: 'error' as const,
-                    suggestions: [{ label: 'Retry', prompt: '__ANALYTICS_DASHBOARD__' }],
-                  },
-                ],
-              }
-            : m,
-        ),
-      );
-    }
+    await this.analyticsOrchestrator.openDashboard({
+      updateMessages: (fn: (msgs: ChatMessage[]) => ChatMessage[]) => this.messages.update(fn),
+      appendMessages: (msgs: ChatMessage[]) => this.messages.update((prev) => [...prev, ...msgs]),
+    });
   }
 
   // ── P0-B: Pinned View Persistence Helpers ─────────────────────────────
@@ -1521,7 +984,7 @@ export class ChatShellComponent implements OnDestroy {
   /** Load pinned views from localStorage (called during signal initialization). */
   private _loadPinnedViews(): ViewSpec[] {
     try {
-      const stored = localStorage.getItem('synaptiq:pinned_views');
+      const stored = localStorage.getItem(PINNED_VIEWS_KEY);
       if (stored) {
         const views = JSON.parse(stored) as ViewSpec[];
         if (Array.isArray(views) && views.length > 0) {
@@ -1577,8 +1040,55 @@ export class ChatShellComponent implements OnDestroy {
     this._refreshTimers.forEach((_, viewId) => this._stopAutoRefresh(viewId));
   }
 
+  // ── Workflow Execution ──────────────────────────────────────────────────
+
+  private _workflowCanvas = viewChild<WorkflowCanvasComponent>('workflowCanvas');
+  private _execAbort: AbortController | null = null;
+
+  /** Run the current workflow via the backend SSE /execute endpoint. */
+  onRunWorkflow(): void {
+    const spec = this.currentWorkflow();
+    const canvas = this._workflowCanvas();
+    if (!spec || !canvas) return;
+
+    canvas.resetExecution();
+    canvas.setExecutionStatus('running');
+    this._execAbort = new AbortController();
+
+    this.workflowService.streamExecute(spec, '', {
+      onExecutionStart: () => canvas.setExecutionStatus('running'),
+      onNodeStart: (nodeId: string) => canvas.setNodeStatus(nodeId, 'running'),
+      onNodeComplete: (nodeId: string, _label: string, durationMs: number) => {
+        canvas.setNodeStatus(nodeId, 'completed', durationMs);
+      },
+      onNodeError: (nodeId: string, _label: string, error: string) => {
+        canvas.setNodeStatus(nodeId, 'error');
+        console.error(`Node ${nodeId} error:`, error);
+      },
+      onExecutionComplete: () => {
+        canvas.setExecutionStatus('completed');
+        // Refresh run history after completion so the new run appears in the dropdown
+        this.loadRunHistory();
+      },
+      onExecutionError: (err: string) => {
+        canvas.setExecutionStatus('error');
+        console.error('Workflow execution error:', err);
+        // Also refresh on error so the failed run appears in history
+        this.loadRunHistory();
+      },
+    });
+  }
+
+  /** Abort a running workflow execution. */
+  onStopExecution(): void {
+    this._execAbort?.abort();
+    this._execAbort = null;
+    this._workflowCanvas()?.setExecutionStatus('idle');
+  }
+
   ngOnDestroy(): void {
     this._stopAllAutoRefresh();
     if (this._pinnedSyncTimer) clearTimeout(this._pinnedSyncTimer);
+    this._execAbort?.abort();
   }
 }

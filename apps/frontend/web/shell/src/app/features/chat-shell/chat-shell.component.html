@@ -1,145 +1,43 @@
 <div class="chat-layout" [class.sidebar-open]="sidebarOpen()" [class.is-mobile]="isMobile()">
 
   <!-- ── Sidebar ───────────────────────────────────────────────────────── -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <div class="brand">
-        <span class="brand-icon">⚡</span>
-        <span class="brand-name sq-gradient-text">Synaptiq</span>
-      </div>
-      <button mat-icon-button (click)="toggleSidebar()" matTooltip="Close sidebar" class="sidebar-close">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
-
-    <button class="new-chat-btn" (click)="newConversation()">
-      <mat-icon>add</mat-icon>
-      New conversation
-    </button>
-
-    <!-- Sidebar Tabs: Recent / Pinned -->
-    <div class="sidebar-tabs">
-      <button class="sidebar-tab" [class.active]="sidebarTab() === 'recent'" (click)="sidebarTab.set('recent')">
-        <mat-icon>chat_bubble_outline</mat-icon> Recent
-      </button>
-      <button class="sidebar-tab" [class.active]="sidebarTab() === 'pinned'" (click)="sidebarTab.set('pinned')">
-        <mat-icon>push_pin</mat-icon> Pinned
-        @if (pinnedViews().length) {
-          <span class="sidebar-tab-badge">{{ pinnedViews().length }}</span>
-        }
-      </button>
-    </div>
-
-    @if (sidebarTab() === 'recent') {
-      <div class="history-list">
-        @for (session of sessionHistory(); track session.session_id) {
-          <div
-            class="history-item"
-            [class.active]="activeSessionId() === session.session_id"
-            (click)="loadSession(session)"
-          >
-            <mat-icon class="history-icon">chat_bubble_outline</mat-icon>
-            <span class="history-title">{{ session.title }}</span>
-            <span class="history-meta">{{ session.turn_count }}</span>
-            <button
-              class="history-delete"
-              mat-icon-button
-              (click)="deleteSession(session, $event)"
-              matTooltip="Delete"
-            >
-              <mat-icon>close</mat-icon>
-            </button>
-          </div>
-        }
-
-        @if (!sessionHistory().length) {
-          <div class="history-empty">
-            <mat-icon>forum</mat-icon>
-            <span>No conversations yet</span>
-          </div>
-        }
-      </div>
-    } @else {
-      <!-- Pinned Views List -->
-      <div class="pinned-list">
-        @for (pv of pinnedViews(); track pv.view_id) {
-          <div
-            class="pinned-item"
-            [class.active]="activePinnedView() === pv.view_id"
-            (click)="selectPinnedView(pv.view_id)"
-          >
-            <mat-icon class="pinned-item-icon">{{ pv.icon || 'dashboard' }}</mat-icon>
-            <span class="pinned-item-title">{{ pv.title }}</span>
-            <button
-              class="pinned-item-close"
-              mat-icon-button
-              (click)="unpinView(pv.view_id, $event)"
-              matTooltip="Unpin"
-            >
-              <mat-icon>close</mat-icon>
-            </button>
-          </div>
-        }
-
-        @if (!pinnedViews().length) {
-          <div class="history-empty">
-            <mat-icon>push_pin</mat-icon>
-            <span>No pinned views yet</span>
-          </div>
-        }
-      </div>
-    }
-
-    <div class="sidebar-footer">
-      @if (!auth.isAuthenticated()) {
-        <button class="auth-sidebar-btn" (click)="openAuthForm('signin')">
-          <mat-icon>login</mat-icon>
-          Sign in
-        </button>
-      } @else {
-        <div class="user-badge">
-          <span class="user-avatar">{{ auth.currentUser()?.email?.charAt(0)?.toUpperCase() ?? '?' }}</span>
-          <span class="user-email">{{ auth.currentUser()?.email ?? 'User' }}</span>
-          <button mat-icon-button matTooltip="Sign out" (click)="signOutFromChat()">
-            <mat-icon>logout</mat-icon>
-          </button>
-        </div>
-      }
-    </div>
-  </aside>
+  <sq-chat-sidebar
+    [(sidebarTab)]="sidebarTab"
+    [sessionHistory]="sessionHistory()"
+    [activeSessionId]="activeSessionId()"
+    [pinnedViews]="pinnedViews()"
+    [activePinnedView]="activePinnedView()"
+    [savedWorkflows]="savedWorkflows()"
+    [currentWorkflowId]="currentWorkflow()?.id ?? null"
+    [isAuthenticated]="auth.isAuthenticated()"
+    [userEmail]="auth.currentUser()?.email ?? null"
+    (toggleSidebar)="toggleSidebar()"
+    (newConversation)="newConversation()"
+    (loadSession)="loadSession($event)"
+    (deleteSession)="deleteSession($event.session, $event.event)"
+    (selectPinnedView)="selectPinnedView($event)"
+    (unpinView)="unpinView($event.viewId, $event.event)"
+    (loadSavedWorkflow)="loadSavedWorkflow($event)"
+    (openAuth)="openAuthForm($event)"
+    (signOut)="signOutFromChat()"
+  />
 
   <!-- ── Main content ──────────────────────────────────────────────────── -->
   <div class="main">
 
     <!-- Topbar -->
-    <header class="topbar sq-glass">
-      @if (!sidebarOpen() || isMobile()) {
-        <button mat-icon-button (click)="toggleSidebar()" matTooltip="Open sidebar">
-          <mat-icon>menu</mat-icon>
-        </button>
-      }
-      <div class="topbar-title">{{ isAdminMode() ? 'Admin Console' : 'AI Assistant' }}</div>
-      <div class="topbar-actions">
-        @if (isAdminMode()) {
-          <span class="mode-badge admin">⚙ Admin</span>
-        }
-        @if (!auth.isAuthenticated()) {
-          <button class="auth-btn-inline" (click)="openAuthForm('signin')">Sign in</button>
-          <button class="auth-btn-inline signup" (click)="openAuthForm('signup')">Sign up</button>
-        }
-        <span class="mode-badge" [class.live]="useBackend()">
-          {{ useBackend() ? '● Live' : '○ Demo' }}
-        </span>
-        <button mat-icon-button
-                [matTooltip]="themeService.isDark() ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
-                (click)="themeService.toggle()">
-          <mat-icon>{{ themeService.isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
-        </button>
-        <button mat-icon-button matTooltip="Settings" (click)="showSettings.set(true)">
-          <mat-icon>settings</mat-icon>
-        </button>
-      </div>
-    </header>
+    <sq-chat-topbar
+      [sidebarOpen]="sidebarOpen()"
+      [isMobile]="isMobile()"
+      [isAdminMode]="isAdminMode()"
+      [isAuthenticated]="auth.isAuthenticated()"
+      [useBackend]="useBackend()"
+      [isDark]="themeService.isDark()"
+      (toggleSidebar)="toggleSidebar()"
+      (openAuth)="openAuthForm($event)"
+      (toggleTheme)="themeService.toggle()"
+      (openSettings)="showSettings.set(true)"
+    />
 
     <!-- Tab strip: Chat | Workflow -->
     <nav class="main-tab-strip" aria-label="Main content tabs">
@@ -155,7 +53,6 @@
         class="main-tab"
         [class.active]="mainTab() === 'workflow'"
         (click)="mainTab.set('workflow')"
-        [disabled]="!currentWorkflow()"
       >
         <mat-icon>account_tree</mat-icon>
         <span>Workflow</span>
@@ -170,502 +67,75 @@
 
     @if (mainTab() === 'chat') {
     <!-- Messages -->
-    <div class="messages-area" role="log" aria-label="Chat messages" aria-live="polite">
-      @for (msg of messages(); track trackById($index, msg)) {
-        <div class="message sq-animate-in"
-             [class.user]="msg.role === 'user'"
-             [class.assistant]="msg.role === 'assistant'"
-             [class.typing]="msg.isTyping"
-             [attr.aria-label]="msg.role === 'user' ? 'Your message' : 'Assistant response'"
-             role="article">
-          @if (msg.isTyping) {
-            <!-- Typing indicator -->
-            <div class="avatar">
-              <span class="avatar-icon">⚡</span>
-            </div>
-            <div class="bubble-group">
-              <div class="bubble typing-bubble">
-                <div class="typing-dots" aria-label="Assistant is typing">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
-              </div>
-            </div>
-          } @else {
-          @if (msg.role === 'assistant') {
-            <div class="avatar">
-              <span class="avatar-icon">⚡</span>
-            </div>
-          }
-          <div class="bubble-group">
-            <!-- Text content -->
-            @if (msg.content) {
-              <div class="bubble">
-                <p class="bubble-text" [innerHTML]="msg.content | markdown"></p>
-              </div>
-            } @else if (msg.statusText && !msg.uiComponents?.length) {
-              <!-- Streaming placeholder while AI is working -->
-              <div class="bubble streaming-bubble">
-                <div class="streaming-indicator">
-                  <span class="typing-dot"></span>
-                  <span class="typing-dot"></span>
-                  <span class="typing-dot"></span>
-                </div>
-              </div>
-            }
-
-            <!-- DSL Components rendered inline -->
-            @if (msg.uiComponents?.length) {
-              <div class="dsl-block" [class.form-submitted]="msg.formSubmitted">
-                @for (comp of msg.uiComponents; track $index) {
-                  <syn-dsl-renderer
-                    [spec]="comp"
-                    (suggestionClicked)="onSuggestionClicked($event)"
-                    (formSubmitted)="onFormSubmitted($event, msg.id)"
-                    (actionClicked)="onActionClicked($event)"
-                    (itemClicked)="onSuggestionClicked('Show details for item ' + $event)"
-                  />
-                }
-              </div>
-            }
-
-            <!-- Inline Auth Form (conversational) -->
-            @if (msg.authForm && !msg.formSubmitted) {
-              <div class="auth-inline-card sq-animate-in">
-                @if (auth.error()) {
-                  <div class="auth-error">{{ auth.error() }}</div>
-                }
-                <input
-                  class="auth-input"
-                  type="email"
-                  placeholder="Email address"
-                  [value]="authEmail()"
-                  (input)="authEmail.set($any($event.target).value)"
-                  (keydown.enter)="submitAuth()"
-                />
-                <input
-                  class="auth-input"
-                  type="password"
-                  placeholder="Password"
-                  [value]="authPassword()"
-                  (input)="authPassword.set($any($event.target).value)"
-                  (keydown.enter)="submitAuth()"
-                />
-                <button
-                  class="auth-submit-btn"
-                  [disabled]="authLoading() || !authEmail().trim() || !authPassword()"
-                  (click)="submitAuth()"
-                >
-                  @if (authLoading()) {
-                    <span class="spinner"></span>
-                  } @else {
-                    {{ authMode() === 'signup' ? 'Create account' : 'Sign in' }}
-                  }
-                </button>
-
-                <div class="auth-divider"><span>or</span></div>
-
-                <button class="auth-google-btn" [disabled]="authLoading()" (click)="signInWithGoogle()">
-                  <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-                  Continue with Google
-                </button>
-
-                <div class="auth-form-footer">
-                  @if (authMode() === 'signin') {
-                    Don't have an account?
-                    <button class="auth-toggle" (click)="toggleAuthMode()">Sign up</button>
-                  } @else {
-                    Already have an account?
-                    <button class="auth-toggle" (click)="toggleAuthMode()">Sign in</button>
-                  }
-                </div>
-              </div>
-            }
-
-            <!-- Admin Config Panels (T9.6) — rendered inline in the chat stream -->
-            @if (msg.configPanel && msg.configData) {
-              <div class="config-panel sq-animate-in">
-                <!-- Persona Config -->
-                @if (msg.configPanel === 'persona') {
-                  @let persona = $any(msg.configData);
-                  <div class="config-field">
-                    <label>Display Name</label>
-                    <input type="text" [value]="persona.display_name"
-                      (change)="saveConfigField('persona', 'display_name', $any($event.target).value, msg.id)" />
-                  </div>
-                  <div class="config-field">
-                    <label>Tone</label>
-                    <select [value]="persona.tone"
-                      (change)="saveConfigField('persona', 'tone', $any($event.target).value, msg.id)">
-                      <option value="professional">Professional</option>
-                      <option value="friendly">Friendly</option>
-                      <option value="concise">Concise</option>
-                      <option value="enthusiastic">Enthusiastic</option>
-                      <option value="formal">Formal</option>
-                    </select>
-                  </div>
-                  <div class="config-field">
-                    <label>Welcome Message</label>
-                    <textarea rows="2" [value]="persona.welcome_message"
-                      (change)="saveConfigField('persona', 'welcome_message', $any($event.target).value, msg.id)"></textarea>
-                  </div>
-                  <div class="config-field">
-                    <label>Custom Instruction</label>
-                    <textarea rows="2" [value]="persona.custom_instruction"
-                      (change)="saveConfigField('persona', 'custom_instruction', $any($event.target).value, msg.id)"></textarea>
-                  </div>
-                }
-
-                <!-- Provider Config -->
-                @if (msg.configPanel === 'provider') {
-                  @let provider = $any(msg.configData);
-                  <div class="config-field">
-                    <label>Provider</label>
-                    <select [value]="provider.provider"
-                      (change)="saveConfigField('provider', 'provider', $any($event.target).value, msg.id)">
-                      <option value="platform_managed">Platform Managed</option>
-                      <option value="openai">OpenAI</option>
-                      <option value="gemini">Gemini</option>
-                      <option value="anthropic">Anthropic</option>
-                    </select>
-                  </div>
-                  <div class="config-field">
-                    <label>Model ID</label>
-                    <input type="text" [value]="provider.model_id"
-                      (change)="saveConfigField('provider', 'model_id', $any($event.target).value, msg.id)" />
-                  </div>
-                  <div class="config-field config-toggle-row">
-                    <label>Bring Your Own Key (BYOK)</label>
-                    <div class="config-toggle" [class.active]="provider.is_byok"
-                      (click)="saveConfigField('provider', 'is_byok', !provider.is_byok, msg.id)"></div>
-                  </div>
-                  @if (provider.is_byok) {
-                    <div class="config-field">
-                      <label>API Key {{ provider.has_key ? '(set)' : '(not set)' }}</label>
-                      <input type="password" placeholder="Enter API key"
-                        (change)="saveConfigField('provider', 'byok_encrypted_key', $any($event.target).value, msg.id)" />
-                    </div>
-                  }
-                }
-
-                <!-- Guardrails Config -->
-                @if (msg.configPanel === 'guardrails') {
-                  @let guardrails = $any(msg.configData);
-                  <div class="config-field">
-                    <label>Out-of-scope Message</label>
-                    <textarea rows="2" [value]="guardrails.out_of_scope_message"
-                      (change)="saveConfigField('guardrails', 'out_of_scope_message', $any($event.target).value, msg.id)"></textarea>
-                  </div>
-                  <div class="config-field config-toggle-row">
-                    <label>Recommendation Mode</label>
-                    <div class="config-toggle" [class.active]="guardrails.recommendation_mode"
-                      (click)="saveConfigField('guardrails', 'recommendation_mode', !guardrails.recommendation_mode, msg.id)"></div>
-                  </div>
-                  <div class="config-field">
-                    <label>Language (ISO 639-1)</label>
-                    <input type="text" [value]="guardrails.language" maxlength="10"
-                      (change)="saveConfigField('guardrails', 'language', $any($event.target).value, msg.id)" />
-                  </div>
-                }
-
-                <!-- Components Config -->
-                @if (msg.configPanel === 'components') {
-                  @let comps = $any(msg.configData);
-                  @for (field of ['item_card','item_grid','item_detail','comparison_table','filter_summary','result_count','empty_state','info_banner']; track field) {
-                    <div class="config-field config-toggle-row">
-                      <label>{{ field.replace('_', ' ') | titlecase }}</label>
-                      <div class="config-toggle" [class.active]="comps[field]"
-                        (click)="saveConfigField('components', field, !comps[field], msg.id)"></div>
-                    </div>
-                  }
-                  <div class="config-field config-toggle-row config-locked">
-                    <label>Action Confirm <span class="config-lock-badge">locked</span></label>
-                    <div class="config-toggle active"></div>
-                  </div>
-                }
-
-                <!-- Actions Config -->
-                @if (msg.configPanel === 'actions') {
-                  @let actCfg = $any(msg.configData);
-                  @for (action of actCfg.actions; track action.action_id) {
-                    <div class="config-action-row">
-                      <div class="config-toggle" [class.active]="action.enabled"
-                        (click)="saveConfigField('actions', 'actions', toggleAction(actCfg.actions, action.action_id), msg.id)"></div>
-                      <span class="config-action-id">{{ action.action_id }}</span>
-                      <input type="text" class="config-action-label" [value]="action.label"
-                        (change)="saveConfigField('actions', 'actions', updateActionLabel(actCfg.actions, action.action_id, $any($event.target).value), msg.id)" />
-                    </div>
-                  }
-                  <div class="config-field">
-                    <label>Enquiry Webhook URL</label>
-                    <input type="url" [value]="actCfg.enquiry_webhook_url"
-                      (change)="saveConfigField('actions', 'enquiry_webhook_url', $any($event.target).value, msg.id)" />
-                  </div>
-                  <div class="config-field">
-                    <label>Enquiry Email</label>
-                    <input type="email" [value]="actCfg.enquiry_email"
-                      (change)="saveConfigField('actions', 'enquiry_email', $any($event.target).value, msg.id)" />
-                  </div>
-                }
-
-                <!-- Branding Config (T10) -->
-                @if (msg.configPanel === 'branding') {
-                  @let brand = $any(msg.configData);
-                  <div class="config-field">
-                    <label>Primary Color</label>
-                    <div class="config-color-row">
-                      <input type="color" [value]="brand.primary_color"
-                        (change)="saveConfigField('branding', 'primary_color', $any($event.target).value, msg.id)" />
-                      <span class="config-color-hex">{{ brand.primary_color }}</span>
-                    </div>
-                  </div>
-                  <div class="config-field">
-                    <label>Secondary Color</label>
-                    <div class="config-color-row">
-                      <input type="color" [value]="brand.secondary_color"
-                        (change)="saveConfigField('branding', 'secondary_color', $any($event.target).value, msg.id)" />
-                      <span class="config-color-hex">{{ brand.secondary_color }}</span>
-                    </div>
-                  </div>
-                  <div class="config-field">
-                    <label>Accent Color</label>
-                    <div class="config-color-row">
-                      <input type="color" [value]="brand.accent_color"
-                        (change)="saveConfigField('branding', 'accent_color', $any($event.target).value, msg.id)" />
-                      <span class="config-color-hex">{{ brand.accent_color }}</span>
-                    </div>
-                  </div>
-                  @if (msg.contrastCheck) {
-                    <div class="config-contrast" [class.pass]="msg.contrastCheck.passes" [class.fail]="!msg.contrastCheck.passes">
-                      <mat-icon>{{ msg.contrastCheck.passes ? 'check_circle' : 'warning' }}</mat-icon>
-                      <span>WCAG AA {{ msg.contrastCheck.passes ? 'Pass' : 'Fail' }} — Ratio: {{ msg.contrastCheck.ratio | number:'1.1-1' }}:1</span>
-                    </div>
-                  }
-                  <div class="config-field">
-                    <label>Font Family</label>
-                    <input type="text" [value]="brand.font_family"
-                      (change)="saveConfigField('branding', 'font_family', $any($event.target).value, msg.id)" />
-                  </div>
-                  <div class="config-field">
-                    <label>Background Style</label>
-                    <select [value]="brand.background_style"
-                      (change)="saveConfigField('branding', 'background_style', $any($event.target).value, msg.id)">
-                      <option value="dark">Dark</option>
-                      <option value="light">Light</option>
-                      <option value="gradient">Gradient</option>
-                    </select>
-                  </div>
-                  <div class="config-field">
-                    <label>Logo</label>
-                    <div class="config-logo-row">
-                      @if (brand.logo_url) {
-                        <img [src]="brand.logo_url" alt="Tenant logo" class="config-logo-preview" />
-                      }
-                      <button class="config-btn" (click)="triggerLogoUpload(msg.id)">
-                        <mat-icon>upload</mat-icon> Upload Logo
-                      </button>
-                    </div>
-                  </div>
-                  <div class="config-field">
-                    <label>Favicon URL</label>
-                    <input type="url" [value]="brand.favicon_url"
-                      (change)="saveConfigField('branding', 'favicon_url', $any($event.target).value, msg.id)" />
-                  </div>
-                }
-
-                <!-- Themes Config (T10.5) -->
-                @if (msg.configPanel === 'themes') {
-                  @let themes = $any(msg.configData);
-                  @if (themes.length === 0) {
-                    <div class="config-empty">No theme presets yet. Create one to get started!</div>
-                  }
-                  @for (theme of themes; track theme.name) {
-                    <div class="config-theme-card">
-                      <div class="config-theme-header">
-                        <strong>{{ theme.name }}</strong>
-                        @if (theme.is_default) {
-                          <span class="config-badge">Default</span>
-                        }
-                      </div>
-                      <div class="config-theme-colors">
-                        <span class="config-swatch" [style.background]="theme.primary_color"></span>
-                        <span class="config-swatch" [style.background]="theme.secondary_color"></span>
-                      </div>
-                      <div class="config-theme-meta">{{ theme.heading_font || 'Default font' }} · {{ theme.background_style }}</div>
-                    </div>
-                  }
-                }
-
-                <!-- Personalization Config (T10.9) -->
-                @if (msg.configPanel === 'personalization') {
-                  @let personalization = $any(msg.configData);
-                  <div class="config-field config-toggle-row">
-                    <label>Allow User Theme Switching</label>
-                    <div class="config-toggle" [class.active]="personalization.allow_theme_switching"
-                      (click)="saveConfigField('personalization', 'allow_theme_switching', !personalization.allow_theme_switching, msg.id)"></div>
-                  </div>
-                  <div class="config-field config-toggle-row">
-                    <label>Allow Font Size Override</label>
-                    <div class="config-toggle" [class.active]="personalization.allow_font_size"
-                      (click)="saveConfigField('personalization', 'allow_font_size', !personalization.allow_font_size, msg.id)"></div>
-                  </div>
-                  <div class="config-field config-toggle-row">
-                    <label>Allow Bubble Style Override</label>
-                    <div class="config-toggle" [class.active]="personalization.allow_bubble_style"
-                      (click)="saveConfigField('personalization', 'allow_bubble_style', !personalization.allow_bubble_style, msg.id)"></div>
-                  </div>
-                  <div class="config-field">
-                    <label>Default Font Size</label>
-                    <select [value]="personalization.default_font_size"
-                      (change)="saveConfigField('personalization', 'default_font_size', $any($event.target).value, msg.id)">
-                      <option value="small">Small</option>
-                      <option value="medium">Medium</option>
-                      <option value="large">Large</option>
-                    </select>
-                  </div>
-                  <div class="config-field">
-                    <label>Default Bubble Style</label>
-                    <select [value]="personalization.default_bubble_style"
-                      (change)="saveConfigField('personalization', 'default_bubble_style', $any($event.target).value, msg.id)">
-                      <option value="rounded">Rounded</option>
-                      <option value="sharp">Sharp</option>
-                      <option value="minimal">Minimal</option>
-                    </select>
-                  </div>
-                }
-              </div>
-            }
-
-            @if (msg.statusText) {
-              <div class="status-text">{{ msg.statusText }}</div>
-            }
-
-            <span class="bubble-time">{{ msg.timestamp | date:'HH:mm' }}</span>
-          </div>
-          }
-        </div>
-      }
-
-      <!-- Old loading indicator replaced by inline typing indicator (Phase 13) -->
-
-      <div #messagesEnd></div>
-    </div>
+    <sq-chat-message-list
+      [messages]="messages()"
+      [authMode]="authMode()"
+      [authEmail]="authEmail()"
+      [authPassword]="authPassword()"
+      [authLoading]="authLoading()"
+      [authError]="auth.error()"
+      (suggestionClicked)="onSuggestionClicked($event)"
+      (formSubmitted)="onFormSubmitted($event.event, $event.messageId)"
+      (actionClicked)="onActionClicked($event)"
+      (configFieldSave)="onConfigFieldSave($event)"
+      (triggerLogoUpload)="triggerLogoUpload($event)"
+      (authEmailChange)="authEmail.set($event)"
+      (authPasswordChange)="authPassword.set($event)"
+      (authSubmit)="submitAuth()"
+      (authGoogleSignIn)="signInWithGoogle()"
+      (authToggleMode)="toggleAuthMode()"
+    />
 
     <!-- Settings Panel -->
-    @if (showSettings()) {
-      <div class="settings-overlay" (click)="showSettings.set(false)"></div>
-      <aside class="settings-panel">
-        <div class="settings-header">
-          <span class="settings-title">Settings</span>
-          <button mat-icon-button (click)="showSettings.set(false)" matTooltip="Close">
-            <mat-icon>close</mat-icon>
-          </button>
-        </div>
-
-        <div class="settings-body">
-          <!-- Appearance -->
-          <div class="settings-group">
-            <div class="settings-label">Appearance</div>
-            <button class="settings-item clickable" (click)="themeService.toggle()">
-              <mat-icon>{{ themeService.isDark() ? 'dark_mode' : 'light_mode' }}</mat-icon>
-              <span>{{ themeService.isDark() ? 'Dark Mode' : 'Light Mode' }}</span>
-              <div class="settings-toggle" [class.active]="themeService.isDark()"></div>
-            </button>
-          </div>
-
-          <!-- Connection -->
-          <div class="settings-group">
-            <div class="settings-label">Connection</div>
-            <div class="settings-item">
-              <mat-icon>cloud</mat-icon>
-              <span>API Mode</span>
-              <span class="settings-value">{{ useBackend() ? '● Live' : '○ Demo' }}</span>
-            </div>
-            <div class="settings-item">
-              <mat-icon>link</mat-icon>
-              <span>Backend</span>
-              <span class="settings-value settings-url" [matTooltip]="apiBaseUrl">{{ apiBaseUrl }}</span>
-            </div>
-          </div>
-
-          <!-- Account -->
-          <div class="settings-group">
-            <div class="settings-label">Account</div>
-            @if (auth.isAuthenticated()) {
-              <div class="settings-item">
-                <mat-icon>person</mat-icon>
-                <span>{{ auth.currentUser()?.email ?? 'Signed in' }}</span>
-              </div>
-              <button class="settings-item clickable" (click)="signOutFromChat(); showSettings.set(false)">
-                <mat-icon>logout</mat-icon>
-                <span>Sign out</span>
-              </button>
-            } @else {
-              <button class="settings-item clickable" (click)="openAuthForm('signin'); showSettings.set(false)">
-                <mat-icon>login</mat-icon>
-                <span>Sign in</span>
-              </button>
-              <button class="settings-item clickable" (click)="openAuthForm('signup'); showSettings.set(false)">
-                <mat-icon>person_add</mat-icon>
-                <span>Create account</span>
-              </button>
-            }
-          </div>
-
-          <!-- Data -->
-          <div class="settings-group">
-            <div class="settings-label">Data</div>
-            <button class="settings-item clickable settings-danger" (click)="clearConversations()">
-              <mat-icon>delete_outline</mat-icon>
-              <span>Clear all conversations</span>
-            </button>
-          </div>
-
-          <!-- About -->
-          <div class="settings-about">
-            <span class="brand-icon">⚡</span>
-            <span class="settings-brand sq-gradient-text">Synaptiq</span>
-            <span class="settings-version">v0.1.0 — AI-Native Platform</span>
-          </div>
-        </div>
-      </aside>
-    }
+    <sq-chat-settings-drawer
+      [isOpen]="showSettings()"
+      [isDark]="themeService.isDark()"
+      [useBackend]="useBackend()"
+      [apiBaseUrl]="apiBaseUrl"
+      [isAuthenticated]="auth.isAuthenticated()"
+      [userEmail]="auth.currentUser()?.email ?? null"
+      (close)="showSettings.set(false)"
+      (toggleTheme)="themeService.toggle()"
+      (signOut)="signOutFromChat()"
+      (openAuth)="openAuthForm($event)"
+      (clearConversations)="clearConversations()"
+    />
 
     <!-- Input bar -->
-    <div class="input-bar sq-glass" role="form" aria-label="Message input">
-      <textarea
-        class="chat-input"
-        [placeholder]="isAdminMode() ? 'Manage your workspace, data, or view analytics…' : 'Ask me anything…'"
-        rows="1"
-        [value]="inputValue()"
-        (input)="inputValue.set($any($event.target).value)"
-        (keydown)="onKeydown($event)"
-        aria-label="Type your message"
-      ></textarea>
-      <button
-        mat-icon-button
-        class="send-btn"
-        [disabled]="!inputValue().trim() || isLoading()"
-        (click)="sendMessage()"
-        matTooltip="Send (Enter)"
-        aria-label="Send message"
-      >
-        <mat-icon>send</mat-icon>
-      </button>
-    </div>
+    <sq-chat-input-bar
+      [isLoading]="isLoading()"
+      [isAdminMode]="isAdminMode()"
+      (sendMessage)="sendMessage($event)"
+    />
     } <!-- end @if mainTab chat -->
 
     @if (mainTab() === 'workflow') {
     <!-- Workflow Canvas -->
     <div class="workflow-area">
       @if (currentWorkflow(); as wf) {
-        <sq-workflow-canvas [spec]="wf"></sq-workflow-canvas>
+        <sq-workflow-canvas
+          #workflowCanvas
+          [spec]="wf"
+          (runWorkflow)="onRunWorkflow()"
+          (stopExecution)="onStopExecution()"
+          (specChange)="currentWorkflow.set($event)"
+          (selectRun)="onSelectRun($event)"
+        ></sq-workflow-canvas>
       } @else {
         <div class="workflow-empty">
           <mat-icon>account_tree</mat-icon>
-          <p>No workflow generated yet.</p>
-          <p class="workflow-empty-hint">Type something like <strong>"Create a workflow for..."</strong> in the chat to generate one.</p>
+          <p>No workflow selected</p>
+          @if (savedWorkflows().length) {
+            <p class="workflow-empty-hint">Select a workflow from the <strong>Flows</strong> tab in the sidebar, or ask the AI to create a new one.</p>
+            <button class="new-chat-btn" style="margin: 0;" (click)="sidebarTab.set('workflows'); sidebarOpen.set(true);">
+              <mat-icon>list</mat-icon> Browse Saved Workflows
+            </button>
+          } @else {
+            <p class="workflow-empty-hint">Type something like <strong>"Create a workflow for..."</strong> in the chat to generate one.</p>
+            <button class="new-chat-btn" style="margin: 0;" (click)="mainTab.set('chat')">
+              <mat-icon>chat</mat-icon> Go to Chat
+            </button>
+          }
         </div>
       }
     </div>
