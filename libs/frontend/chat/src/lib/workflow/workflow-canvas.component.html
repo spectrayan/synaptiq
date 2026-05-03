@@ -32,6 +32,10 @@
       <button class="toolbar-btn toolbar-btn--add" (click)="showAddNodeForm.update(v => !v)" matTooltip="Add agent node">
         <mat-icon>add_circle</mat-icon>
       </button>
+      <!-- Fit & Layout -->
+      <button class="toolbar-btn" (click)="fitToScreen()" matTooltip="Fit graph to screen">
+        <mat-icon>fit_screen</mat-icon>
+      </button>
       <!-- Run History dropdown -->
       @if (runHistory().length) {
         <div class="run-history-dropdown">
@@ -326,14 +330,11 @@
 
         <!-- Editable System Prompt -->
         <div class="detail-section">
-          <span class="detail-label">System Prompt</span>
-          <textarea
-            class="inspector-textarea"
-            [ngModel]="selectedNode()!.systemPrompt"
-            (ngModelChange)="onSystemPromptChange($event)"
-            placeholder="Enter system prompt…"
-            rows="5"
-          ></textarea>
+          <sq-prompt-editor
+            label="System Prompt"
+            [content]="selectedNode()!.systemPrompt"
+            (contentChange)="onSystemPromptChange($event)"
+          />
         </div>
 
         @if (selectedNode()!.tools.length) {

@@ -25,6 +25,7 @@ import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MarkdownViewerComponent } from './markdown-viewer.component';
+import { PromptEditorComponent } from './prompt-editor.component';
 import {
   FFlowModule,
   FCanvasComponent,
@@ -102,6 +103,7 @@ const NODE_ICONS: Record<string, string> = {
     MatIconModule,
     MatTooltipModule,
     MarkdownViewerComponent,
+    PromptEditorComponent,
     FFlowModule,
     FZoomDirective,
   ],
@@ -295,6 +297,11 @@ export class WorkflowCanvasComponent {
   /** Called when the graph first renders — fit canvas to content. */
   onFlowRendered(): void {
     this.fCanvas()?.resetScaleAndCenter(false);
+  }
+
+  /** Fit the graph to the current viewport (toolbar button). */
+  fitToScreen(): void {
+    this.fCanvas()?.resetScaleAndCenter(true);
   }
 
   /** Handle drag-to-connect: user drew from an output port to an input port. */
