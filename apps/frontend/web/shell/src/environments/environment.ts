@@ -1,14 +1,15 @@
 /**
  * Environment configuration — development
  *
- * Uses Firebase Auth Emulator for local development.
- * No real Firebase project credentials needed — the emulator handles all auth.
+ * Uses built-in auth (MongoDB + JWT) for local development.
+ * No Firebase dependency — the backend handles all auth.
  */
 export const environment = {
   production: false,
   apiBaseUrl: 'http://localhost:8000',
+  authProvider: 'builtin' as const,
   firebase: {
-    apiKey: 'fake-api-key-for-emulator',
+    apiKey: 'not-used-with-builtin-auth',
     authDomain: 'localhost',
     projectId: 'synaptiq-dev',
     storageBucket: 'synaptiq-dev.appspot.com',
@@ -16,9 +17,5 @@ export const environment = {
     appId: '1:000000000000:web:0000000000000000',
   },
   tenantId: 'demo-tenant', // Default tenant for local dev (matches seed_dev.py + seed_e2e_data.py)
-  useEmulators: true,
-  emulators: {
-    authHost: 'localhost',
-    authPort: 9099,
-  },
+  useEmulators: false, // Not needed with builtin auth
 } as const;

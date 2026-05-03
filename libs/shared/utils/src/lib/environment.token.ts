@@ -22,6 +22,8 @@ export interface AppEnvironment {
     readonly appId: string;
   };
   readonly tenantId: string;
+  /** Auth provider: "builtin" (MongoDB + JWT) or "firebase" (default). */
+  readonly authProvider?: 'builtin' | 'firebase';
   /** When true, connect Firebase services to local emulators. */
   readonly useEmulators?: boolean;
   /** Firebase Auth Emulator config (default: localhost:9099). */

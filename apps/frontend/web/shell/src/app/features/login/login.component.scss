@@ -191,6 +191,92 @@ mat-divider {
   line-height: 1.5;
 }
 
+// ─── Success Banner ───────────────────────────────────────────
+.success-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  border-radius: 0.75rem;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  color: #86efac;
+  font-size: 0.8125rem;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: #22c55e;
+  }
+}
+
+// ─── Change Password ──────────────────────────────────────────
+.change-password-section {
+  .change-pw-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+
+    .lock-icon {
+      font-size: 40px;
+      width: 40px;
+      height: 40px;
+      color: var(--sq-primary, #6366f1);
+      margin-bottom: 0.5rem;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--sq-text-primary, #f0f0f5);
+      margin: 0 0 0.25rem;
+    }
+
+    p {
+      font-size: 0.8125rem;
+      color: var(--sq-text-secondary, rgba(255, 255, 255, 0.5));
+      margin: 0;
+    }
+  }
+}
+
+.password-mismatch {
+  font-size: 0.8125rem;
+  color: #fca5a5;
+  margin: -0.25rem 0 0.5rem 0.25rem;
+}
+
+// ─── Builtin Auth Hint ────────────────────────────────────────
+.builtin-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-top: 1.25rem;
+  border-radius: 0.75rem;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  color: var(--sq-text-secondary, rgba(255, 255, 255, 0.6));
+  font-size: 0.8125rem;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: var(--sq-primary, #6366f1);
+  }
+
+  code {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.8125rem;
+    padding: 0.1rem 0.35rem;
+    border-radius: 0.25rem;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--sq-text-primary, #f0f0f5);
+  }
+}
+
 // ─── Material Overrides (dark theme) ──────────────────────────
 ::ng-deep {
   .mat-mdc-form-field {
