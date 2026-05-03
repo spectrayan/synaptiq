@@ -28,6 +28,14 @@
       }
     </div>
     <div class="toolbar-right">
+      <!-- Undo / Redo -->
+      <button class="toolbar-btn" (click)="undo()" [disabled]="!canUndo()" matTooltip="Undo (Ctrl+Z)">
+        <mat-icon>undo</mat-icon>
+      </button>
+      <button class="toolbar-btn" (click)="redo()" [disabled]="!canRedo()" matTooltip="Redo (Ctrl+Shift+Z)">
+        <mat-icon>redo</mat-icon>
+      </button>
+      <span class="toolbar-sep"></span>
       <!-- Add Node -->
       <button class="toolbar-btn toolbar-btn--add" (click)="showAddNodeForm.update(v => !v)" matTooltip="Add agent node">
         <mat-icon>add_circle</mat-icon>

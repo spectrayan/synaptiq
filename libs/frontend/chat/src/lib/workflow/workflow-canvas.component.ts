@@ -19,6 +19,7 @@ import {
   ChangeDetectionStrategy,
   viewChild,
   OnInit,
+  HostListener,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -180,8 +181,85 @@ export class WorkflowCanvasComponent {
   /** Node outputs from a historical run (keyed by node_id) */
   readonly historicalNodeOutputs = signal<Record<string, WorkflowRunNodeDetail>>({});
 
+
   /** Per-node execution state, keyed by node ID. */
   readonly nodeExecState = signal<Record<string, { status: NodeExecutionStatus; durationMs?: number }>>({});
+
+  // ── Undo / Redo ────────────────────────────────────────────────────────
+
+  private static readonly MAX_UNDO_STACK = 50;
+  private _undoStack: string[] = []; // JSON snapshots
+  private _redoStack: string[] = [];
+  readonly canUndo = signal(false);
+  readonly canRedo = signal(false);
+
+  /**
+   * Central method for all spec mutations.
+   * Pushes current state onto undo stack, clears redo, and emits the change.
+   */
+  protected emitSpecChange(updated: WorkflowSpec): void {
+    const current = this.spec();
+    if (current) {
+      this._undoStack.push(JSON.stringify(current));
+      if (this._undoStack.length > WorkflowCanvasComponent.MAX_UNDO_STACK) {
+        this._undoStack.shift();
+      }
+      this._redoStack.length = 0;
+      this._syncUndoRedoSignals();
+    }
+    this.specChange.emit(updated);
+  }
+
+  undo(): void {
+    if (!this._undoStack.length) return;
+    const current = this.spec();
+    if (current) {
+      this._redoStack.push(JSON.stringify(current));
+    }
+    const prev = JSON.parse(this._undoStack.pop()!) as WorkflowSpec;
+    this._syncUndoRedoSignals();
+    this.specChange.emit(prev); // Direct emit — don't push to undo again
+    console.log('[Canvas] undo');
+  }
+
+  redo(): void {
+    if (!this._redoStack.length) return;
+    const current = this.spec();
+    if (current) {
+      this._undoStack.push(JSON.stringify(current));
+    }
+    const next = JSON.parse(this._redoStack.pop()!) as WorkflowSpec;
+    this._syncUndoRedoSignals();
+    this.specChange.emit(next); // Direct emit — don't push to undo
+    console.log('[Canvas] redo');
+  }
+
+  private _syncUndoRedoSignals(): void {
+    this.canUndo.set(this._undoStack.length > 0);
+    this.canRedo.set(this._redoStack.length > 0);
+  }
+
+  /** Reset undo/redo stacks (e.g. when loading a new workflow). */
+  resetHistory(): void {
+    this._undoStack.length = 0;
+    this._redoStack.length = 0;
+    this._syncUndoRedoSignals();
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onKeydown(event: KeyboardEvent): void {
+    const ctrl = event.ctrlKey || event.metaKey;
+    if (ctrl && event.key === 'z' && !event.shiftKey) {
+      event.preventDefault();
+      this.undo();
+    } else if (ctrl && event.key === 'z' && event.shiftKey) {
+      event.preventDefault();
+      this.redo();
+    } else if (ctrl && event.key === 'y') {
+      event.preventDefault();
+      this.redo();
+    }
+  }
 
   // ── Execution API (called from parent) ─────────────────────────────────
 
@@ -214,7 +292,7 @@ export class WorkflowCanvasComponent {
       ...s,
       agents: s.agents.map(a => a.id === nodeId ? { ...a, system_prompt: newPrompt } : a),
     };
-    this.specChange.emit(updated);
+    this.emitSpecChange(updated);
   }
 
   /** Inspector: regenerate system prompt with AI */
@@ -243,7 +321,7 @@ export class WorkflowCanvasComponent {
       ...s,
       agents: s.agents.map(a => a.id === nodeId ? { ...a, system_prompt: newPrompt } : a),
     };
-    this.specChange.emit(updated);
+    this.emitSpecChange(updated);
     this.promptEditorRef()?.setRegenerating(false);
   }
 
@@ -269,7 +347,7 @@ export class WorkflowCanvasComponent {
     };
     this.selectedNodeId.set(null);
     this.showDeleteConfirm.set(false);
-    this.specChange.emit(updated);
+    this.emitSpecChange(updated);
   }
 
   /** Delete an edge by its source→target pair. */
@@ -280,7 +358,7 @@ export class WorkflowCanvasComponent {
       ...s,
       edges: (s.edges ?? []).filter(e => !(e.from === source && e.to === target)),
     };
-    this.specChange.emit(updated);
+    this.emitSpecChange(updated);
   }
 
   /** Add a new agent node to the workflow. */
@@ -303,14 +381,14 @@ export class WorkflowCanvasComponent {
       agents: [...s.agents, newAgent],
     };
     this.showAddNodeForm.set(false);
-    this.specChange.emit(updated);
+    this.emitSpecChange(updated);
   }
 
   /** Set a node as the workflow entry point. */
   setEntryPoint(nodeId: string): void {
     const s = this.spec();
     if (!s) return;
-    this.specChange.emit({ ...s, entry_point: nodeId });
+    this.emitSpecChange({ ...s, entry_point: nodeId });
   }
 
   /** Update a node's label. */
@@ -340,7 +418,7 @@ export class WorkflowCanvasComponent {
     if (!s) return;
     const name = this.editingName().trim();
     if (name && name !== s.name) {
-      this.specChange.emit({ ...s, name });
+      this.emitSpecChange({ ...s, name });
     }
     this.isEditingName.set(false);
   }
@@ -354,7 +432,7 @@ export class WorkflowCanvasComponent {
     const s = this.spec();
     const nodeId = this.selectedNodeId();
     if (!s || !nodeId) return;
-    this.specChange.emit({
+    this.emitSpecChange({
       ...s,
       agents: s.agents.map(a => a.id === nodeId ? { ...a, ...patch } : a),
     });
@@ -391,7 +469,7 @@ export class WorkflowCanvasComponent {
       ...s,
       edges: [...(s.edges ?? []), { from: sourceNodeId, to: targetNodeId, condition: 'always', label: '' }],
     };
-    this.specChange.emit(updated);
+    this.emitSpecChange(updated);
   }
 
   /** Handle node position change after user drags a node. */
@@ -717,7 +795,7 @@ export class WorkflowCanvasComponent {
       return { ...a, tools: [...a.tools, toolId] };
     });
 
-    this.specChange.emit({ ...spec, agents: updatedAgents });
+    this.emitSpecChange({ ...spec, agents: updatedAgents });
     console.log(`[Canvas] added tool "${toolId}" to node "${node.id}"`);
   }
 
@@ -733,7 +811,7 @@ export class WorkflowCanvasComponent {
       return { ...a, tools: a.tools.filter(t => t !== toolId) };
     });
 
-    this.specChange.emit({ ...spec, agents: updatedAgents });
+    this.emitSpecChange({ ...spec, agents: updatedAgents });
     this.showToolPicker.set(false);
     console.log(`[Canvas] removed tool "${toolId}" from node "${node.id}"`);
   }
