@@ -34,7 +34,7 @@ import {
 } from '@foblex/flow';
 import type {
   WorkflowSpec, AgentNodeSpec, EdgeSpec, ConditionalEdgeSpec, NodeExecutionStatus,
-  WorkflowRunSummary, WorkflowRunNodeDetail,
+  WorkflowRunSummary, WorkflowRunNodeDetail, ToolDefinition,
 } from '../workflow.service';
 
 // ---------------------------------------------------------------------------
@@ -148,6 +148,29 @@ export class WorkflowCanvasComponent {
   readonly showAddNodeForm = signal(false);
   readonly showDeleteConfirm = signal(false);
   readonly showToolbar3Dot = signal(false);
+
+  /** Tool registry state */
+  readonly showToolPicker = signal(false);
+  readonly toolSearchQuery = signal('');
+  readonly toolCatalog = signal<ToolDefinition[]>([]);
+  private _toolIndex = new Map<string, ToolDefinition>();
+
+  /** Grouped/filtered tools for the picker dropdown */
+  readonly filteredToolCategories = computed(() => {
+    const query = this.toolSearchQuery().toLowerCase().trim();
+    const all = this.toolCatalog();
+    const groups = new Map<string, { key: string; label: string; tools: ToolDefinition[] }>();
+    for (const tool of all) {
+      if (query && !tool.name.toLowerCase().includes(query) && !tool.description.toLowerCase().includes(query)) {
+        continue;
+      }
+      if (!groups.has(tool.category)) {
+        groups.set(tool.category, { key: tool.category, label: tool.category, tools: [] });
+      }
+      groups.get(tool.category)!.tools.push(tool);
+    }
+    return Array.from(groups.values());
+  });
 
   /** Run history for the current workflow */
   readonly runHistory = signal<WorkflowRunSummary[]>([]);
@@ -657,5 +680,61 @@ export class WorkflowCanvasComponent {
     }
 
     return edges;
+  }
+
+  // ── Tool Registry ──────────────────────────────────────────────────────
+
+  /** Load tool catalog from parent-provided data. */
+  loadToolCatalog(tools: ToolDefinition[]): void {
+    this.toolCatalog.set(tools);
+    this._toolIndex.clear();
+    for (const t of tools) {
+      this._toolIndex.set(t.id, t);
+    }
+  }
+
+  getToolName(toolId: string): string {
+    return this._toolIndex.get(toolId)?.name ?? toolId;
+  }
+
+  getToolIcon(toolId: string): string {
+    return this._toolIndex.get(toolId)?.icon ?? '🔧';
+  }
+
+  getToolDescription(toolId: string): string {
+    return this._toolIndex.get(toolId)?.description ?? toolId;
+  }
+
+  addTool(toolId: string): void {
+    const node = this.selectedNode();
+    if (!node || node.tools.includes(toolId)) return;
+
+    const spec = this.spec();
+    if (!spec) return;
+
+    const updatedAgents = (spec.agents ?? []).map(a => {
+      if (a.id !== node.id) return a;
+      return { ...a, tools: [...a.tools, toolId] };
+    });
+
+    this.specChange.emit({ ...spec, agents: updatedAgents });
+    console.log(`[Canvas] added tool "${toolId}" to node "${node.id}"`);
+  }
+
+  removeTool(toolId: string): void {
+    const node = this.selectedNode();
+    if (!node) return;
+
+    const spec = this.spec();
+    if (!spec) return;
+
+    const updatedAgents = (spec.agents ?? []).map(a => {
+      if (a.id !== node.id) return a;
+      return { ...a, tools: a.tools.filter(t => t !== toolId) };
+    });
+
+    this.specChange.emit({ ...spec, agents: updatedAgents });
+    this.showToolPicker.set(false);
+    console.log(`[Canvas] removed tool "${toolId}" from node "${node.id}"`);
   }
 }

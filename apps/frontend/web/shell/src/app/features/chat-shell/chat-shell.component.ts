@@ -1059,6 +1059,24 @@ export class ChatShellComponent implements OnDestroy {
 
   private _workflowCanvas = viewChild<WorkflowCanvasComponent>('workflowCanvas');
   private _execAbort: AbortController | null = null;
+  private _toolsLoaded = false;
+
+  /** Load tool catalog into canvas when it first appears. */
+  private _loadToolCatalog = effect(() => {
+    const canvas = this._workflowCanvas();
+    const wf = this.currentWorkflow();
+    if (canvas && wf && !this._toolsLoaded) {
+      this._toolsLoaded = true;
+      this.auth.getIdToken().then(token => {
+        this.workflowService.getAvailableTools(token ?? undefined).then(catalog => {
+          canvas.loadToolCatalog(catalog.tools);
+          console.log(`[ChatShell] loaded ${catalog.tools.length} tools into canvas`);
+        }).catch(e => console.warn('[ChatShell] failed to load tool catalog:', e));
+      });
+    }
+    // Reset when no workflow
+    if (!wf) this._toolsLoaded = false;
+  });
 
   /** Run the current workflow via the backend SSE /execute endpoint. */
   onRunWorkflow(): void {

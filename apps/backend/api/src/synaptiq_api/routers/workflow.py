@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 
 from synaptiq_api.services.workflow_service import WorkflowService
 from synaptiq_api.services.workflow_executor import WorkflowExecutor
+from synaptiq_api.services.tool_registry import get_all_tools, get_tools_by_category, TOOL_CATEGORIES
 
 router = APIRouter()
 
@@ -146,6 +147,23 @@ async def get_templates():
     """Return a list of pre-built workflow templates for quick start."""
     templates = await workflow_service.get_templates()
     return {"templates": templates}
+
+
+# ---------------------------------------------------------------------------
+# Tool Registry
+# ---------------------------------------------------------------------------
+
+@router.get(
+    "/tools",
+    summary="Get available tools for workflow agents",
+)
+async def get_available_tools():
+    """Return the full catalog of tools available for workflow agent nodes."""
+    return {
+        "tools": get_all_tools(),
+        "categories": TOOL_CATEGORIES,
+        "by_category": get_tools_by_category(),
+    }
 
 
 # ---------------------------------------------------------------------------

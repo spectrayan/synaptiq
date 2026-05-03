@@ -338,16 +338,60 @@
           />
         </div>
 
-        @if (selectedNode()!.tools.length) {
-          <div class="detail-section">
+        <!-- Tools Management -->
+        <div class="detail-section">
+          <div class="detail-label-row">
             <span class="detail-label">Tools</span>
-            <div class="detail-tools">
-              @for (tool of selectedNode()!.tools; track tool) {
-                <span class="detail-tool-chip">🔧 {{ tool }}</span>
-              }
-            </div>
+            <button class="tool-add-btn" (click)="showToolPicker.update(v => !v)" matTooltip="Add tool">
+              <mat-icon>{{ showToolPicker() ? 'close' : 'add' }}</mat-icon>
+            </button>
           </div>
-        }
+          <div class="detail-tools">
+            @for (tool of selectedNode()!.tools; track tool) {
+              <span class="detail-tool-chip"
+                    [matTooltip]="getToolDescription(tool)">
+                {{ getToolIcon(tool) }} {{ getToolName(tool) }}
+                <button class="tool-remove-btn" (click)="removeTool(tool)" matTooltip="Remove tool">×</button>
+              </span>
+            }
+            @if (!selectedNode()!.tools.length) {
+              <span class="detail-empty-hint">No tools assigned. Click + to add.</span>
+            }
+          </div>
+          <!-- Tool picker dropdown -->
+          @if (showToolPicker()) {
+            <div class="tool-picker">
+              <input class="tool-picker-search" type="text"
+                     placeholder="Search tools…"
+                     [ngModel]="toolSearchQuery()"
+                     (ngModelChange)="toolSearchQuery.set($event)" />
+              <div class="tool-picker-list">
+                @for (category of filteredToolCategories(); track category.key) {
+                  <div class="tool-picker-category">
+                    <span class="tool-picker-cat-label">{{ category.label }}</span>
+                    @for (tool of category.tools; track tool.id) {
+                      <button class="tool-picker-item"
+                              [disabled]="selectedNode()!.tools.includes(tool.id)"
+                              (click)="addTool(tool.id)">
+                        <span class="tool-picker-icon">{{ tool.icon }}</span>
+                        <div class="tool-picker-info">
+                          <span class="tool-picker-name">{{ tool.name }}</span>
+                          <span class="tool-picker-desc">{{ tool.description }}</span>
+                        </div>
+                        @if (selectedNode()!.tools.includes(tool.id)) {
+                          <mat-icon class="tool-picker-check">check</mat-icon>
+                        }
+                      </button>
+                    }
+                  </div>
+                }
+                @if (filteredToolCategories().length === 0) {
+                  <div class="tool-picker-empty">No matching tools found.</div>
+                }
+              </div>
+            </div>
+          }
+        </div>
 
         <div class="detail-section">
           <span class="detail-label">Node ID</span>

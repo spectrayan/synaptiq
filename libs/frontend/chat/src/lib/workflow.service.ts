@@ -63,6 +63,20 @@ export interface WorkflowTemplate {
   entry_point: string;
 }
 
+export interface ToolDefinition {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  icon: string;
+}
+
+export interface ToolCatalogResponse {
+  tools: ToolDefinition[];
+  categories: Record<string, { label: string; icon: string }>;
+  by_category: Record<string, ToolDefinition[]>;
+}
+
 // ---------------------------------------------------------------------------
 // Execution Run Types
 // ---------------------------------------------------------------------------
@@ -290,6 +304,23 @@ export class WorkflowService {
     if (!response.ok) return [];
     const data = await response.json();
     return data.templates ?? [];
+  }
+
+  /** Fetch available tools catalog (cached after first call). */
+  private _toolCache: ToolCatalogResponse | null = null;
+
+  async getAvailableTools(authToken?: string): Promise<ToolCatalogResponse> {
+    if (this._toolCache) return this._toolCache;
+
+    const headers: Record<string, string> = {};
+    if (this.env.tenantId) headers['X-Tenant-ID'] = this.env.tenantId;
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+
+    const response = await fetch(`${this.baseUrl}/tools`, { headers });
+    if (!response.ok) return { tools: [], categories: {}, by_category: {} };
+    const data = await response.json();
+    this._toolCache = data;
+    return data;
   }
 
   /** Save a workflow to the backend. */
