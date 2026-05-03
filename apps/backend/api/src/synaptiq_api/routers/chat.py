@@ -315,23 +315,35 @@ async def get_session_history(
     # Apply pagination
     paginated = turns[offset:offset + limit]
 
+    # Normalize field names: stored as created_at/ui_components,
+    # frontend expects timestamp/components
+    normalized = []
+    for turn in paginated:
+        normalized.append({
+            "role": turn.get("role", "user"),
+            "content": turn.get("content", ""),
+            "timestamp": turn.get("created_at", ""),
+            "components": turn.get("ui_components"),
+            "turn_id": turn.get("turn_id"),
+        })
+
     return HistoryResponse(
         session_id=session_id,
-        turns=paginated,
+        turns=normalized,
         total=total,
     )
 
 
 # ---------------------------------------------------------------------------
-# T6.14 — Delete / reset session
+# T6.14 — Reset session (clear history, keep document)
 # ---------------------------------------------------------------------------
 
-@router.delete(
-    "/sessions/{session_id}",
+@router.post(
+    "/sessions/{session_id}/reset",
     summary="Clear/reset conversation session",
     status_code=204,
 )
-async def delete_session(session_id: str, request: Request):
+async def reset_session(session_id: str, request: Request):
     """
     Clear session history and reset the conversation (REQ-C9).
 

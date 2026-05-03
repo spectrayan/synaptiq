@@ -1,6 +1,6 @@
-"""Workflow Service — generates and executes AI agent workflows from natural language."""
-
 from __future__ import annotations
+"""Workflow Service — generates and executes AI agent workflows from natural language."""
+import logging
 
 import json
 import time
@@ -279,6 +279,19 @@ class WorkflowService:
             # Validate with our model
             spec = WorkflowSpec(**spec_dict)
 
+            # Auto-save the generated workflow to MongoDB
+            try:
+                await WorkflowService.save_workflow(
+                    spec.model_dump(by_alias=True), tenant_id,
+                )
+                logging.getLogger(__name__).info(
+                    "Auto-saved generated workflow '%s' (%s)", spec.name, spec.id,
+                )
+            except Exception as save_err:
+                logging.getLogger(__name__).warning(
+                    "Failed to auto-save workflow: %s", save_err,
+                )
+
             # 4. Yield the workflow spec as a component
             yield SSEEvent(event="component", data={
                 "type": "workflow",
@@ -347,6 +360,35 @@ class WorkflowService:
             {"_id": 0, "id": 1, "name": 1, "description": 1, "flow_type": 1, "created_at": 1, "updated_at": 1},
         ).sort("updated_at", -1).limit(limit)
         return await cursor.to_list(length=limit)
+
+    @staticmethod
+    async def list_workflow_runs(
+        workflow_id: str, tenant_id: str, limit: int = 20,
+    ) -> list[dict[str, Any]]:
+        """List past execution runs for a workflow (most recent first)."""
+        db = await get_database()
+        cursor = db["workflow_runs"].find(
+            {"workflow_id": workflow_id, "tenant_id": tenant_id},
+            {
+                "_id": 0,
+                "run_id": 1, "status": 1, "dry_run": 1,
+                "started_at": 1, "completed_at": 1,
+                "total_duration_ms": 1,
+                "workflow_name": 1,
+            },
+        ).sort("started_at", -1).limit(limit)
+        return await cursor.to_list(length=limit)
+
+    @staticmethod
+    async def get_workflow_run(
+        run_id: str, tenant_id: str,
+    ) -> dict[str, Any] | None:
+        """Retrieve a full execution run by run_id (includes all node outputs)."""
+        db = await get_database()
+        return await db["workflow_runs"].find_one(
+            {"run_id": run_id, "tenant_id": tenant_id},
+            {"_id": 0},
+        )
 
 
 def _extract_json(text: str) -> dict[str, Any] | None:

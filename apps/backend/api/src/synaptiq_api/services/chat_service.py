@@ -246,22 +246,32 @@ async def chat_stream(
 
     yield _sse_done(turn_id, tokens_in, tokens_out)
 
-    # -- Step 9: Async persist (fire-and-forget)
+    # -- Step 9: Persist turn to session (fire-and-forget with error logging)
     # P1-B: Skip persistence for background auto-refresh queries
     if not background:
         import asyncio
-        asyncio.create_task(_persist_turn(
-            tenant_id=tenant_id,
-            session_id=session_id,
-            turn_id=turn_id,
-            user_message=user_message,
-            assistant_response=cleaned_text if components else full_response,
-            components=components,
-            tokens_in=tokens_in,
-            tokens_out=tokens_out,
-            model_id=model_id or "langchain-agent",
-            latency_ms=latency_ms,
-        ))
+
+        async def _safe_persist():
+            try:
+                await _persist_turn(
+                    tenant_id=tenant_id,
+                    session_id=session_id,
+                    turn_id=turn_id,
+                    user_message=user_message,
+                    assistant_response=cleaned_text if components else full_response,
+                    components=components,
+                    tokens_in=tokens_in,
+                    tokens_out=tokens_out,
+                    model_id=model_id or "langchain-agent",
+                    latency_ms=latency_ms,
+                )
+            except Exception as persist_err:
+                logger.error(
+                    "Failed to persist turn %s for session %s: %s",
+                    turn_id, session_id, persist_err, exc_info=True,
+                )
+
+        asyncio.create_task(_safe_persist())
 
 
 # ---------------------------------------------------------------------------
@@ -600,17 +610,31 @@ async def _persist_turn(
         "created_at": now,
     }
 
-    await db[SESSIONS_COLLECTION].update_one(
+    # Use upsert=True to handle race condition where session may not exist yet
+    result = await db[SESSIONS_COLLECTION].update_one(
         {"session_id": session_id, "tenant_id": tenant_id},
         {
             "$push": {
                 "turns": {"$each": [user_turn, assistant_turn]},
             },
             "$set": {"updated_at": now},
+            "$setOnInsert": {
+                "session_id": session_id,
+                "tenant_id": tenant_id,
+                "active_filters": [],
+                "created_at": now,
+            },
         },
+        upsert=True,
     )
 
-    # T6.11 — Append to usage ledger (fire-and-forget)
+    logger.info(
+        "Turn %s persisted (matched=%d, modified=%d, upserted=%s): %d in / %d out tokens, %dms",
+        turn_id, result.matched_count, result.modified_count,
+        result.upserted_id is not None, tokens_in, tokens_out, latency_ms,
+    )
+
+    # T6.11 — Append to usage ledger
     await db[USAGE_COLLECTION].insert_one({
         "tenant_id": tenant_id,
         "session_id": session_id,
@@ -622,11 +646,6 @@ async def _persist_turn(
         "estimated_cost_usd": _estimate_cost(tokens_in, tokens_out, model_id),
         "created_at": now,
     })
-
-    logger.info(
-        "Turn %s persisted: %d in / %d out tokens, %dms",
-        turn_id, tokens_in, tokens_out, latency_ms,
-    )
 
 
 def _estimate_cost(tokens_in: int, tokens_out: int, model_id: str) -> float:

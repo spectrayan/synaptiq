@@ -27,3 +27,9 @@ def get_db() -> AsyncIOMotorDatabase:
     if _client is None:
         raise RuntimeError("Database not initialised — call connect_db() first")
     return _client[settings.mongodb_db_name]
+
+
+async def get_database() -> AsyncIOMotorDatabase:
+    """Alias for get_db() — used by workflow services."""
+    return get_db()
+

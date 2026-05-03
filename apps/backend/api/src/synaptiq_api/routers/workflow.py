@@ -1,15 +1,18 @@
-"""Workflow router — SSE streaming workflow generation + CRUD endpoints."""
+"""Workflow router — SSE streaming workflow generation, execution + CRUD endpoints."""
 import json
+from typing import Any
 
 from fastapi import APIRouter, HTTPException, Request, status
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from synaptiq_api.services.workflow_service import WorkflowService
+from synaptiq_api.services.workflow_executor import WorkflowExecutor
 
 router = APIRouter()
 
 workflow_service = WorkflowService()
+workflow_executor = WorkflowExecutor()
 
 
 # ---------------------------------------------------------------------------
@@ -25,6 +28,13 @@ class GenerateWorkflowRequest(BaseModel):
 class SaveWorkflowRequest(BaseModel):
     """POST /workflow/save — persist a workflow spec."""
     spec: dict = Field(..., description="Complete workflow specification JSON")
+
+
+class ExecuteWorkflowRequest(BaseModel):
+    """POST /workflow/execute — execute a workflow spec step-by-step."""
+    spec: dict[str, Any] = Field(..., description="Complete workflow specification JSON")
+    input_text: str = Field(default="", description="Initial input text for the workflow")
+    dry_run: bool = Field(default=False, description="Simulate execution without calling LLMs")
 
 
 # ---------------------------------------------------------------------------
@@ -127,3 +137,83 @@ async def get_workflow(workflow_id: str, request: Request):
             detail=f"Workflow {workflow_id} not found",
         )
     return workflow
+
+
+# ---------------------------------------------------------------------------
+# Execution
+# ---------------------------------------------------------------------------
+
+@router.post(
+    "/execute",
+    summary="Execute a workflow step-by-step (SSE stream)",
+    response_class=StreamingResponse,
+)
+async def execute_workflow(body: ExecuteWorkflowRequest, request: Request):
+    """Stream workflow execution via Server-Sent Events.
+
+    Events emitted:
+      - `execution_start`: run metadata and initial node statuses
+      - `node_start`: a node begins execution
+      - `node_complete`: a node finishes successfully
+      - `node_error`: a node failed
+      - `execution_complete`: workflow finished
+      - `execution_error`: workflow failed
+    """
+    tenant_id: str = request.state.tenant_id
+
+    async def event_stream():
+        async for event in workflow_executor.execute(
+            spec_dict=body.spec,
+            input_text=body.input_text,
+            tenant_id=tenant_id,
+            dry_run=body.dry_run,
+        ):
+            data = event.data
+            if isinstance(data, dict):
+                data = json.dumps(data, default=str)
+            elif data is None:
+                data = ""
+            yield f"event: {event.event}\ndata: {data}\n\n"
+
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
+
+
+# ---------------------------------------------------------------------------
+# Execution History
+# ---------------------------------------------------------------------------
+
+@router.get(
+    "/{workflow_id}/runs",
+    summary="List past execution runs for a workflow",
+)
+async def list_workflow_runs(
+    workflow_id: str, request: Request, limit: int = 20,
+):
+    """List past runs (most recent first) for a specific workflow."""
+    tenant_id: str = request.state.tenant_id
+    runs = await workflow_service.list_workflow_runs(workflow_id, tenant_id, limit)
+    return {"runs": runs}
+
+
+@router.get(
+    "/runs/{run_id}",
+    summary="Get full execution run details",
+)
+async def get_workflow_run(run_id: str, request: Request):
+    """Retrieve a full execution run including all node outputs."""
+    tenant_id: str = request.state.tenant_id
+    run = await workflow_service.get_workflow_run(run_id, tenant_id)
+    if not run:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Run {run_id} not found",
+        )
+    return run

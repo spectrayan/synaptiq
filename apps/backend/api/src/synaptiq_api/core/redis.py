@@ -25,8 +25,8 @@ async def connect_redis() -> None:
         await _pool.ping()
         logger.info("Connected to Redis at %s", settings.redis_url)
     except Exception as e:
-        logger.error("Failed to connect to Redis: %s", e)
-        raise
+        logger.warning("Redis unavailable (%s) — session caching disabled", e)
+        _pool = None  # Allow app to start without Redis
 
 
 async def disconnect_redis() -> None:
