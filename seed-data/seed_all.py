@@ -23,6 +23,11 @@ async def main():
     logger.info("🌱 Synaptiq Full Database Seed")
     logger.info("=" * 60)
 
+    # 0. Default users (admin@synaptiq.dev / admin)
+    logger.info("\n👤 Phase 0: Users...")
+    from seed_users import seed as seed_users
+    await seed_users()
+
     # 1. E2E business data (tenant, catalog, orders, sales, tasks, etc.)
     logger.info("\n📦 Phase 1: Business data...")
     from seed_e2e_data import seed as seed_e2e
