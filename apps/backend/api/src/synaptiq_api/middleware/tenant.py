@@ -29,6 +29,7 @@ TENANT_EXEMPT_ROUTES = (
     "/api/v1/auth/login",
     "/api/v1/auth/refresh",
     "/api/v1/auth/change-password",
+    "/api/v1/workflow/shared",
 )
 
 

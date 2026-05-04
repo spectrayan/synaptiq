@@ -36,6 +36,16 @@ class EdgeSpec(BaseModel):
     model_config = {"populate_by_name": True}
 
 
+class WorkflowInput(BaseModel):
+    """Input variable definition for the workflow."""
+    name: str             # e.g., "topic"
+    type: str             # "text" | "textarea" | "number" | "select" | "file"
+    label: str            # e.g., "Research Topic"
+    required: bool = True
+    default: str = ""
+    options: list[str] = Field(default_factory=list)  # For select type
+
+
 class WorkflowSpec(BaseModel):
     """Complete workflow specification — the frontend contract."""
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -45,6 +55,7 @@ class WorkflowSpec(BaseModel):
     agents: list[AgentNodeSpec] = Field(default_factory=list)
     edges: list[EdgeSpec] = Field(default_factory=list)
     conditional_edges: list[dict[str, Any]] = Field(default_factory=list)
+    inputs: list[WorkflowInput] = Field(default_factory=list)
     entry_point: str = ""
     metadata: dict[str, Any] = Field(default_factory=dict)
     created_at: float = Field(default_factory=time.time)
@@ -438,6 +449,44 @@ class WorkflowService:
         await db["workflows"].insert_one(clone)
         logger.info("[workflow_service] duplicated workflow %s → %s", workflow_id, new_id)
         return new_id
+
+    @staticmethod
+    async def share_workflow(workflow_id: str, tenant_id: str) -> str:
+        """Enable public sharing and generate/return a share token."""
+        logger = logging.getLogger(__name__)
+        db = await get_database()
+        workflow = await db["workflows"].find_one({"id": workflow_id, "tenant_id": tenant_id})
+        if not workflow:
+            raise ValueError(f"Workflow {workflow_id} not found")
+        
+        share_token = workflow.get("share_token")
+        if not share_token:
+            share_token = uuid.uuid4().hex
+            await db["workflows"].update_one(
+                {"id": workflow_id, "tenant_id": tenant_id},
+                {"$set": {"is_public": True, "share_token": share_token}}
+            )
+            logger.info("[workflow_service] Generated share token for %s", workflow_id)
+        return share_token
+
+    @staticmethod
+    async def get_shared_workflow(share_token: str) -> dict[str, Any] | None:
+        """Retrieve a shared workflow by its share_token."""
+        db = await get_database()
+        return await db["workflows"].find_one(
+            {"share_token": share_token, "is_public": True},
+            {"_id": 0}
+        )
+
+    @staticmethod
+    async def list_public_templates(limit: int = 50) -> list[dict[str, Any]]:
+        """List workflows that are marked as public templates."""
+        db = await get_database()
+        cursor = db["workflows"].find(
+            {"is_public": True},
+            {"_id": 0, "id": 1, "name": 1, "description": 1, "flow_type": 1, "created_at": 1}
+        ).sort("created_at", -1).limit(limit)
+        return await cursor.to_list(length=limit)
 
     @staticmethod
     async def list_workflow_runs(

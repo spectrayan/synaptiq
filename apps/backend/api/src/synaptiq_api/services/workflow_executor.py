@@ -136,6 +136,7 @@ class WorkflowExecutor:
     async def execute(
         spec_dict: dict[str, Any],
         input_text: str = "",
+        input_variables: dict[str, Any] = None,
         tenant_id: str = "",
         dry_run: bool = False,
         start_node_id: str | None = None,
@@ -171,19 +172,50 @@ class WorkflowExecutor:
             })
             return
 
+        # Build execution order via topological sort
+        execution_order = _build_execution_order(spec)
+
+        # Partial re-execution: determine skipped nodes
+        start_idx = 0
+        if start_node_id:
+            if start_node_id not in {a.id for a in agents}:
+                yield SSEEvent(event="execution_error", data={
+                    "run_id": run_id,
+                    "error": f"Start node '{start_node_id}' not found in workflow",
+                })
+                return
+            try:
+                start_idx = execution_order.index(start_node_id)
+            except ValueError:
+                start_idx = 0
+
         # Initialize node statuses
         node_statuses: dict[str, dict[str, Any]] = {}
         for agent in agents:
+            is_skipped = False
+            if start_idx > 0:
+                try:
+                    idx = execution_order.index(agent.id)
+                    if idx < start_idx:
+                        is_skipped = True
+                except ValueError:
+                    pass
+
             node_statuses[agent.id] = {
                 "node_id": agent.id,
                 "label": agent.label,
-                "status": "pending",
+                "status": "skipped" if is_skipped else "pending",
                 "started_at": None,
                 "completed_at": None,
                 "duration_ms": None,
                 "output": None,
                 "error": None,
             }
+
+        # Apply start_idx slice
+        if start_node_id:
+            execution_order = execution_order[start_idx:]
+            logger.info("[executor] partial re-exec from '%s', skipping %d nodes", start_node_id, start_idx)
 
         # Persist initial run document
         await _create_run_doc(
@@ -206,27 +238,6 @@ class WorkflowExecutor:
             "started_at": started_at,
             "nodes": node_statuses,
         })
-
-        # Build execution order via topological sort
-        execution_order = _build_execution_order(spec)
-
-        # Partial re-execution: skip nodes before start_node_id
-        if start_node_id:
-            if start_node_id not in {a.id for a in agents}:
-                yield SSEEvent(event="execution_error", data={
-                    "run_id": run_id,
-                    "error": f"Start node '{start_node_id}' not found in workflow",
-                })
-                return
-            # Find index of start node and mark predecessors as skipped
-            try:
-                start_idx = execution_order.index(start_node_id)
-            except ValueError:
-                start_idx = 0
-            for skipped_id in execution_order[:start_idx]:
-                node_statuses[skipped_id]["status"] = "skipped"
-            execution_order = execution_order[start_idx:]
-            logger.info("[executor] partial re-exec from '%s', skipping %d nodes", start_node_id, start_idx)
 
         # Execute each node in order
         accumulated_context = prior_context or input_text or f"Execute workflow: {spec.name}"
@@ -251,10 +262,10 @@ class WorkflowExecutor:
             try:
                 if dry_run:
                     # Simulate execution with realistic delays
-                    output = await _simulate_node_execution(agent, accumulated_context)
+                    output = await _simulate_node_execution(agent, accumulated_context, input_variables)
                 else:
                     # Attempt real LLM execution
-                    output = await _execute_node_with_llm(agent, accumulated_context, tenant_id)
+                    output = await _execute_node_with_llm(agent, accumulated_context, tenant_id, input_variables)
 
                 node_end_time = time.time()
                 duration_ms = (node_end_time - node_start_time) * 1000
@@ -402,7 +413,7 @@ def _build_execution_order(spec: WorkflowSpec) -> list[str]:
     return order
 
 
-async def _simulate_node_execution(agent: Any, context: str) -> str:
+async def _simulate_node_execution(agent: Any, context: str, input_variables: dict[str, Any] = None) -> str:
     """Simulate node execution with realistic delays."""
     # Vary delay based on node type
     base_delay = 0.8
@@ -420,14 +431,20 @@ async def _simulate_node_execution(agent: Any, context: str) -> str:
 
     # Generate simulated output
     tool_info = f" using tools: {', '.join(agent.tools)}" if agent.tools else ""
+    system_prompt = agent.system_prompt or agent.description or "default"
+    if input_variables:
+        for k, v in input_variables.items():
+            system_prompt = system_prompt.replace(f"{{{{input.{k}}}}}", str(v))
+            system_prompt = system_prompt.replace(f"{{{k}}}", str(v))
+
     return (
         f"[{agent.label}] Processed input{tool_info}. "
         f"Agent '{agent.label}' ({agent.type}) completed successfully. "
-        f"System prompt: '{(agent.system_prompt or agent.description or 'default')[:100]}...'"
+        f"System prompt: '{system_prompt[:100]}...'"
     )
 
 
-async def _execute_node_with_llm(agent: Any, context: str, tenant_id: str) -> str:
+async def _execute_node_with_llm(agent: Any, context: str, tenant_id: str, input_variables: dict[str, Any] = None) -> str:
     """Execute a node using the configured LLM provider.
 
     Falls back to platform default settings when no tenant-level LLM config exists.
@@ -450,6 +467,12 @@ async def _execute_node_with_llm(agent: Any, context: str, tenant_id: str) -> st
         llm = get_langchain_model(llm_config, byok_key)
 
         system_prompt = agent.system_prompt or agent.description or "You are a helpful AI agent."
+        
+        if input_variables:
+            for k, v in input_variables.items():
+                system_prompt = system_prompt.replace(f"{{{{input.{k}}}}}", str(v))
+                system_prompt = system_prompt.replace(f"{{{k}}}", str(v))
+
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": context},
@@ -462,4 +485,4 @@ async def _execute_node_with_llm(agent: Any, context: str, tenant_id: str) -> st
     except Exception as e:
         logger.warning("LLM execution failed for node '%s': %s — falling back to simulation", agent.label, e)
         # Fall back to simulation if LLM execution fails
-        return await _simulate_node_execution(agent, context)
+        return await _simulate_node_execution(agent, context, input_variables)

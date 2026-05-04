@@ -5,13 +5,14 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
-from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import APIRouter, HTTPException, Request, status, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from synaptiq_api.services.workflow_service import WorkflowService
 from synaptiq_api.services.workflow_executor import WorkflowExecutor
 from synaptiq_api.services.tool_registry import get_all_tools, get_tools_by_category, TOOL_CATEGORIES
+from synaptiq_api.websockets.connection_manager import manager
 
 router = APIRouter()
 
@@ -43,6 +44,7 @@ class ExecuteWorkflowRequest(BaseModel):
     """POST /workflow/execute — execute a workflow spec step-by-step."""
     spec: dict[str, Any] = Field(..., description="Complete workflow specification JSON")
     input_text: str = Field(default="", description="Initial input text for the workflow")
+    input_variables: dict[str, Any] = Field(default_factory=dict, description="Values for the workflow input variables")
     dry_run: bool = Field(default=False, description="Simulate execution without calling LLMs")
     start_node_id: str | None = Field(default=None, description="Start execution from this node (partial re-execution)")
     prior_context: str = Field(default="", description="Context to use when starting from a non-entry node")
@@ -101,6 +103,21 @@ async def generate_workflow(body: GenerateWorkflowRequest, request: Request):
             "X-Accel-Buffering": "no",
         },
     )
+
+
+# ---------------------------------------------------------------------------
+# Templates
+# ---------------------------------------------------------------------------
+
+@router.get(
+    "/community-templates",
+    summary="List public community workflow templates",
+)
+async def list_templates(limit: int = 50):
+    """List workflows that have been shared publicly to be used as templates."""
+    logger.info("[workflow] list_templates limit=%d", limit)
+    templates = await workflow_service.list_public_templates(limit)
+    return {"templates": templates}
 
 
 # ---------------------------------------------------------------------------
@@ -265,6 +282,39 @@ async def duplicate_workflow(workflow_id: str, request: Request):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
 
 
+@router.post(
+    "/{workflow_id}/share",
+    summary="Generate a public share token for a workflow",
+)
+async def share_workflow(workflow_id: str, request: Request):
+    """Make a workflow public and generate a unique sharing token."""
+    tenant_id: str = request.state.tenant_id
+    logger.info("[workflow] share_workflow id=%s tenant=%s", workflow_id, tenant_id)
+    try:
+        share_token = await workflow_service.share_workflow(workflow_id, tenant_id)
+        logger.info("[workflow] share_workflow %s -> token %s", workflow_id, share_token)
+        return {"share_token": share_token, "success": True}
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+
+
+@router.get(
+    "/shared/{share_token}",
+    summary="Get a shared workflow by token",
+)
+async def get_shared_workflow(share_token: str):
+    """Retrieve a workflow using its public share token (no authentication required)."""
+    logger.info("[workflow] get_shared_workflow token=%s", share_token)
+    workflow = await workflow_service.get_shared_workflow(share_token)
+    if not workflow:
+        logger.warning("[workflow] get_shared_workflow token=%s not found", share_token)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Shared workflow not found or is no longer public",
+        )
+    return workflow
+
+
 # ---------------------------------------------------------------------------
 # Execution
 # ---------------------------------------------------------------------------
@@ -291,6 +341,7 @@ async def execute_workflow(body: ExecuteWorkflowRequest, request: Request):
         async for event in workflow_executor.execute(
             spec_dict=body.spec,
             input_text=body.input_text,
+            input_variables=body.input_variables,
             tenant_id=tenant_id,
             dry_run=body.dry_run,
             start_node_id=body.start_node_id,
@@ -350,3 +401,43 @@ async def get_workflow_run(run_id: str, request: Request):
         )
     logger.info("[workflow] get_run found: status=%s", run.get('status', '?'))
     return run
+
+# ---------------------------------------------------------------------------
+# WebSocket endpoint for Real-Time Collaboration
+# ---------------------------------------------------------------------------
+
+@router.websocket("/{workflow_id}/sync")
+async def websocket_sync_endpoint(websocket: WebSocket, workflow_id: str, token: str | None = None):
+    # In a real implementation, we would validate the token to get the user
+    # For now, we will assign a random guest name or use token as a hint
+    import random
+    colors = ['#f43f5e', '#8b5cf6', '#10b981', '#f59e0b', '#3b82f6', '#ec4899']
+    user_info = {
+        "id": f"user_{id(websocket)}", 
+        "name": f"Collaborator {str(id(websocket))[-4:]}",
+        "color": random.choice(colors)
+    }
+    
+    await manager.connect(websocket, workflow_id, user_info)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            # We expect JSON messages: { "type": "...", ... }
+            try:
+                message = json.loads(data)
+                
+                if message.get("type") in ["cursor_move", "node_moved", "spec_change", "node_selected"]:
+                    # Broadcast the message to all OTHER clients in this workflow
+                    message["user_id"] = user_info["id"]
+                    message["user"] = user_info
+                    await manager.broadcast(workflow_id, message, exclude=websocket)
+            except json.JSONDecodeError:
+                logger.warning(f"Invalid JSON received on websocket for {workflow_id}")
+                
+    except WebSocketDisconnect:
+        manager.disconnect(websocket, workflow_id)
+        await manager.broadcast(workflow_id, {
+            "type": "user_left",
+            "user_id": user_info["id"],
+            "user": user_info
+        })
