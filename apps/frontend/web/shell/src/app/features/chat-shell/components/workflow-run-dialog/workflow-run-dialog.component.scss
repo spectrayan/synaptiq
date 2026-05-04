@@ -1,0 +1,31 @@
+::ng-deep .synaptiq-form-field {
+  .mdc-text-field--outlined {
+    --mdc-outlined-text-field-container-shape: 8px;
+  }
+}
+
+.custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.5);
+    border-radius: 20px;
+  }
+}
+
+.file-upload-wrapper {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    border-color: var(--mdc-theme-primary, #3b82f6);
+  }
+  
+  &.border-red-500 {
+    border-color: #ef4444;
+  }
+}

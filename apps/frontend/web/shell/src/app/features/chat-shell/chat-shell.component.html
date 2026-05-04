@@ -8,6 +8,7 @@
     [pinnedViews]="pinnedViews()"
     [activePinnedView]="activePinnedView()"
     [savedWorkflows]="savedWorkflows()"
+    [communityTemplates]="communityTemplates()"
     [currentWorkflowId]="currentWorkflow()?.id ?? null"
     [isAuthenticated]="auth.isAuthenticated()"
     [userEmail]="auth.currentUser()?.email ?? null"
@@ -18,6 +19,7 @@
     (selectPinnedView)="selectPinnedView($event)"
     (unpinView)="unpinView($event.viewId, $event.event)"
     (loadSavedWorkflow)="loadSavedWorkflow($event)"
+    (loadWorkflowTemplate)="loadWorkflowTemplate($event)"
     (openAuth)="openAuthForm($event)"
     (signOut)="signOutFromChat()"
   />
@@ -124,6 +126,7 @@
           (duplicateWorkflowRequest)="onDuplicateWorkflow($event)"
           (regeneratePromptRequest)="onRegeneratePrompt($event)"
           (runFromNode)="onRunFromNode($event)"
+          (shareWorkflowRequest)="onShareWorkflow($event)"
         ></sq-workflow-canvas>
       } @else {
         <div class="workflow-empty">

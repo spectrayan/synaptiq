@@ -4,6 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute } from '@angular/router';
 import { map } from 'rxjs';
 import { type ComponentSpec, type ViewSpec } from '@synaptiq/constants';
 import { FormSubmitEvent } from '@synaptiq/dsl-renderer';
@@ -28,6 +29,8 @@ import { ChatTopbarComponent } from './components/chat-topbar/chat-topbar.compon
 import { ChatMessageListComponent } from './components/chat-message-list/chat-message-list.component';
 import { ChatInputBarComponent } from './components/chat-input-bar/chat-input-bar.component';
 import { ChatSettingsDrawerComponent } from './components/chat-settings-drawer/chat-settings-drawer.component';
+import { MatDialog } from '@angular/material/dialog';
+import { WorkflowRunDialogComponent } from './components/workflow-run-dialog/workflow-run-dialog.component';
 import { ConfigFieldSaveEvent } from './components/admin-config-panel/admin-config-panel.component';
 import {
   CMD_SIGN_IN,
@@ -79,6 +82,8 @@ export class ChatShellComponent implements OnDestroy {
   private readonly streamOrchestrator = inject(ChatStreamOrchestrator);
   private readonly configPanelOrchestrator = inject(ConfigPanelOrchestrator);
   private readonly analyticsOrchestrator = inject(ChatAnalyticsOrchestrator);
+  private readonly route = inject(ActivatedRoute);
+  private readonly dialog = inject(MatDialog);
 
   /** Exposed for settings panel template */
   readonly apiBaseUrl = this.env.apiBaseUrl;
@@ -127,6 +132,8 @@ export class ChatShellComponent implements OnDestroy {
   readonly workflowRunHistory = signal<WorkflowRunSummary[]>([]);
   /** Saved workflows list for the sidebar */
   readonly savedWorkflows = signal<WorkflowSpec[]>([]);
+  /** Community templates list for the sidebar */
+  readonly communityTemplates = signal<WorkflowSpec[]>([]);
 
   messages = signal<ChatMessage[]>([]);
 
@@ -188,6 +195,13 @@ export class ChatShellComponent implements OnDestroy {
 
   constructor() {
 
+    this.route.paramMap.subscribe(params => {
+      const token = params.get('token');
+      if (token) {
+        this.loadSharedWorkflow(token);
+      }
+    });
+
     // Fetch public tenant persona config (welcome message + starter prompts)
     const personaReady = this._loadPersona();
 
@@ -211,7 +225,10 @@ export class ChatShellComponent implements OnDestroy {
           // No user at all — sign in anonymously for immediate access
           this.auth.signInAsGuest()
             .then(() => personaReady)
-            .then(() => this.messages.set(this._buildInitialMessages()))
+            .then(() => {
+              this.messages.set(this._buildInitialMessages());
+              this.loadCommunityTemplates();
+            })
             .catch(() => {
               // Emulator might not be running — show welcome anyway
               this.messages.set(this._buildInitialMessages());
@@ -222,6 +239,7 @@ export class ChatShellComponent implements OnDestroy {
             this.messages.set(this._buildInitialMessages());
             this.loadSessionHistory();
             this.loadSavedWorkflows();
+            this.loadCommunityTemplates();
           });
         }
       }
@@ -525,7 +543,9 @@ export class ChatShellComponent implements OnDestroy {
 
   /** Load a template as the current workflow. */
   loadWorkflowTemplate(template: WorkflowSpec): void {
-    this.currentWorkflow.set(template);
+    // Strip the ID so that saving it creates a new workflow for the user
+    const { id, ...templateWithoutId } = template;
+    this.currentWorkflow.set(templateWithoutId as WorkflowSpec);
     this.mainTab.set('workflow');
   }
 
@@ -539,6 +559,18 @@ export class ChatShellComponent implements OnDestroy {
       this.savedWorkflows.set(workflows);
     } catch (err) {
       console.warn('[ChatShell] loadSavedWorkflows failed:', err);
+    }
+  }
+
+  /** Fetch public community templates from the backend for the sidebar list. */
+  async loadCommunityTemplates(): Promise<void> {
+    console.log('[ChatShell] loadCommunityTemplates: fetching list...');
+    try {
+      const templates = await this.workflowService.listPublicTemplates();
+      console.log(`[ChatShell] loadCommunityTemplates: got ${templates.length} templates`);
+      this.communityTemplates.set(templates);
+    } catch (err) {
+      console.warn('[ChatShell] loadCommunityTemplates failed:', err);
     }
   }
 
@@ -1084,19 +1116,70 @@ export class ChatShellComponent implements OnDestroy {
     const canvas = this._workflowCanvas();
     if (!spec || !canvas) return;
 
+    if (spec.inputs && spec.inputs.length > 0) {
+      const dialogRef = this.dialog.open(WorkflowRunDialogComponent, {
+        data: { inputs: spec.inputs },
+        width: '400px',
+      });
+
+      dialogRef.afterClosed().subscribe((result) => {
+        if (result) {
+          this._executeWorkflow(spec, canvas, result);
+        }
+      });
+    } else {
+      this._executeWorkflow(spec, canvas);
+    }
+  }
+
+  /** Execute the workflow starting from a specific node (partial re-execution). */
+  onRunFromNode(nodeId: string): void {
+    const spec = this.currentWorkflow();
+    const canvas = this._workflowCanvas();
+    if (!spec || !canvas) return;
+
+    if (spec.inputs && spec.inputs.length > 0) {
+      const dialogRef = this.dialog.open(WorkflowRunDialogComponent, {
+        data: { inputs: spec.inputs },
+        width: '400px',
+      });
+
+      dialogRef.afterClosed().subscribe((result) => {
+        if (result) {
+          this._executeWorkflow(spec, canvas, result, nodeId);
+        }
+      });
+    } else {
+      this._executeWorkflow(spec, canvas, undefined, nodeId);
+    }
+  }
+
+  private _executeWorkflow(spec: WorkflowSpec, canvas: WorkflowCanvasComponent, inputVariables?: Record<string, unknown>, startNodeId?: string): void {
+    if (startNodeId) {
+      console.log(`[ChatShell] partial re-exec from node "${startNodeId}"`);
+    }
     canvas.resetExecution();
     canvas.setExecutionStatus('running');
     this._execAbort = new AbortController();
 
     this.workflowService.streamExecute(spec, '', {
-      onExecutionStart: () => canvas.setExecutionStatus('running'),
-      onNodeStart: (nodeId: string) => canvas.setNodeStatus(nodeId, 'running'),
-      onNodeComplete: (nodeId: string, _label: string, durationMs: number) => {
-        canvas.setNodeStatus(nodeId, 'completed', durationMs);
+      onExecutionStart: (state) => {
+        canvas.setExecutionStatus('running');
+        if (state.nodes) {
+          Object.values(state.nodes).forEach(n => {
+            if (n.status === 'skipped') {
+              canvas.setNodeStatus(n.node_id, 'skipped');
+            }
+          });
+        }
       },
-      onNodeError: (nodeId: string, _label: string, error: string) => {
-        canvas.setNodeStatus(nodeId, 'error');
-        console.error(`Node ${nodeId} error:`, error);
+      onNodeStart: (nId: string) => canvas.setNodeStatus(nId, 'running'),
+      onNodeComplete: (nId: string, _label: string, durationMs: number) => {
+        canvas.setNodeStatus(nId, 'completed', durationMs);
+      },
+      onNodeError: (nId: string, _label: string, error: string) => {
+        canvas.setNodeStatus(nId, 'error');
+        console.error(`Node ${nId} error:`, error);
       },
       onExecutionComplete: () => {
         canvas.setExecutionStatus('completed');
@@ -1109,40 +1192,7 @@ export class ChatShellComponent implements OnDestroy {
         // Also refresh on error so the failed run appears in history
         this.loadRunHistory();
       },
-    });
-  }
-
-  /** Execute the workflow starting from a specific node (partial re-execution). */
-  onRunFromNode(nodeId: string): void {
-    const spec = this.currentWorkflow();
-    const canvas = this._workflowCanvas();
-    if (!spec || !canvas) return;
-
-    console.log(`[ChatShell] partial re-exec from node "${nodeId}"`);
-    canvas.resetExecution();
-    canvas.setExecutionStatus('running');
-    this._execAbort = new AbortController();
-
-    this.workflowService.streamExecute(spec, '', {
-      onExecutionStart: () => canvas.setExecutionStatus('running'),
-      onNodeStart: (nId: string) => canvas.setNodeStatus(nId, 'running'),
-      onNodeComplete: (nId: string, _label: string, durationMs: number) => {
-        canvas.setNodeStatus(nId, 'completed', durationMs);
-      },
-      onNodeError: (nId: string, _label: string, error: string) => {
-        canvas.setNodeStatus(nId, 'error');
-        console.error(`Node ${nId} error:`, error);
-      },
-      onExecutionComplete: () => {
-        canvas.setExecutionStatus('completed');
-        this.loadRunHistory();
-      },
-      onExecutionError: (err: string) => {
-        canvas.setExecutionStatus('error');
-        console.error('Partial execution error:', err);
-        this.loadRunHistory();
-      },
-    }, undefined, false, nodeId);
+    }, undefined, false, startNodeId, undefined, inputVariables);
   }
 
   /** Abort a running workflow execution. */
@@ -1252,6 +1302,95 @@ export class ChatShellComponent implements OnDestroy {
       this.loadSavedWorkflows();
     } catch (e) {
       console.error('[ChatShell] duplicate failed:', e);
+    }
+  }
+
+  async onShareWorkflow(workflowId: string): Promise<void> {
+    if (!workflowId) return;
+    this.isLoading.set(true);
+    try {
+      const authToken = (await this.auth.getIdToken().catch(() => undefined)) ?? undefined;
+      const shareToken = await this.workflowService.shareWorkflow(workflowId, authToken);
+      const shareUrl = `${window.location.origin}/shared/${shareToken}`;
+      
+      await navigator.clipboard?.writeText(shareUrl);
+      
+      this.messages.update((msgs) => [
+        ...msgs,
+        {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: '',
+          timestamp: new Date(),
+          uiComponents: [
+            {
+              type: 'info_banner',
+              title: 'Workflow Shared',
+              body: `A shareable link has been generated and copied to your clipboard: ${shareUrl}`,
+              style: 'success',
+            },
+          ],
+        },
+      ]);
+      this.mainTab.set('chat');
+    } catch (err) {
+      console.error('[ChatShell] share workflow failed:', err);
+      const errorMsg = err instanceof Error ? err.message : 'Failed to share workflow.';
+      this.messages.update((msgs) => [
+        ...msgs,
+        {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: '',
+          timestamp: new Date(),
+          uiComponents: [
+            {
+              type: 'info_banner',
+              title: 'Share Failed',
+              body: errorMsg,
+              style: 'error',
+            },
+          ],
+        },
+      ]);
+      this.mainTab.set('chat');
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  async loadSharedWorkflow(token: string): Promise<void> {
+    console.log(`[ChatShell] loadSharedWorkflow: loading token ${token}...`);
+    try {
+      const authToken = (await this.auth.getIdToken().catch(() => undefined)) ?? undefined;
+      const spec = await this.workflowService.getSharedWorkflow(token);
+      if (spec) {
+        console.log(`[ChatShell] loadSharedWorkflow: loaded shared workflow "${spec.name}"`);
+        this.currentWorkflow.set(spec);
+        this.mainTab.set('workflow');
+      } else {
+        console.warn(`[ChatShell] loadSharedWorkflow: returned null for token ${token}`);
+        this.messages.update((msgs) => [
+          ...msgs,
+          {
+            id: crypto.randomUUID(),
+            role: 'assistant',
+            content: `❌ The shared workflow link is invalid or has expired.`,
+            timestamp: new Date(),
+          },
+        ]);
+      }
+    } catch (err) {
+      console.error('[ChatShell] loadSharedWorkflow failed:', err);
+      this.messages.update((msgs) => [
+        ...msgs,
+        {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: `❌ Failed to load shared workflow. Please try again.`,
+          timestamp: new Date(),
+        },
+      ]);
     }
   }
 

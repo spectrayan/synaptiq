@@ -16,6 +16,13 @@ export const appRoutes: Route[] = [
     // Anonymous users get guest access; auth upgrades happen inline.
   },
   {
+    path: 'shared/:token',
+    loadComponent: () =>
+      import('./features/chat-shell/chat-shell.component').then(
+        (m) => m.ChatShellComponent,
+      ),
+  },
+  {
     path: 'admin',
     redirectTo: 'chat',
     // Admin capabilities are surfaced within the chat when the user has admin claims.

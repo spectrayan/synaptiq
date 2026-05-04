@@ -64,7 +64,7 @@ const COLLAPSE_THRESHOLD = 1500; // Characters
       }
 
       @if (isLong() && !expanded()) {
-        <div class="md-fade-overlay" (click)="expanded.set(true)">
+        <div class="md-fade-overlay" tabindex="0" role="button" (click)="expanded.set(true)" (keyup.enter)="expanded.set(true)" (keyup.space)="expanded.set(true)">
           <span class="md-show-more">Show more ↓</span>
         </div>
       }

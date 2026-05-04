@@ -1,0 +1,81 @@
+<div class="dialog-container bg-white dark:bg-gray-900 overflow-hidden flex flex-col h-full rounded-xl">
+  <div class="px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex items-center gap-4">
+    <div class="w-12 h-12 rounded-full bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center shrink-0">
+      <mat-icon class="text-primary-600 dark:text-primary-400">play_arrow</mat-icon>
+    </div>
+    <div>
+      <h2 class="text-xl font-semibold text-gray-900 dark:text-white m-0 tracking-tight">Run Workflow</h2>
+      <p class="text-sm text-gray-500 dark:text-gray-400 m-0 mt-0.5">Provide the required input variables below</p>
+    </div>
+  </div>
+
+  <mat-dialog-content class="flex-1 px-6 py-6 custom-scrollbar">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="workflow-inputs-form flex flex-col gap-4">
+      
+      <ng-container *ngFor="let input of data.inputs">
+        
+        <!-- Text / Number Input -->
+        <div *ngIf="input.type === 'text' || input.type === 'number'" class="w-full">
+          <mat-form-field appearance="outline" class="w-full synaptiq-form-field">
+            <mat-label>{{ input.label || input.name }}</mat-label>
+            <input matInput [type]="input.type" [formControlName]="input.name" [required]="input.required !== false">
+          </mat-form-field>
+        </div>
+        
+        <!-- Textarea Input -->
+        <div *ngIf="input.type === 'textarea'" class="w-full">
+          <mat-form-field appearance="outline" class="w-full synaptiq-form-field">
+            <mat-label>{{ input.label || input.name }}</mat-label>
+            <textarea matInput [formControlName]="input.name" rows="3" [required]="input.required !== false"></textarea>
+          </mat-form-field>
+        </div>
+
+        <!-- Select Input -->
+        <div *ngIf="input.type === 'select'" class="w-full">
+          <mat-form-field appearance="outline" class="w-full synaptiq-form-field">
+            <mat-label>{{ input.label || input.name }}</mat-label>
+            <mat-select [formControlName]="input.name" [required]="input.required !== false">
+              <mat-option *ngFor="let option of input.options" [value]="option">
+                {{ option }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- File Input -->
+        <div *ngIf="input.type === 'file'" class="w-full">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            {{ input.label || input.name }}
+            <span *ngIf="input.required !== false" class="text-red-500">*</span>
+          </label>
+          <div class="file-upload-wrapper relative border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-6 flex flex-col items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+               [class.border-red-500]="form.get(input.name)?.invalid && form.get(input.name)?.touched">
+            <input type="file" 
+                   class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                   (change)="onFileSelected($event, input.name)" 
+                   [required]="input.required !== false">
+            <mat-icon class="text-gray-400 dark:text-gray-500 mb-2" style="transform: scale(1.5);">cloud_upload</mat-icon>
+            <p class="text-sm font-medium text-gray-600 dark:text-gray-400 text-center m-0">
+              <span *ngIf="!fileNames[input.name]">Click to upload or drag and drop</span>
+              <span *ngIf="fileNames[input.name]" class="text-primary-600 dark:text-primary-400 font-semibold truncate max-w-full block">{{ fileNames[input.name] }}</span>
+            </p>
+            <p *ngIf="!fileNames[input.name]" class="text-xs text-gray-400 dark:text-gray-500 mt-1">Maximum file size: 10MB</p>
+          </div>
+          <mat-error class="text-xs mt-1 block" *ngIf="form.get(input.name)?.invalid && form.get(input.name)?.touched">
+            <span *ngIf="form.get(input.name)?.hasError('required')">This file is required.</span>
+            <span *ngIf="form.get(input.name)?.hasError('fileSizeError')">File exceeds 10MB limit.</span>
+            <span *ngIf="form.get(input.name)?.hasError('fileReadError')">Failed to read file.</span>
+          </mat-error>
+        </div>
+
+      </ng-container>
+    </form>
+  </mat-dialog-content>
+
+  <div class="px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 flex justify-end gap-3">
+    <button mat-button mat-dialog-close class="rounded-full px-5 py-2 tracking-wide font-medium">Cancel</button>
+    <button mat-flat-button color="primary" [disabled]="form.invalid" (click)="onSubmit()" class="rounded-full px-6 py-2 tracking-wide font-medium shadow-sm hover:shadow transition-shadow">
+      <mat-icon class="mr-1">play_arrow</mat-icon> Run Workflow
+    </button>
+  </div>
+</div>

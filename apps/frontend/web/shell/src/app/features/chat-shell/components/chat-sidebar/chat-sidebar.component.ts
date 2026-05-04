@@ -21,6 +21,7 @@ export class ChatSidebarComponent {
   readonly pinnedViews = input<ViewSpec[]>([]);
   readonly activePinnedView = input('');
   readonly savedWorkflows = input<WorkflowSpec[]>([]);
+  readonly communityTemplates = input<WorkflowSpec[]>([]);
   readonly currentWorkflowId = input<string | null>(null);
   readonly isAuthenticated = input(false);
   readonly userEmail = input<string | null>(null);
@@ -33,6 +34,7 @@ export class ChatSidebarComponent {
   readonly selectPinnedView = output<string>();
   readonly unpinView = output<{ viewId: string; event: Event }>();
   readonly loadSavedWorkflow = output<string>();
+  readonly loadWorkflowTemplate = output<WorkflowSpec>();
   readonly openAuth = output<'signin' | 'signup'>();
   readonly signOut = output<void>();
 }

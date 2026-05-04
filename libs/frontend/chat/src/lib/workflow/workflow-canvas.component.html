@@ -26,6 +26,17 @@
       } @else if (saveStatus() === 'error') {
         <span class="save-status save-status--error">Save failed</span>
       }
+
+      <!-- Collaborative Active Users -->
+      @if (activeUsers().length > 0) {
+        <div class="active-users-list">
+          @for (user of activeUsers(); track user.id) {
+            <div class="active-user-avatar" [style.backgroundColor]="user.color || '#6366f1'" [matTooltip]="user.name">
+              {{ user.name ? user.name.charAt(0).toUpperCase() : '?' }}
+            </div>
+          }
+        </div>
+      }
     </div>
     <div class="toolbar-right">
       <!-- Undo / Redo -->
@@ -64,9 +75,13 @@
               @for (run of runHistory(); track run.run_id) {
                 <div
                   class="run-history-item"
+                  tabindex="0"
+                  role="button"
                   [class.run-history-item--active]="selectedRunId() === run.run_id"
                   [attr.data-status]="run.status"
-                  (click)="selectRun.emit(run.run_id)">
+                  (click)="selectRun.emit(run.run_id)"
+                  (keyup.enter)="selectRun.emit(run.run_id)"
+                  (keyup.space)="selectRun.emit(run.run_id)">
                   <div class="run-item-status">
                     <mat-icon>{{ run.status === 'completed' ? 'check_circle' : run.status === 'error' ? 'error' : 'pending' }}</mat-icon>
                   </div>
@@ -90,10 +105,14 @@
       } @else if (executionStatus() === 'completed') {
         <span class="exec-status exec-status--done">✓ Done ({{ totalDurationMs() | number:'1.0-0' }}ms)</span>
       }
-      <button class="toolbar-btn toolbar-btn--run" (click)="runWorkflow.emit()" [disabled]="executionStatus() === 'running'" matTooltip="Run workflow (dry run)">
+      <button class="toolbar-btn toolbar-btn--run" (click)="runWorkflow.emit({})" [disabled]="executionStatus() === 'running'" matTooltip="Run workflow (dry run)">
         <mat-icon>play_arrow</mat-icon>
       </button>
       <span class="toolbar-sep"></span>
+      <!-- Share button -->
+      <button class="toolbar-btn" (click)="shareWorkflowRequest.emit(spec()?.id ?? '')" matTooltip="Share workflow">
+        <mat-icon>share</mat-icon>
+      </button>
       <!-- 3-dot menu -->
       <div class="toolbar-more">
         <button class="toolbar-btn" (click)="showToolbar3Dot.update(v => !v)" matTooltip="More actions">
@@ -104,9 +123,16 @@
             <button class="dropdown-item" (click)="duplicateWorkflowRequest.emit(spec()?.id ?? ''); showToolbar3Dot.set(false)">
               <mat-icon>content_copy</mat-icon> Duplicate
             </button>
+            <button class="dropdown-item" (click)="exportJson(); showToolbar3Dot.set(false)">
+              <mat-icon>download</mat-icon> Export JSON
+            </button>
+            <button class="dropdown-item" (click)="fileInput.click(); showToolbar3Dot.set(false)">
+              <mat-icon>upload</mat-icon> Import JSON
+            </button>
             <button class="dropdown-item dropdown-item--danger" (click)="deleteWorkflowRequest.emit(spec()?.id ?? ''); showToolbar3Dot.set(false)">
               <mat-icon>delete</mat-icon> Delete
             </button>
+            <input type="file" #fileInput (change)="importJson($event)" accept=".json" style="display: none" />
           </div>
         }
       </div>
@@ -173,6 +199,8 @@
           fType="segment"
           [class.sq-edge-conditional]="edge.isConditional"
           [class.sq-edge-active]="getNodeExecStatus(edge.sourceOutputId.replace('-output', '')) === 'completed'"
+          [class.sq-edge-selected]="selectedEdgeId() === edge.id"
+          (click)="selectEdge(edge.id)"
         >
         </f-connection>
       }
@@ -185,13 +213,18 @@
           fDragHandle
           [fConnectOnNode]="false"
           class="sq-node"
+          tabindex="0"
+          role="button"
           [class.sq-node-selected]="selectedNodeId() === node.id"
+          [class.sq-node-remote-selected]="getRemoteSelectionsForNode(node.id).length > 0"
           [class.sq-node-entry]="spec()?.entry_point === node.id"
           [class.sq-node-running]="node.executionStatus === 'running'"
           [class.sq-node-completed]="node.executionStatus === 'completed'"
           [class.sq-node-error]="node.executionStatus === 'error'"
           [class.sq-node-skipped]="node.executionStatus === 'skipped'"
           (click)="selectNode(node.id)"
+          (keyup.enter)="selectNode(node.id)"
+          (keyup.space)="selectNode(node.id)"
           (mouseenter)="hoveredNodeId.set(node.id)"
           (mouseleave)="hoveredNodeId.set(null)"
         >
@@ -221,6 +254,17 @@
             </div>
           }
 
+          <!-- Remote Selection Indicators -->
+          @if (getRemoteSelectionsForNode(node.id).length > 0) {
+            <div class="sq-node-remote-indicators">
+              @for (sel of getRemoteSelectionsForNode(node.id); track sel.name) {
+                <div class="sq-node-remote-indicator" [style.backgroundColor]="sel.color" [matTooltip]="sel.name">
+                  {{ sel.name ? sel.name.charAt(0).toUpperCase() : '?' }}
+                </div>
+              }
+            </div>
+          }
+
           <!-- Execution duration badge -->
           @if (node.durationMs) {
             <div class="sq-node-duration">{{ node.durationMs | number:'1.0-0' }}ms</div>
@@ -239,8 +283,10 @@
           <!-- Run from here button (hover) -->
           @if (hoveredNodeId() === node.id && executionStatus() !== 'running') {
             <button class="sq-node-run-btn"
-                    (click)="runFromNode.emit(node.id); $event.stopPropagation()"
-                    matTooltip="Run from this node">
+                    [class.disabled]="invalidRunFromNodes().has(node.id)"
+                    [disabled]="invalidRunFromNodes().has(node.id)"
+                    (click)="!invalidRunFromNodes().has(node.id) && runFromNode.emit(node.id); $event.stopPropagation()"
+                    [matTooltip]="invalidRunFromNodes().has(node.id) ? 'Cannot run from a disconnected or cyclical node' : 'Run from this node'">
               <mat-icon>play_circle</mat-icon>
             </button>
           }
@@ -449,5 +495,56 @@
         }
       }
     </aside>
+  } @else if (selectedEdge()) {
+    <aside class="detail-panel">
+      <div class="detail-header">
+        <div class="detail-icon" style="background: rgba(244, 63, 94, 0.22); color: #f43f5e">
+          <mat-icon>{{ selectedEdge()!.isConditional ? 'call_split' : 'timeline' }}</mat-icon>
+        </div>
+        <div class="detail-title-group">
+          <h3 class="detail-title">Edge Connection</h3>
+          <span class="detail-type" style="color: #f43f5e">{{ selectedEdge()!.isConditional ? 'Conditional' : 'Direct' }}</span>
+        </div>
+        <button class="detail-close" (click)="selectedEdgeId.set(null)">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="detail-section">
+        <span class="detail-label">Source Node</span>
+        <code class="detail-code">{{ selectedEdge()!.sourceOutputId.replace('-output', '') }}</code>
+      </div>
+      
+      <div class="detail-section">
+        <span class="detail-label">Target Node</span>
+        <code class="detail-code">{{ selectedEdge()!.targetInputId.replace('-input', '') }}</code>
+      </div>
+
+      @if (selectedEdge()!.isConditional) {
+        <div class="detail-section">
+          <span class="detail-label">Condition Label</span>
+          <input class="inspector-input"
+                 [ngModel]="selectedEdge()!.condition"
+                 (ngModelChange)="onEdgeConditionChange($event)"
+                 placeholder="e.g. 'success' or 'error'" />
+        </div>
+      }
+
+      <div class="detail-section detail-actions">
+        <button class="action-btn action-btn--danger" (click)="deleteSelectedEdge()">
+          <mat-icon>delete</mat-icon> Delete Edge
+        </button>
+      </div>
+    </aside>
+  }
+
+  <!-- Remote Cursors Overlay -->
+  @for (cursor of remoteCursorsList(); track cursor.id) {
+    <div class="remote-cursor" [style.left.px]="cursor.x" [style.top.px]="cursor.y">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.04c.45 0 .67-.54.35-.85L5.85 3.21a.5.5 0 0 0-.85.35z" [attr.fill]="cursor.color"/>
+      </svg>
+      <span class="remote-cursor-name" [style.backgroundColor]="cursor.color">{{ cursor.name }}</span>
+    </div>
   }
 </div>

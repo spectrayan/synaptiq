@@ -39,6 +39,15 @@ export interface ConditionalEdgeSpec {
   default_target: string;
 }
 
+export interface WorkflowInput {
+  name: string;
+  type: string;
+  label: string;
+  required?: boolean;
+  default?: string;
+  options?: string[];
+}
+
 export interface WorkflowSpec {
   id: string;
   name: string;
@@ -47,6 +56,7 @@ export interface WorkflowSpec {
   agents: AgentNodeSpec[];
   edges: EdgeSpec[];
   conditional_edges: ConditionalEdgeSpec[];
+  inputs?: WorkflowInput[];
   entry_point: string;
   metadata?: Record<string, unknown>;
   created_at?: number;
@@ -306,6 +316,18 @@ export class WorkflowService {
     return data.templates ?? [];
   }
 
+  /** Fetch public community templates. */
+  async listPublicTemplates(authToken?: string): Promise<WorkflowSpec[]> {
+    const headers: Record<string, string> = {};
+    if (this.env.tenantId) headers['X-Tenant-ID'] = this.env.tenantId;
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+
+    const response = await fetch(`${this.baseUrl}/community-templates`, { headers });
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.templates ?? [];
+  }
+
   /** Fetch available tools catalog (cached after first call). */
   private _toolCache: ToolCatalogResponse | null = null;
 
@@ -446,6 +468,35 @@ export class WorkflowService {
     console.log(`[WorkflowService] deleteWorkflow: done`);
   }
 
+  /** Share a workflow and generate a public token. */
+  async shareWorkflow(workflowId: string, authToken?: string): Promise<{share_token: string}> {
+    console.log(`[WorkflowService] shareWorkflow: ${workflowId}`);
+    const headers: Record<string, string> = {};
+    if (this.env.tenantId) headers['X-Tenant-ID'] = this.env.tenantId;
+    if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+
+    const response = await fetch(`${this.baseUrl}/${workflowId}/share`, {
+      method: 'POST',
+      headers,
+    });
+    if (!response.ok) {
+      console.error(`[WorkflowService] shareWorkflow failed: ${response.status}`);
+      throw new Error(`Failed to share workflow: ${response.status}`);
+    }
+    return response.json();
+  }
+
+  /** Retrieve a shared workflow by its public token. */
+  async getSharedWorkflow(shareToken: string): Promise<WorkflowSpec> {
+    console.log(`[WorkflowService] getSharedWorkflow: ${shareToken}`);
+    const response = await fetch(`${this.baseUrl}/shared/${shareToken}`);
+    if (!response.ok) {
+      console.error(`[WorkflowService] getSharedWorkflow failed: ${response.status}`);
+      throw new Error(`Failed to retrieve shared workflow: ${response.status}`);
+    }
+    return response.json();
+  }
+
   /** Ask AI to improve a node's system prompt. */
   async regeneratePrompt(
     payload: {
@@ -515,6 +566,7 @@ export class WorkflowService {
     dryRun = false,
     startNodeId?: string,
     priorContext?: string,
+    inputVariables?: Record<string, unknown>,
   ): Promise<void> {
     this.abort();
 
@@ -538,6 +590,7 @@ export class WorkflowService {
           dry_run: dryRun,
           ...(startNodeId ? { start_node_id: startNodeId } : {}),
           ...(priorContext ? { prior_context: priorContext } : {}),
+          ...(inputVariables ? { input_variables: inputVariables } : {}),
         }),
         signal: controller.signal,
       });

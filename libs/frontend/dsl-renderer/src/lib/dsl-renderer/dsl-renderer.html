@@ -1,4 +1,4 @@
-@switch (spec()?.type) {
+@switch (spec().type) {
   <!-- ── Catalog-specific (MVP) ── -->
   @case ('item_card') {
     <syn-item-card
@@ -118,6 +118,6 @@
   }
 
   @default {
-    <div class="dsl-unknown">Unknown component type: {{ spec()?.type }}</div>
+    <div class="dsl-unknown">Unknown component type: {{ spec().type }}</div>
   }
 }

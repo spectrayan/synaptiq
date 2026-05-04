@@ -189,10 +189,8 @@
             [disabled]="submitted()">
       @if (submitted()) {
         <mat-icon class="spin">sync</mat-icon>
-        Submitting...
-      } @else {
-        {{ spec().submit_label ?? 'Submit' }}
       }
+      {{ submitted() ? 'Submitting...' : (spec().submit_label ?? 'Submit') }}
     </button>
   </mat-card-actions>
 </mat-card>

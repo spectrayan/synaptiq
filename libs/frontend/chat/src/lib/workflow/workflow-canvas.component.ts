@@ -15,16 +15,18 @@ import {
   output,
   signal,
   computed,
-  effect,
   ChangeDetectionStrategy,
   viewChild,
-  OnInit,
   HostListener,
+  inject,
+  effect,
+  DestroyRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { CollaborationService, CollabMessage } from './collaboration.service';
 import { MarkdownViewerComponent } from './markdown-viewer.component';
 import { PromptEditorComponent, RegeneratePromptEvent } from './prompt-editor.component';
 import {
@@ -34,7 +36,7 @@ import {
   FZoomDirective,
 } from '@foblex/flow';
 import type {
-  WorkflowSpec, AgentNodeSpec, EdgeSpec, ConditionalEdgeSpec, NodeExecutionStatus,
+  WorkflowSpec, AgentNodeSpec, NodeExecutionStatus,
   WorkflowRunSummary, WorkflowRunNodeDetail, ToolDefinition,
 } from '../workflow.service';
 
@@ -120,7 +122,7 @@ export class WorkflowCanvasComponent {
   readonly spec = input<WorkflowSpec | null>(null);
 
   // ── Outputs ─────────────────────────────────────────────────────────────
-  readonly runWorkflow = output<void>();
+  readonly runWorkflow = output<Record<string, unknown>>();
   readonly stopExecution = output<void>();
   readonly specChange = output<WorkflowSpec>();
   readonly selectRun = output<string>();
@@ -134,9 +136,13 @@ export class WorkflowCanvasComponent {
     instruction: string;
   }>();
   readonly runFromNode = output<string>();
+  readonly shareWorkflowRequest = output<string>();
 
   // ── Child refs ──────────────────────────────────────────────────────────
   protected readonly promptEditorRef = viewChild<PromptEditorComponent>('promptEditorRef');
+
+  private readonly collabService = inject(CollaborationService);
+  private readonly destroyRef = inject(DestroyRef);
 
   // ── State ───────────────────────────────────────────────────────────────
   readonly selectedNodeId = signal<string | null>(null);
@@ -150,6 +156,8 @@ export class WorkflowCanvasComponent {
   readonly showAddNodeForm = signal(false);
   readonly showDeleteConfirm = signal(false);
   readonly showToolbar3Dot = signal(false);
+  
+  readonly selectedEdgeId = signal<string | null>(null);
 
   /** Tool registry state */
   readonly showToolPicker = signal(false);
@@ -169,7 +177,8 @@ export class WorkflowCanvasComponent {
       if (!groups.has(tool.category)) {
         groups.set(tool.category, { key: tool.category, label: tool.category, tools: [] });
       }
-      groups.get(tool.category)!.tools.push(tool);
+      const group = groups.get(tool.category);
+      if (group) group.tools.push(tool);
     }
     return Array.from(groups.values());
   });
@@ -194,11 +203,126 @@ export class WorkflowCanvasComponent {
   readonly canUndo = signal(false);
   readonly canRedo = signal(false);
 
+  /** Active Users */
+  readonly activeUsers = signal<any[]>([]);
+
+  /** Remote cursors state */
+  readonly remoteCursors = signal<Record<string, { id: string, name: string, x: number, y: number, color: string }>>({});
+  readonly remoteCursorsList = computed(() => Object.values(this.remoteCursors()));
+
+  /** Remote node selections state */
+  readonly remoteSelections = signal<Record<string, { nodeId: string, color: string, name: string }>>({});
+  readonly remoteSelectionsList = computed(() => Object.values(this.remoteSelections()));
+
+  getRemoteSelectionsForNode(nodeId: string): { color: string, name: string }[] {
+    return this.remoteSelectionsList().filter(sel => sel.nodeId === nodeId);
+  }
+
+  constructor() {
+    effect(() => {
+      const s = this.spec();
+      if (s?.id) {
+        this.collabService.connect(s.id);
+      } else {
+        this.collabService.disconnect();
+      }
+    });
+
+    const sub = this.collabService.messages$.subscribe((msg: CollabMessage) => {
+      this.handleCollabMessage(msg);
+    });
+
+    this.destroyRef.onDestroy(() => {
+      sub.unsubscribe();
+      this.collabService.disconnect();
+    });
+  }
+
+  private handleCollabMessage(msg: CollabMessage): void {
+    switch (msg.type) {
+      case 'user_joined':
+      case 'user_left':
+      case 'active_users':
+        if (msg.users) {
+          this.activeUsers.set(msg.users);
+        } else if (msg.type === 'user_joined' && msg.user) {
+          this.activeUsers.update(u => [...u.filter(x => x.id !== msg.user.id), msg.user]);
+        } else if (msg.type === 'user_left' && msg.user) {
+          this.activeUsers.update(u => u.filter(x => x.id !== msg.user.id));
+          this.remoteCursors.update(c => {
+            const next = { ...c };
+            delete next[msg.user.id];
+            return next;
+          });
+          this.remoteSelections.update(sels => {
+            const next = { ...sels };
+            delete next[msg.user.id];
+            return next;
+          });
+        }
+        break;
+      case 'cursor_move':
+        if (msg.user_id && msg.x !== undefined && msg.y !== undefined) {
+          this.remoteCursors.update(cursors => ({
+            ...cursors,
+            [msg.user_id!]: {
+              id: msg.user_id!,
+              name: msg.user?.name || 'Guest',
+              x: msg.x!,
+              y: msg.y!,
+              color: msg.user?.color || '#ff0000'
+            }
+          }));
+        }
+        break;
+      case 'spec_change':
+        if (msg.spec) {
+          this.specChange.emit(msg.spec);
+        }
+        break;
+      case 'node_selected':
+        if (msg.user_id && msg.node_id) {
+          this.remoteSelections.update(sels => ({
+            ...sels,
+            [msg.user_id!]: {
+              nodeId: msg.node_id!,
+              color: msg.user?.color || '#ff0000',
+              name: msg.user?.name || 'Guest'
+            }
+          }));
+        } else if (msg.user_id && !msg.node_id) {
+          this.remoteSelections.update(sels => {
+            const next = { ...sels };
+            delete next[msg.user_id!];
+            return next;
+          });
+        }
+        break;
+    }
+  }
+
+  private _lastCursorMove = 0;
+  private _cursorThrottleMs = 50;
+
+  @HostListener('mousemove', ['$event'])
+  onMouseMove(event: MouseEvent): void {
+    if (this.spec()?.id) {
+      const now = Date.now();
+      if (now - this._lastCursorMove > this._cursorThrottleMs) {
+        this._lastCursorMove = now;
+        const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        this.collabService.sendMessage({ type: 'cursor_move', x, y });
+      }
+    }
+  }
+
   /**
    * Central method for all spec mutations.
    * Pushes current state onto undo stack, clears redo, and emits the change.
    */
-  protected emitSpecChange(updated: WorkflowSpec): void {
+  protected emitSpecChange(updated: WorkflowSpec, broadcast = true): void {
     const current = this.spec();
     if (current) {
       this._undoStack.push(JSON.stringify(current));
@@ -209,6 +333,10 @@ export class WorkflowCanvasComponent {
       this._syncUndoRedoSignals();
     }
     this.specChange.emit(updated);
+    
+    if (broadcast && updated.id) {
+      this.collabService.sendMessage({ type: 'spec_change', spec: updated });
+    }
   }
 
   undo(): void {
@@ -217,9 +345,12 @@ export class WorkflowCanvasComponent {
     if (current) {
       this._redoStack.push(JSON.stringify(current));
     }
-    const prev = JSON.parse(this._undoStack.pop()!) as WorkflowSpec;
+    const popPrev = this._undoStack.pop();
+    if (!popPrev) return;
+    const prev = JSON.parse(popPrev) as WorkflowSpec;
     this._syncUndoRedoSignals();
     this.specChange.emit(prev); // Direct emit — don't push to undo again
+    if (prev.id) this.collabService.sendMessage({ type: 'spec_change', spec: prev });
     console.log('[Canvas] undo');
   }
 
@@ -229,9 +360,12 @@ export class WorkflowCanvasComponent {
     if (current) {
       this._undoStack.push(JSON.stringify(current));
     }
-    const next = JSON.parse(this._redoStack.pop()!) as WorkflowSpec;
+    const popNext = this._redoStack.pop();
+    if (!popNext) return;
+    const next = JSON.parse(popNext) as WorkflowSpec;
     this._syncUndoRedoSignals();
     this.specChange.emit(next); // Direct emit — don't push to undo
+    if (next.id) this.collabService.sendMessage({ type: 'spec_change', spec: next });
     console.log('[Canvas] redo');
   }
 
@@ -259,6 +393,15 @@ export class WorkflowCanvasComponent {
     } else if (ctrl && event.key === 'y') {
       event.preventDefault();
       this.redo();
+    } else if (event.key === 'Delete' || event.key === 'Backspace') {
+      const activeTag = document.activeElement?.tagName;
+      if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') return;
+      
+      if (this.selectedNodeId()) {
+        this.showDeleteConfirm.set(true);
+      } else if (this.selectedEdgeId()) {
+        this.deleteSelectedEdge();
+      }
     }
   }
 
@@ -347,8 +490,12 @@ export class WorkflowCanvasComponent {
         : s.entry_point,
     };
     this.selectedNodeId.set(null);
+    this.selectedEdgeId.set(null);
     this.showDeleteConfirm.set(false);
     this.emitSpecChange(updated);
+    if (this.spec()?.id) {
+      this.collabService.sendMessage({ type: 'node_selected', node_id: undefined });
+    }
   }
 
   /** Delete an edge by its source→target pair. */
@@ -360,6 +507,76 @@ export class WorkflowCanvasComponent {
       edges: (s.edges ?? []).filter(e => !(e.from === source && e.to === target)),
     };
     this.emitSpecChange(updated);
+  }
+
+  deleteSelectedEdge(): void {
+    const edge = this.selectedEdge();
+    if (!edge) return;
+    const s = this.spec();
+    if (!s) return;
+
+    const fromId = edge.sourceOutputId.replace(/-output$/, '');
+    const targetId = edge.targetInputId.replace(/-input$/, '');
+
+    let updated: WorkflowSpec;
+
+    if (edge.isConditional) {
+      const conditionalEdges = [...(s.conditional_edges ?? [])];
+      const ceIndex = conditionalEdges.findIndex(ce => ce.from === fromId);
+      if (ceIndex >= 0) {
+        const ce = { ...conditionalEdges[ceIndex] };
+        const mapping = { ...ce.condition_mapping };
+        const condition = edge.condition;
+        delete mapping[condition];
+        
+        if (Object.keys(mapping).length === 0) {
+          conditionalEdges.splice(ceIndex, 1);
+        } else {
+          ce.condition_mapping = mapping;
+          conditionalEdges[ceIndex] = ce;
+        }
+      }
+      updated = { ...s, conditional_edges: conditionalEdges };
+    } else {
+      updated = {
+        ...s,
+        edges: (s.edges ?? []).filter(e => !(e.from === fromId && e.to === targetId)),
+      };
+    }
+
+    this.selectedEdgeId.set(null);
+    this.emitSpecChange(updated);
+  }
+
+  onEdgeConditionChange(newCondition: string): void {
+    const edge = this.selectedEdge();
+    if (!edge || !edge.isConditional) return;
+    const s = this.spec();
+    if (!s) return;
+
+    const fromId = edge.sourceOutputId.replace(/-output$/, '');
+    const targetId = edge.targetInputId.replace(/-input$/, '');
+
+    const conditionalEdges = [...(s.conditional_edges ?? [])];
+    const ceIndex = conditionalEdges.findIndex(ce => ce.from === fromId);
+    if (ceIndex >= 0) {
+      const ce = { ...conditionalEdges[ceIndex] };
+      const mapping = { ...ce.condition_mapping };
+      
+      const oldCondition = edge.condition;
+      
+      if (newCondition && newCondition !== oldCondition) {
+         mapping[newCondition] = mapping[oldCondition];
+         delete mapping[oldCondition];
+         ce.condition_mapping = mapping;
+         conditionalEdges[ceIndex] = ce;
+         
+         this.emitSpecChange({ ...s, conditional_edges: conditionalEdges });
+         
+         const newEdgeId = `${fromId}-${targetId}-${newCondition}`;
+         this.selectedEdgeId.set(newEdgeId);
+      }
+    }
   }
 
   /** Add a new agent node to the workflow. */
@@ -474,7 +691,7 @@ export class WorkflowCanvasComponent {
   }
 
   /** Handle node position change after user drags a node. */
-  onNodePositionChanged(nodeId: string, position: { x: number; y: number }): void {
+  onNodePositionChanged(): void {
     // Store position in our layout. Since Foblex manages the visual drag,
     // we only emit a spec change if we're persisting positions.
     // For now, positions are auto-computed from the layout algorithm,
@@ -514,7 +731,101 @@ export class WorkflowCanvasComponent {
         errors.push(`Agent "${a.label}" is disconnected (no edges)`);
       }
     }
+
+    // Cycle detection
+    if (this.cycleNodes().size > 0) {
+      errors.push('Workflow contains one or more cycles, which are not allowed');
+    }
+
     return errors;
+  });
+
+  readonly cycleNodes = computed(() => {
+    const s = this.spec();
+    if (!s) return new Set<string>();
+
+    const inDegree = new Map<string, number>();
+    const adj = new Map<string, string[]>();
+    for (const a of s.agents) {
+      inDegree.set(a.id, 0);
+      adj.set(a.id, []);
+    }
+    inDegree.set('END', 0);
+    adj.set('END', []);
+
+    const addEdge = (from: string, to: string) => {
+      if (adj.has(from) && adj.has(to)) {
+        adj.get(from)!.push(to);
+        inDegree.set(to, inDegree.get(to)! + 1);
+      }
+    };
+
+    for (const e of s.edges ?? []) { addEdge(e.from, e.to); }
+    for (const ce of s.conditional_edges ?? []) {
+      for (const target of Object.values(ce.condition_mapping)) { addEdge(ce.from, target); }
+    }
+
+    const inDegreeCopy = new Map(inDegree);
+    const q: string[] = [];
+    for (const [node, deg] of inDegreeCopy.entries()) {
+      if (deg === 0) q.push(node);
+    }
+
+    let visitedCount = 0;
+    while (q.length > 0) {
+      const u = q.shift()!;
+      visitedCount++;
+      for (const v of adj.get(u)!) {
+        const newDeg = inDegreeCopy.get(v)! - 1;
+        inDegreeCopy.set(v, newDeg);
+        if (newDeg === 0) q.push(v);
+      }
+    }
+
+    const cycles = new Set<string>();
+    if (visitedCount !== adj.size) {
+      for (const [node, deg] of inDegreeCopy.entries()) {
+        if (deg > 0) cycles.add(node);
+      }
+    }
+    return cycles;
+  });
+
+  readonly invalidRunFromNodes = computed(() => {
+    const s = this.spec();
+    if (!s) return new Set<string>();
+    
+    const invalidSet = new Set<string>();
+    const inDegree = new Map<string, number>();
+    
+    for (const a of s.agents) {
+      inDegree.set(a.id, 0);
+    }
+    inDegree.set('END', 0);
+    
+    const addEdge = (from: string, to: string) => {
+      if (inDegree.has(to)) {
+        inDegree.set(to, inDegree.get(to)! + 1);
+      }
+    };
+    
+    for (const e of s.edges ?? []) { addEdge(e.from, e.to); }
+    for (const ce of s.conditional_edges ?? []) {
+      for (const target of Object.values(ce.condition_mapping)) { addEdge(ce.from, target); }
+    }
+    
+    // Nodes with no incoming edges (except entry point)
+    for (const a of s.agents) {
+      if (a.id !== s.entry_point && inDegree.get(a.id) === 0) {
+        invalidSet.add(a.id);
+      }
+    }
+    
+    for (const node of this.cycleNodes()) {
+      invalidSet.add(node);
+    }
+    
+    return invalidSet;
   });
 
   // ── Run History API ─────────────────────────────────────────────────────
@@ -560,7 +871,7 @@ export class WorkflowCanvasComponent {
   /** Get node output — from historical data or live execution. */
   getNodeOutput(nodeId: string): string | null {
     const historical = this.historicalNodeOutputs();
-    if (historical[nodeId]?.output) return historical[nodeId].output!;
+    if (historical[nodeId]?.output) return historical[nodeId].output ?? null;
     return null;
   }
 
@@ -606,10 +917,32 @@ export class WorkflowCanvasComponent {
     return this.layoutNodes().find(n => n.id === id) || null;
   });
 
+  readonly selectedEdge = computed<FoblexEdge | null>(() => {
+    const id = this.selectedEdgeId();
+    if (!id) return null;
+    return this.foblexEdges().find(e => e.id === id) || null;
+  });
+
   // ── Interactions ────────────────────────────────────────────────────────
 
   selectNode(id: string): void {
-    this.selectedNodeId.set(this.selectedNodeId() === id ? null : id);
+    const isDeselect = this.selectedNodeId() === id;
+    this.selectedNodeId.set(isDeselect ? null : id);
+    this.selectedEdgeId.set(null);
+    if (this.spec()?.id) {
+      this.collabService.sendMessage({ type: 'node_selected', node_id: isDeselect ? undefined : id });
+    }
+  }
+
+  selectEdge(id: string): void {
+    const isDeselect = this.selectedEdgeId() === id;
+    this.selectedEdgeId.set(isDeselect ? null : id);
+    if (this.selectedNodeId() !== null) {
+      this.selectedNodeId.set(null);
+      if (this.spec()?.id) {
+        this.collabService.sendMessage({ type: 'node_selected', node_id: undefined });
+      }
+    }
   }
 
   // ── Layout Algorithm ────────────────────────────────────────────────────
@@ -627,7 +960,8 @@ export class WorkflowCanvasComponent {
     }
     for (const e of spec.edges ?? []) {
       if (e.to !== 'END' && adj.has(e.from)) {
-        adj.get(e.from)!.push(e.to);
+        const fromAdj = adj.get(e.from);
+        if (fromAdj) fromAdj.push(e.to);
         inDeg.set(e.to, (inDeg.get(e.to) ?? 0) + 1);
       }
     }
@@ -635,7 +969,8 @@ export class WorkflowCanvasComponent {
       if (adj.has(ce.from)) {
         for (const target of Object.values(ce.condition_mapping)) {
           if (target !== 'END' && adj.has(target)) {
-            adj.get(ce.from)!.push(target);
+            const fromAdj = adj.get(ce.from);
+            if (fromAdj) fromAdj.push(target);
             inDeg.set(target, (inDeg.get(target) ?? 0) + 1);
           }
         }
@@ -666,7 +1001,8 @@ export class WorkflowCanvasComponent {
 
     while (queue.length > 0 && iterations < maxIterations) {
       iterations++;
-      const node = queue.shift()!;
+      const node = queue.shift();
+      if (!node) continue;
       if (visited.has(node)) continue;
       visited.add(node);
 
@@ -689,7 +1025,8 @@ export class WorkflowCanvasComponent {
     const layerGroups = new Map<number, string[]>();
     for (const [id, layer] of layers) {
       if (!layerGroups.has(layer)) layerGroups.set(layer, []);
-      layerGroups.get(layer)!.push(id);
+      const group = layerGroups.get(layer);
+      if (group) group.push(id);
     }
 
     // Position nodes
@@ -737,9 +1074,9 @@ export class WorkflowCanvasComponent {
         id: `${e.from}-${targetId}`,
         sourceOutputId: `${e.from}-output`,
         targetInputId: `${targetId}-input`,
-        label: (e as any).label || '',
+        label: (e as unknown as Record<string, string>)['label'] || '',
         isConditional: false,
-        condition: (e as any).condition || 'always',
+        condition: (e as unknown as Record<string, string>)['condition'] || 'always',
       });
     }
 
@@ -815,5 +1152,42 @@ export class WorkflowCanvasComponent {
     this.emitSpecChange({ ...spec, agents: updatedAgents });
     this.showToolPicker.set(false);
     console.log(`[Canvas] removed tool "${toolId}" from node "${node.id}"`);
+  }
+
+  exportJson(): void {
+    const spec = this.spec();
+    if (!spec) return;
+    
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(spec, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", (spec.name || 'workflow') + ".json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  }
+
+  importJson(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const spec = JSON.parse(content);
+        
+        // Ensure imported spec maintains structural integrity if needed
+        // but we'll assume it's valid for now.
+        this.emitSpecChange(spec);
+        console.log(`[Canvas] Imported workflow "${spec.name}"`);
+      } catch (err) {
+        console.error('[Canvas] Error parsing imported JSON', err);
+        alert('Invalid JSON file.');
+      }
+      target.value = '';
+    };
+    reader.readAsText(file);
   }
 }
