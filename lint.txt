@@ -1,0 +1,44 @@
+
+> nx run chat:lint
+
+Linting "chat"...
+[0m[0m
+[0m[4m/home/bharat/git/synaptiq/libs/frontend/chat/src/lib/workflow/collaboration.service.ts[24m[0m
+[0m   [2m7:10[22m  [33mwarning[39m  Unexpected any. Specify a different type                                                                                                                                [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m   [2m8:11[22m  [33mwarning[39m  Unexpected any. Specify a different type                                                                                                                                [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m11:10[22m  [33mwarning[39m  Unexpected any. Specify a different type                                                                                                                                [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m22:15[22m  [31merror[39m    Prefer using the inject() function over constructor parameter injection. Use Angular's migration schematic to automatically refactor: ng generate @angular/core:inject  [2m@angular-eslint/prefer-inject[22m[0m
+[0m  [2m46:18[22m  [33mwarning[39m  'e' is defined but never used                                                                                                                                           [2m@typescript-eslint/no-unused-vars[22m[0m
+[0m[0m
+[0m[4m/home/bharat/git/synaptiq/libs/frontend/chat/src/lib/workflow/workflow-canvas.component.ts[24m[0m
+[0m  [2m204:33[22m  [33mwarning[39m  Unexpected any. Specify a different type  [2m@typescript-eslint/no-explicit-any[22m[0m
+[0m  [2m265:14[22m  [33mwarning[39m  Forbidden non-null assertion              [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m266:19[22m  [33mwarning[39m  Forbidden non-null assertion              [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m268:18[22m  [33mwarning[39m  Forbidden non-null assertion              [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m269:18[22m  [33mwarning[39m  Forbidden non-null assertion              [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m284:14[22m  [33mwarning[39m  Forbidden non-null assertion              [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m285:23[22m  [33mwarning[39m  Forbidden non-null assertion              [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m293:25[22m  [33mwarning[39m  Forbidden non-null assertion              [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m755:9[22m   [33mwarning[39m  Forbidden non-null assertion              [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m756:26[22m  [33mwarning[39m  Forbidden non-null assertion              [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m773:17[22m  [33mwarning[39m  Forbidden non-null assertion              [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m775:23[22m  [33mwarning[39m  Forbidden non-null assertion              [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m776:24[22m  [33mwarning[39m  Forbidden non-null assertion              [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m  [2m805:26[22m  [33mwarning[39m  Forbidden non-null assertion              [2m@typescript-eslint/no-non-null-assertion[22m[0m
+[0m[0m
+[0m[31m[1m✖ 19 problems (1 error, 18 warnings)[22m[39m[0m
+[0m[31m[1m[22m[39m[0m
+✖ 19 problems (1 error, 18 warnings)
+
+
+
+ NX   Running target lint for project chat failed
+
+Failed tasks:
+
+- chat:lint
+
+Hint: run the command with --verbose for more details.
+
+Your AI agent configuration is outdated. Run "nx configure-ai-agents" to update.
+
