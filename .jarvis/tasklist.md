@@ -14,4 +14,8 @@
 - Integrate `agent-flow-spring` into the backend API.
 
 ## Recently Completed
-(None for this session)
+
+### Workflow Execution Variables & Template Warnings
+- **Status**: Completed
+- **What was done**: Added numeric validation, file upload to base64 (with 10MB limit), and UI polish for `WorkflowRunDialogComponent`. Fixed NG8107 optional chaining and NG8011 content projection warnings in `dsl-renderer`.
+- **Files touched**: `workflow-run-dialog.component.ts`, `workflow-run-dialog.component.html`, `dsl-renderer.html`, `suggestion-bar.component.html`, `form-input.component.html`.
