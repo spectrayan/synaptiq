@@ -1,0 +1,15 @@
+type: object
+properties:
+  id:
+    type: string
+  tenantId:
+    type: string
+  spec:
+    $ref: 'FlowSettingsSpec.yaml'
+  isPublic:
+    type: boolean
+  shareToken:
+    type: string
+  createdAt:
+    type: string
+    format: date-time

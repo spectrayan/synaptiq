@@ -3,8 +3,8 @@
 }
 
 .item-detail {
-  --mdc-outlined-card-container-color: var(--syn-surface, #1e1e2e);
-  --mdc-outlined-card-outline-color: var(--syn-border, rgba(255, 255, 255, 0.08));
+  --mdc-outlined-card-container-color: var(--mat-sys-surface);
+  --mdc-outlined-card-outline-color: var(--mat-sys-outline);
   border-radius: 14px;
   overflow: hidden;
 
@@ -16,22 +16,25 @@
 
 mat-card-title {
   font-size: 1.15rem;
-  color: var(--syn-text, #e2e8f0);
+  color: var(--mat-sys-on-surface);
 }
 
 .detail-fields {
   --mdc-list-list-item-container-color: transparent;
-  --mdc-list-list-item-label-text-color: var(--syn-text, #e2e8f0);
+  --mdc-list-list-item-label-text-color: var(--mat-sys-on-surface);
 }
 
 .field-label {
   font-weight: 500;
   font-size: 0.82rem;
-  color: var(--syn-text-muted, #94a3b8);
+  color: var(--mat-sys-on-surface-variant);
   text-transform: capitalize;
 }
 
 .field-value {
   font-size: 0.9rem;
-  color: var(--syn-text, #e2e8f0);
+  color: var(--mat-sys-on-surface);
 }
+
+
+

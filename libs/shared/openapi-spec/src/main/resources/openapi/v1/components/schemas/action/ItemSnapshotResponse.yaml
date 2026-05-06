@@ -1,0 +1,19 @@
+type: object
+description: Snapshot of a saved item at the time it was bookmarked
+properties:
+  title:
+    type: string
+  subtitle:
+    type: string
+  imageUrl:
+    type: string
+  description:
+    type: string
+  price:
+    type: string
+  category:
+    type: string
+  dataSourceId:
+    type: string
+  sourceItemId:
+    type: string

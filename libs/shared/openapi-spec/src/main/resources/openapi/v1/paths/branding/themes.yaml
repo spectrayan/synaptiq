@@ -1,0 +1,13 @@
+﻿get:
+  operationId: getThemes
+  summary: Get theme presets
+  tags: [Branding]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  responses:
+    '200':
+      description: Theme presets
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/branding/ThemeListResponse.yaml'

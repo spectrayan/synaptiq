@@ -1,0 +1,15 @@
+type: object
+description: Theme preset configuration
+properties:
+  themeId:
+    type: string
+  name:
+    type: string
+  primaryColor:
+    type: string
+  secondaryColor:
+    type: string
+  backgroundStyle:
+    type: string
+  isDefault:
+    type: boolean

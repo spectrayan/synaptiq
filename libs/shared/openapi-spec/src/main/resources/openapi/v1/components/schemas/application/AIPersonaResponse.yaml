@@ -1,0 +1,15 @@
+type: object
+description: AI persona configuration
+properties:
+  displayName:
+    type: string
+  tone:
+    type: string
+  customInstruction:
+    type: string
+  welcomeMessage:
+    type: string
+  starterPrompts:
+    type: array
+    items:
+      type: string

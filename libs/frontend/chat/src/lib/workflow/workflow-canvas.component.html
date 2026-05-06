@@ -16,7 +16,7 @@
         <span class="workflow-name" (dblclick)="startNameEdit()"
               matTooltip="Double-click to rename">{{ spec()?.name || 'Workflow' }}</span>
       }
-      <span class="workflow-badge" [attr.data-type]="spec()?.flow_type">{{ spec()?.flow_type || 'static' }}</span>
+      <span class="workflow-badge" [attr.data-type]="spec()?.flowType">{{ spec()?.flowType || 'static' }}</span>
       <span class="agent-count">{{ layoutNodes().length }} agents</span>
       <!-- Save status -->
       @if (saveStatus() === 'saving') {
@@ -72,23 +72,23 @@
                   </button>
                 }
               </div>
-              @for (run of runHistory(); track run.run_id) {
+              @for (run of runHistory(); track run.runId) {
                 <div
                   class="run-history-item"
                   tabindex="0"
                   role="button"
-                  [class.run-history-item--active]="selectedRunId() === run.run_id"
+                  [class.run-history-item--active]="selectedRunId() === run.runId"
                   [attr.data-status]="run.status"
-                  (click)="selectRun.emit(run.run_id)"
-                  (keyup.enter)="selectRun.emit(run.run_id)"
-                  (keyup.space)="selectRun.emit(run.run_id)">
+                  (click)="selectRun.emit(run.runId)"
+                  (keyup.enter)="selectRun.emit(run.runId)"
+                  (keyup.space)="selectRun.emit(run.runId)">
                   <div class="run-item-status">
-                    <mat-icon>{{ run.status === 'completed' ? 'check_circle' : run.status === 'error' ? 'error' : 'pending' }}</mat-icon>
+                    <mat-icon>{{ run.status === 'COMPLETED' ? 'check_circle' : run.status === 'ERROR' ? 'error' : 'pending' }}</mat-icon>
                   </div>
                   <div class="run-item-info">
-                    <span class="run-item-time">{{ formatRunTime(run.started_at) }}</span>
+                    <span class="run-item-time">{{ formatRunTime(run.startedAt) }}</span>
                     <span class="run-item-duration">
-                      {{ run.total_duration_ms ? (run.total_duration_ms | number:'1.0-0') + 'ms' : 'In progress' }}
+                      {{ run.totalDurationMs ? (run.totalDurationMs | number:'1.0-0') + 'ms' : 'In progress' }}
                     </span>
                   </div>
                 </div>
@@ -217,7 +217,7 @@
           role="button"
           [class.sq-node-selected]="selectedNodeId() === node.id"
           [class.sq-node-remote-selected]="getRemoteSelectionsForNode(node.id).length > 0"
-          [class.sq-node-entry]="spec()?.entry_point === node.id"
+          [class.sq-node-entry]="spec()?.entrypoint === node.id"
           [class.sq-node-running]="node.executionStatus === 'running'"
           [class.sq-node-completed]="node.executionStatus === 'completed'"
           [class.sq-node-error]="node.executionStatus === 'error'"
@@ -232,7 +232,7 @@
           <div class="sq-node-accent" [style.background]="node.color"></div>
 
           <!-- Entry point badge -->
-          @if (spec()?.entry_point === node.id) {
+          @if (spec()?.entrypoint === node.id) {
             <div class="sq-node-entry-badge"></div>
           }
 
@@ -276,7 +276,7 @@
           }
 
           <!-- Entry-point button (hover) -->
-          @if (hoveredNodeId() === node.id && spec()?.entry_point !== node.id) {
+          @if (hoveredNodeId() === node.id && spec()?.entrypoint !== node.id) {
             <button class="sq-node-entry-btn" (click)="setEntryPoint(node.id); $event.stopPropagation()">▶</button>
           }
 
@@ -434,14 +434,14 @@
                     <span class="tool-picker-cat-label">{{ category.label }}</span>
                     @for (tool of category.tools; track tool.id) {
                       <button class="tool-picker-item"
-                              [disabled]="selectedNode()!.tools.includes(tool.id)"
+                              [disabled]="hasToolId(selectedNode()!.tools, tool.id)"
                               (click)="addTool(tool.id)">
                         <span class="tool-picker-icon">{{ tool.icon }}</span>
                         <div class="tool-picker-info">
                           <span class="tool-picker-name">{{ tool.name }}</span>
                           <span class="tool-picker-desc">{{ tool.description }}</span>
                         </div>
-                        @if (selectedNode()!.tools.includes(tool.id)) {
+                        @if (hasToolId(selectedNode()!.tools, tool.id)) {
                           <mat-icon class="tool-picker-check">check</mat-icon>
                         }
                       </button>
@@ -463,7 +463,7 @@
 
         <!-- Actions -->
         <div class="detail-section detail-actions">
-          @if (spec()?.entry_point !== selectedNode()!.id) {
+          @if (spec()?.entrypoint !== selectedNode()!.id) {
             <button class="action-btn action-btn--entry" (click)="setEntryPoint(selectedNode()!.id)">
               <mat-icon>login</mat-icon> Set as Entry Point
             </button>

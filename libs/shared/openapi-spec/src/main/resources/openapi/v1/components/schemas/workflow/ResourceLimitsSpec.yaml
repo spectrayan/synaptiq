@@ -1,0 +1,12 @@
+type: object
+description: Resource limits for workflow execution
+properties:
+  totalTimeoutMs:
+    type: integer
+  stepTimeoutMs:
+    type: integer
+  maxTokens:
+    type: integer
+  rateLimitRps:
+    type: number
+    format: double

@@ -394,17 +394,9 @@ export class AuthService {
 
   private async builtinSignIn(email: string, password: string): Promise<AuthUser> {
     interface LoginResponse {
-      id_token: string;
-      refresh_token: string;
-      expires_in: number;
-      must_change_password: boolean;
-      user: {
-        uid: string;
-        email: string;
-        display_name: string;
-        role: string;
-        tenant_id: string;
-      };
+      idToken: string;
+      refreshToken: string;
+      expiresIn: number;
     }
 
     const url = `${this.env.apiBaseUrl}/api/v1/auth/login`;
@@ -413,18 +405,21 @@ export class AuthService {
     );
 
     // Store JWT
-    localStorage.setItem(STORAGE_KEY_TOKEN, response.id_token);
+    localStorage.setItem(STORAGE_KEY_TOKEN, response.idToken);
+
+    // Decode user info from JWT payload
+    const payload = JSON.parse(atob(response.idToken.split('.')[1]));
 
     const authUser: AuthUser = {
-      uid: response.user.uid,
-      email: response.user.email,
-      displayName: response.user.display_name || null,
+      uid: payload.sub,
+      email: payload.email || email,
+      displayName: payload.display_name || payload.email || email,
       photoURL: null,
       emailVerified: true,
-      role: (response.user.role as UserRole) || null,
-      tenantId: response.user.tenant_id || this.env.tenantId || null,
+      role: (payload.role as UserRole) || null,
+      tenantId: payload.tenant_id || this.env.tenantId || null,
       isAnonymous: false,
-      mustChangePassword: response.must_change_password,
+      mustChangePassword: false,
     };
 
     localStorage.setItem(STORAGE_KEY_USER, JSON.stringify(authUser));

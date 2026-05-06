@@ -37,7 +37,7 @@ import {
 } from '@foblex/flow';
 import type {
   WorkflowSpec, AgentNodeSpec, NodeExecutionStatus,
-  WorkflowRunSummary, WorkflowRunNodeDetail, ToolDefinition,
+  WorkflowRunSummary, WorkflowRunNodeDetail, ToolDefinition, ToolSpec,
 } from '../workflow.service';
 
 // ---------------------------------------------------------------------------
@@ -50,7 +50,7 @@ interface LayoutNode {
   type: string;
   description: string;
   systemPrompt: string;
-  tools: string[];
+  tools: (string | ToolSpec)[];
   x: number;
   y: number;
   color: string;
@@ -171,13 +171,14 @@ export class WorkflowCanvasComponent {
     const all = this.toolCatalog();
     const groups = new Map<string, { key: string; label: string; tools: ToolDefinition[] }>();
     for (const tool of all) {
-      if (query && !tool.name.toLowerCase().includes(query) && !tool.description.toLowerCase().includes(query)) {
+      if (query && !tool.name.toLowerCase().includes(query) && !(tool.description ?? '').toLowerCase().includes(query)) {
         continue;
       }
-      if (!groups.has(tool.category)) {
-        groups.set(tool.category, { key: tool.category, label: tool.category, tools: [] });
+      const cat = tool.category ?? 'General';
+      if (!groups.has(cat)) {
+        groups.set(cat, { key: cat, label: cat, tools: [] });
       }
-      const group = groups.get(tool.category);
+      const group = groups.get(cat);
       if (group) group.tools.push(tool);
     }
     return Array.from(groups.values());
@@ -434,7 +435,7 @@ export class WorkflowCanvasComponent {
     if (!s || !nodeId) return;
     const updated: WorkflowSpec = {
       ...s,
-      agents: s.agents.map(a => a.id === nodeId ? { ...a, system_prompt: newPrompt } : a),
+      agents: (s.agents ?? []).map(a => a.id === nodeId ? { ...a, system_prompt: newPrompt } : a),
     };
     this.emitSpecChange(updated);
   }
@@ -444,15 +445,15 @@ export class WorkflowCanvasComponent {
     const s = this.spec();
     const nodeId = this.selectedNodeId();
     if (!s || !nodeId) return;
-    const node = s.agents.find(a => a.id === nodeId);
+    const node = (s.agents ?? []).find(a => a.id === nodeId);
     if (!node) return;
 
     this.promptEditorRef()?.setRegenerating(true);
     this.regeneratePromptRequest.emit({
       nodeId: node.id,
-      nodeLabel: node.label,
-      nodeDescription: node.description,
-      currentPrompt: node.system_prompt,
+      nodeLabel: node.name ?? node.id,
+      nodeDescription: node.description ?? '',
+      currentPrompt: node.systemPrompt ?? '',
       instruction: event.instruction,
     });
   }
@@ -463,7 +464,7 @@ export class WorkflowCanvasComponent {
     if (!s) return;
     const updated: WorkflowSpec = {
       ...s,
-      agents: s.agents.map(a => a.id === nodeId ? { ...a, system_prompt: newPrompt } : a),
+      agents: (s.agents ?? []).map(a => a.id === nodeId ? { ...a, system_prompt: newPrompt } : a),
     };
     this.emitSpecChange(updated);
     this.promptEditorRef()?.setRegenerating(false);
@@ -480,15 +481,15 @@ export class WorkflowCanvasComponent {
   deleteNode(nodeId: string): void {
     const s = this.spec();
     if (!s) return;
-    const updated: WorkflowSpec = {
+    const updated = {
       ...s,
-      agents: s.agents.filter(a => a.id !== nodeId),
-      edges: (s.edges ?? []).filter(e => e.from !== nodeId && e.to !== nodeId),
-      conditional_edges: (s.conditional_edges ?? []).filter(ce => ce.from !== nodeId),
-      entry_point: s.entry_point === nodeId
-        ? (s.agents.find(a => a.id !== nodeId)?.id ?? '')
-        : s.entry_point,
-    };
+      agents: (s.agents ?? []).filter(a => a.id !== nodeId),
+      edges: (s.edges ?? []).filter(e => e.source !== nodeId && e.target !== nodeId),
+      conditionalEdges: ((s as any).conditionalEdges ?? []).filter((ce: any) => ce.source !== nodeId),
+      entrypoint: s.entrypoint === nodeId
+        ? ((s.agents ?? []).find(a => a.id !== nodeId)?.id ?? '')
+        : s.entrypoint,
+    } as WorkflowSpec;
     this.selectedNodeId.set(null);
     this.selectedEdgeId.set(null);
     this.showDeleteConfirm.set(false);
@@ -504,7 +505,7 @@ export class WorkflowCanvasComponent {
     if (!s) return;
     const updated: WorkflowSpec = {
       ...s,
-      edges: (s.edges ?? []).filter(e => !(e.from === source && e.to === target)),
+      edges: (s.edges ?? []).filter(e => !(e.source === source && e.target === target)),
     };
     this.emitSpecChange(updated);
   }
@@ -521,26 +522,26 @@ export class WorkflowCanvasComponent {
     let updated: WorkflowSpec;
 
     if (edge.isConditional) {
-      const conditionalEdges = [...(s.conditional_edges ?? [])];
-      const ceIndex = conditionalEdges.findIndex(ce => ce.from === fromId);
+      const conditionalEdges = [...((s as any).conditionalEdges ?? [])];
+      const ceIndex = conditionalEdges.findIndex(ce => ce.source === fromId);
       if (ceIndex >= 0) {
         const ce = { ...conditionalEdges[ceIndex] };
-        const mapping = { ...ce.condition_mapping };
+        const mapping = { ...ce.conditionMapping };
         const condition = edge.condition;
         delete mapping[condition];
         
         if (Object.keys(mapping).length === 0) {
           conditionalEdges.splice(ceIndex, 1);
         } else {
-          ce.condition_mapping = mapping;
+          ce.conditionMapping = mapping;
           conditionalEdges[ceIndex] = ce;
         }
       }
-      updated = { ...s, conditional_edges: conditionalEdges };
+      updated = { ...s, conditionalEdges: conditionalEdges } as unknown as WorkflowSpec;
     } else {
       updated = {
         ...s,
-        edges: (s.edges ?? []).filter(e => !(e.from === fromId && e.to === targetId)),
+        edges: (s.edges ?? []).filter(e => !(e.source === fromId && e.target === targetId)),
       };
     }
 
@@ -557,21 +558,21 @@ export class WorkflowCanvasComponent {
     const fromId = edge.sourceOutputId.replace(/-output$/, '');
     const targetId = edge.targetInputId.replace(/-input$/, '');
 
-    const conditionalEdges = [...(s.conditional_edges ?? [])];
-    const ceIndex = conditionalEdges.findIndex(ce => ce.from === fromId);
+    const conditionalEdges = [...((s as any).conditionalEdges ?? [])];
+    const ceIndex = conditionalEdges.findIndex(ce => ce.source === fromId);
     if (ceIndex >= 0) {
       const ce = { ...conditionalEdges[ceIndex] };
-      const mapping = { ...ce.condition_mapping };
+      const mapping = { ...ce.conditionMapping };
       
       const oldCondition = edge.condition;
       
       if (newCondition && newCondition !== oldCondition) {
          mapping[newCondition] = mapping[oldCondition];
          delete mapping[oldCondition];
-         ce.condition_mapping = mapping;
+         ce.conditionMapping = mapping;
          conditionalEdges[ceIndex] = ce;
          
-         this.emitSpecChange({ ...s, conditional_edges: conditionalEdges });
+         this.emitSpecChange({ ...s, conditionalEdges: conditionalEdges } as unknown as WorkflowSpec);
          
          const newEdgeId = `${fromId}-${targetId}-${newCondition}`;
          this.selectedEdgeId.set(newEdgeId);
@@ -584,19 +585,18 @@ export class WorkflowCanvasComponent {
     const s = this.spec();
     if (!s) return;
     const id = label.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
-    if (s.agents.some(a => a.id === id)) return; // Prevent duplicates
+    if ((s.agents ?? []).some(a => a.id === id)) return; // Prevent duplicates
 
     const newAgent: AgentNodeSpec = {
       id,
-      type,
-      label,
+      name: label,
       description,
-      system_prompt: `You are a ${label}. ${description}`,
+      systemPrompt: `You are a ${label}. ${description}`,
       tools: [],
     };
     const updated: WorkflowSpec = {
       ...s,
-      agents: [...s.agents, newAgent],
+      agents: [...(s.agents ?? []), newAgent],
     };
     this.showAddNodeForm.set(false);
     this.emitSpecChange(updated);
@@ -606,12 +606,12 @@ export class WorkflowCanvasComponent {
   setEntryPoint(nodeId: string): void {
     const s = this.spec();
     if (!s) return;
-    this.emitSpecChange({ ...s, entry_point: nodeId });
+    this.emitSpecChange({ ...s, entrypoint: nodeId });
   }
 
   /** Update a node's label. */
   onNodeLabelChange(newLabel: string): void {
-    this._updateSelectedNode({ label: newLabel });
+    this._updateSelectedNode({ name: newLabel } as Partial<AgentNodeSpec>);
   }
 
   /** Update a node's description. */
@@ -621,7 +621,7 @@ export class WorkflowCanvasComponent {
 
   /** Update a node's type. */
   onNodeTypeChange(newType: string): void {
-    this._updateSelectedNode({ type: newType });
+    this._updateSelectedNode({ description: newType } as Partial<AgentNodeSpec>);
   }
 
   /** Start inline name editing */
@@ -652,7 +652,7 @@ export class WorkflowCanvasComponent {
     if (!s || !nodeId) return;
     this.emitSpecChange({
       ...s,
-      agents: s.agents.map(a => a.id === nodeId ? { ...a, ...patch } : a),
+      agents: (s.agents ?? []).map(a => a.id === nodeId ? { ...a, ...patch } : a),
     });
   }
 
@@ -680,12 +680,12 @@ export class WorkflowCanvasComponent {
     if (!targetNodeId) return;
 
     // Prevent duplicate edges
-    const exists = (s.edges ?? []).some(e => e.from === sourceNodeId && e.to === targetNodeId);
+    const exists = (s.edges ?? []).some(e => e.source === sourceNodeId && e.target === targetNodeId);
     if (exists) return;
 
     const updated: WorkflowSpec = {
       ...s,
-      edges: [...(s.edges ?? []), { from: sourceNodeId, to: targetNodeId, condition: 'always', label: '' }],
+      edges: [...(s.edges ?? []), { source: sourceNodeId, target: targetNodeId }],
     };
     this.emitSpecChange(updated);
   }
@@ -704,31 +704,32 @@ export class WorkflowCanvasComponent {
     const s = this.spec();
     if (!s) return [];
     const errors: string[] = [];
-    if (!s.entry_point) errors.push('No entry point set');
-    if (s.entry_point && !s.agents.some(a => a.id === s.entry_point)) {
-      errors.push(`Entry point "${s.entry_point}" references a non-existent node`);
+    if (!s.entrypoint) errors.push('No entry point set');
+    const agents = s.agents ?? [];
+    if (s.entrypoint && !agents.some(a => a.id === s.entrypoint)) {
+      errors.push(`Entry point "${s.entrypoint}" references a non-existent node`);
     }
-    for (const a of s.agents) {
-      if (a.type === 'agent' && !a.system_prompt?.trim()) {
-        errors.push(`Agent "${a.label}" has no system prompt`);
+    for (const a of agents) {
+      if (!a.systemPrompt?.trim()) {
+        errors.push(`Agent "${a.name}" has no system prompt`);
       }
     }
-    const nodeIds = new Set(s.agents.map(a => a.id));
+    const nodeIds = new Set(agents.map(a => a.id));
     nodeIds.add('END');
     for (const e of s.edges ?? []) {
-      if (!nodeIds.has(e.from)) errors.push(`Edge references non-existent source "${e.from}"`);
-      if (!nodeIds.has(e.to)) errors.push(`Edge references non-existent target "${e.to}"`);
+      if (!nodeIds.has(e.source)) errors.push(`Edge references non-existent source "${e.source}"`);
+      if (!nodeIds.has(e.target)) errors.push(`Edge references non-existent target "${e.target}"`);
     }
     // Orphan nodes (no edges at all)
     const connectedNodes = new Set<string>();
-    for (const e of s.edges ?? []) { connectedNodes.add(e.from); connectedNodes.add(e.to); }
-    for (const ce of s.conditional_edges ?? []) {
-      connectedNodes.add(ce.from);
-      Object.values(ce.condition_mapping).forEach(t => connectedNodes.add(t));
+    for (const e of s.edges ?? []) { connectedNodes.add(e.source); connectedNodes.add(e.target); }
+    for (const ce of (s as any).conditionalEdges ?? []) {
+      connectedNodes.add(ce.source);
+      Object.values(ce.conditionMapping).forEach((t: any) => connectedNodes.add(t as string));
     }
-    for (const a of s.agents) {
-      if (a.id !== s.entry_point && !connectedNodes.has(a.id)) {
-        errors.push(`Agent "${a.label}" is disconnected (no edges)`);
+    for (const a of (s.agents ?? [])) {
+      if (a.id !== s.entrypoint && !connectedNodes.has(a.id)) {
+        errors.push(`Agent "${a.name}" is disconnected (no edges)`);
       }
     }
 
@@ -746,7 +747,7 @@ export class WorkflowCanvasComponent {
 
     const inDegree = new Map<string, number>();
     const adj = new Map<string, string[]>();
-    for (const a of s.agents) {
+    for (const a of (s.agents ?? [])) {
       inDegree.set(a.id, 0);
       adj.set(a.id, []);
     }
@@ -760,9 +761,9 @@ export class WorkflowCanvasComponent {
       }
     };
 
-    for (const e of s.edges ?? []) { addEdge(e.from, e.to); }
-    for (const ce of s.conditional_edges ?? []) {
-      for (const target of Object.values(ce.condition_mapping)) { addEdge(ce.from, target); }
+    for (const e of s.edges ?? []) { addEdge(e.source, e.target); }
+    for (const ce of (s as any).conditionalEdges ?? []) {
+      for (const target of Object.values(ce.conditionMapping) as string[]) { addEdge(ce.source, target); }
     }
 
     const inDegreeCopy = new Map(inDegree);
@@ -798,7 +799,7 @@ export class WorkflowCanvasComponent {
     const invalidSet = new Set<string>();
     const inDegree = new Map<string, number>();
     
-    for (const a of s.agents) {
+    for (const a of (s.agents ?? [])) {
       inDegree.set(a.id, 0);
     }
     inDegree.set('END', 0);
@@ -809,14 +810,14 @@ export class WorkflowCanvasComponent {
       }
     };
     
-    for (const e of s.edges ?? []) { addEdge(e.from, e.to); }
-    for (const ce of s.conditional_edges ?? []) {
-      for (const target of Object.values(ce.condition_mapping)) { addEdge(ce.from, target); }
+    for (const e of s.edges ?? []) { addEdge(e.source, e.target); }
+    for (const ce of (s as any).conditionalEdges ?? []) {
+      for (const target of Object.values(ce.conditionMapping) as string[]) { addEdge(ce.source, target); }
     }
     
     // Nodes with no incoming edges (except entry point)
-    for (const a of s.agents) {
-      if (a.id !== s.entry_point && inDegree.get(a.id) === 0) {
+    for (const a of (s.agents ?? [])) {
+      if (a.id !== s.entrypoint && inDegree.get(a.id) === 0) {
         invalidSet.add(a.id);
       }
     }
@@ -836,20 +837,23 @@ export class WorkflowCanvasComponent {
   }
 
   /** Load historical node outputs from a completed run (called by parent). */
-  loadHistoricalRun(runId: string, nodes: Record<string, WorkflowRunNodeDetail>): void {
+  loadHistoricalRun(runId: string, nodes?: Record<string, WorkflowRunNodeDetail>): void {
+    if (!nodes) return;
     this.selectedRunId.set(runId);
     this.historicalNodeOutputs.set(nodes);
     this.showRunHistory.set(false);
 
     // Apply the historical statuses to the node exec state for visual display
+    // SDK uses UPPERCASE enums, canvas uses lowercase
     const execState: Record<string, { status: NodeExecutionStatus; durationMs?: number }> = {};
     for (const [nodeId, detail] of Object.entries(nodes)) {
-      execState[nodeId] = { status: detail.status, durationMs: detail.duration_ms };
+      const status = (detail.status?.toLowerCase() ?? 'pending') as NodeExecutionStatus;
+      execState[nodeId] = { status, durationMs: detail.durationMs };
     }
     this.nodeExecState.set(execState);
 
     // Calculate total duration from the run
-    const durations = Object.values(nodes).map(n => n.duration_ms ?? 0);
+    const durations = Object.values(nodes).map(n => n.durationMs ?? 0);
     const total = durations.reduce((s, d) => s + d, 0);
     this.totalDurationMs.set(total);
     this.executionStatus.set('completed');
@@ -876,8 +880,8 @@ export class WorkflowCanvasComponent {
   }
 
   /** Format timestamp to readable time string. */
-  formatRunTime(ts: number): string {
-    const d = new Date(ts * 1000);
+  formatRunTime(ts: string | number): string {
+    const d = typeof ts === 'string' ? new Date(ts) : new Date(ts * 1000);
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' +
            d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   }
@@ -900,7 +904,7 @@ export class WorkflowCanvasComponent {
   readonly hasEndNode = computed(() => {
     const s = this.spec();
     if (!s) return false;
-    return s.edges?.some(e => e.to === 'END');
+    return s.edges?.some(e => e.target === 'END');
   });
 
   readonly endNodePos = computed(() => {
@@ -948,7 +952,7 @@ export class WorkflowCanvasComponent {
   // ── Layout Algorithm ────────────────────────────────────────────────────
 
   private computeLayout(spec: WorkflowSpec): LayoutNode[] {
-    const agents = spec.agents;
+    const agents = spec.agents ?? [];
     if (!agents.length) return [];
 
     // Build adjacency list
@@ -959,17 +963,17 @@ export class WorkflowCanvasComponent {
       inDeg.set(a.id, 0);
     }
     for (const e of spec.edges ?? []) {
-      if (e.to !== 'END' && adj.has(e.from)) {
-        const fromAdj = adj.get(e.from);
-        if (fromAdj) fromAdj.push(e.to);
-        inDeg.set(e.to, (inDeg.get(e.to) ?? 0) + 1);
+      if (e.target !== 'END' && adj.has(e.source)) {
+        const fromAdj = adj.get(e.source);
+        if (fromAdj) fromAdj.push(e.target);
+        inDeg.set(e.target, (inDeg.get(e.target) ?? 0) + 1);
       }
     }
-    for (const ce of spec.conditional_edges ?? []) {
-      if (adj.has(ce.from)) {
-        for (const target of Object.values(ce.condition_mapping)) {
+    for (const ce of (spec as any).conditionalEdges ?? []) {
+      if (adj.has(ce.source)) {
+        for (const target of Object.values(ce.conditionMapping) as string[]) {
           if (target !== 'END' && adj.has(target)) {
-            const fromAdj = adj.get(ce.from);
+            const fromAdj = adj.get(ce.source);
             if (fromAdj) fromAdj.push(target);
             inDeg.set(target, (inDeg.get(target) ?? 0) + 1);
           }
@@ -983,9 +987,9 @@ export class WorkflowCanvasComponent {
     const visited = new Set<string>();
 
     // Entry point is always layer 0
-    if (spec.entry_point && inDeg.has(spec.entry_point)) {
-      queue.push(spec.entry_point);
-      layers.set(spec.entry_point, 0);
+    if (spec.entrypoint && inDeg.has(spec.entrypoint)) {
+      queue.push(spec.entrypoint);
+      layers.set(spec.entrypoint, 0);
     }
     // Also add other roots (in-degree 0)
     for (const [id, deg] of inDeg) {
@@ -1041,14 +1045,14 @@ export class WorkflowCanvasComponent {
         const agent = agentMap.get(id);
         if (!agent) return;
 
-        const type = agent.type || 'agent';
+        const type = 'agent';
         const execState = this.nodeExecState()[agent.id];
         layoutNodes.push({
           id: agent.id,
-          label: agent.label || agent.id,
+          label: agent.name || agent.id,
           type,
           description: agent.description || '',
-          systemPrompt: agent.system_prompt || '',
+          systemPrompt: agent.systemPrompt || '',
           tools: agent.tools || [],
           x: PADDING + layer * LAYER_GAP_X,
           y: startY + idx * (NODE_HEIGHT + NODE_GAP_Y),
@@ -1069,10 +1073,10 @@ export class WorkflowCanvasComponent {
 
     // Regular edges
     for (const e of spec.edges ?? []) {
-      const targetId = e.to === 'END' ? 'END' : e.to;
+      const targetId = e.target === 'END' ? 'END' : e.target;
       edges.push({
-        id: `${e.from}-${targetId}`,
-        sourceOutputId: `${e.from}-output`,
+        id: `${e.source}-${targetId}`,
+        sourceOutputId: `${e.source}-output`,
         targetInputId: `${targetId}-input`,
         label: (e as unknown as Record<string, string>)['label'] || '',
         isConditional: false,
@@ -1081,12 +1085,12 @@ export class WorkflowCanvasComponent {
     }
 
     // Conditional edges
-    for (const ce of spec.conditional_edges ?? []) {
-      for (const [condition, targetId] of Object.entries(ce.condition_mapping)) {
+    for (const ce of (spec as any).conditionalEdges ?? []) {
+      for (const [condition, targetId] of Object.entries(ce.conditionMapping)) {
         const actualTarget = targetId === 'END' ? 'END' : targetId;
         edges.push({
-          id: `${ce.from}-${actualTarget}-${condition}`,
-          sourceOutputId: `${ce.from}-output`,
+          id: `${ce.source}-${actualTarget}-${condition}`,
+          sourceOutputId: `${ce.source}-output`,
           targetInputId: `${actualTarget}-input`,
           label: condition,
           isConditional: true,
@@ -1109,35 +1113,49 @@ export class WorkflowCanvasComponent {
     }
   }
 
-  getToolName(toolId: string): string {
-    return this._toolIndex.get(toolId)?.name ?? toolId;
+  /** Extract string ID from a tool reference (string or object with id). */
+  resolveToolId(tool: string | ToolSpec | ToolDefinition): string {
+    return typeof tool === 'string' ? tool : (tool.id ?? '');
   }
 
-  getToolIcon(toolId: string): string {
-    return this._toolIndex.get(toolId)?.icon ?? '🔧';
+  /** Check if a tools array contains a given tool ID. */
+  hasToolId(tools: (string | ToolSpec | ToolDefinition)[], toolId: string): boolean {
+    return tools.some(t => (typeof t === 'string' ? t : (t.id ?? '')) === toolId);
   }
 
-  getToolDescription(toolId: string): string {
-    return this._toolIndex.get(toolId)?.description ?? toolId;
+  getToolName(tool: string | ToolSpec | ToolDefinition): string {
+    const id = this.resolveToolId(tool);
+    return this._toolIndex.get(id)?.name ?? (typeof tool !== 'string' && 'name' in tool ? tool.name ?? id : id);
+  }
+
+  getToolIcon(tool: string | ToolSpec | ToolDefinition): string {
+    const id = this.resolveToolId(tool);
+    return this._toolIndex.get(id)?.icon ?? '🔧';
+  }
+
+  getToolDescription(tool: string | ToolSpec | ToolDefinition): string {
+    const id = this.resolveToolId(tool);
+    return this._toolIndex.get(id)?.description ?? id;
   }
 
   addTool(toolId: string): void {
     const node = this.selectedNode();
-    if (!node || node.tools.includes(toolId)) return;
+    if (!node || this.hasToolId(node.tools, toolId)) return;
 
     const spec = this.spec();
     if (!spec) return;
 
     const updatedAgents = (spec.agents ?? []).map(a => {
       if (a.id !== node.id) return a;
-      return { ...a, tools: [...a.tools, toolId] };
+      return { ...a, tools: [...(a.tools ?? []), { id: toolId } as ToolSpec] };
     });
 
     this.emitSpecChange({ ...spec, agents: updatedAgents });
     console.log(`[Canvas] added tool "${toolId}" to node "${node.id}"`);
   }
 
-  removeTool(toolId: string): void {
+  removeTool(tool: string | ToolSpec | ToolDefinition): void {
+    const toolId = this.resolveToolId(tool);
     const node = this.selectedNode();
     if (!node) return;
 
@@ -1146,7 +1164,7 @@ export class WorkflowCanvasComponent {
 
     const updatedAgents = (spec.agents ?? []).map(a => {
       if (a.id !== node.id) return a;
-      return { ...a, tools: a.tools.filter(t => t !== toolId) };
+      return { ...a, tools: (a.tools ?? []).filter(t => (typeof t === 'string' ? t : (t.id ?? '')) !== toolId) };
     });
 
     this.emitSpecChange({ ...spec, agents: updatedAgents });

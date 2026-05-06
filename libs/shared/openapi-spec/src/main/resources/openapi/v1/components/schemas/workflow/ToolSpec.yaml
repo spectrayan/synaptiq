@@ -1,0 +1,19 @@
+type: object
+description: Tool configuration for an agent
+properties:
+  id:
+    type: string
+  type:
+    type: string
+    enum: [PYTHON, JAVA, MCP, LANGCHAIN, SPRING_BEAN]
+  name:
+    type: string
+  importPath:
+    type: string
+  mcpServer:
+    type: string
+  mcpTool:
+    type: string
+  params:
+    type: object
+    additionalProperties: true

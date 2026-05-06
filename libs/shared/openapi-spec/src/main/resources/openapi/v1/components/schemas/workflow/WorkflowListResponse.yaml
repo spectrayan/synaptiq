@@ -1,0 +1,6 @@
+type: object
+properties:
+  workflows:
+    type: array
+    items:
+      $ref: 'WorkflowResponse.yaml'

@@ -1,0 +1,18 @@
+﻿post:
+  operationId: duplicateWorkflow
+  summary: Duplicate a workflow
+  tags: [Workflows]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: workflowId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '201':
+      description: Workflow duplicated
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/workflow/WorkflowResponse.yaml'

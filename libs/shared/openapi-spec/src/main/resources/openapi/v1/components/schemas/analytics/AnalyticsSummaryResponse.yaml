@@ -1,0 +1,17 @@
+type: object
+properties:
+  totalConversations:
+    type: integer
+  totalMessages:
+    type: integer
+  totalTokensInput:
+    type: integer
+  totalTokensOutput:
+    type: integer
+  totalActions:
+    type: integer
+  uniqueUsers:
+    type: integer
+  avgMessagesPerSession:
+    type: number
+    format: double

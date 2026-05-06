@@ -67,7 +67,7 @@ export class ChatStreamOrchestrator {
     };
 
     await this.chatService.streamMessage(
-      { session_id: sessionId, message: msg },
+      { sessionId: sessionId, message: msg },
       {
         onToken: (token) => {
           ensureAssistantMessage();

@@ -1,0 +1,20 @@
+type: object
+properties:
+  tenantId:
+    type: string
+  name:
+    type: string
+  slug:
+    type: string
+  status:
+    $ref: '../common/enums/TenantStatus.yaml'
+  accessMode:
+    $ref: '../common/enums/AccessMode.yaml'
+  catalogLabel:
+    type: string
+  createdAt:
+    type: string
+    format: date-time
+  updatedAt:
+    type: string
+    format: date-time

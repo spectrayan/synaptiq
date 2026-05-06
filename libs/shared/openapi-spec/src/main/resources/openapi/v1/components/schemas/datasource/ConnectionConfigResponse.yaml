@@ -1,0 +1,46 @@
+type: object
+description: >
+  Connection configuration — polymorphic based on data source type.
+  Only the relevant fields are populated based on the parent DataSource type.
+properties:
+  synaptiqNative:
+    type: object
+    properties:
+      collectionName:
+        type: string
+  mcpServer:
+    type: object
+    properties:
+      serverUrl:
+        type: string
+      transport:
+        type: string
+        enum: [STDIO, HTTP, WS]
+      env:
+        type: object
+        additionalProperties:
+          type: string
+      enabledTools:
+        type: array
+        items:
+          type: string
+  restApi:
+    type: object
+    properties:
+      baseUrl:
+        type: string
+      headers:
+        type: object
+        additionalProperties:
+          type: string
+      authType:
+        type: string
+  databaseDirect:
+    type: object
+    properties:
+      connectionUri:
+        type: string
+      databaseName:
+        type: string
+      collectionOrTable:
+        type: string

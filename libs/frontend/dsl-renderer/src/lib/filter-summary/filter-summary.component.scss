@@ -11,7 +11,7 @@
   align-items: center;
   gap: 4px;
   font-size: 0.78rem;
-  color: var(--syn-text-muted, #94a3b8);
+  color: var(--mat-sys-on-surface-variant);
   font-weight: 500;
   white-space: nowrap;
 }
@@ -23,7 +23,10 @@
 }
 
 .filter-chip {
-  --mdc-chip-elevated-container-color: var(--syn-primary-alpha, rgba(129, 140, 248, 0.1));
-  --mdc-chip-label-text-color: var(--syn-text, #e2e8f0);
+  --mdc-chip-elevated-container-color: var(--mat-sys-primary-container);
+  --mdc-chip-label-text-color: var(--mat-sys-on-surface);
   font-size: 0.78rem;
 }
+
+
+

@@ -1,0 +1,6 @@
+type: string
+description: Role in a conversation turn
+enum:
+  - USER
+  - ASSISTANT
+  - SYSTEM

@@ -1,0 +1,3047 @@
+openapi: 3.1.0
+info:
+  title: Synaptiq API
+  description: |
+    AI-Powered Conversational Commerce Platform — REST API
+
+    Synaptiq enables businesses to deploy intelligent, context-aware AI shopping assistants
+    with full catalog management, conversation orchestration, workflow automation,
+    and multi-tenant governance. This specification covers all bounded contexts:
+    Authentication, Tenants, Catalog, Chat, Actions, Workflows, Analytics,
+    Branding, Tenant Configuration, and Schema Registry.
+  version: 1.0.0
+  contact:
+    name: Synaptiq Team
+    url: https://synaptiq.dev
+  license:
+    name: Proprietary
+    url: https://synaptiq.dev/license
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+  - url: https://api.synaptiq.dev
+    description: Production server
+tags:
+  - name: Auth
+    description: Authentication — signup, login, token management
+  - name: Tenants
+    description: Tenant lifecycle — creation, configuration, admin management
+  - name: Catalog
+    description: Catalog Registry — schema management, item CRUD, embedding
+  - name: Chat
+    description: Conversational AI — sessions, messages, context management
+  - name: Actions
+    description: Actions — execution, saved items
+  - name: Workflows
+    description: Workflow Engine — agent-flow generation, execution, sharing
+  - name: Analytics
+    description: Analytics — usage metrics, token tracking, billing
+  - name: Branding
+    description: Branding — theming, personalization, visual identity
+  - name: Config
+    description: Tenant Configuration — AI persona, guardrails, LLM provider, components
+  - name: SchemaRegistry
+    description: Schema Registry — collection inspection, dynamic queries
+  - name: Health
+    description: Health checks — liveness and readiness probes
+  - name: Applications
+    description: Application lifecycle — create, read, delete application configurations
+  - name: DataSources
+    description: DataSource management — create, read, delete data source connections
+paths:
+  /api/v1/health:
+    get:
+      operationId: healthCheck
+      summary: Liveness probe
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /api/v1/health/ready:
+    get:
+      operationId: readinessCheck
+      summary: Readiness probe
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+  /api/v1/auth/signup:
+    post:
+      operationId: signup
+      summary: Register a new user
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /api/v1/auth/login:
+    post:
+      operationId: login
+      summary: Authenticate user
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokenResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/v1/auth/refresh:
+    post:
+      operationId: refreshToken
+      summary: Refresh access token
+      tags:
+        - Auth
+      responses:
+        '200':
+          description: Token refreshed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthTokenResponse'
+  /api/v1/auth/me:
+    get:
+      operationId: getCurrentUser
+      summary: Get current user profile
+      tags:
+        - Auth
+      responses:
+        '200':
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+  /api/v1/auth/me/role:
+    patch:
+      operationId: updateUserRole
+      summary: Update current user role
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRoleRequest'
+      responses:
+        '200':
+          description: Role updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+  /api/v1/auth/change-password:
+    post:
+      operationId: changePassword
+      summary: Change password
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '204':
+          description: Password changed
+  /api/v1/tenants:
+    post:
+      operationId: createTenant
+      summary: Create a new tenant
+      tags:
+        - Tenants
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTenantRequest'
+      responses:
+        '201':
+          description: Tenant created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantResponse'
+  /api/v1/tenants/{tenantId}:
+    get:
+      operationId: getTenant
+      summary: Get tenant by ID
+      tags:
+        - Tenants
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Tenant details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantResponse'
+    patch:
+      operationId: updateTenant
+      summary: Update tenant
+      tags:
+        - Tenants
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTenantRequest'
+      responses:
+        '200':
+          description: Tenant updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantResponse'
+  /api/v1/tenants/{tenantId}/admins:
+    get:
+      operationId: listTenantAdmins
+      summary: List tenant admins
+      tags:
+        - Tenants
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Admin list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TenantAdminResponse'
+    post:
+      operationId: inviteAdmin
+      summary: Invite a tenant admin
+      tags:
+        - Tenants
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InviteAdminRequest'
+      responses:
+        '201':
+          description: Admin invited
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantAdminResponse'
+  /api/v1/applications:
+    get:
+      operationId: listApplications
+      summary: List applications for a tenant
+      tags:
+        - Applications
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      responses:
+        '200':
+          description: Application list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  applications:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ApplicationResponse'
+    post:
+      operationId: createApplication
+      summary: Create a new application
+      tags:
+        - Applications
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateApplicationRequest'
+      responses:
+        '201':
+          description: Application created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResponse'
+  /api/v1/applications/{appId}:
+    get:
+      operationId: getApplication
+      summary: Get application by ID
+      tags:
+        - Applications
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Application details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationResponse'
+    delete:
+      operationId: deleteApplication
+      summary: Delete an application
+      tags:
+        - Applications
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: appId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Application deleted
+  /api/v1/datasources:
+    get:
+      operationId: listDataSources
+      summary: List data sources for a tenant
+      tags:
+        - DataSources
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      responses:
+        '200':
+          description: Data source list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  dataSources:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DataSourceResponse'
+    post:
+      operationId: createDataSource
+      summary: Create a new data source
+      tags:
+        - DataSources
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDataSourceRequest'
+      responses:
+        '201':
+          description: Data source created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataSourceResponse'
+  /api/v1/datasources/{dataSourceId}:
+    get:
+      operationId: getDataSource
+      summary: Get data source by ID
+      tags:
+        - DataSources
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: dataSourceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Data source details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataSourceResponse'
+    delete:
+      operationId: deleteDataSource
+      summary: Delete a data source
+      tags:
+        - DataSources
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: dataSourceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Data source deleted
+  /api/v1/catalog/schema:
+    get:
+      operationId: getActiveSchema
+      summary: Get active catalog schema
+      tags:
+        - Catalog
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      responses:
+        '200':
+          description: Active schema
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogSchemaResponse'
+  /api/v1/catalog/items:
+    post:
+      operationId: createCatalogItem
+      summary: Create a catalog item
+      tags:
+        - Catalog
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCatalogItemRequest'
+      responses:
+        '201':
+          description: Item created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogItemResponse'
+    get:
+      operationId: listCatalogItems
+      summary: List catalog items
+      tags:
+        - Catalog
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: statusFilter
+          in: query
+          schema:
+            type: string
+        - name: skip
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Item list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogItemListResponse'
+  /api/v1/catalog/items/{itemId}:
+    get:
+      operationId: getCatalogItem
+      summary: Get a catalog item
+      tags:
+        - Catalog
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Item details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogItemResponse'
+    patch:
+      operationId: updateCatalogItem
+      summary: Update a catalog item
+      tags:
+        - Catalog
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Item updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogItemResponse'
+    delete:
+      operationId: deleteCatalogItem
+      summary: Delete a catalog item
+      tags:
+        - Catalog
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Item deleted
+  /api/v1/catalog/import:
+    post:
+      operationId: importCatalogItems
+      summary: Import catalog items from CSV
+      tags:
+        - Catalog
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Import results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogImportResponse'
+  /api/v1/chat/message:
+    post:
+      operationId: postChatMessage
+      summary: Send a chat message (SSE stream)
+      tags:
+        - Chat
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatMessageRequest'
+      responses:
+        '200':
+          description: SSE stream of chat events
+          content:
+            text/event-stream:
+              schema:
+                type: string
+  /api/v1/chat/sessions:
+    post:
+      operationId: createSession
+      summary: Create a new session
+      tags:
+        - Chat
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSessionRequest'
+      responses:
+        '201':
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+    get:
+      operationId: listSessions
+      summary: List sessions
+      tags:
+        - Chat
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Session list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionListResponse'
+  /api/v1/chat/sessions/{sessionId}:
+    patch:
+      operationId: updateSession
+      summary: Update session
+      tags:
+        - Chat
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSessionRequest'
+      responses:
+        '200':
+          description: Session updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionResponse'
+    delete:
+      operationId: deleteSession
+      summary: Delete session
+      tags:
+        - Chat
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Session deleted
+  /api/v1/chat/sessions/{sessionId}/history:
+    get:
+      operationId: getSessionHistory
+      summary: Get session conversation history
+      tags:
+        - Chat
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Conversation history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionHistoryResponse'
+  /api/v1/chat/sessions/{sessionId}/reset:
+    post:
+      operationId: resetSession
+      summary: Reset session (clear turns)
+      tags:
+        - Chat
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Session reset
+  /api/v1/actions/execute:
+    post:
+      operationId: executeAction
+      summary: Execute an action
+      tags:
+        - Actions
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecuteActionRequest'
+      responses:
+        '200':
+          description: Action result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionResultResponse'
+  /api/v1/actions/saved-items:
+    get:
+      operationId: listSavedItems
+      summary: List saved items
+      tags:
+        - Actions
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: sessionId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Saved items list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedItemListResponse'
+  /api/v1/actions/saved-items/{itemId}:
+    delete:
+      operationId: removeSavedItem
+      summary: Remove a saved item
+      tags:
+        - Actions
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: sessionId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Item removed
+  /api/v1/workflow/save:
+    post:
+      operationId: saveWorkflow
+      summary: Save a workflow
+      tags:
+        - Workflows
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveWorkflowRequest'
+      responses:
+        '201':
+          description: Workflow saved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowResponse'
+  /api/v1/workflow/list:
+    get:
+      operationId: listWorkflows
+      summary: List workflows
+      tags:
+        - Workflows
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Workflow list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowListResponse'
+  /api/v1/workflow/{workflowId}:
+    get:
+      operationId: getWorkflow
+      summary: Get a workflow
+      tags:
+        - Workflows
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: workflowId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Workflow details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowResponse'
+    patch:
+      operationId: updateWorkflow
+      summary: Update a workflow
+      tags:
+        - Workflows
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: workflowId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveWorkflowRequest'
+      responses:
+        '200':
+          description: Workflow updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowResponse'
+    delete:
+      operationId: deleteWorkflow
+      summary: Delete a workflow
+      tags:
+        - Workflows
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: workflowId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Workflow deleted
+  /api/v1/workflow/{workflowId}/duplicate:
+    post:
+      operationId: duplicateWorkflow
+      summary: Duplicate a workflow
+      tags:
+        - Workflows
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: workflowId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Workflow duplicated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowResponse'
+  /api/v1/workflow/{workflowId}/share:
+    post:
+      operationId: shareWorkflow
+      summary: Share a workflow
+      tags:
+        - Workflows
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: workflowId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Share token generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShareWorkflowResponse'
+  /api/v1/workflow/shared/{shareToken}:
+    get:
+      operationId: getSharedWorkflow
+      summary: Get a shared workflow by token
+      tags:
+        - Workflows
+      parameters:
+        - name: shareToken
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Shared workflow
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowResponse'
+  /api/v1/workflow/templates:
+    get:
+      operationId: listWorkflowTemplates
+      summary: List workflow templates
+      tags:
+        - Workflows
+      responses:
+        '200':
+          description: Template list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowListResponse'
+  /api/v1/workflow/tools:
+    get:
+      operationId: listWorkflowTools
+      summary: List available workflow tools
+      tags:
+        - Workflows
+      responses:
+        '200':
+          description: Tool catalog
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolCatalogResponse'
+  /api/v1/workflow/{workflowId}/runs:
+    get:
+      operationId: listWorkflowRuns
+      summary: List execution runs for a workflow
+      tags:
+        - Workflows
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: workflowId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: List of workflow run summaries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkflowRunSummary'
+  /api/v1/workflow/runs/{runId}:
+    get:
+      operationId: getWorkflowRunDetail
+      summary: Get detailed execution result of a specific run
+      tags:
+        - Workflows
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Full run detail with per-node results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowRunDetail'
+        '404':
+          description: Run not found
+  /api/v1/workflow/execute:
+    post:
+      operationId: executeWorkflow
+      summary: Execute a workflow (SSE streaming response)
+      tags:
+        - Workflows
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecuteWorkflowRequest'
+      responses:
+        '200':
+          description: SSE stream of execution events
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: Server-Sent Events stream with node status updates
+  /api/v1/workflow/generate:
+    post:
+      operationId: generateWorkflow
+      summary: Generate a workflow from natural language (SSE streaming response)
+      tags:
+        - Workflows
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateWorkflowRequest'
+      responses:
+        '200':
+          description: SSE stream with workflow generation events
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: Server-Sent Events stream with workflow spec components
+  /api/v1/workflow/regenerate-prompt:
+    post:
+      operationId: regeneratePrompt
+      summary: Regenerate a system prompt for a workflow node using AI
+      tags:
+        - Workflows
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegeneratePromptRequest'
+      responses:
+        '200':
+          description: Regenerated prompt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegeneratePromptResponse'
+  /api/v1/analytics/summary:
+    get:
+      operationId: getAnalyticsSummary
+      summary: Get analytics summary
+      tags:
+        - Analytics
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Analytics summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyticsSummaryResponse'
+  /api/v1/analytics/tokens:
+    get:
+      operationId: getTokenUsage
+      summary: Get token usage
+      tags:
+        - Analytics
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Token usage
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenUsageResponse'
+  /api/v1/analytics/billing:
+    get:
+      operationId: getBilling
+      summary: Get billing info
+      tags:
+        - Analytics
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Billing data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BillingResponse'
+  /api/v1/analytics/platform:
+    get:
+      operationId: getPlatformRollup
+      summary: Get platform-wide rollup
+      tags:
+        - Analytics
+      parameters:
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Platform rollup
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformRollupResponse'
+  /api/v1/config/branding:
+    get:
+      operationId: getBranding
+      summary: Get branding config
+      tags:
+        - Branding
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      responses:
+        '200':
+          description: Branding config
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandingResponse'
+    patch:
+      operationId: updateBranding
+      summary: Update branding
+      tags:
+        - Branding
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BrandingResponse'
+      responses:
+        '200':
+          description: Branding updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandingResponse'
+  /api/v1/config/branding/public:
+    get:
+      summary: Get Public Branding
+      description: Retrieve public branding information for a tenant without authentication.
+      operationId: getPublicBranding
+      tags:
+        - Branding
+      parameters:
+        - name: X-Tenant-ID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Public branding configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandingResponse'
+        '404':
+          description: Tenant not found
+        '500':
+          description: Internal server error
+  /api/v1/config/themes:
+    get:
+      operationId: getThemes
+      summary: Get theme presets
+      tags:
+        - Branding
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      responses:
+        '200':
+          description: Theme presets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThemeListResponse'
+  /api/v1/config/contrast:
+    get:
+      operationId: checkContrast
+      summary: Check color contrast ratio
+      tags:
+        - Branding
+      parameters:
+        - name: fg
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: bg
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Contrast result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContrastCheckResponse'
+  /api/v1/config/personalization:
+    get:
+      operationId: getPersonalization
+      summary: Get personalization settings
+      tags:
+        - Branding
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      responses:
+        '200':
+          description: Personalization settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonalizationResponse'
+    patch:
+      operationId: updatePersonalization
+      summary: Update personalization
+      tags:
+        - Branding
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonalizationResponse'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersonalizationResponse'
+  /api/v1/config/ai:
+    get:
+      operationId: getAiConfig
+      summary: Get ai config
+      tags:
+        - Config
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      responses:
+        '200':
+          description: Config data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AiPersonaResponse'
+    patch:
+      operationId: updateAiConfig
+      summary: Update ai config
+      tags:
+        - Config
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AiPersonaResponse'
+      responses:
+        '200':
+          description: Config updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AiPersonaResponse'
+  /api/v1/config/guardrails:
+    get:
+      operationId: getGuardrailsConfig
+      summary: Get guardrails config
+      tags:
+        - Config
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      responses:
+        '200':
+          description: Config data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GuardrailsResponse'
+    patch:
+      operationId: updateGuardrailsConfig
+      summary: Update guardrails config
+      tags:
+        - Config
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GuardrailsResponse'
+      responses:
+        '200':
+          description: Config updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GuardrailsResponse'
+  /api/v1/config/llm:
+    get:
+      operationId: getLlmConfig
+      summary: Get llm config
+      tags:
+        - Config
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      responses:
+        '200':
+          description: Config data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LlmProviderResponse'
+    patch:
+      operationId: updateLlmConfig
+      summary: Update llm config
+      tags:
+        - Config
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LlmProviderResponse'
+      responses:
+        '200':
+          description: Config updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LlmProviderResponse'
+  /api/v1/config/components:
+    get:
+      operationId: getComponentsConfig
+      summary: Get components config
+      tags:
+        - Config
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      responses:
+        '200':
+          description: Config data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComponentsToggleResponse'
+    patch:
+      operationId: updateComponentsConfig
+      summary: Update components config
+      tags:
+        - Config
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ComponentsToggleResponse'
+      responses:
+        '200':
+          description: Config updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ComponentsToggleResponse'
+  /api/v1/config/actions:
+    get:
+      operationId: getActionsConfig
+      summary: Get actions config
+      tags:
+        - Config
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      responses:
+        '200':
+          description: Config data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionsConfigResponse'
+    patch:
+      operationId: updateActionsConfig
+      summary: Update actions config
+      tags:
+        - Config
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActionsConfigResponse'
+      responses:
+        '200':
+          description: Config updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionsConfigResponse'
+  /api/v1/schema-registry/collections:
+    get:
+      operationId: listCollections
+      summary: List MongoDB collections
+      tags:
+        - SchemaRegistry
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      responses:
+        '200':
+          description: Collections
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionListResponse'
+  /api/v1/schema-registry/infer/{collection}:
+    get:
+      operationId: inferSchema
+      summary: Infer collection schema
+      tags:
+        - SchemaRegistry
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: collection
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Inferred schema
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InferredSchemaResponse'
+  /api/v1/schema-registry/query/{collection}:
+    post:
+      operationId: queryCollection
+      summary: Query a collection
+      tags:
+        - SchemaRegistry
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: collection
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Query results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResultResponse'
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    TenantIdHeader:
+      name: X-Tenant-ID
+      in: header
+      required: false
+      description: The tenant identifier for multi-tenant isolation
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 100
+  schemas:
+    TenantStatus:
+      type: string
+      description: Tenant lifecycle status
+      enum:
+        - ACTIVE
+        - SUSPENDED
+        - TRIAL
+        - ONBOARDING
+    AccessMode:
+      type: string
+      description: Tenant access mode
+      enum:
+        - PUBLIC
+        - UNLISTED
+        - PROTECTED
+        - AUTHENTICATED
+    AdminRole:
+      type: string
+      description: Admin role within a tenant
+      enum:
+        - OWNER
+        - EDITOR
+        - VIEWER
+    ActionOutcome:
+      type: string
+      description: Outcome of an action execution
+      enum:
+        - SUCCESS
+        - FAILURE
+        - PENDING
+        - SKIPPED
+    CatalogItemStatus:
+      type: string
+      description: Status of a catalog item
+      enum:
+        - DRAFT
+        - PUBLISHED
+        - ARCHIVED
+    ConversationRole:
+      type: string
+      description: Role in a conversation turn
+      enum:
+        - USER
+        - ASSISTANT
+        - SYSTEM
+    ProblemDetails:
+      type: object
+      description: RFC 9457 Problem Details for HTTP APIs
+      properties:
+        type:
+          type: string
+          description: URI reference identifying the problem type
+        title:
+          type: string
+          description: Short human-readable summary
+        status:
+          type: integer
+          description: HTTP status code
+        detail:
+          type: string
+          description: Human-readable explanation
+        instance:
+          type: string
+          description: URI reference identifying the specific occurrence
+    ValidationError:
+      type: object
+      properties:
+        field:
+          type: string
+        message:
+          type: string
+        rejectedValue:
+          type: string
+    SignupRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 5
+          maxLength: 255
+        password:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 128
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    AuthTokenResponse:
+      type: object
+      properties:
+        idToken:
+          type: string
+          description: JWT identity token
+        refreshToken:
+          type: string
+          description: Opaque refresh token
+        expiresIn:
+          type: integer
+          description: Token lifetime in seconds
+    UserResponse:
+      type: object
+      properties:
+        uid:
+          type: string
+        email:
+          type: string
+          format: email
+        displayName:
+          type: string
+        role:
+          type: string
+        emailVerified:
+          type: boolean
+        tenantId:
+          type: string
+    ChangePasswordRequest:
+      type: object
+      required:
+        - currentPassword
+        - newPassword
+      properties:
+        currentPassword:
+          type: string
+          format: password
+        newPassword:
+          type: string
+          format: password
+          minLength: 8
+    UpdateRoleRequest:
+      type: object
+      required:
+        - role
+      properties:
+        role:
+          type: string
+          description: New role for the user
+    CreateTenantRequest:
+      type: object
+      required:
+        - tenantId
+        - name
+        - slug
+      properties:
+        tenantId:
+          type: string
+          minLength: 1
+          maxLength: 100
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 100
+        catalogLabel:
+          type: string
+          maxLength: 100
+        accessMode:
+          $ref: '#/components/schemas/AccessMode'
+    TenantResponse:
+      type: object
+      properties:
+        tenantId:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+        status:
+          $ref: '#/components/schemas/TenantStatus'
+        accessMode:
+          $ref: '#/components/schemas/AccessMode'
+        catalogLabel:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    TenantLimitsResponse:
+      type: object
+      properties:
+        maxCatalogItems:
+          type: integer
+        maxMonthlyTokens:
+          type: integer
+        maxUsers:
+          type: integer
+        maxRequestsPerMinute:
+          type: integer
+        seatCap:
+          type: integer
+    TenantAdminResponse:
+      type: object
+      properties:
+        uid:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          $ref: '#/components/schemas/AdminRole'
+        invitedAt:
+          type: string
+          format: date-time
+        accepted:
+          type: boolean
+    InviteAdminRequest:
+      type: object
+      required:
+        - email
+        - role
+      properties:
+        email:
+          type: string
+          format: email
+        role:
+          $ref: '#/components/schemas/AdminRole'
+    UpdateTenantRequest:
+      type: object
+      description: Partial update for tenant org-level fields. All fields are optional.
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        slug:
+          type: string
+          minLength: 1
+          maxLength: 100
+        catalogLabel:
+          type: string
+          maxLength: 100
+        accessMode:
+          $ref: '#/components/schemas/AccessMode'
+        planTier:
+          $ref: '#/components/schemas/PlanTier'
+        dbConnectionUri:
+          type: string
+          description: MongoDB connection URI for tenant-isolated database
+          maxLength: 500
+    PlanTier:
+      type: string
+      description: Subscription plan tier
+      enum:
+        - FREE
+        - GROWTH
+        - ENTERPRISE
+    ApplicationResponse:
+      type: object
+      description: Full application configuration response
+      properties:
+        appId:
+          type: string
+        slug:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        isDefault:
+          type: boolean
+        status:
+          $ref: '#/components/schemas/ApplicationStatus'
+        aiPersona:
+          $ref: '#/components/schemas/AiPersonaResponse'
+        guardrails:
+          $ref: '#/components/schemas/GuardrailsResponse'
+        branding:
+          $ref: '#/components/schemas/BrandingResponse'
+        components:
+          $ref: '#/components/schemas/ComponentsToggleResponse'
+        actions:
+          $ref: '#/components/schemas/ActionsConfigResponse'
+        personalization:
+          $ref: '#/components/schemas/PersonalizationResponse'
+        themes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThemePresetResponse'
+        dataSourceIds:
+          type: array
+          items:
+            type: string
+        llmOverride:
+          $ref: '#/components/schemas/LlmProviderResponse'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CreateApplicationRequest:
+      type: object
+      description: Create a new application
+      required:
+        - name
+        - slug
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        isDefault:
+          type: boolean
+          default: false
+        aiPersona:
+          $ref: '#/components/schemas/AiPersonaResponse'
+        guardrails:
+          $ref: '#/components/schemas/GuardrailsResponse'
+        branding:
+          $ref: '#/components/schemas/BrandingResponse'
+        components:
+          $ref: '#/components/schemas/ComponentsToggleResponse'
+        actions:
+          $ref: '#/components/schemas/ActionsConfigResponse'
+        personalization:
+          $ref: '#/components/schemas/PersonalizationResponse'
+        themes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThemePresetResponse'
+        dataSourceIds:
+          type: array
+          items:
+            type: string
+        llmOverride:
+          $ref: '#/components/schemas/LlmProviderResponse'
+    ApplicationStatus:
+      type: string
+      enum:
+        - DRAFT
+        - ACTIVE
+        - PAUSED
+        - ARCHIVED
+    DataSourceResponse:
+      type: object
+      description: Data source configuration response
+      properties:
+        dataSourceId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          $ref: '#/components/schemas/DataSourceType'
+        status:
+          $ref: '#/components/schemas/DataSourceStatus'
+        schema:
+          $ref: '#/components/schemas/DataSourceSchemaResponse'
+        connection:
+          $ref: '#/components/schemas/ConnectionConfigResponse'
+        credentialRef:
+          $ref: '#/components/schemas/CredentialRefResponse'
+        lastSyncedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CreateDataSourceRequest:
+      type: object
+      description: Create a new data source
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          $ref: '#/components/schemas/DataSourceType'
+        connection:
+          $ref: '#/components/schemas/ConnectionConfigResponse'
+        credentialRef:
+          $ref: '#/components/schemas/CredentialRefResponse'
+    ConnectionConfigResponse:
+      type: object
+      description: |
+        Connection configuration — polymorphic based on data source type. Only the relevant fields are populated based on the parent DataSource type.
+      properties:
+        synaptiqNative:
+          type: object
+          properties:
+            collectionName:
+              type: string
+        mcpServer:
+          type: object
+          properties:
+            serverUrl:
+              type: string
+            transport:
+              type: string
+              enum:
+                - STDIO
+                - HTTP
+                - WS
+            env:
+              type: object
+              additionalProperties:
+                type: string
+            enabledTools:
+              type: array
+              items:
+                type: string
+        restApi:
+          type: object
+          properties:
+            baseUrl:
+              type: string
+            headers:
+              type: object
+              additionalProperties:
+                type: string
+            authType:
+              type: string
+        databaseDirect:
+          type: object
+          properties:
+            connectionUri:
+              type: string
+            databaseName:
+              type: string
+            collectionOrTable:
+              type: string
+    CredentialRefResponse:
+      type: object
+      description: Credential reference for data source authentication
+      properties:
+        type:
+          $ref: '#/components/schemas/CredentialType'
+        secretRef:
+          type: string
+          description: Secret identifier (GCP secret name, Vault path, or MongoDB doc ID)
+        oauthProvider:
+          type: string
+          description: OAuth2 provider name (only for OAUTH2 type)
+    DataSourceSchemaResponse:
+      type: object
+      description: Data source schema definition (inferred or manually defined)
+      properties:
+        schemaName:
+          type: string
+        fields:
+          type: array
+          items:
+            type: object
+            properties:
+              fieldId:
+                type: string
+              label:
+                type: string
+              type:
+                type: string
+              required:
+                type: boolean
+              searchable:
+                type: boolean
+              displayable:
+                type: boolean
+              filterable:
+                type: boolean
+              displayOrder:
+                type: integer
+              enumValues:
+                type: array
+                items:
+                  type: string
+        schemaVersion:
+          type: integer
+        autoInferred:
+          type: boolean
+    DataSourceType:
+      type: string
+      enum:
+        - SYNAPTIQ_NATIVE
+        - MCP_SERVER
+        - REST_API
+        - DATABASE_DIRECT
+        - FILE_UPLOAD
+    DataSourceStatus:
+      type: string
+      enum:
+        - PENDING
+        - CONNECTED
+        - ERROR
+        - DISABLED
+    CredentialType:
+      type: string
+      enum:
+        - GCP_SECRET_MANAGER
+        - EXTERNAL_SECRET_MANAGER
+        - MONGODB_ENCRYPTED
+        - OAUTH2
+    CatalogSchemaResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        tenantId:
+          type: string
+        name:
+          type: string
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/SchemaFieldResponse'
+        schemaVersion:
+          type: integer
+        active:
+          type: boolean
+    SchemaFieldResponse:
+      type: object
+      properties:
+        fieldId:
+          type: string
+        label:
+          type: string
+        type:
+          type: string
+        required:
+          type: boolean
+        searchable:
+          type: boolean
+        displayable:
+          type: boolean
+        filterable:
+          type: boolean
+        displayOrder:
+          type: integer
+        enumValues:
+          type: array
+          items:
+            type: string
+    CreateCatalogItemRequest:
+      type: object
+      required:
+        - data
+      properties:
+        data:
+          type: object
+          additionalProperties: true
+        status:
+          $ref: '#/components/schemas/CatalogItemStatus'
+    CatalogItemResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        tenantId:
+          type: string
+        status:
+          $ref: '#/components/schemas/CatalogItemStatus'
+        data:
+          type: object
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CatalogItemListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogItemResponse'
+        total:
+          type: integer
+          format: int64
+    CatalogImportResponse:
+      type: object
+      properties:
+        imported:
+          type: integer
+        skipped:
+          type: integer
+        errors:
+          type: array
+          items:
+            type: string
+    ChatMessageRequest:
+      type: object
+      required:
+        - sessionId
+        - message
+      properties:
+        sessionId:
+          type: string
+        message:
+          type: string
+        modelOverride:
+          type: string
+    CreateSessionRequest:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+    SessionResponse:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        tenantId:
+          type: string
+        title:
+          type: string
+        turnCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+    SessionListResponse:
+      type: object
+      properties:
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionSummaryResponse'
+        total:
+          type: integer
+          format: int64
+    SessionSummaryResponse:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        title:
+          type: string
+        turnCount:
+          type: integer
+        updatedAt:
+          type: string
+          format: date-time
+    ConversationTurnResponse:
+      type: object
+      properties:
+        turnId:
+          type: string
+        role:
+          $ref: '#/components/schemas/ConversationRole'
+        content:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+    SessionHistoryResponse:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        turns:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConversationTurnResponse'
+        total:
+          type: integer
+    UpdateSessionRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 200
+    ExecuteActionRequest:
+      type: object
+      required:
+        - action
+      properties:
+        action:
+          type: string
+        itemId:
+          type: string
+        sessionId:
+          type: string
+        message:
+          type: string
+    ActionResultResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          additionalProperties: true
+    SavedItemResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        itemId:
+          type: string
+        sessionId:
+          type: string
+        itemSnapshot:
+          $ref: '#/components/schemas/ItemSnapshotResponse'
+        createdAt:
+          type: string
+          format: date-time
+    SavedItemListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SavedItemResponse'
+        total:
+          type: integer
+    SaveWorkflowRequest:
+      type: object
+      required:
+        - spec
+      properties:
+        spec:
+          $ref: '#/components/schemas/FlowSettingsSpec'
+    WorkflowResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        tenantId:
+          type: string
+        spec:
+          $ref: '#/components/schemas/FlowSettingsSpec'
+        isPublic:
+          type: boolean
+        shareToken:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    WorkflowListResponse:
+      type: object
+      properties:
+        workflows:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowResponse'
+    ShareWorkflowResponse:
+      type: object
+      properties:
+        shareToken:
+          type: string
+        success:
+          type: boolean
+    FlowSettingsSpec:
+      type: object
+      description: Flow specification for a workflow
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        entrypoint:
+          type: string
+        agents:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentSpec'
+        edges:
+          type: array
+          items:
+            $ref: '#/components/schemas/EdgeSpec'
+        mcpServers:
+          type: array
+          items:
+            $ref: '#/components/schemas/MCPServerSpec'
+        policy:
+          $ref: '#/components/schemas/ExecutionPolicySpec'
+        flowType:
+          type: string
+          enum:
+            - STATIC
+            - DYNAMIC
+            - HYBRID
+        inputs:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkflowInput'
+          description: Input fields for parameterized workflow execution
+    AgentSpec:
+      type: object
+      description: Agent node configuration within a workflow
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        systemPrompt:
+          type: string
+        description:
+          type: string
+        instructions:
+          type: string
+        llm:
+          $ref: '#/components/schemas/LLMSpec'
+        tools:
+          type: array
+          items:
+            $ref: '#/components/schemas/ToolSpec'
+    EdgeSpec:
+      type: object
+      description: Edge connecting two agent nodes
+      required:
+        - source
+        - target
+      properties:
+        source:
+          type: string
+        target:
+          type: string
+        condition:
+          type: string
+          enum:
+            - ALWAYS
+            - ON_TOOL_CALLS
+            - NEVER
+          default: ALWAYS
+        label:
+          type: string
+    ToolSpec:
+      type: object
+      description: Tool configuration for an agent
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum:
+            - PYTHON
+            - JAVA
+            - MCP
+            - LANGCHAIN
+            - SPRING_BEAN
+        name:
+          type: string
+        importPath:
+          type: string
+        mcpServer:
+          type: string
+        mcpTool:
+          type: string
+        params:
+          type: object
+          additionalProperties: true
+    LLMSpec:
+      type: object
+      description: LLM configuration for an agent node
+      properties:
+        provider:
+          type: string
+          enum:
+            - VERTEXAI
+            - OPENAI
+            - ANTHROPIC
+        model:
+          type: string
+        temperature:
+          type: number
+          format: double
+          default: 0
+        maxTokens:
+          type: integer
+        streaming:
+          type: boolean
+          default: true
+        params:
+          type: object
+          additionalProperties: true
+    MCPServerSpec:
+      type: object
+      description: MCP server connection configuration
+      properties:
+        id:
+          type: string
+        transport:
+          type: string
+          enum:
+            - STDIO
+            - HTTP
+            - WS
+          default: STDIO
+        command:
+          type: string
+        args:
+          type: array
+          items:
+            type: string
+        env:
+          type: object
+          additionalProperties:
+            type: string
+        url:
+          type: string
+    ExecutionPolicySpec:
+      type: object
+      description: Execution policy for workflow runs
+      properties:
+        deterministic:
+          type: boolean
+          default: false
+        seed:
+          type: integer
+        resources:
+          $ref: '#/components/schemas/ResourceLimitsSpec'
+    ResourceLimitsSpec:
+      type: object
+      description: Resource limits for workflow execution
+      properties:
+        totalTimeoutMs:
+          type: integer
+        stepTimeoutMs:
+          type: integer
+        maxTokens:
+          type: integer
+        rateLimitRps:
+          type: number
+          format: double
+    ToolDefinitionResponse:
+      type: object
+      description: A tool available in the platform catalog
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        icon:
+          type: string
+    ToolCatalogResponse:
+      type: object
+      description: List of available tools grouped by category
+      properties:
+        tools:
+          type: array
+          items:
+            $ref: '#/components/schemas/ToolDefinitionResponse'
+    WorkflowInput:
+      type: object
+      description: Input field definition for parameterized workflow execution
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+        label:
+          type: string
+        type:
+          type: string
+          description: Input type (text, number, select, boolean, etc.)
+        description:
+          type: string
+        required:
+          type: boolean
+          default: false
+        defaultValue:
+          description: Default value for the input field
+        options:
+          type: array
+          items:
+            type: string
+          description: Available options for select-type inputs
+    NodeExecutionStatus:
+      type: string
+      description: Execution status of a workflow node
+      enum:
+        - PENDING
+        - RUNNING
+        - COMPLETED
+        - ERROR
+        - SKIPPED
+    WorkflowRunNodeDetail:
+      type: object
+      description: Execution details for a single node within a workflow run
+      properties:
+        status:
+          $ref: '#/components/schemas/NodeExecutionStatus'
+        durationMs:
+          type: integer
+          format: int64
+          description: Execution duration in milliseconds
+        output:
+          type: string
+          description: Node output text
+        error:
+          type: string
+          description: Error message if the node failed
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+    WorkflowRunSummary:
+      type: object
+      description: Summary of a workflow execution run
+      required:
+        - runId
+        - workflowId
+        - status
+        - startedAt
+      properties:
+        runId:
+          type: string
+        workflowId:
+          type: string
+        status:
+          type: string
+          enum:
+            - RUNNING
+            - COMPLETED
+            - ERROR
+            - CANCELLED
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        durationMs:
+          type: integer
+          format: int64
+          description: Duration of the most recent node execution
+        totalDurationMs:
+          type: integer
+          format: int64
+          description: Total duration of the entire run
+    WorkflowRunDetail:
+      type: object
+      description: Detailed result of a workflow execution run including per-node results
+      required:
+        - runId
+        - workflowId
+        - status
+        - startedAt
+      properties:
+        runId:
+          type: string
+        workflowId:
+          type: string
+        status:
+          type: string
+          enum:
+            - RUNNING
+            - COMPLETED
+            - ERROR
+            - CANCELLED
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        currentNode:
+          type: string
+          description: Currently executing node ID (when status is RUNNING)
+        totalDurationMs:
+          type: integer
+          format: int64
+        result:
+          type: string
+          description: Final output of the workflow execution
+        nodes:
+          type: object
+          description: Per-node execution details keyed by node ID
+          additionalProperties:
+            $ref: '#/components/schemas/WorkflowRunNodeDetail'
+    ExecuteWorkflowRequest:
+      type: object
+      description: Request body for executing a workflow
+      required:
+        - spec
+      properties:
+        spec:
+          $ref: '#/components/schemas/FlowSettingsSpec'
+        inputText:
+          type: string
+          description: Primary text input for the workflow
+        dryRun:
+          type: boolean
+          default: false
+          description: If true, validate the workflow without executing
+        startNodeId:
+          type: string
+          description: Optional node ID to start execution from (for partial runs)
+        priorContext:
+          type: string
+          description: Prior conversation context for the execution
+        inputVariables:
+          type: object
+          description: Key-value map of input variables for parameterized execution
+          additionalProperties: true
+    GenerateWorkflowRequest:
+      type: object
+      description: Request body for AI-powered workflow generation
+      required:
+        - prompt
+      properties:
+        prompt:
+          type: string
+          description: Natural language description of the desired workflow
+    RegeneratePromptRequest:
+      type: object
+      description: Request body for AI-powered prompt regeneration
+      required:
+        - nodeId
+      properties:
+        nodeId:
+          type: string
+        nodeLabel:
+          type: string
+        nodeDescription:
+          type: string
+        currentPrompt:
+          type: string
+        instruction:
+          type: string
+          description: User instruction for how the prompt should be regenerated
+    RegeneratePromptResponse:
+      type: object
+      description: Response from prompt regeneration
+      properties:
+        prompt:
+          type: string
+          description: The regenerated prompt text
+    AnalyticsSummaryResponse:
+      type: object
+      properties:
+        totalConversations:
+          type: integer
+        totalMessages:
+          type: integer
+        totalTokensInput:
+          type: integer
+        totalTokensOutput:
+          type: integer
+        totalActions:
+          type: integer
+        uniqueUsers:
+          type: integer
+        avgMessagesPerSession:
+          type: number
+          format: double
+    TokenUsageResponse:
+      type: object
+      properties:
+        totalTokensInput:
+          type: integer
+        totalTokensOutput:
+          type: integer
+        totalTokens:
+          type: integer
+        estimatedCostUsd:
+          type: number
+          format: double
+        planTokenLimit:
+          type: integer
+        usagePercent:
+          type: number
+          format: double
+    BillingResponse:
+      type: object
+      properties:
+        seatCount:
+          type: integer
+        totalTokens:
+          type: integer
+        estimatedCostUsd:
+          type: number
+          format: double
+    PlatformRollupResponse:
+      type: object
+      properties:
+        totalTenants:
+          type: integer
+        activeTenants:
+          type: integer
+        totalConversations:
+          type: integer
+        totalMessages:
+          type: integer
+        totalTokens:
+          type: integer
+        totalEstimatedCostUsd:
+          type: number
+          format: double
+    BrandingResponse:
+      type: object
+      properties:
+        logoUrl:
+          type: string
+        primaryColor:
+          type: string
+        secondaryColor:
+          type: string
+        backgroundStyle:
+          type: string
+        headingFont:
+          type: string
+        bodyFont:
+          type: string
+        faviconUrl:
+          type: string
+        pageTitle:
+          type: string
+        showPlatformBranding:
+          type: boolean
+    ThemePresetResponse:
+      type: object
+      properties:
+        themeId:
+          type: string
+        name:
+          type: string
+        primaryColor:
+          type: string
+        secondaryColor:
+          type: string
+        backgroundStyle:
+          type: string
+        isDefault:
+          type: boolean
+    ThemeListResponse:
+      type: object
+      properties:
+        themes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ThemePresetResponse'
+    ContrastCheckResponse:
+      type: object
+      properties:
+        foreground:
+          type: string
+        background:
+          type: string
+        ratio:
+          type: number
+          format: double
+        aaNormal:
+          type: boolean
+        aaLarge:
+          type: boolean
+        aaaNormal:
+          type: boolean
+    PersonalizationResponse:
+      type: object
+      properties:
+        allowThemeSwitch:
+          type: boolean
+        allowFontSwitch:
+          type: boolean
+        allowBubbleStyle:
+          type: boolean
+    AiPersonaResponse:
+      type: object
+      properties:
+        displayName:
+          type: string
+        tone:
+          type: string
+        customInstruction:
+          type: string
+        welcomeMessage:
+          type: string
+        starterPrompts:
+          type: array
+          items:
+            type: string
+    GuardrailsResponse:
+      type: object
+      properties:
+        outOfScopeMessage:
+          type: string
+        recommendationMode:
+          type: boolean
+        language:
+          type: string
+    LlmProviderResponse:
+      type: object
+      properties:
+        provider:
+          type: string
+        modelId:
+          type: string
+        isByok:
+          type: boolean
+    ComponentsToggleResponse:
+      type: object
+      properties:
+        itemCard:
+          type: boolean
+        itemGrid:
+          type: boolean
+        itemDetail:
+          type: boolean
+        comparisonTable:
+          type: boolean
+        filterSummary:
+          type: boolean
+        resultCount:
+          type: boolean
+        emptyState:
+          type: boolean
+        actionConfirm:
+          type: boolean
+        infoBanner:
+          type: boolean
+    ActionsConfigResponse:
+      type: object
+      properties:
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActionEntryResponse'
+        enquiryWebhookUrl:
+          type: string
+        enquiryEmail:
+          type: string
+    ActionEntryResponse:
+      type: object
+      properties:
+        actionId:
+          type: string
+        enabled:
+          type: boolean
+        label:
+          type: string
+    CollectionListResponse:
+      type: object
+      properties:
+        collections:
+          type: array
+          items:
+            type: string
+    InferredSchemaResponse:
+      type: object
+      additionalProperties:
+        type: string
+        description: Field name to inferred type mapping
+    QueryResultResponse:
+      type: object
+      properties:
+        documents:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        total:
+          type: integer
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: Health status (UP or DOWN)
+        mongo:
+          type: string
+        redis:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+    ItemSnapshotResponse:
+      type: object
+      description: Snapshot of a saved item at the time it was bookmarked
+      properties:
+        title:
+          type: string
+        subtitle:
+          type: string
+        imageUrl:
+          type: string
+        description:
+          type: string
+        price:
+          type: string
+        category:
+          type: string
+        dataSourceId:
+          type: string
+        sourceItemId:
+          type: string
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'

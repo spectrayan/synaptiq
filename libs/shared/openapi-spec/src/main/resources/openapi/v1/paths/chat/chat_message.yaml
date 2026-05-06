@@ -1,0 +1,19 @@
+﻿post:
+  operationId: postChatMessage
+  summary: Send a chat message (SSE stream)
+  tags: [Chat]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/chat/ChatMessageRequest.yaml'
+  responses:
+    '200':
+      description: SSE stream of chat events
+      content:
+        text/event-stream:
+          schema:
+            type: string

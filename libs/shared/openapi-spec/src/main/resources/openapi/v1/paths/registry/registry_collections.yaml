@@ -1,0 +1,13 @@
+﻿get:
+  operationId: listCollections
+  summary: List MongoDB collections
+  tags: [SchemaRegistry]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  responses:
+    '200':
+      description: Collections
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/registry/CollectionListResponse.yaml'

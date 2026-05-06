@@ -1,0 +1,15 @@
+type: object
+properties:
+  totalTenants:
+    type: integer
+  activeTenants:
+    type: integer
+  totalConversations:
+    type: integer
+  totalMessages:
+    type: integer
+  totalTokens:
+    type: integer
+  totalEstimatedCostUsd:
+    type: number
+    format: double

@@ -16,6 +16,7 @@
     "target": "es2022",
     "useDefineForClassFields": false,
     "paths": {
+      "@synaptiq/client": ["libs/shared/sdks/v1/angular/synaptiq-client/index.ts"],
       "@synaptiq/chat": ["libs/frontend/chat/src/index.ts"],
       "@synaptiq/dsl-renderer": ["libs/frontend/dsl-renderer/src/index.ts"],
       "@synaptiq/theme": ["libs/frontend/theme/src/index.ts"],

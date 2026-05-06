@@ -1,0 +1,11 @@
+﻿get:
+  operationId: healthCheck
+  summary: Liveness probe
+  tags: [Health]
+  responses:
+    '200':
+      description: Service is alive
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/health/HealthResponse.yaml'

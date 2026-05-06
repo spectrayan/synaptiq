@@ -1,0 +1,20 @@
+type: object
+properties:
+  itemCard:
+    type: boolean
+  itemGrid:
+    type: boolean
+  itemDetail:
+    type: boolean
+  comparisonTable:
+    type: boolean
+  filterSummary:
+    type: boolean
+  resultCount:
+    type: boolean
+  emptyState:
+    type: boolean
+  actionConfirm:
+    type: boolean
+  infoBanner:
+    type: boolean

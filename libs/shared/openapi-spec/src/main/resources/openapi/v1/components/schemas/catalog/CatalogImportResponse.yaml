@@ -1,0 +1,10 @@
+type: object
+properties:
+  imported:
+    type: integer
+  skipped:
+    type: integer
+  errors:
+    type: array
+    items:
+      type: string

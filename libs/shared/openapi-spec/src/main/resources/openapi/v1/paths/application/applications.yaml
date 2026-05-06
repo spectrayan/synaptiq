@@ -1,0 +1,37 @@
+get:
+  operationId: listApplications
+  summary: List applications for a tenant
+  tags: [Applications]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  responses:
+    '200':
+      description: Application list
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              applications:
+                type: array
+                items:
+                  $ref: '../../components/schemas/application/ApplicationResponse.yaml'
+post:
+  operationId: createApplication
+  summary: Create a new application
+  tags: [Applications]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/application/CreateApplicationRequest.yaml'
+  responses:
+    '201':
+      description: Application created
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/application/ApplicationResponse.yaml'

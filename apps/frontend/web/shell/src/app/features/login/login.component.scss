@@ -15,7 +15,7 @@
   max-width: 420px;
   padding: 2.5rem;
   border-radius: 1.25rem;
-  background: var(--sq-surface-1, rgba(255, 255, 255, 0.04));
+  background: var(--glass-bg);
   border: 1px solid var(--sq-border, rgba(255, 255, 255, 0.08));
   backdrop-filter: blur(20px);
   box-shadow:
@@ -288,3 +288,5 @@ mat-divider {
     --mdc-outlined-text-field-input-text-placeholder-color: rgba(255, 255, 255, 0.25);
   }
 }
+
+

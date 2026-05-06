@@ -1,12 +1,38 @@
-# Context
+# Current Focus: Synaptiq Java Spring Boot Backend (spring-apis)
 
-- **Last Session**: May 3, 2026. Added numeric parsing, 10MB file upload limits (converted to base64) to the Workflow Run Dialog and resolved Angular compiler warnings (`NG8107`, `NG8011`) in the DSL renderer templates.
-- **Current Focus**: Enhancing Workflow Execution UI and migrating Agent Flow to Spring Boot.
-- **Key Decisions & Notes**: 
-  - Workflow file inputs are read and converted to Base64 strings directly on the client side before being submitted.
-  - Using Google ADK 1.0.0 with Spring AI (`google-adk-spring-ai`).
-  - DTOs exactly mirror the structure of `FlowSettings` from the Python agent flow library for seamless workflow definitions.
-  - Streaming returns `Flux<Map<String, Object>>` matching the Python implementation's event yielding style.
-- **Blockers & Open Questions**: 
-  - Need to implement the actual logic connecting `FlowSettings` nodes to Google ADK `Agent` instances in `FlowBuilder`.
-  - Encountered an issue downloading `spring-ai-core` milestone version during Maven build (need to resolve repo/version).
+## Architecture
+- **Hexagonal/DDD** — strict Ports & Adapters, matching Promptly reference
+- **Spring Boot 4.0.0** + **Spring WebFlux** (reactive)
+- **Spring Modulith 2.1.0-M4** (module boundaries via package-info.java)
+- **Spring AI 2.0.0-M4** (Vertex AI Gemini)
+- **API-first** (SpringDoc OpenAPI 3.0.3)
+- **MongoDB Reactive** + **Redis**
+
+## Key Principles Enforced
+- Domain models are **pure POJOs** — NO @Document, @Id, or framework annotations
+- Controllers depend **ONLY** on input port interfaces (use cases)
+- MongoDB documents live in `infrastructure/persistence/mongo/entity/`
+- Mappers (MapStruct or manual) convert domain ↔ document at persistence boundary
+- Application services implement use case interfaces and orchestrate ports
+
+## Module Structure (per module)
+```
+module/
+├── domain/model/           # Pure POJO entities, value objects, enums
+├── application/
+│   ├── port/in/            # Use case interfaces (input ports)
+│   ├── port/out/           # Persistence port interfaces (output ports)
+│   └── service/            # Use case implementations
+└── infrastructure/
+    ├── persistence/mongo/
+    │   ├── entity/         # @Document classes
+    │   ├── mapper/         # MapStruct or manual mappers
+    │   └── repository/     # Spring Data repos + port adapters
+    └── web/
+        ├── Controller.java # REST controller (uses input ports only)
+        └── WebMapper.java  # Domain → DTO mapping
+```
+
+## Status
+- ✅ All 11 modules refactored to strict hex architecture
+- ✅ Clean Maven compilation verified

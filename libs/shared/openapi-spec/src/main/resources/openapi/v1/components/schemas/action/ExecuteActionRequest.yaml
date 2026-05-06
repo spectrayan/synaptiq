@@ -1,0 +1,11 @@
+type: object
+required: [action]
+properties:
+  action:
+    type: string
+  itemId:
+    type: string
+  sessionId:
+    type: string
+  message:
+    type: string

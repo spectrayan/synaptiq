@@ -1,0 +1,11 @@
+type: object
+properties:
+  turnId:
+    type: string
+  role:
+    $ref: '../common/enums/ConversationRole.yaml'
+  content:
+    type: string
+  timestamp:
+    type: string
+    format: date-time

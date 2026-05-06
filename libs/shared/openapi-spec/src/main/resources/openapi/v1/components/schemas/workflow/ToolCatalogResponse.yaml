@@ -1,0 +1,7 @@
+type: object
+description: List of available tools grouped by category
+properties:
+  tools:
+    type: array
+    items:
+      $ref: 'ToolDefinitionResponse.yaml'

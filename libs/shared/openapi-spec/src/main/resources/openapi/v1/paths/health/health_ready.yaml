@@ -1,0 +1,11 @@
+﻿get:
+  operationId: readinessCheck
+  summary: Readiness probe
+  tags: [Health]
+  responses:
+    '200':
+      description: Service is ready
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/health/HealthResponse.yaml'

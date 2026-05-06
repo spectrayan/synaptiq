@@ -35,15 +35,15 @@
 
   @if (sidebarTab() === 'recent') {
     <div class="history-list">
-      @for (session of sessionHistory(); track session.session_id) {
+      @for (session of sessionHistory(); track session.sessionId) {
         <div
           class="history-item"
-          [class.active]="activeSessionId() === session.session_id"
+          [class.active]="activeSessionId() === session.sessionId"
           (click)="loadSession.emit(session)"
         >
           <mat-icon class="history-icon">chat_bubble_outline</mat-icon>
           <span class="history-title">{{ session.title }}</span>
-          <span class="history-meta">{{ session.turn_count }}</span>
+          <span class="history-meta">{{ session.turnCount }}</span>
           <button
             class="history-delete"
             mat-icon-button
@@ -103,7 +103,7 @@
         >
           <mat-icon class="history-icon">account_tree</mat-icon>
           <span class="history-title">{{ wf.name || 'Untitled Workflow' }}</span>
-          <span class="history-meta">{{ wf.flow_type }}</span>
+          <span class="history-meta">{{ wf.flowType }}</span>
         </div>
       }
 
@@ -124,7 +124,7 @@
         >
           <mat-icon class="history-icon">public</mat-icon>
           <span class="history-title">{{ wf.name || 'Untitled Template' }}</span>
-          <span class="history-meta">{{ wf.flow_type }}</span>
+          <span class="history-meta">{{ wf.flowType }}</span>
         </div>
       }
       @if (!communityTemplates().length) {

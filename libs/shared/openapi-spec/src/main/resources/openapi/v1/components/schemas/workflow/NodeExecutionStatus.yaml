@@ -1,0 +1,3 @@
+type: string
+description: Execution status of a workflow node
+enum: [PENDING, RUNNING, COMPLETED, ERROR, SKIPPED]

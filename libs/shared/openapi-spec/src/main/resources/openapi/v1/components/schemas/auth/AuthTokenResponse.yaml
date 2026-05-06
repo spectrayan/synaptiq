@@ -1,0 +1,11 @@
+type: object
+properties:
+  idToken:
+    type: string
+    description: JWT identity token
+  refreshToken:
+    type: string
+    description: Opaque refresh token
+  expiresIn:
+    type: integer
+    description: Token lifetime in seconds

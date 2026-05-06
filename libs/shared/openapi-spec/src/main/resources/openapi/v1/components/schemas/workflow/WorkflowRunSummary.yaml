@@ -1,0 +1,25 @@
+type: object
+description: Summary of a workflow execution run
+required: [runId, workflowId, status, startedAt]
+properties:
+  runId:
+    type: string
+  workflowId:
+    type: string
+  status:
+    type: string
+    enum: [RUNNING, COMPLETED, ERROR, CANCELLED]
+  startedAt:
+    type: string
+    format: date-time
+  completedAt:
+    type: string
+    format: date-time
+  durationMs:
+    type: integer
+    format: int64
+    description: Duration of the most recent node execution
+  totalDurationMs:
+    type: integer
+    format: int64
+    description: Total duration of the entire run

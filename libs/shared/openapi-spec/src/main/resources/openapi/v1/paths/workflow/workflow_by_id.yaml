@@ -1,0 +1,56 @@
+﻿get:
+  operationId: getWorkflow
+  summary: Get a workflow
+  tags: [Workflows]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: workflowId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Workflow details
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/workflow/WorkflowResponse.yaml'
+patch:
+  operationId: updateWorkflow
+  summary: Update a workflow
+  tags: [Workflows]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: workflowId
+      in: path
+      required: true
+      schema:
+        type: string
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/workflow/SaveWorkflowRequest.yaml'
+  responses:
+    '200':
+      description: Workflow updated
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/workflow/WorkflowResponse.yaml'
+delete:
+  operationId: deleteWorkflow
+  summary: Delete a workflow
+  tags: [Workflows]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: workflowId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '204':
+      description: Workflow deleted

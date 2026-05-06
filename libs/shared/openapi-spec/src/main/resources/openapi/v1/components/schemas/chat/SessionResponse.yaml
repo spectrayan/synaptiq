@@ -1,0 +1,13 @@
+type: object
+properties:
+  sessionId:
+    type: string
+  tenantId:
+    type: string
+  title:
+    type: string
+  turnCount:
+    type: integer
+  createdAt:
+    type: string
+    format: date-time

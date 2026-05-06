@@ -1,0 +1,23 @@
+﻿get:
+  operationId: getAnalyticsSummary
+  summary: Get analytics summary
+  tags: [Analytics]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: from
+      in: query
+      schema:
+        type: string
+        format: date
+    - name: to
+      in: query
+      schema:
+        type: string
+        format: date
+  responses:
+    '200':
+      description: Analytics summary
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/analytics/AnalyticsSummaryResponse.yaml'

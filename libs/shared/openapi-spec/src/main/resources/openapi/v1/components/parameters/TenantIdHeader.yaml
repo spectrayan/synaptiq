@@ -1,0 +1,8 @@
+name: X-Tenant-ID
+in: header
+required: false
+description: The tenant identifier for multi-tenant isolation
+schema:
+  type: string
+  minLength: 1
+  maxLength: 100

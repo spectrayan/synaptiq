@@ -1,0 +1,37 @@
+get:
+  operationId: listDataSources
+  summary: List data sources for a tenant
+  tags: [DataSources]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  responses:
+    '200':
+      description: Data source list
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              dataSources:
+                type: array
+                items:
+                  $ref: '../../components/schemas/datasource/DataSourceResponse.yaml'
+post:
+  operationId: createDataSource
+  summary: Create a new data source
+  tags: [DataSources]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/datasource/CreateDataSourceRequest.yaml'
+  responses:
+    '201':
+      description: Data source created
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/datasource/DataSourceResponse.yaml'

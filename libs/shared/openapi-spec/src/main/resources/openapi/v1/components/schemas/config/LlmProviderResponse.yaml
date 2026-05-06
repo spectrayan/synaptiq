@@ -1,0 +1,8 @@
+type: object
+properties:
+  provider:
+    type: string
+  modelId:
+    type: string
+  isByok:
+    type: boolean

@@ -1,0 +1,32 @@
+﻿get:
+  operationId: getActionsConfig
+  summary: Get actions config
+  tags: [Config]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  responses:
+    '200':
+      description: Config data
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/config/ActionsConfigResponse.yaml'
+patch:
+  operationId: updateActionsConfig
+  summary: Update actions config
+  tags: [Config]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/config/ActionsConfigResponse.yaml'
+  responses:
+    '200':
+      description: Config updated
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/config/ActionsConfigResponse.yaml'

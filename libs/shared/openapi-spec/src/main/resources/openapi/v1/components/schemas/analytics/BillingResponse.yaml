@@ -1,0 +1,9 @@
+type: object
+properties:
+  seatCount:
+    type: integer
+  totalTokens:
+    type: integer
+  estimatedCostUsd:
+    type: number
+    format: double

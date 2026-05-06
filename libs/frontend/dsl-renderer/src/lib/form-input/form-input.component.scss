@@ -7,8 +7,8 @@
 }
 
 .form-input-card {
-  --mdc-outlined-card-container-color: var(--syn-surface-container, #1e1e2e);
-  border: 1px solid var(--syn-outline-variant, rgba(255, 255, 255, 0.12));
+  --mdc-outlined-card-container-color: var(--mat-sys-surface-container);
+  border: 1px solid var(--mat-sys-outline-variant);
   border-radius: 16px;
   overflow: hidden;
 
@@ -16,7 +16,7 @@
     padding: 20px 24px 8px;
 
     mat-icon {
-      color: var(--syn-primary, #a78bfa);
+      color: var(--mat-sys-primary);
       font-size: 28px;
       width: 28px;
       height: 28px;
@@ -25,12 +25,12 @@
     mat-card-title {
       font-size: 1.1rem;
       font-weight: 600;
-      color: var(--syn-on-surface, #e0e0e0);
+      color: var(--mat-sys-on-surface);
     }
 
     mat-card-subtitle {
       font-size: 0.85rem;
-      color: var(--syn-on-surface-variant, #a0a0a0);
+      color: var(--mat-sys-on-surface-variant);
       margin-top: 4px;
     }
   }
@@ -71,7 +71,7 @@
 
     .toggle-hint {
       font-size: 0.75rem;
-      color: var(--syn-on-surface-variant, #a0a0a0);
+      color: var(--mat-sys-on-surface-variant);
       padding-left: 48px;
     }
   }
@@ -86,7 +86,7 @@
     .file-label {
       font-size: 0.85rem;
       font-weight: 500;
-      color: var(--syn-on-surface, #e0e0e0);
+      color: var(--mat-sys-on-surface);
     }
 
     .file-drop-zone {
@@ -96,13 +96,13 @@
       justify-content: center;
       gap: 8px;
       padding: 24px 16px;
-      border: 2px dashed var(--syn-outline-variant, rgba(255, 255, 255, 0.2));
+      border: 2px dashed var(--mat-sys-outline-variant);
       border-radius: 12px;
       cursor: pointer;
       transition: border-color 0.2s, background 0.2s;
 
       &:hover {
-        border-color: var(--syn-primary, #a78bfa);
+        border-color: var(--mat-sys-primary);
         background: rgba(167, 139, 250, 0.05);
       }
 
@@ -110,18 +110,18 @@
         font-size: 32px;
         width: 32px;
         height: 32px;
-        color: var(--syn-on-surface-variant, #a0a0a0);
+        color: var(--mat-sys-on-surface-variant);
       }
 
       .file-placeholder {
         font-size: 0.85rem;
-        color: var(--syn-on-surface-variant, #a0a0a0);
+        color: var(--mat-sys-on-surface-variant);
       }
 
       .file-selected {
         font-size: 0.85rem;
         font-weight: 500;
-        color: var(--syn-primary, #a78bfa);
+        color: var(--mat-sys-primary);
         word-break: break-all;
         text-align: center;
       }
@@ -129,21 +129,21 @@
 
     .file-hint {
       font-size: 0.75rem;
-      color: var(--syn-on-surface-variant, #a0a0a0);
+      color: var(--mat-sys-on-surface-variant);
     }
   }
 }
 
 .field-unit {
   font-size: 0.85rem;
-  color: var(--syn-on-surface-variant, #a0a0a0);
+  color: var(--mat-sys-on-surface-variant);
   padding-left: 4px;
 }
 
 .field-currency {
   font-size: 0.9rem;
   font-weight: 500;
-  color: var(--syn-on-surface-variant, #a0a0a0);
+  color: var(--mat-sys-on-surface-variant);
 }
 
 // Submit button feedback
@@ -160,15 +160,18 @@
 ::ng-deep {
   .form-input-card {
     .mat-mdc-form-field {
-      --mdc-outlined-text-field-outline-color: var(--syn-outline-variant, rgba(255, 255, 255, 0.2));
-      --mdc-outlined-text-field-focus-outline-color: var(--syn-primary, #a78bfa);
-      --mdc-outlined-text-field-label-text-color: var(--syn-on-surface-variant, #a0a0a0);
-      --mdc-outlined-text-field-input-text-color: var(--syn-on-surface, #e0e0e0);
-      --mdc-outlined-text-field-hover-outline-color: var(--syn-primary, #a78bfa);
+      --mdc-outlined-text-field-outline-color: var(--mat-sys-outline-variant);
+      --mdc-outlined-text-field-focus-outline-color: var(--mat-sys-primary);
+      --mdc-outlined-text-field-label-text-color: var(--mat-sys-on-surface-variant);
+      --mdc-outlined-text-field-input-text-color: var(--mat-sys-on-surface);
+      --mdc-outlined-text-field-hover-outline-color: var(--mat-sys-primary);
     }
 
     .mat-mdc-select-value-text {
-      color: var(--syn-on-surface, #e0e0e0);
+      color: var(--mat-sys-on-surface);
     }
   }
 }
+
+
+

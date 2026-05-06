@@ -1,0 +1,38 @@
+﻿patch:
+  operationId: updateSession
+  summary: Update session
+  tags: [Chat]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: sessionId
+      in: path
+      required: true
+      schema:
+        type: string
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/chat/UpdateSessionRequest.yaml'
+  responses:
+    '200':
+      description: Session updated
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/chat/SessionResponse.yaml'
+delete:
+  operationId: deleteSession
+  summary: Delete session
+  tags: [Chat]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: sessionId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '204':
+      description: Session deleted

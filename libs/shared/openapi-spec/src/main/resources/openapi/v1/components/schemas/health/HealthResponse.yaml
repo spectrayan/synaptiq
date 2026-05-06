@@ -1,0 +1,12 @@
+type: object
+properties:
+  status:
+    type: string
+    description: Health status (UP or DOWN)
+  mongo:
+    type: string
+  redis:
+    type: string
+  timestamp:
+    type: string
+    format: date-time

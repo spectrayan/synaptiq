@@ -1,0 +1,19 @@
+﻿post:
+  operationId: saveWorkflow
+  summary: Save a workflow
+  tags: [Workflows]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/workflow/SaveWorkflowRequest.yaml'
+  responses:
+    '201':
+      description: Workflow saved
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/workflow/WorkflowResponse.yaml'

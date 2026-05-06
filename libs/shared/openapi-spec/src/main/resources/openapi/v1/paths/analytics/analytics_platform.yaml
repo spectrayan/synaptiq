@@ -1,0 +1,22 @@
+﻿get:
+  operationId: getPlatformRollup
+  summary: Get platform-wide rollup
+  tags: [Analytics]
+  parameters:
+    - name: from
+      in: query
+      schema:
+        type: string
+        format: date
+    - name: to
+      in: query
+      schema:
+        type: string
+        format: date
+  responses:
+    '200':
+      description: Platform rollup
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/analytics/PlatformRollupResponse.yaml'

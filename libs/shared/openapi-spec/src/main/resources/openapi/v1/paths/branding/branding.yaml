@@ -1,0 +1,32 @@
+﻿get:
+  operationId: getBranding
+  summary: Get branding config
+  tags: [Branding]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  responses:
+    '200':
+      description: Branding config
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/branding/BrandingResponse.yaml'
+patch:
+  operationId: updateBranding
+  summary: Update branding
+  tags: [Branding]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/branding/BrandingResponse.yaml'
+  responses:
+    '200':
+      description: Branding updated
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/branding/BrandingResponse.yaml'

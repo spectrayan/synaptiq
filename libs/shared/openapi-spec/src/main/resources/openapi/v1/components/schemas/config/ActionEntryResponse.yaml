@@ -1,0 +1,8 @@
+type: object
+properties:
+  actionId:
+    type: string
+  enabled:
+    type: boolean
+  label:
+    type: string

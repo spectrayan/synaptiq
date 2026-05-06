@@ -1,0 +1,431 @@
+openapi: 3.1.0
+info:
+  title: Synaptiq API
+  description: |
+    AI-Powered Conversational Commerce Platform — REST API
+
+    Synaptiq enables businesses to deploy intelligent, context-aware AI shopping assistants
+    with full catalog management, conversation orchestration, workflow automation,
+    and multi-tenant governance. This specification covers all bounded contexts:
+    Authentication, Tenants, Catalog, Chat, Actions, Workflows, Analytics,
+    Branding, Tenant Configuration, and Schema Registry.
+  version: 1.0.0
+  contact:
+    name: Synaptiq Team
+    url: https://synaptiq.dev
+  license:
+    name: Proprietary
+    url: https://synaptiq.dev/license
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+  - url: https://api.synaptiq.dev
+    description: Production server
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    TenantIdHeader:
+      $ref: 'v1/components/parameters/TenantIdHeader.yaml'
+
+  schemas:
+    # ── Common / Enums ──
+    TenantStatus:
+      $ref: 'v1/components/schemas/common/enums/TenantStatus.yaml'
+    AccessMode:
+      $ref: 'v1/components/schemas/common/enums/AccessMode.yaml'
+    AdminRole:
+      $ref: 'v1/components/schemas/common/enums/AdminRole.yaml'
+    ActionOutcome:
+      $ref: 'v1/components/schemas/common/enums/ActionOutcome.yaml'
+    CatalogItemStatus:
+      $ref: 'v1/components/schemas/common/enums/CatalogItemStatus.yaml'
+    ConversationRole:
+      $ref: 'v1/components/schemas/common/enums/ConversationRole.yaml'
+    ProblemDetails:
+      $ref: 'v1/components/schemas/common/ProblemDetails.yaml'
+    ValidationError:
+      $ref: 'v1/components/schemas/common/ValidationError.yaml'
+
+    # ── Auth ──
+    SignupRequest:
+      $ref: 'v1/components/schemas/auth/SignupRequest.yaml'
+    LoginRequest:
+      $ref: 'v1/components/schemas/auth/LoginRequest.yaml'
+    AuthTokenResponse:
+      $ref: 'v1/components/schemas/auth/AuthTokenResponse.yaml'
+    UserResponse:
+      $ref: 'v1/components/schemas/auth/UserResponse.yaml'
+    ChangePasswordRequest:
+      $ref: 'v1/components/schemas/auth/ChangePasswordRequest.yaml'
+    UpdateRoleRequest:
+      $ref: 'v1/components/schemas/auth/UpdateRoleRequest.yaml'
+
+    # ── Tenant ──
+    CreateTenantRequest:
+      $ref: 'v1/components/schemas/tenant/CreateTenantRequest.yaml'
+    TenantResponse:
+      $ref: 'v1/components/schemas/tenant/TenantResponse.yaml'
+    TenantLimitsResponse:
+      $ref: 'v1/components/schemas/tenant/TenantLimitsResponse.yaml'
+    TenantAdminResponse:
+      $ref: 'v1/components/schemas/tenant/TenantAdminResponse.yaml'
+    InviteAdminRequest:
+      $ref: 'v1/components/schemas/tenant/InviteAdminRequest.yaml'
+    UpdateTenantRequest:
+      $ref: 'v1/components/schemas/tenant/UpdateTenantRequest.yaml'
+    PlanTier:
+      $ref: 'v1/components/schemas/common/enums/PlanTier.yaml'
+
+    # ── Application ──
+    ApplicationResponse:
+      $ref: 'v1/components/schemas/application/ApplicationResponse.yaml'
+    CreateApplicationRequest:
+      $ref: 'v1/components/schemas/application/CreateApplicationRequest.yaml'
+    ApplicationStatus:
+      $ref: 'v1/components/schemas/common/enums/ApplicationStatus.yaml'
+
+    # ── DataSource ──
+    DataSourceResponse:
+      $ref: 'v1/components/schemas/datasource/DataSourceResponse.yaml'
+    CreateDataSourceRequest:
+      $ref: 'v1/components/schemas/datasource/CreateDataSourceRequest.yaml'
+    ConnectionConfigResponse:
+      $ref: 'v1/components/schemas/datasource/ConnectionConfigResponse.yaml'
+    CredentialRefResponse:
+      $ref: 'v1/components/schemas/datasource/CredentialRefResponse.yaml'
+    DataSourceSchemaResponse:
+      $ref: 'v1/components/schemas/datasource/DataSourceSchemaResponse.yaml'
+    DataSourceType:
+      $ref: 'v1/components/schemas/common/enums/DataSourceType.yaml'
+    DataSourceStatus:
+      $ref: 'v1/components/schemas/common/enums/DataSourceStatus.yaml'
+    CredentialType:
+      $ref: 'v1/components/schemas/common/enums/CredentialType.yaml'
+
+    # ── Catalog ──
+    CatalogSchemaResponse:
+      $ref: 'v1/components/schemas/catalog/CatalogSchemaResponse.yaml'
+    SchemaFieldResponse:
+      $ref: 'v1/components/schemas/catalog/SchemaFieldResponse.yaml'
+    CreateCatalogItemRequest:
+      $ref: 'v1/components/schemas/catalog/CreateCatalogItemRequest.yaml'
+    CatalogItemResponse:
+      $ref: 'v1/components/schemas/catalog/CatalogItemResponse.yaml'
+    CatalogItemListResponse:
+      $ref: 'v1/components/schemas/catalog/CatalogItemListResponse.yaml'
+    CatalogImportResponse:
+      $ref: 'v1/components/schemas/catalog/CatalogImportResponse.yaml'
+
+    # ── Chat ──
+    ChatMessageRequest:
+      $ref: 'v1/components/schemas/chat/ChatMessageRequest.yaml'
+    CreateSessionRequest:
+      $ref: 'v1/components/schemas/chat/CreateSessionRequest.yaml'
+    SessionResponse:
+      $ref: 'v1/components/schemas/chat/SessionResponse.yaml'
+    SessionListResponse:
+      $ref: 'v1/components/schemas/chat/SessionListResponse.yaml'
+    SessionSummaryResponse:
+      $ref: 'v1/components/schemas/chat/SessionSummaryResponse.yaml'
+    ConversationTurnResponse:
+      $ref: 'v1/components/schemas/chat/ConversationTurnResponse.yaml'
+    SessionHistoryResponse:
+      $ref: 'v1/components/schemas/chat/SessionHistoryResponse.yaml'
+    UpdateSessionRequest:
+      $ref: 'v1/components/schemas/chat/UpdateSessionRequest.yaml'
+
+    # ── Actions ──
+    ExecuteActionRequest:
+      $ref: 'v1/components/schemas/action/ExecuteActionRequest.yaml'
+    ActionResultResponse:
+      $ref: 'v1/components/schemas/action/ActionResultResponse.yaml'
+    SavedItemResponse:
+      $ref: 'v1/components/schemas/action/SavedItemResponse.yaml'
+    SavedItemListResponse:
+      $ref: 'v1/components/schemas/action/SavedItemListResponse.yaml'
+
+    # ── Workflow ──
+    SaveWorkflowRequest:
+      $ref: 'v1/components/schemas/workflow/SaveWorkflowRequest.yaml'
+    WorkflowResponse:
+      $ref: 'v1/components/schemas/workflow/WorkflowResponse.yaml'
+    WorkflowListResponse:
+      $ref: 'v1/components/schemas/workflow/WorkflowListResponse.yaml'
+    ShareWorkflowResponse:
+      $ref: 'v1/components/schemas/workflow/ShareWorkflowResponse.yaml'
+    FlowSettingsSpec:
+      $ref: 'v1/components/schemas/workflow/FlowSettingsSpec.yaml'
+    AgentSpec:
+      $ref: 'v1/components/schemas/workflow/AgentSpec.yaml'
+    EdgeSpec:
+      $ref: 'v1/components/schemas/workflow/EdgeSpec.yaml'
+    ToolSpec:
+      $ref: 'v1/components/schemas/workflow/ToolSpec.yaml'
+    LLMSpec:
+      $ref: 'v1/components/schemas/workflow/LLMSpec.yaml'
+    MCPServerSpec:
+      $ref: 'v1/components/schemas/workflow/MCPServerSpec.yaml'
+    ExecutionPolicySpec:
+      $ref: 'v1/components/schemas/workflow/ExecutionPolicySpec.yaml'
+    ResourceLimitsSpec:
+      $ref: 'v1/components/schemas/workflow/ResourceLimitsSpec.yaml'
+    ToolDefinitionResponse:
+      $ref: 'v1/components/schemas/workflow/ToolDefinitionResponse.yaml'
+    ToolCatalogResponse:
+      $ref: 'v1/components/schemas/workflow/ToolCatalogResponse.yaml'
+    WorkflowInput:
+      $ref: 'v1/components/schemas/workflow/WorkflowInput.yaml'
+    NodeExecutionStatus:
+      $ref: 'v1/components/schemas/workflow/NodeExecutionStatus.yaml'
+    WorkflowRunNodeDetail:
+      $ref: 'v1/components/schemas/workflow/WorkflowRunNodeDetail.yaml'
+    WorkflowRunSummary:
+      $ref: 'v1/components/schemas/workflow/WorkflowRunSummary.yaml'
+    WorkflowRunDetail:
+      $ref: 'v1/components/schemas/workflow/WorkflowRunDetail.yaml'
+    ExecuteWorkflowRequest:
+      $ref: 'v1/components/schemas/workflow/ExecuteWorkflowRequest.yaml'
+    GenerateWorkflowRequest:
+      $ref: 'v1/components/schemas/workflow/GenerateWorkflowRequest.yaml'
+    RegeneratePromptRequest:
+      $ref: 'v1/components/schemas/workflow/RegeneratePromptRequest.yaml'
+    RegeneratePromptResponse:
+      $ref: 'v1/components/schemas/workflow/RegeneratePromptResponse.yaml'
+
+    # ── Analytics ──
+    AnalyticsSummaryResponse:
+      $ref: 'v1/components/schemas/analytics/AnalyticsSummaryResponse.yaml'
+    TokenUsageResponse:
+      $ref: 'v1/components/schemas/analytics/TokenUsageResponse.yaml'
+    BillingResponse:
+      $ref: 'v1/components/schemas/analytics/BillingResponse.yaml'
+    PlatformRollupResponse:
+      $ref: 'v1/components/schemas/analytics/PlatformRollupResponse.yaml'
+
+    # ── Branding ──
+    BrandingResponse:
+      $ref: 'v1/components/schemas/branding/BrandingResponse.yaml'
+    ThemePresetResponse:
+      $ref: 'v1/components/schemas/branding/ThemePresetResponse.yaml'
+    ThemeListResponse:
+      $ref: 'v1/components/schemas/branding/ThemeListResponse.yaml'
+    ContrastCheckResponse:
+      $ref: 'v1/components/schemas/branding/ContrastCheckResponse.yaml'
+    PersonalizationResponse:
+      $ref: 'v1/components/schemas/branding/PersonalizationResponse.yaml'
+
+    # ── Config ──
+    AiPersonaResponse:
+      $ref: 'v1/components/schemas/config/AiPersonaResponse.yaml'
+    GuardrailsResponse:
+      $ref: 'v1/components/schemas/config/GuardrailsResponse.yaml'
+    LlmProviderResponse:
+      $ref: 'v1/components/schemas/config/LlmProviderResponse.yaml'
+    ComponentsToggleResponse:
+      $ref: 'v1/components/schemas/config/ComponentsToggleResponse.yaml'
+    ActionsConfigResponse:
+      $ref: 'v1/components/schemas/config/ActionsConfigResponse.yaml'
+    ActionEntryResponse:
+      $ref: 'v1/components/schemas/config/ActionEntryResponse.yaml'
+
+    # ── Schema Registry ──
+    CollectionListResponse:
+      $ref: 'v1/components/schemas/registry/CollectionListResponse.yaml'
+    InferredSchemaResponse:
+      $ref: 'v1/components/schemas/registry/InferredSchemaResponse.yaml'
+    QueryResultResponse:
+      $ref: 'v1/components/schemas/registry/QueryResultResponse.yaml'
+
+    # ── Health ──
+    HealthResponse:
+      $ref: 'v1/components/schemas/health/HealthResponse.yaml'
+
+  responses:
+    BadRequest:
+      $ref: 'v1/components/responses/BadRequest.yaml'
+    Unauthorized:
+      $ref: 'v1/components/responses/Unauthorized.yaml'
+    Forbidden:
+      $ref: 'v1/components/responses/Forbidden.yaml'
+    NotFound:
+      $ref: 'v1/components/responses/NotFound.yaml'
+    Conflict:
+      $ref: 'v1/components/responses/Conflict.yaml'
+    InternalServerError:
+      $ref: 'v1/components/responses/InternalServerError.yaml'
+
+tags:
+  - name: Auth
+    description: Authentication — signup, login, token management
+  - name: Tenants
+    description: Tenant lifecycle — creation, configuration, admin management
+  - name: Catalog
+    description: Catalog Registry — schema management, item CRUD, embedding
+  - name: Chat
+    description: Conversational AI — sessions, messages, context management
+  - name: Actions
+    description: Actions — execution, saved items
+  - name: Workflows
+    description: Workflow Engine — agent-flow generation, execution, sharing
+  - name: Analytics
+    description: Analytics — usage metrics, token tracking, billing
+  - name: Branding
+    description: Branding — theming, personalization, visual identity
+  - name: Config
+    description: Tenant Configuration — AI persona, guardrails, LLM provider, components
+  - name: SchemaRegistry
+    description: Schema Registry — collection inspection, dynamic queries
+  - name: Health
+    description: Health checks — liveness and readiness probes
+  - name: Applications
+    description: Application lifecycle — create, read, delete application configurations
+  - name: DataSources
+    description: DataSource management — create, read, delete data source connections
+
+paths:
+  # ── Health ──
+  /api/v1/health:
+    $ref: 'v1/paths/health/health.yaml'
+  /api/v1/health/ready:
+    $ref: 'v1/paths/health/health_ready.yaml'
+
+  # ── Auth ──
+  /api/v1/auth/signup:
+    $ref: 'v1/paths/auth/auth_signup.yaml'
+  /api/v1/auth/login:
+    $ref: 'v1/paths/auth/auth_login.yaml'
+  /api/v1/auth/refresh:
+    $ref: 'v1/paths/auth/auth_refresh.yaml'
+  /api/v1/auth/me:
+    $ref: 'v1/paths/auth/auth_me.yaml'
+  /api/v1/auth/me/role:
+    $ref: 'v1/paths/auth/auth_me_role.yaml'
+  /api/v1/auth/change-password:
+    $ref: 'v1/paths/auth/auth_change_password.yaml'
+
+  # ── Tenants ──
+  /api/v1/tenants:
+    $ref: 'v1/paths/tenant/tenants.yaml'
+  /api/v1/tenants/{tenantId}:
+    $ref: 'v1/paths/tenant/tenants_by_id.yaml'
+  /api/v1/tenants/{tenantId}/admins:
+    $ref: 'v1/paths/tenant/tenant_admins.yaml'
+
+  # ── Applications ──
+  /api/v1/applications:
+    $ref: 'v1/paths/application/applications.yaml'
+  /api/v1/applications/{appId}:
+    $ref: 'v1/paths/application/applications_by_id.yaml'
+
+  # ── DataSources ──
+  /api/v1/datasources:
+    $ref: 'v1/paths/datasource/datasources.yaml'
+  /api/v1/datasources/{dataSourceId}:
+    $ref: 'v1/paths/datasource/datasources_by_id.yaml'
+
+  # ── Catalog ──
+  /api/v1/catalog/schema:
+    $ref: 'v1/paths/catalog/catalog_schema.yaml'
+  /api/v1/catalog/items:
+    $ref: 'v1/paths/catalog/catalog_items.yaml'
+  /api/v1/catalog/items/{itemId}:
+    $ref: 'v1/paths/catalog/catalog_items_by_id.yaml'
+  /api/v1/catalog/import:
+    $ref: 'v1/paths/catalog/catalog_import.yaml'
+
+  # ── Chat ──
+  /api/v1/chat/message:
+    $ref: 'v1/paths/chat/chat_message.yaml'
+  /api/v1/chat/sessions:
+    $ref: 'v1/paths/chat/chat_sessions.yaml'
+  /api/v1/chat/sessions/{sessionId}:
+    $ref: 'v1/paths/chat/chat_sessions_by_id.yaml'
+  /api/v1/chat/sessions/{sessionId}/history:
+    $ref: 'v1/paths/chat/chat_sessions_history.yaml'
+  /api/v1/chat/sessions/{sessionId}/reset:
+    $ref: 'v1/paths/chat/chat_sessions_reset.yaml'
+
+  # ── Actions ──
+  /api/v1/actions/execute:
+    $ref: 'v1/paths/action/actions_execute.yaml'
+  /api/v1/actions/saved-items:
+    $ref: 'v1/paths/action/actions_saved_items.yaml'
+  /api/v1/actions/saved-items/{itemId}:
+    $ref: 'v1/paths/action/actions_saved_items_by_id.yaml'
+
+  # ── Workflows ──
+  /api/v1/workflow/save:
+    $ref: 'v1/paths/workflow/workflow_save.yaml'
+  /api/v1/workflow/list:
+    $ref: 'v1/paths/workflow/workflow_list.yaml'
+  /api/v1/workflow/{workflowId}:
+    $ref: 'v1/paths/workflow/workflow_by_id.yaml'
+  /api/v1/workflow/{workflowId}/duplicate:
+    $ref: 'v1/paths/workflow/workflow_duplicate.yaml'
+  /api/v1/workflow/{workflowId}/share:
+    $ref: 'v1/paths/workflow/workflow_share.yaml'
+  /api/v1/workflow/shared/{shareToken}:
+    $ref: 'v1/paths/workflow/workflow_shared.yaml'
+  /api/v1/workflow/templates:
+    $ref: 'v1/paths/workflow/workflow_templates.yaml'
+  /api/v1/workflow/tools:
+    $ref: 'v1/paths/workflow/workflow_tools.yaml'
+  /api/v1/workflow/{workflowId}/runs:
+    $ref: 'v1/paths/workflow/workflow_runs.yaml'
+  /api/v1/workflow/runs/{runId}:
+    $ref: 'v1/paths/workflow/workflow_run_detail.yaml'
+  /api/v1/workflow/execute:
+    $ref: 'v1/paths/workflow/workflow_execute.yaml'
+  /api/v1/workflow/generate:
+    $ref: 'v1/paths/workflow/workflow_generate.yaml'
+  /api/v1/workflow/regenerate-prompt:
+    $ref: 'v1/paths/workflow/workflow_regenerate_prompt.yaml'
+
+  # ── Analytics ──
+  /api/v1/analytics/summary:
+    $ref: 'v1/paths/analytics/analytics_summary.yaml'
+  /api/v1/analytics/tokens:
+    $ref: 'v1/paths/analytics/analytics_tokens.yaml'
+  /api/v1/analytics/billing:
+    $ref: 'v1/paths/analytics/analytics_billing.yaml'
+  /api/v1/analytics/platform:
+    $ref: 'v1/paths/analytics/analytics_platform.yaml'
+
+  # ── Branding ──
+  /api/v1/config/branding:
+    $ref: 'v1/paths/branding/branding.yaml'
+  /api/v1/config/branding/public:
+    $ref: 'v1/paths/branding/branding_public.yaml'
+  /api/v1/config/themes:
+    $ref: 'v1/paths/branding/themes.yaml'
+  /api/v1/config/contrast:
+    $ref: 'v1/paths/branding/contrast.yaml'
+  /api/v1/config/personalization:
+    $ref: 'v1/paths/branding/personalization.yaml'
+
+  # ── Config ──
+  /api/v1/config/ai:
+    $ref: 'v1/paths/config/config_ai.yaml'
+  /api/v1/config/guardrails:
+    $ref: 'v1/paths/config/config_guardrails.yaml'
+  /api/v1/config/llm:
+    $ref: 'v1/paths/config/config_llm.yaml'
+  /api/v1/config/components:
+    $ref: 'v1/paths/config/config_components.yaml'
+  /api/v1/config/actions:
+    $ref: 'v1/paths/config/config_actions.yaml'
+
+  # ── Schema Registry ──
+  /api/v1/schema-registry/collections:
+    $ref: 'v1/paths/registry/registry_collections.yaml'
+  /api/v1/schema-registry/infer/{collection}:
+    $ref: 'v1/paths/registry/registry_infer.yaml'
+  /api/v1/schema-registry/query/{collection}:
+    $ref: 'v1/paths/registry/registry_query.yaml'

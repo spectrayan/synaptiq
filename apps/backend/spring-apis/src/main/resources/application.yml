@@ -1,0 +1,101 @@
+# ═══════════════════════════════════════════════════════════════════
+# Synaptiq — Spring Boot Application Configuration
+# ═══════════════════════════════════════════════════════════════════
+
+spring:
+  application:
+    name: synaptiq-spring-apis
+  main:
+    web-application-type: reactive
+
+  # ── MongoDB ───────────────────────────────────────────────────────
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/synaptiq}
+      database: ${MONGODB_DATABASE:synaptiq}
+
+  # ── Redis ─────────────────────────────────────────────────────────
+    redis:
+      url: ${REDIS_URL:redis://localhost:6379}
+
+  # ── Security (OAuth2 Resource Server) ─────────────────────────────
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # For Firebase: use https://securetoken.google.com/<project-id>
+          # For builtin: this is overridden by the custom JWT decoder
+          issuer-uri: ${JWT_ISSUER_URI:}
+
+
+
+  # ── Spring AI ─────────────────────────────────────────────────────
+  ai:
+    vertex:
+      ai:
+        gemini:
+          project-id: ${VERTEX_AI_PROJECT:elevate-x-2d43c}
+          location: ${VERTEX_AI_LOCATION:us-central1}
+          chat:
+            options:
+              model: gemini-1.5-pro-002
+        embedding:
+          project-id: ${VERTEX_AI_PROJECT:elevate-x-2d43c}
+          location: ${VERTEX_AI_LOCATION:us-central1}
+          options:
+            model: text-embedding-004
+
+# ── Synaptiq Custom Properties ─────────────────────────────────────
+synaptiq:
+  debug: ${DEBUG:true}
+  environment: ${ENVIRONMENT:development}
+  cors-origins: ${SYNAPTIQ_CORS_ORIGINS:http://localhost:4200}
+  base-domain: ${BASE_DOMAIN:spectrayan.com}
+  mongo:
+    uri: ${MONGODB_URI:mongodb://localhost:27017}
+    database: ${MONGODB_DATABASE:synaptiq}
+  redis:
+    url: ${REDIS_URL:redis://localhost:6379}
+    chat-session-ttl-seconds: 7200
+  auth:
+    provider: ${AUTH_PROVIDER:builtin}
+    jwt-secret: ${JWT_SECRET:synaptiq-local-dev-secret-change-in-prod}
+    jwt-expiry-hours: 24
+    firebase-project-id: ${FIREBASE_PROJECT_ID:}
+    firebase-auth-emulator-host: ${FIREBASE_AUTH_EMULATOR_HOST:}
+  llm:
+    default-provider: ${LLM_DEFAULT_PROVIDER:vertexai}
+    vertexai-project: ${VERTEX_AI_PROJECT:}
+    vertexai-location: ${VERTEX_AI_LOCATION:us-central1}
+    gemini-api-key: ${GEMINI_API_KEY:}
+    gemini-model: ${GEMINI_MODEL:gemini-2.5-flash}
+
+# ── Server ──────────────────────────────────────────────────────────
+server:
+  port: ${SERVER_PORT:8080}
+
+# ── Actuator ────────────────────────────────────────────────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,modulith
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# ── Logging ─────────────────────────────────────────────────────────
+logging:
+  level:
+    com.synaptiq: DEBUG
+    org.springframework.data.mongodb: WARN
+    org.springframework.security: WARN
+
+# ── SpringDoc ───────────────────────────────────────────────────────
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+  show-actuator: true

@@ -1,0 +1,18 @@
+type: object
+description: RFC 9457 Problem Details for HTTP APIs
+properties:
+  type:
+    type: string
+    description: URI reference identifying the problem type
+  title:
+    type: string
+    description: Short human-readable summary
+  status:
+    type: integer
+    description: HTTP status code
+  detail:
+    type: string
+    description: Human-readable explanation
+  instance:
+    type: string
+    description: URI reference identifying the specific occurrence

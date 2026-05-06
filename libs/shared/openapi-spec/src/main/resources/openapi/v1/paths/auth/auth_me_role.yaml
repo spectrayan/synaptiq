@@ -1,0 +1,17 @@
+﻿patch:
+  operationId: updateUserRole
+  summary: Update current user role
+  tags: [Auth]
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/auth/UpdateRoleRequest.yaml'
+  responses:
+    '200':
+      description: Role updated
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/auth/UserResponse.yaml'

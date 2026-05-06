@@ -1,0 +1,14 @@
+type: object
+properties:
+  displayName:
+    type: string
+  tone:
+    type: string
+  customInstruction:
+    type: string
+  welcomeMessage:
+    type: string
+  starterPrompts:
+    type: array
+    items:
+      type: string

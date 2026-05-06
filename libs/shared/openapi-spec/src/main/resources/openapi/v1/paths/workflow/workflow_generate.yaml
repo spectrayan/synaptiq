@@ -1,0 +1,20 @@
+post:
+  operationId: generateWorkflow
+  summary: Generate a workflow from natural language (SSE streaming response)
+  tags: [Workflows]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/workflow/GenerateWorkflowRequest.yaml'
+  responses:
+    '200':
+      description: SSE stream with workflow generation events
+      content:
+        text/event-stream:
+          schema:
+            type: string
+            description: Server-Sent Events stream with workflow spec components

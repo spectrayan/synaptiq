@@ -1,0 +1,17 @@
+﻿get:
+  operationId: getSharedWorkflow
+  summary: Get a shared workflow by token
+  tags: [Workflows]
+  parameters:
+    - name: shareToken
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Shared workflow
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/workflow/WorkflowResponse.yaml'

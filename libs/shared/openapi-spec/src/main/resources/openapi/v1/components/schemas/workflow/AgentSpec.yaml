@@ -1,0 +1,20 @@
+type: object
+description: Agent node configuration within a workflow
+required: [id, name]
+properties:
+  id:
+    type: string
+  name:
+    type: string
+  systemPrompt:
+    type: string
+  description:
+    type: string
+  instructions:
+    type: string
+  llm:
+    $ref: 'LLMSpec.yaml'
+  tools:
+    type: array
+    items:
+      $ref: 'ToolSpec.yaml'

@@ -1,0 +1,12 @@
+type: object
+properties:
+  maxCatalogItems:
+    type: integer
+  maxMonthlyTokens:
+    type: integer
+  maxUsers:
+    type: integer
+  maxRequestsPerMinute:
+    type: integer
+  seatCap:
+    type: integer

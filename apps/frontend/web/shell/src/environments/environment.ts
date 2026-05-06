@@ -6,7 +6,7 @@
  */
 export const environment = {
   production: false,
-  apiBaseUrl: 'http://localhost:8000',
+  apiBaseUrl: 'http://localhost:8080',
   authProvider: 'builtin' as const,
   firebase: {
     apiKey: 'not-used-with-builtin-auth',

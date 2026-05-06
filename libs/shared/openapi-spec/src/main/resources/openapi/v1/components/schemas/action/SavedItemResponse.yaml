@@ -1,0 +1,13 @@
+type: object
+properties:
+  id:
+    type: string
+  itemId:
+    type: string
+  sessionId:
+    type: string
+  itemSnapshot:
+    $ref: 'ItemSnapshotResponse.yaml'
+  createdAt:
+    type: string
+    format: date-time

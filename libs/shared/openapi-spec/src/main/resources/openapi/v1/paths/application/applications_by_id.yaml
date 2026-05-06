@@ -1,0 +1,32 @@
+get:
+  operationId: getApplication
+  summary: Get application by ID
+  tags: [Applications]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: appId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Application details
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/application/ApplicationResponse.yaml'
+delete:
+  operationId: deleteApplication
+  summary: Delete an application
+  tags: [Applications]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: appId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '204':
+      description: Application deleted

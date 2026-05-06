@@ -1,0 +1,28 @@
+type: object
+description: Data source configuration response
+properties:
+  dataSourceId:
+    type: string
+  name:
+    type: string
+  description:
+    type: string
+  type:
+    $ref: '../common/enums/DataSourceType.yaml'
+  status:
+    $ref: '../common/enums/DataSourceStatus.yaml'
+  schema:
+    $ref: './DataSourceSchemaResponse.yaml'
+  connection:
+    $ref: './ConnectionConfigResponse.yaml'
+  credentialRef:
+    $ref: './CredentialRefResponse.yaml'
+  lastSyncedAt:
+    type: string
+    format: date-time
+  createdAt:
+    type: string
+    format: date-time
+  updatedAt:
+    type: string
+    format: date-time

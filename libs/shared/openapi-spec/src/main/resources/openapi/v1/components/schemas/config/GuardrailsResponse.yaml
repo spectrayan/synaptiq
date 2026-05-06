@@ -1,0 +1,8 @@
+type: object
+properties:
+  outOfScopeMessage:
+    type: string
+  recommendationMode:
+    type: boolean
+  language:
+    type: string

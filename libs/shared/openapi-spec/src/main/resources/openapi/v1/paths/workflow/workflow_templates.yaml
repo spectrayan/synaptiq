@@ -1,0 +1,11 @@
+﻿get:
+  operationId: listWorkflowTemplates
+  summary: List workflow templates
+  tags: [Workflows]
+  responses:
+    '200':
+      description: Template list
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/workflow/WorkflowListResponse.yaml'

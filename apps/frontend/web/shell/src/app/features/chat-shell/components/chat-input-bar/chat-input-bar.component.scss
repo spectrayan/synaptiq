@@ -17,7 +17,7 @@
 
 .chat-input {
   flex: 1;
-  background: var(--sq-surface-elevated);
+  background: var(--mat-sys-surface-container-high);
   border: 1px solid var(--sq-outline);
   border-radius: var(--sq-radius-lg);
   padding: var(--sq-space-3) var(--sq-space-4);
@@ -50,7 +50,7 @@
 // ─── Light Theme ────────────────────────────────────────────────────────────
 :host-context([data-theme="light"]) {
   .chat-input {
-    background: var(--sq-surface);
+    background: var(--mat-sys-surface);
     border-color: var(--sq-outline);
     color: var(--sq-on-surface);
 
@@ -66,3 +66,5 @@
     border-color: var(--sq-outline-variant);
   }
 }
+
+

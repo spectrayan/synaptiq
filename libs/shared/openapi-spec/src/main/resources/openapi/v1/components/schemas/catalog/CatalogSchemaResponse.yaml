@@ -1,0 +1,16 @@
+type: object
+properties:
+  id:
+    type: string
+  tenantId:
+    type: string
+  name:
+    type: string
+  fields:
+    type: array
+    items:
+      $ref: 'SchemaFieldResponse.yaml'
+  schemaVersion:
+    type: integer
+  active:
+    type: boolean

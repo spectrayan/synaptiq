@@ -1,0 +1,31 @@
+type: object
+description: Detailed result of a workflow execution run including per-node results
+required: [runId, workflowId, status, startedAt]
+properties:
+  runId:
+    type: string
+  workflowId:
+    type: string
+  status:
+    type: string
+    enum: [RUNNING, COMPLETED, ERROR, CANCELLED]
+  startedAt:
+    type: string
+    format: date-time
+  completedAt:
+    type: string
+    format: date-time
+  currentNode:
+    type: string
+    description: Currently executing node ID (when status is RUNNING)
+  totalDurationMs:
+    type: integer
+    format: int64
+  result:
+    type: string
+    description: Final output of the workflow execution
+  nodes:
+    type: object
+    description: Per-node execution details keyed by node ID
+    additionalProperties:
+      $ref: 'WorkflowRunNodeDetail.yaml'

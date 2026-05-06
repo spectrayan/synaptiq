@@ -1,0 +1,32 @@
+﻿get:
+  operationId: getPersonalization
+  summary: Get personalization settings
+  tags: [Branding]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  responses:
+    '200':
+      description: Personalization settings
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/branding/PersonalizationResponse.yaml'
+patch:
+  operationId: updatePersonalization
+  summary: Update personalization
+  tags: [Branding]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/branding/PersonalizationResponse.yaml'
+  responses:
+    '200':
+      description: Updated
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/branding/PersonalizationResponse.yaml'

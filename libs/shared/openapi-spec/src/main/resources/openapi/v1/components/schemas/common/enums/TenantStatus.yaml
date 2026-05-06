@@ -1,0 +1,7 @@
+type: string
+description: Tenant lifecycle status
+enum:
+  - ACTIVE
+  - SUSPENDED
+  - TRIAL
+  - ONBOARDING

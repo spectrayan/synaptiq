@@ -65,7 +65,7 @@
   display: grid;
   grid-template-rows: auto auto 1fr auto;
   overflow: hidden;
-  background: var(--sq-surface-dim);
+  background: var(--mat-sys-surface-container-low);
   position: relative;
 }
 
@@ -74,7 +74,7 @@
   display: flex;
   gap: 2px;
   padding: 0 var(--sq-space-4);
-  background: var(--sq-surface-container);
+  background: var(--mat-sys-surface-container);
   border-bottom: 1px solid var(--sq-outline-variant);
   z-index: 9;
 }
@@ -103,7 +103,7 @@
 
   &:hover:not(:disabled) {
     color: var(--sq-on-surface);
-    background: var(--sq-surface-overlay);
+    background: var(--mat-sys-surface-container-highest);
   }
 
   &.active {
@@ -204,7 +204,7 @@
 // ─── Light Theme ────────────────────────────────────────────────────────────
 :host-context([data-theme="light"]) {
   .main {
-    background: var(--sq-surface-dim);
+    background: var(--mat-sys-surface-container-low);
   }
 
   .new-chat-btn {
@@ -212,3 +212,5 @@
     color: var(--sq-on-primary-cont);
   }
 }
+
+

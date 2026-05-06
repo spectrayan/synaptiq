@@ -1,0 +1,6 @@
+type: object
+description: Response from prompt regeneration
+properties:
+  prompt:
+    type: string
+    description: The regenerated prompt text

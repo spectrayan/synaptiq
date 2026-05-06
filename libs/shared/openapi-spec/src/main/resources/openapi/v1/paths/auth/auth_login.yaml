@@ -1,0 +1,19 @@
+﻿post:
+  operationId: login
+  summary: Authenticate user
+  tags: [Auth]
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/auth/LoginRequest.yaml'
+  responses:
+    '200':
+      description: Authentication successful
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/auth/AuthTokenResponse.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'

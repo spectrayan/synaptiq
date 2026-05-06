@@ -1,0 +1,18 @@
+﻿get:
+  operationId: inferSchema
+  summary: Infer collection schema
+  tags: [SchemaRegistry]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: collection
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Inferred schema
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/registry/InferredSchemaResponse.yaml'

@@ -1,0 +1,9 @@
+type: object
+description: LLM provider configuration
+properties:
+  provider:
+    type: string
+  modelId:
+    type: string
+  isByok:
+    type: boolean

@@ -1,5 +1,5 @@
 /**
- * ChatService — SSE streaming client for the Synaptiq chat API (T9.1).
+ * ChatStreamService — SSE streaming client for the Synaptiq chat API (T9.1).
  *
  * Connects to `POST /api/v1/chat/message` and streams Server-Sent Events:
  *   - `token`     → individual text tokens (typewriter effect)
@@ -10,13 +10,25 @@
  *
  * Uses `fetch()` with `ReadableStream` instead of `EventSource` because
  * `EventSource` only supports GET — our chat endpoint is POST.
+ *
+ * All REST endpoints (sessions CRUD, history) are handled by the generated
+ * ChatService from @synaptiq/client.
  */
 import { inject, Injectable, NgZone } from '@angular/core';
 import { ENVIRONMENT } from '@synaptiq/utils';
 import { ComponentSpec } from '@synaptiq/constants';
 
+// Re-export the generated SDK service and types
+export {
+  ChatService as ChatApiService,
+  type ChatMessageRequest,
+  type SessionResponse,
+  type SessionListResponse,
+  type SessionHistoryResponse,
+} from '@synaptiq/client';
+
 // ---------------------------------------------------------------------------
-// SSE Event Types
+// SSE Event Types (not in SDK — SSE streaming is custom)
 // ---------------------------------------------------------------------------
 
 export interface SseTokenEvent {
@@ -36,9 +48,9 @@ export interface SseStatusEvent {
 
 export interface SseDoneEvent {
   readonly type: 'done';
-  readonly turn_id: string;
-  readonly tokens_input: number;
-  readonly tokens_output: number;
+  readonly turnId: string;
+  readonly tokensInput: number;
+  readonly tokensOutput: number;
 }
 
 export interface SseErrorEvent {
@@ -53,14 +65,14 @@ export interface SseTextReplaceEvent {
 
 export interface SseStepStartEvent {
   readonly type: 'step_start';
-  readonly step_id: string;
+  readonly stepId: string;
   readonly action: string;
   readonly description: string;
 }
 
 export interface SseStepCompleteEvent {
   readonly type: 'step_complete';
-  readonly step_id: string;
+  readonly stepId: string;
   readonly action: string;
 }
 
@@ -75,14 +87,13 @@ export type ChatSseEvent =
   | SseStepCompleteEvent;
 
 // ---------------------------------------------------------------------------
-// Chat request payload
+// Chat request payload (for SSE stream — not the same as SDK's ChatMessageRequest)
 // ---------------------------------------------------------------------------
 
 export interface ChatRequest {
-  readonly session_id: string;
+  readonly sessionId: string;
   readonly message: string;
-  readonly model_override?: string;
-  /** P1-B: If true, the turn is not persisted to session history (for auto-refresh). */
+  readonly modelOverride?: string;
   readonly background?: boolean;
 }
 
@@ -91,26 +102,18 @@ export interface ChatRequest {
 // ---------------------------------------------------------------------------
 
 export interface ChatStreamCallbacks {
-  /** Called for each text token (build typewriter effect). */
   onToken?: (text: string) => void;
-  /** Called when the backend emits a DSL component. */
   onComponent?: (component: ComponentSpec) => void;
-  /** Called for status/progress messages (e.g., fallback notices). */
   onStatus?: (message: string) => void;
-  /** Called when the backend replaces streamed text with cleaned version (strips raw JSON). */
   onTextReplace?: (text: string) => void;
-  /** Called when a tool invocation starts (e.g., query_collection). */
   onStepStart?: (event: SseStepStartEvent) => void;
-  /** Called when a tool invocation completes. */
   onStepComplete?: (event: SseStepCompleteEvent) => void;
-  /** Called once the stream completes successfully. */
   onDone?: (event: SseDoneEvent) => void;
-  /** Called on any error (network, backend, parse). */
   onError?: (message: string) => void;
 }
 
 // ---------------------------------------------------------------------------
-// Service
+// Service — SSE streaming only
 // ---------------------------------------------------------------------------
 
 @Injectable({ providedIn: 'root' })
@@ -124,23 +127,6 @@ export class ChatService {
 
   /**
    * Stream a chat response from the backend via SSE over POST.
-   *
-   * Returns a `Promise` that resolves when the stream finishes (or errors).
-   * The caller interacts via callbacks for real-time updates.
-   *
-   * @example
-   * ```ts
-   * await chatService.streamMessage(
-   *   { session_id: 'abc', message: 'Show me electronics' },
-   *   {
-   *     onToken: (text) => accumulatedText += text,
-   *     onComponent: (comp) => components.push(comp),
-   *     onDone: (evt) => console.log('Done', evt.turn_id),
-   *     onError: (msg) => console.error(msg),
-   *   },
-   *   authToken,
-   * );
-   * ```
    */
   async streamMessage(
     request: ChatRequest,
@@ -158,19 +144,24 @@ export class ChatService {
         'Content-Type': 'application/json',
         'Accept': 'text/event-stream',
       };
-      // Tenant resolution: backend middleware uses this header (local dev)
-      // or subdomain extraction (production)
       if (this.env.tenantId) {
         headers['X-Tenant-ID'] = this.env.tenantId;
       }
-      if (authToken) {
-        headers['Authorization'] = `Bearer ${authToken}`;
+      // Auto-retrieve token from localStorage if not explicitly passed
+      const token = authToken ?? localStorage.getItem('synaptiq_auth_token');
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
       }
 
       const response = await fetch(`${this.baseUrl}/message`, {
         method: 'POST',
         headers,
-        body: JSON.stringify(request),
+        body: JSON.stringify({
+          sessionId: request.sessionId,
+          message: request.message,
+          ...(request.modelOverride ? { modelOverride: request.modelOverride } : {}),
+          ...(request.background ? { background: true } : {}),
+        }),
         signal: controller.signal,
       });
 
@@ -197,9 +188,7 @@ export class ChatService {
 
         buffer += decoder.decode(value, { stream: true });
 
-        // SSE events are separated by double newlines
         const parts = buffer.split('\n\n');
-        // Keep the last (potentially incomplete) chunk in the buffer
         buffer = parts.pop() ?? '';
 
         for (const part of parts) {
@@ -219,7 +208,6 @@ export class ChatService {
       }
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === 'AbortError') {
-        // Stream was intentionally cancelled — not an error
         return;
       }
       const message = err instanceof Error ? err.message : 'Network error';
@@ -233,8 +221,6 @@ export class ChatService {
 
   /**
    * Abort the current in-flight stream.
-   *
-   * Safe to call even if no stream is active.
    */
   abort(): void {
     this.activeController?.abort();
@@ -243,15 +229,6 @@ export class ChatService {
 
   // ── Private helpers ───────────────────────────────────────────────────
 
-  /**
-   * Parse a raw SSE text block into a typed event.
-   *
-   * SSE format:
-   * ```
-   * event: token
-   * data: {"text": "Hello"}
-   * ```
-   */
   private parseSseBlock(block: string): ChatSseEvent | null {
     const lines = block.split('\n');
     let eventType = '';
@@ -284,22 +261,22 @@ export class ChatService {
         case 'step_start':
           return {
             type: 'step_start',
-            step_id: data.step_id ?? '',
+            stepId: data.step_id ?? data.stepId ?? '',
             action: data.action ?? '',
             description: data.description ?? '',
           };
         case 'step_complete':
           return {
             type: 'step_complete',
-            step_id: data.step_id ?? '',
+            stepId: data.step_id ?? data.stepId ?? '',
             action: data.action ?? '',
           };
         case 'done':
           return {
             type: 'done',
-            turn_id: data.turn_id ?? '',
-            tokens_input: data.tokens_input ?? 0,
-            tokens_output: data.tokens_output ?? 0,
+            turnId: data.turn_id ?? data.turnId ?? '',
+            tokensInput: data.tokens_input ?? data.tokensInput ?? 0,
+            tokensOutput: data.tokens_output ?? data.tokensOutput ?? 0,
           };
         case 'error':
           return { type: 'error', message: data.message ?? 'Unknown error' };
@@ -311,9 +288,6 @@ export class ChatService {
     }
   }
 
-  /**
-   * Dispatch a parsed SSE event to the appropriate callback.
-   */
   private dispatchEvent(event: ChatSseEvent, callbacks: ChatStreamCallbacks): void {
     switch (event.type) {
       case 'token':

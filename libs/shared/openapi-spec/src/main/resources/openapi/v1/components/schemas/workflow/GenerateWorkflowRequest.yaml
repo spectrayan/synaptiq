@@ -1,0 +1,7 @@
+type: object
+description: Request body for AI-powered workflow generation
+required: [prompt]
+properties:
+  prompt:
+    type: string
+    description: Natural language description of the desired workflow

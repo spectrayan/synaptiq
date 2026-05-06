@@ -1,0 +1,14 @@
+type: object
+properties:
+  uid:
+    type: string
+  email:
+    type: string
+    format: email
+  role:
+    $ref: '../common/enums/AdminRole.yaml'
+  invitedAt:
+    type: string
+    format: date-time
+  accepted:
+    type: boolean

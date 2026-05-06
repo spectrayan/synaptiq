@@ -1,0 +1,9 @@
+type: object
+required: [sessionId, message]
+properties:
+  sessionId:
+    type: string
+  message:
+    type: string
+  modelOverride:
+    type: string

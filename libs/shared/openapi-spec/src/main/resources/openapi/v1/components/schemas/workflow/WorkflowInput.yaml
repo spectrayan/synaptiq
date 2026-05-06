@@ -1,0 +1,23 @@
+type: object
+description: Input field definition for parameterized workflow execution
+required: [name, type]
+properties:
+  name:
+    type: string
+  label:
+    type: string
+  type:
+    type: string
+    description: Input type (text, number, select, boolean, etc.)
+  description:
+    type: string
+  required:
+    type: boolean
+    default: false
+  defaultValue:
+    description: Default value for the input field
+  options:
+    type: array
+    items:
+      type: string
+    description: Available options for select-type inputs

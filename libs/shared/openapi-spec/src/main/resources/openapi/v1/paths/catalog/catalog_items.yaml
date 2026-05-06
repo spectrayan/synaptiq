@@ -1,0 +1,46 @@
+﻿post:
+  operationId: createCatalogItem
+  summary: Create a catalog item
+  tags: [Catalog]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/catalog/CreateCatalogItemRequest.yaml'
+  responses:
+    '201':
+      description: Item created
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/catalog/CatalogItemResponse.yaml'
+get:
+  operationId: listCatalogItems
+  summary: List catalog items
+  tags: [Catalog]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: statusFilter
+      in: query
+      schema:
+        type: string
+    - name: skip
+      in: query
+      schema:
+        type: integer
+        default: 0
+    - name: limit
+      in: query
+      schema:
+        type: integer
+        default: 20
+  responses:
+    '200':
+      description: Item list
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/catalog/CatalogItemListResponse.yaml'

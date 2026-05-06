@@ -1,0 +1,13 @@
+﻿get:
+  operationId: getActiveSchema
+  summary: Get active catalog schema
+  tags: [Catalog]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  responses:
+    '200':
+      description: Active schema
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/catalog/CatalogSchemaResponse.yaml'

@@ -43,7 +43,7 @@ export class WorkflowRunDialogComponent {
       const validators = input.required !== false ? [Validators.required] : [];
       // If type is number, we might want to add a pattern or custom validation,
       // but Angular handles type="number" binding. Let's just use the default.
-      group[input.name] = [input.default || '', validators];
+      group[input.name] = [input.defaultValue || '', validators];
     }
     this.form = this.fb.group(group);
   }

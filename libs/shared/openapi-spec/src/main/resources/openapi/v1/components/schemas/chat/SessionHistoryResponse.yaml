@@ -1,0 +1,10 @@
+type: object
+properties:
+  sessionId:
+    type: string
+  turns:
+    type: array
+    items:
+      $ref: 'ConversationTurnResponse.yaml'
+  total:
+    type: integer

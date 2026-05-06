@@ -1,0 +1,10 @@
+type: object
+description: Execution policy for workflow runs
+properties:
+  deterministic:
+    type: boolean
+    default: false
+  seed:
+    type: integer
+  resources:
+    $ref: 'ResourceLimitsSpec.yaml'

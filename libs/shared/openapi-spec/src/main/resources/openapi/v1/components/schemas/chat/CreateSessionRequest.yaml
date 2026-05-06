@@ -1,0 +1,7 @@
+type: object
+properties:
+  sessionId:
+    type: string
+  metadata:
+    type: object
+    additionalProperties: true

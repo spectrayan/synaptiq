@@ -1,0 +1,23 @@
+﻿post:
+  operationId: importCatalogItems
+  summary: Import catalog items from CSV
+  tags: [Catalog]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          properties:
+            file:
+              type: string
+              format: binary
+  responses:
+    '200':
+      description: Import results
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/catalog/CatalogImportResponse.yaml'

@@ -1,0 +1,23 @@
+﻿get:
+  operationId: getBilling
+  summary: Get billing info
+  tags: [Analytics]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: from
+      in: query
+      schema:
+        type: string
+        format: date
+    - name: to
+      in: query
+      schema:
+        type: string
+        format: date
+  responses:
+    '200':
+      description: Billing data
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/analytics/BillingResponse.yaml'

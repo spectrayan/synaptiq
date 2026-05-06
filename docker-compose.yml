@@ -100,6 +100,28 @@ services:
       - ./apps/backend/api/src:/app/src
     restart: unless-stopped
 
+  # ── Spring Boot Backend ────────────────────────────────────────────────
+  spring-apis:
+    build:
+      context: ./apps/backend/spring-apis
+      dockerfile: Dockerfile
+    container_name: synaptiq-spring-apis
+    ports:
+      - "8081:8080"
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/synaptiq
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - FIREBASE_AUTH_EMULATOR_HOST=firebase-auth:9099
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      firebase-auth:
+        condition: service_healthy
+    restart: unless-stopped
+
   # ── One-shot seed runner ───────────────────────────────────────────────
   # Populates demo tenant + catalog data on first start
   seed:

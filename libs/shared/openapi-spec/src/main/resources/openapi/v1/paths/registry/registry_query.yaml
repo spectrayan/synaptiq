@@ -1,0 +1,29 @@
+﻿post:
+  operationId: queryCollection
+  summary: Query a collection
+  tags: [SchemaRegistry]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: collection
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: limit
+      in: query
+      schema:
+        type: integer
+        default: 20
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: true
+  responses:
+    '200':
+      description: Query results
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/registry/QueryResultResponse.yaml'

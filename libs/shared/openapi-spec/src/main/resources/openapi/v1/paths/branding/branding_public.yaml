@@ -1,0 +1,23 @@
+get:
+  summary: Get Public Branding
+  description: Retrieve public branding information for a tenant without authentication.
+  operationId: getPublicBranding
+  tags:
+    - Branding
+  parameters:
+    - name: X-Tenant-ID
+      in: header
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Public branding configuration.
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/branding/BrandingResponse.yaml'
+    '404':
+      description: Tenant not found
+    '500':
+      description: Internal server error

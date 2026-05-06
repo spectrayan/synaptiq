@@ -1,0 +1,18 @@
+﻿get:
+  operationId: listWorkflows
+  summary: List workflows
+  tags: [Workflows]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: limit
+      in: query
+      schema:
+        type: integer
+        default: 20
+  responses:
+    '200':
+      description: Workflow list
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/workflow/WorkflowListResponse.yaml'

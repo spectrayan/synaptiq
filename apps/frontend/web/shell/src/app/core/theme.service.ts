@@ -222,9 +222,19 @@ export class ThemeService {
    */
   private _applyCSSVars(b: BrandingConfig): void {
     if (!this.isBrowser) return;
+    const hexToRgb = (hex: string) => {
+      if (!hex) return '179, 157, 219';
+      const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+      hex = hex.replace(shorthandRegex, (m, r, g, b) => r + r + g + g + b + b);
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '179, 157, 219';
+    };
+
     const root = document.documentElement;
     root.style.setProperty('--sq-brand-primary', b.primary_color);
+    root.style.setProperty('--sq-brand-primary-rgb', hexToRgb(b.primary_color));
     root.style.setProperty('--sq-brand-secondary', b.secondary_color);
+    root.style.setProperty('--sq-brand-secondary-rgb', hexToRgb(b.secondary_color));
     root.style.setProperty('--sq-brand-heading-font', `'${b.heading_font}', system-ui, sans-serif`);
     root.style.setProperty('--sq-brand-body-font', `'${b.body_font}', system-ui, sans-serif`);
     root.style.setProperty('--sq-brand-ui-font', `'${b.ui_font}', system-ui, sans-serif`);

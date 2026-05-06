@@ -1,0 +1,17 @@
+﻿post:
+  operationId: createTenant
+  summary: Create a new tenant
+  tags: [Tenants]
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/tenant/CreateTenantRequest.yaml'
+  responses:
+    '201':
+      description: Tenant created
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/tenant/TenantResponse.yaml'

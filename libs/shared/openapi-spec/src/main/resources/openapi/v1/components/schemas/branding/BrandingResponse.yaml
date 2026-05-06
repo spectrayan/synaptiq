@@ -1,0 +1,20 @@
+type: object
+properties:
+  logoUrl:
+    type: string
+  primaryColor:
+    type: string
+  secondaryColor:
+    type: string
+  backgroundStyle:
+    type: string
+  headingFont:
+    type: string
+  bodyFont:
+    type: string
+  faviconUrl:
+    type: string
+  pageTitle:
+    type: string
+  showPlatformBranding:
+    type: boolean

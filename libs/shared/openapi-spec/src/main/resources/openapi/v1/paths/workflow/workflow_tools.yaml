@@ -1,0 +1,11 @@
+get:
+  operationId: listWorkflowTools
+  summary: List available workflow tools
+  tags: [Workflows]
+  responses:
+    '200':
+      description: Tool catalog
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/workflow/ToolCatalogResponse.yaml'

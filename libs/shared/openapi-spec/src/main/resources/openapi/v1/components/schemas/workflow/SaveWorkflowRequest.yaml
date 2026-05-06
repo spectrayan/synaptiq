@@ -1,0 +1,5 @@
+type: object
+required: [spec]
+properties:
+  spec:
+    $ref: 'FlowSettingsSpec.yaml'

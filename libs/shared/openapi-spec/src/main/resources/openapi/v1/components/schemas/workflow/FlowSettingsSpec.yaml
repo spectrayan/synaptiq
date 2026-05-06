@@ -1,0 +1,33 @@
+type: object
+description: Flow specification for a workflow
+properties:
+  id:
+    type: string
+  name:
+    type: string
+  description:
+    type: string
+  entrypoint:
+    type: string
+  agents:
+    type: array
+    items:
+      $ref: 'AgentSpec.yaml'
+  edges:
+    type: array
+    items:
+      $ref: 'EdgeSpec.yaml'
+  mcpServers:
+    type: array
+    items:
+      $ref: 'MCPServerSpec.yaml'
+  policy:
+    $ref: 'ExecutionPolicySpec.yaml'
+  flowType:
+    type: string
+    enum: [STATIC, DYNAMIC, HYBRID]
+  inputs:
+    type: array
+    items:
+      $ref: 'WorkflowInput.yaml'
+    description: Input fields for parameterized workflow execution

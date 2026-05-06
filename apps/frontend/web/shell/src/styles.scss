@@ -7,6 +7,9 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
+@import 'tokens';
+@import 'material-overrides';
+
 // Define custom color palettes using M3 hue values
 $synaptiq-primary: mat.define-theme((
   color: (
@@ -134,6 +137,14 @@ $synaptiq-light: mat.define-theme((
 // ─────────────────────────────────────────────────────────────────────────────
 html {
   @include mat.theme($synaptiq-primary);
+  
+
+  // Dynamic Tenant Branding Overrides (T10.4)
+  // These map the tenant branding from the DB directly to Material 3 variables
+  --mat-sys-primary: var(--sq-brand-primary, #b39ddb);
+  --mat-sys-secondary: var(--sq-brand-secondary, #4dd0e1);
+  --mat-sys-tertiary: var(--sq-brand-secondary, #4dd0e1);
+  --mat-sys-primary-container: rgba(var(--sq-brand-primary-rgb, 179, 157, 219), 0.2);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -148,7 +159,7 @@ html {
 html, body {
   height: 100%;
   min-height: 100dvh;
-  background-color: var(--sq-surface-dim);
+  background-color: var(--mat-sys-surface-container-low);
   color: var(--sq-on-surface);
   font-family: 'Inter', system-ui, sans-serif;
   font-size: 16px;
@@ -172,7 +183,7 @@ html, body {
 // Utility classes
 // ─────────────────────────────────────────────────────────────────────────────
 .sq-card {
-  background: var(--sq-surface-container);
+  background: var(--mat-sys-surface-container);
   border: 1px solid var(--sq-outline-variant);
   border-radius: var(--sq-radius-lg);
   box-shadow: var(--sq-shadow-sm);
@@ -226,6 +237,7 @@ html, body {
 html[data-theme="light"] {
   // Apply light Material theme to all Angular Material components
   @include mat.theme($synaptiq-light);
+  
 
   // Surface colours
   --sq-surface-dim:        #f5f5f8;
@@ -302,4 +314,8 @@ html[data-theme="light"] .sq-glass {
     border: none !important;
   }
 }
+
+
+
+
 

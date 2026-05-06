@@ -3,7 +3,7 @@
 }
 
 .item-card {
-  --mdc-outlined-card-container-color: var(--syn-surface, rgba(30, 30, 46, 0.7));
+  --mdc-outlined-card-container-color: var(--mat-sys-surface, rgba(30, 30, 46, 0.7));
   --mdc-outlined-card-outline-color: transparent;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -18,7 +18,7 @@
     &:hover {
       transform: translateY(-4px) scale(1.02);
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.1);
-      --mdc-outlined-card-container-color: var(--syn-surface-hover, rgba(255, 255, 255, 0.06));
+      --mdc-outlined-card-container-color: var(--mat-sys-surface-container-high, rgba(255, 255, 255, 0.06));
     }
     
     &:active {
@@ -45,8 +45,8 @@
 }
 
 .variant-featured {
-  border-color: var(--syn-primary, rgba(129, 140, 248, 0.5));
-  box-shadow: 0 0 20px rgba(129, 140, 248, 0.15);
+  border-color: var(--mat-sys-primary, rgba(129, 140, 248, 0.5));
+  box-shadow: 0 0 20px rgba(var(--sq-brand-primary-rgb, 129, 140, 248), 0.15);
 
   img[mat-card-image] {
     height: 220px;
@@ -55,18 +55,18 @@
 
 mat-card-title {
   font-size: 1rem;
-  color: var(--syn-text, #e2e8f0);
+  color: var(--mat-sys-on-surface, #e2e8f0);
 }
 
 .card-price {
-  color: var(--syn-primary, #818cf8) !important;
+  color: var(--mat-sys-primary, #818cf8) !important;
   font-weight: 600;
   font-size: 1.1rem;
 }
 
 .card-desc {
   font-size: 0.82rem;
-  color: var(--syn-text-muted, #94a3b8);
+  color: var(--mat-sys-on-surface-variant, #94a3b8);
   line-height: 1.5;
   margin: 4px 0 8px;
 }
@@ -76,8 +76,8 @@ mat-card-title {
 }
 
 .badge-chip {
-  --mdc-chip-elevated-container-color: var(--syn-primary-alpha, rgba(129, 140, 248, 0.1));
-  --mdc-chip-label-text-color: var(--syn-primary, #818cf8);
+  --mdc-chip-elevated-container-color: var(--mat-sys-primary-container, rgba(129, 140, 248, 0.1));
+  --mdc-chip-label-text-color: var(--mat-sys-on-primary-container, #818cf8);
   font-size: 0.72rem;
   transition: background-color 0.2s;
 }
@@ -95,3 +95,6 @@ mat-card-title {
     }
   }
 }
+
+
+

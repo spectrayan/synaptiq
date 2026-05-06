@@ -1,0 +1,8 @@
+type: object
+required: [email, role]
+properties:
+  email:
+    type: string
+    format: email
+  role:
+    $ref: '../common/enums/AdminRole.yaml'

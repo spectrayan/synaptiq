@@ -1,8 +1,8 @@
 .comparison-table-wrap {
   overflow-x: auto;
   border-radius: 12px;
-  background: var(--syn-surface, #1e1e2e);
-  border: 1px solid var(--syn-border, rgba(255, 255, 255, 0.08));
+  background: var(--mat-sys-surface);
+  border: 1px solid var(--mat-sys-outline);
 }
 
 .comparison-table {
@@ -14,26 +14,29 @@ th,
 td {
   padding: 10px 16px;
   text-align: left;
-  border-bottom: 1px solid var(--syn-border, rgba(255, 255, 255, 0.06));
+  border-bottom: 1px solid var(--mat-sys-outline);
   font-size: 0.85rem;
 }
 
 th {
   font-weight: 600;
-  color: var(--syn-text, #e2e8f0);
-  background: var(--syn-surface-elevated, #252538);
+  color: var(--mat-sys-on-surface);
+  background: var(--mat-sys-surface-container-high);
 }
 
 td {
-  color: var(--syn-text-muted, #94a3b8);
+  color: var(--mat-sys-on-surface-variant);
 }
 
 .field-label {
   font-weight: 500;
-  color: var(--syn-text, #e2e8f0);
+  color: var(--mat-sys-on-surface);
   text-transform: capitalize;
 }
 
 .field-col {
   min-width: 140px;
 }
+
+
+

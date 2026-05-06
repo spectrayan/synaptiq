@@ -1,0 +1,22 @@
+﻿get:
+  operationId: checkContrast
+  summary: Check color contrast ratio
+  tags: [Branding]
+  parameters:
+    - name: fg
+      in: query
+      required: true
+      schema:
+        type: string
+    - name: bg
+      in: query
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Contrast result
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/branding/ContrastCheckResponse.yaml'

@@ -1,0 +1,18 @@
+type: object
+description: Actions configuration for the application
+properties:
+  actions:
+    type: array
+    items:
+      type: object
+      properties:
+        actionId:
+          type: string
+        enabled:
+          type: boolean
+        label:
+          type: string
+  enquiryWebhookUrl:
+    type: string
+  enquiryEmail:
+    type: string

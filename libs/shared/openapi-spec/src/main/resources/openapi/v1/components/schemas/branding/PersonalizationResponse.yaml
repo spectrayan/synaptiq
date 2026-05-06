@@ -1,0 +1,8 @@
+type: object
+properties:
+  allowThemeSwitch:
+    type: boolean
+  allowFontSwitch:
+    type: boolean
+  allowBubbleStyle:
+    type: boolean

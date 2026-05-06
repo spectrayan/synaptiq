@@ -27,6 +27,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     return next(req);
   }
 
+  // Skip auth header for login/signup/refresh — these are public endpoints
+  const authPaths = ['/auth/login', '/auth/signup', '/auth/refresh'];
+  if (authPaths.some(p => req.url.includes(p))) {
+    return next(req);
+  }
+
   const auth = inject(AuthService);
   const tenantId = auth.tenantId() || env.tenantId;
 

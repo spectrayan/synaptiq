@@ -1,0 +1,11 @@
+﻿get:
+  operationId: getCurrentUser
+  summary: Get current user profile
+  tags: [Auth]
+  responses:
+    '200':
+      description: Current user
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/auth/UserResponse.yaml'

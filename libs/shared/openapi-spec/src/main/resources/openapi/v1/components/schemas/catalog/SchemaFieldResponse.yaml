@@ -1,0 +1,22 @@
+type: object
+properties:
+  fieldId:
+    type: string
+  label:
+    type: string
+  type:
+    type: string
+  required:
+    type: boolean
+  searchable:
+    type: boolean
+  displayable:
+    type: boolean
+  filterable:
+    type: boolean
+  displayOrder:
+    type: integer
+  enumValues:
+    type: array
+    items:
+      type: string

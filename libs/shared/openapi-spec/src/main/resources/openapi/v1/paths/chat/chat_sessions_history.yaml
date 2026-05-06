@@ -1,0 +1,18 @@
+﻿get:
+  operationId: getSessionHistory
+  summary: Get session conversation history
+  tags: [Chat]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: sessionId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Conversation history
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/chat/SessionHistoryResponse.yaml'

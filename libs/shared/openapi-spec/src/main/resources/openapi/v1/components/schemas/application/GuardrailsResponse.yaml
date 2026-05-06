@@ -1,0 +1,9 @@
+type: object
+description: AI guardrails configuration
+properties:
+  outOfScopeMessage:
+    type: string
+  recommendationMode:
+    type: boolean
+  language:
+    type: string

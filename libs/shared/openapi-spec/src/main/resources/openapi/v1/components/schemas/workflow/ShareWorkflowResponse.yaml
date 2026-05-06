@@ -1,0 +1,6 @@
+type: object
+properties:
+  shareToken:
+    type: string
+  success:
+    type: boolean

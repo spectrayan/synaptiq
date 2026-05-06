@@ -1,0 +1,41 @@
+type: object
+description: Component enable/disable toggles for the application
+properties:
+  itemCard:
+    type: boolean
+  itemGrid:
+    type: boolean
+  itemDetail:
+    type: boolean
+  comparisonTable:
+    type: boolean
+  filterSummary:
+    type: boolean
+  resultCount:
+    type: boolean
+  emptyState:
+    type: boolean
+  actionConfirm:
+    type: boolean
+  infoBanner:
+    type: boolean
+  formInput:
+    type: boolean
+  dataTable:
+    type: boolean
+  kpiCard:
+    type: boolean
+  chart:
+    type: boolean
+  statGrid:
+    type: boolean
+  kanban:
+    type: boolean
+  timeline:
+    type: boolean
+  metricTable:
+    type: boolean
+  progressTracker:
+    type: boolean
+  launchpad:
+    type: boolean

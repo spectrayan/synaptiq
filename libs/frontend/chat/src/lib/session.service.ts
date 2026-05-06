@@ -1,56 +1,31 @@
 /**
- * SessionService — HTTP client for session management (T6.12).
+ * SessionService — facade for session management (T6.12).
  *
- * Provides CRUD operations for chat sessions via the backend API:
- *   - List sessions (sidebar history)
- *   - Create session
- *   - Load session history
- *   - Update session title
- *   - Delete session
+ * Delegates to the generated ChatService from @synaptiq/client for standard
+ * CRUD operations, and provides custom methods for features not yet in the
+ * OpenAPI spec (e.g., pinned views persistence).
  */
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { ENVIRONMENT } from '@synaptiq/utils';
+import {
+  ChatService as ChatApiService,
+  type SessionListResponse,
+  type SessionResponse,
+  type SessionHistoryResponse,
+  type SessionSummaryResponse,
+  type ConversationTurnResponse,
+} from '@synaptiq/client';
 
-// ---------------------------------------------------------------------------
-// Response types
-// ---------------------------------------------------------------------------
+// Re-export SDK types for backward compatibility
+export type { SessionListResponse, SessionResponse, SessionHistoryResponse };
 
-export interface SessionListItem {
-  readonly session_id: string;
-  readonly title: string;
-  readonly turn_count: number;
-  readonly created_at: string;
-  readonly updated_at: string;
-}
+/** Alias for sidebar list items (mapped from SDK's SessionSummaryResponse). */
+export type SessionListItem = SessionSummaryResponse;
 
-export interface SessionListResponse {
-  readonly sessions: SessionListItem[];
-  readonly total: number;
-}
-
-export interface SessionHistoryTurn {
-  readonly role: 'user' | 'assistant';
-  readonly content: string;
-  readonly components?: unknown[];
-  readonly timestamp?: string;
-}
-
-export interface SessionHistoryResponse {
-  readonly session_id: string;
-  readonly turns: SessionHistoryTurn[];
-  readonly total: number;
-}
-
-export interface SessionResponse {
-  readonly session_id: string;
-  readonly tenant_id: string;
-  readonly created_at: string;
-  readonly turn_count: number;
-  readonly title: string;
-  readonly updated_at?: string;
-}
+/** Alias for history turns (mapped from SDK's ConversationTurnResponse). */
+export type SessionHistoryTurn = ConversationTurnResponse;
 
 // ---------------------------------------------------------------------------
 // Service
@@ -58,18 +33,16 @@ export interface SessionResponse {
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {
+  private readonly api = inject(ChatApiService);
   private readonly http = inject(HttpClient);
   private readonly env = inject(ENVIRONMENT);
-  private readonly baseUrl = `${this.env.apiBaseUrl}/api/v1/chat`;
 
   /**
    * List all sessions for the current tenant, ordered by most recent.
    */
   async listSessions(limit = 20): Promise<SessionListResponse> {
     return firstValueFrom(
-      this.http.get<SessionListResponse>(`${this.baseUrl}/sessions`, {
-        params: { limit: limit.toString() },
-      }),
+      this.api.listSessions({ limit }),
     );
   }
 
@@ -78,21 +51,16 @@ export class SessionService {
    */
   async createSession(sessionId: string): Promise<SessionResponse> {
     return firstValueFrom(
-      this.http.post<SessionResponse>(`${this.baseUrl}/sessions`, {
-        session_id: sessionId,
-      }),
+      this.api.createSession({ createSessionRequest: { sessionId } }),
     );
   }
 
   /**
    * Load conversation history for a session.
    */
-  async getHistory(sessionId: string, limit = 50): Promise<SessionHistoryResponse> {
+  async getHistory(sessionId: string, _limit = 50): Promise<SessionHistoryResponse> {
     return firstValueFrom(
-      this.http.get<SessionHistoryResponse>(
-        `${this.baseUrl}/sessions/${sessionId}/history`,
-        { params: { limit: limit.toString() } },
-      ),
+      this.api.getSessionHistory({ sessionId }),
     );
   }
 
@@ -101,10 +69,7 @@ export class SessionService {
    */
   async updateTitle(sessionId: string, title: string): Promise<SessionResponse> {
     return firstValueFrom(
-      this.http.patch<SessionResponse>(
-        `${this.baseUrl}/sessions/${sessionId}`,
-        { title },
-      ),
+      this.api.updateSession({ sessionId, updateSessionRequest: { title } }),
     );
   }
 
@@ -112,19 +77,21 @@ export class SessionService {
    * Delete/reset a session.
    */
   async deleteSession(sessionId: string): Promise<void> {
-    return firstValueFrom(
-      this.http.delete<void>(`${this.baseUrl}/sessions/${sessionId}`),
+    await firstValueFrom(
+      this.api.deleteSession({ sessionId }),
     );
   }
 
   // ── P0-B: Pinned views persistence ────────────────────────────────────
+  // These endpoints are not yet in the OpenAPI spec — uses direct HTTP.
 
   /**
    * Save pinned views to the backend session document.
    */
   async savePinnedViews(sessionId: string, views: unknown[]): Promise<void> {
+    const baseUrl = `${this.env.apiBaseUrl}/api/v1/chat`;
     await firstValueFrom(
-      this.http.put(`${this.baseUrl}/sessions/${sessionId}/pinned_views`, { views }),
+      this.http.put(`${baseUrl}/sessions/${sessionId}/pinned_views`, { views }),
     );
   }
 
@@ -132,8 +99,9 @@ export class SessionService {
    * Load pinned views from the backend session document.
    */
   async loadPinnedViews(sessionId: string): Promise<unknown[]> {
+    const baseUrl = `${this.env.apiBaseUrl}/api/v1/chat`;
     const res = await firstValueFrom(
-      this.http.get<{ views: unknown[] }>(`${this.baseUrl}/sessions/${sessionId}/pinned_views`),
+      this.http.get<{ views: unknown[] }>(`${baseUrl}/sessions/${sessionId}/pinned_views`),
     );
     return res.views ?? [];
   }

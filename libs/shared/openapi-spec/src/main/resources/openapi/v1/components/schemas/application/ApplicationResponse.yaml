@@ -1,0 +1,45 @@
+type: object
+description: Full application configuration response
+properties:
+  appId:
+    type: string
+  slug:
+    type: string
+  name:
+    type: string
+  description:
+    type: string
+  icon:
+    type: string
+  isDefault:
+    type: boolean
+  status:
+    $ref: '../common/enums/ApplicationStatus.yaml'
+  aiPersona:
+    $ref: '../config/AiPersonaResponse.yaml'
+  guardrails:
+    $ref: '../config/GuardrailsResponse.yaml'
+  branding:
+    $ref: '../branding/BrandingResponse.yaml'
+  components:
+    $ref: '../config/ComponentsToggleResponse.yaml'
+  actions:
+    $ref: '../config/ActionsConfigResponse.yaml'
+  personalization:
+    $ref: '../branding/PersonalizationResponse.yaml'
+  themes:
+    type: array
+    items:
+      $ref: '../branding/ThemePresetResponse.yaml'
+  dataSourceIds:
+    type: array
+    items:
+      type: string
+  llmOverride:
+    $ref: '../config/LlmProviderResponse.yaml'
+  createdAt:
+    type: string
+    format: date-time
+  updatedAt:
+    type: string
+    format: date-time

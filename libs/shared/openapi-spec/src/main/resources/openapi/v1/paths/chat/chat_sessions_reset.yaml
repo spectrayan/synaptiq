@@ -1,0 +1,14 @@
+﻿post:
+  operationId: resetSession
+  summary: Reset session (clear turns)
+  tags: [Chat]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: sessionId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '204':
+      description: Session reset

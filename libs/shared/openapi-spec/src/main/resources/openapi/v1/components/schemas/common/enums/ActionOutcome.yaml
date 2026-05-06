@@ -1,0 +1,7 @@
+type: string
+description: Outcome of an action execution
+enum:
+  - SUCCESS
+  - FAILURE
+  - PENDING
+  - SKIPPED

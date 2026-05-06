@@ -1,0 +1,22 @@
+type: object
+description: Partial update for tenant org-level fields. All fields are optional.
+properties:
+  name:
+    type: string
+    minLength: 1
+    maxLength: 200
+  slug:
+    type: string
+    minLength: 1
+    maxLength: 100
+  catalogLabel:
+    type: string
+    maxLength: 100
+  accessMode:
+    $ref: '../common/enums/AccessMode.yaml'
+  planTier:
+    $ref: '../common/enums/PlanTier.yaml'
+  dbConnectionUri:
+    type: string
+    description: MongoDB connection URI for tenant-isolated database
+    maxLength: 500

@@ -1,0 +1,10 @@
+type: object
+properties:
+  actions:
+    type: array
+    items:
+      $ref: 'ActionEntryResponse.yaml'
+  enquiryWebhookUrl:
+    type: string
+  enquiryEmail:
+    type: string

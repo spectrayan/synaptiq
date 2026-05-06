@@ -1,0 +1,18 @@
+﻿get:
+  operationId: listSavedItems
+  summary: List saved items
+  tags: [Actions]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: sessionId
+      in: query
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Saved items list
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/action/SavedItemListResponse.yaml'

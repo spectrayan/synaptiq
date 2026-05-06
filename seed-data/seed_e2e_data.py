@@ -289,8 +289,31 @@ async def seed():
     )
     logger.info("  ✅ Tenant config upserted")
 
+    # ─── 9. Applications ────────────────────────────────────────────────
+    applications = db["applications"]
+    await applications.update_one(
+        {"appId": "demo"},
+        {"$set": {
+            "tenantId": TENANT_ID,
+            "appId": "demo",
+            "slug": "demo",
+            "name": "Demo App",
+            "isDefault": True,
+            "status": "ACTIVE",
+            "branding": {
+                "logoUrl": "/assets/logo.svg",
+                "faviconUrl": "/assets/favicon.ico",
+                "primaryColor": "#3B82F6",
+                "fontFamily": "Inter, sans-serif"
+            },
+            "createdAt": now,
+        }},
+        upsert=True,
+    )
+    logger.info("  ✅ Application config upserted")
+
     logger.info("🎉 Seed complete! %d collections populated for tenant '%s'",
-                7, TENANT_ID)
+                8, TENANT_ID)
 
     client.close()
 

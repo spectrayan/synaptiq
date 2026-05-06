@@ -74,7 +74,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--sq-surface-elevated);
+  background: var(--mat-sys-surface-container-high);
   border: 1px solid var(--sq-outline-variant);
   display: grid;
   place-items: center;
@@ -93,7 +93,7 @@
 
 .bubble {
   padding: var(--sq-space-3) var(--sq-space-4);
-  background: var(--sq-surface-container);
+  background: var(--mat-sys-surface-container);
   border: 1px solid var(--sq-outline-variant);
   border-radius: var(--sq-radius-lg);
   box-shadow: var(--sq-shadow-sm);
@@ -170,7 +170,7 @@
 }
 
 .typing-bubble {
-  background: var(--sq-surface-container) !important;
+  background: var(--mat-sys-surface-container) !important;
   border: 1px solid var(--sq-outline-variant);
   padding: var(--sq-space-3) var(--sq-space-4) !important;
   min-width: 64px;
@@ -192,7 +192,7 @@
 
 // Streaming bubble
 .streaming-bubble {
-  background: var(--sq-surface-container) !important;
+  background: var(--mat-sys-surface-container) !important;
   border: 1px solid var(--sq-outline-variant);
   animation: typing-fade-in 0.3s ease-out;
   padding: var(--sq-space-3) var(--sq-space-4) !important;
@@ -268,7 +268,7 @@
   gap: var(--sq-space-3);
   margin-top: var(--sq-space-3);
   padding: var(--sq-space-5);
-  background: var(--sq-surface-elevated);
+  background: var(--mat-sys-surface-container-high);
   border-radius: var(--sq-radius-lg, 16px);
   border: 1px solid rgba(179, 157, 219, 0.15);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -300,7 +300,7 @@
 .auth-input {
   width: 100%;
   padding: var(--sq-space-3) var(--sq-space-4);
-  background: var(--sq-surface-elevated);
+  background: var(--mat-sys-surface-container-high);
   border: 1px solid var(--sq-outline);
   border-radius: var(--sq-radius-md);
   color: var(--sq-on-surface);
@@ -382,7 +382,7 @@
   gap: var(--sq-space-2);
   width: 100%;
   padding: var(--sq-space-3) var(--sq-space-4);
-  background: var(--sq-surface-elevated);
+  background: var(--mat-sys-surface-container-high);
   border: 1px solid var(--sq-outline);
   border-radius: var(--sq-radius-md);
   font-size: 14px;
@@ -393,7 +393,7 @@
   transition: background var(--sq-transition-fast), border-color var(--sq-transition-fast);
 
   &:hover:not([disabled]) {
-    background: var(--sq-surface-overlay);
+    background: var(--mat-sys-surface-container-highest);
     border-color: var(--sq-primary);
   }
 
@@ -427,7 +427,7 @@
 // ─── Light Theme ────────────────────────────────────────────────────────────
 :host-context([data-theme="light"]) {
   .bubble {
-    background: var(--sq-surface);
+    background: var(--mat-sys-surface);
     border-color: var(--sq-outline-variant);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   }
@@ -438,19 +438,19 @@
   }
 
   .auth-inline-card {
-    background: var(--sq-surface);
+    background: var(--mat-sys-surface);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
     border-color: var(--sq-outline-variant);
   }
 
   .auth-input {
-    background: var(--sq-surface-dim);
+    background: var(--mat-sys-surface-container-low);
     border-color: var(--sq-outline);
     color: var(--sq-on-surface);
   }
 
   .auth-google-btn {
-    background: var(--sq-surface);
+    background: var(--mat-sys-surface);
     border-color: var(--sq-outline);
     color: var(--sq-on-surface);
   }
@@ -465,7 +465,9 @@
   }
 
   .avatar {
-    background: var(--sq-surface);
+    background: var(--mat-sys-surface);
     border-color: var(--sq-outline-variant);
   }
 }
+
+

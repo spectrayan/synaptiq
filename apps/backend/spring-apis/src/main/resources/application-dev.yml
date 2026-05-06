@@ -1,0 +1,31 @@
+# ═══════════════════════════════════════════════════════════════════
+# Dev profile — local development overrides
+# Activated via: mvn spring-boot:run -Dspring-boot.run.profiles=dev
+# ═══════════════════════════════════════════════════════════════════
+
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.ai.model.vertexai.autoconfigure.embedding.VertexAiEmbeddingConnectionAutoConfiguration
+      - org.springframework.ai.model.vertexai.autoconfigure.embedding.VertexAiTextEmbeddingAutoConfiguration
+      - org.springframework.ai.model.vertexai.autoconfigure.embedding.VertexAiMultiModalEmbeddingAutoConfiguration
+      - org.springframework.ai.model.vertexai.autoconfigure.gemini.VertexAiGeminiChatAutoConfiguration
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/synaptiq
+    redis:
+      url: redis://localhost:6379
+
+synaptiq:
+  debug: true
+  environment: development
+  cors-origins: http://localhost:4200,http://localhost:4201
+  auth:
+    provider: builtin
+    jwt-secret: synaptiq-local-dev-secret-change-in-prod
+    firebase-auth-emulator-host: localhost:9099
+
+logging:
+  level:
+    com.synaptiq: DEBUG
+    org.springframework.data.mongodb.core.ReactiveMongoTemplate: DEBUG

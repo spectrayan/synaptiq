@@ -1,0 +1,7 @@
+type: string
+enum:
+  - SYNAPTIQ_NATIVE
+  - MCP_SERVER
+  - REST_API
+  - DATABASE_DIRECT
+  - FILE_UPLOAD

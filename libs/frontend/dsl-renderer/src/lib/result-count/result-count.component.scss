@@ -8,16 +8,19 @@
 .count-number {
   font-weight: 700;
   font-size: 1.2rem;
-  color: var(--syn-primary, #818cf8);
+  color: var(--mat-sys-primary);
 }
 
 .count-label {
   font-size: 0.85rem;
-  color: var(--syn-text-muted, #94a3b8);
+  color: var(--mat-sys-on-surface-variant);
 }
 
 .count-query {
   font-size: 0.85rem;
-  color: var(--syn-text, #e2e8f0);
+  color: var(--mat-sys-on-surface);
   font-style: italic;
 }
+
+
+

@@ -1,0 +1,15 @@
+type: object
+description: Request body for AI-powered prompt regeneration
+required: [nodeId]
+properties:
+  nodeId:
+    type: string
+  nodeLabel:
+    type: string
+  nodeDescription:
+    type: string
+  currentPrompt:
+    type: string
+  instruction:
+    type: string
+    description: User instruction for how the prompt should be regenerated

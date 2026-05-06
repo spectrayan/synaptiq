@@ -1,14 +1,17 @@
 // ---------------------------------------------------------------------------
-// ChatAnalyticsService — analytics dashboard builder
+// ChatAnalyticsOrchestrator — analytics dashboard builder (facade pattern)
 // ---------------------------------------------------------------------------
+// Uses the generated @synaptiq/client SDK services.
+// The auth interceptor handles Authorization + X-Tenant-ID headers.
 
 import { Injectable, inject } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { type ComponentSpec } from '@synaptiq/constants';
 import {
-  AnalyticsService,
-  type AnalyticsSummary,
-  type TokenUsageSummary,
-} from '@synaptiq/chat';
+  AnalyticsService as AnalyticsApiService,
+  type AnalyticsSummaryResponse,
+  type TokenUsageResponse,
+} from '@synaptiq/client';
 import { ChatMessage } from '../chat-message.model';
 import {
   CMD_ANALYTICS_DASHBOARD,
@@ -19,8 +22,8 @@ import {
 
 /** Bundled analytics data attached to a chat message. */
 export interface AnalyticsData {
-  summary: AnalyticsSummary;
-  tokens: TokenUsageSummary;
+  summary: AnalyticsSummaryResponse;
+  tokens: TokenUsageResponse;
 }
 
 export interface AnalyticsDashboardCallbacks {
@@ -30,18 +33,18 @@ export interface AnalyticsDashboardCallbacks {
 
 @Injectable({ providedIn: 'root' })
 export class ChatAnalyticsOrchestrator {
-  private readonly analyticsService = inject(AnalyticsService);
+  private readonly api = inject(AnalyticsApiService);
 
   /** Build DSL components from raw analytics data. */
-  buildDashboardComponents(summary: AnalyticsSummary, tokens: TokenUsageSummary): ComponentSpec[] {
+  buildDashboardComponents(summary: AnalyticsSummaryResponse, tokens: TokenUsageResponse): ComponentSpec[] {
     const components: ComponentSpec[] = [
       {
         type: 'info_banner' as const,
         title: '📊 Usage Overview (Last 30 Days)',
         body: [
-          `**${summary.total_conversations}** conversations · **${summary.total_messages}** messages`,
-          `**${summary.unique_users}** unique users · **${summary.avg_messages_per_session}** avg msgs/session`,
-          `**${summary.total_actions}** actions performed`,
+          `**${summary.totalConversations ?? 0}** conversations · **${summary.totalMessages ?? 0}** messages`,
+          `**${summary.uniqueUsers ?? 0}** unique users · **${summary.avgMessagesPerSession ?? 0}** avg msgs/session`,
+          `**${summary.totalActions ?? 0}** actions performed`,
         ].join('\n'),
         style: 'info' as const,
         suggestions: [
@@ -56,12 +59,12 @@ export class ChatAnalyticsOrchestrator {
           {
             item_id: 'token-usage',
             data: {
-              'Input Tokens': tokens.total_tokens_input.toLocaleString(),
-              'Output Tokens': tokens.total_tokens_output.toLocaleString(),
-              'Total Tokens': tokens.total_tokens.toLocaleString(),
-              'Est. Cost': `$${tokens.estimated_cost_usd.toFixed(4)}`,
-              'Plan Limit': tokens.plan_token_limit ? tokens.plan_token_limit.toLocaleString() : 'Unlimited',
-              'Usage': tokens.plan_token_limit ? `${tokens.usage_percent}%` : 'N/A',
+              'Input Tokens': (tokens.totalTokensInput ?? 0).toLocaleString(),
+              'Output Tokens': (tokens.totalTokensOutput ?? 0).toLocaleString(),
+              'Total Tokens': (tokens.totalTokens ?? 0).toLocaleString(),
+              'Est. Cost': `$${(tokens.estimatedCostUsd ?? 0).toFixed(4)}`,
+              'Plan Limit': tokens.planTokenLimit ? tokens.planTokenLimit.toLocaleString() : 'Unlimited',
+              'Usage': tokens.planTokenLimit ? `${tokens.usagePercent}%` : 'N/A',
             },
           },
         ],
@@ -69,19 +72,6 @@ export class ChatAnalyticsOrchestrator {
         suggestions: [],
       },
     ];
-
-    // Add action breakdown if present
-    if (Object.keys(summary.action_rates).length > 0) {
-      components.push({
-        type: 'comparison_table' as const,
-        items: Object.entries(summary.action_rates).map(([action, count]) => ({
-          item_id: action,
-          data: { Action: action, Count: count },
-        })),
-        fields: ['Action', 'Count'],
-        suggestions: [],
-      });
-    }
 
     return components;
   }
@@ -102,8 +92,8 @@ export class ChatAnalyticsOrchestrator {
 
     try {
       const [summary, tokens] = await Promise.all([
-        this.analyticsService.getSummary(),
-        this.analyticsService.getTokenUsage(),
+        firstValueFrom(this.api.getAnalyticsSummary()),
+        firstValueFrom(this.api.getTokenUsage()),
       ]);
 
       const analyticsComponents = this.buildDashboardComponents(summary, tokens);

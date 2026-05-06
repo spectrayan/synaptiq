@@ -20,7 +20,9 @@ DB_NAME = "synaptiq"
 
 
 def _hash_pw(plain: str) -> str:
-    return bcrypt.hashpw(plain.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    h = bcrypt.hashpw(plain.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    # Spring Security's BCryptPasswordEncoder uses $2a$ prefix
+    return h.replace("$2b$", "$2a$", 1)
 
 DEFAULT_USERS = [
     {
@@ -56,15 +58,15 @@ async def seed():
         now = datetime.now(timezone.utc)
         doc = {
             "email": user_def["email"],
-            "password_hash": _hash_pw(user_def["password"]),
-            "display_name": user_def["display_name"],
+            "passwordHash": _hash_pw(user_def["password"]),
+            "displayName": user_def["display_name"],
             "role": user_def["role"],
-            "tenant_id": user_def["tenant_id"],
-            "must_change_password": user_def["must_change_password"],
-            "email_verified": user_def["email_verified"],
+            "tenantId": user_def["tenant_id"],
+            "mustChangePassword": user_def["must_change_password"],
+            "emailVerified": user_def["email_verified"],
             "disabled": user_def["disabled"],
-            "created_at": now,
-            "updated_at": now,
+            "createdAt": now,
+            "updatedAt": now,
         }
         await collection.insert_one(doc)
         logger.info("  ✅ Created user '%s' (role=%s, must_change_password=%s)",

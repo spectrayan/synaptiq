@@ -1,0 +1,23 @@
+type: object
+description: Request body for executing a workflow
+required: [spec]
+properties:
+  spec:
+    $ref: 'FlowSettingsSpec.yaml'
+  inputText:
+    type: string
+    description: Primary text input for the workflow
+  dryRun:
+    type: boolean
+    default: false
+    description: If true, validate the workflow without executing
+  startNodeId:
+    type: string
+    description: Optional node ID to start execution from (for partial runs)
+  priorContext:
+    type: string
+    description: Prior conversation context for the execution
+  inputVariables:
+    type: object
+    description: Key-value map of input variables for parameterized execution
+    additionalProperties: true

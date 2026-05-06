@@ -1,0 +1,42 @@
+﻿post:
+  operationId: createSession
+  summary: Create a new session
+  tags: [Chat]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/chat/CreateSessionRequest.yaml'
+  responses:
+    '201':
+      description: Session created
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/chat/SessionResponse.yaml'
+get:
+  operationId: listSessions
+  summary: List sessions
+  tags: [Chat]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: limit
+      in: query
+      schema:
+        type: integer
+        default: 20
+    - name: offset
+      in: query
+      schema:
+        type: integer
+        default: 0
+  responses:
+    '200':
+      description: Session list
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/chat/SessionListResponse.yaml'

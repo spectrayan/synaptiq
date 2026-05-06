@@ -1,0 +1,10 @@
+name: X-App-ID
+in: header
+required: false
+description: >
+  The application identifier for multi-application isolation.
+  When omitted, the tenant's default application is used.
+schema:
+  type: string
+  minLength: 1
+  maxLength: 100

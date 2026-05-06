@@ -1,0 +1,20 @@
+get:
+  operationId: getWorkflowRunDetail
+  summary: Get detailed execution result of a specific run
+  tags: [Workflows]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: runId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Full run detail with per-node results
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/workflow/WorkflowRunDetail.yaml'
+    '404':
+      description: Run not found

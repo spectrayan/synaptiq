@@ -10,7 +10,7 @@
   font-size: 48px;
   width: 48px;
   height: 48px;
-  color: var(--syn-text-muted, #94a3b8);
+  color: var(--mat-sys-on-surface-variant);
   opacity: 0.5;
   margin-bottom: 12px;
 }
@@ -18,13 +18,13 @@
 .empty-title {
   margin: 0 0 6px;
   font-size: 1rem;
-  color: var(--syn-text, #e2e8f0);
+  color: var(--mat-sys-on-surface);
 }
 
 .empty-message {
   margin: 0 0 16px;
   font-size: 0.85rem;
-  color: var(--syn-text-muted, #94a3b8);
+  color: var(--mat-sys-on-surface-variant);
   max-width: 320px;
   line-height: 1.5;
 }
@@ -33,3 +33,6 @@
   display: flex;
   gap: 8px;
 }
+
+
+

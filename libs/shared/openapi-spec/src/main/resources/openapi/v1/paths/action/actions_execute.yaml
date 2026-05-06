@@ -1,0 +1,19 @@
+﻿post:
+  operationId: executeAction
+  summary: Execute an action
+  tags: [Actions]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/action/ExecuteActionRequest.yaml'
+  responses:
+    '200':
+      description: Action result
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/action/ActionResultResponse.yaml'

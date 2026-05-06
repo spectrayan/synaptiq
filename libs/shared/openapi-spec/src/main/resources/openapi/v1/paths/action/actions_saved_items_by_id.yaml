@@ -1,0 +1,19 @@
+﻿delete:
+  operationId: removeSavedItem
+  summary: Remove a saved item
+  tags: [Actions]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: itemId
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: sessionId
+      in: query
+      required: true
+      schema:
+        type: string
+  responses:
+    '204':
+      description: Item removed

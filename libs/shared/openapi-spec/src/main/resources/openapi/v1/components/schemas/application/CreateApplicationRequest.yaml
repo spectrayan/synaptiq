@@ -1,0 +1,39 @@
+type: object
+description: Create a new application
+required:
+  - name
+  - slug
+properties:
+  name:
+    type: string
+  slug:
+    type: string
+  description:
+    type: string
+  icon:
+    type: string
+  isDefault:
+    type: boolean
+    default: false
+  aiPersona:
+    $ref: '../config/AiPersonaResponse.yaml'
+  guardrails:
+    $ref: '../config/GuardrailsResponse.yaml'
+  branding:
+    $ref: '../branding/BrandingResponse.yaml'
+  components:
+    $ref: '../config/ComponentsToggleResponse.yaml'
+  actions:
+    $ref: '../config/ActionsConfigResponse.yaml'
+  personalization:
+    $ref: '../branding/PersonalizationResponse.yaml'
+  themes:
+    type: array
+    items:
+      $ref: '../branding/ThemePresetResponse.yaml'
+  dataSourceIds:
+    type: array
+    items:
+      type: string
+  llmOverride:
+    $ref: '../config/LlmProviderResponse.yaml'

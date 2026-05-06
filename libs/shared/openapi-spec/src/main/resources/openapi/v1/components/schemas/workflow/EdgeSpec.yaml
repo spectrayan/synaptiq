@@ -1,0 +1,14 @@
+type: object
+description: Edge connecting two agent nodes
+required: [source, target]
+properties:
+  source:
+    type: string
+  target:
+    type: string
+  condition:
+    type: string
+    enum: [ALWAYS, ON_TOOL_CALLS, NEVER]
+    default: ALWAYS
+  label:
+    type: string

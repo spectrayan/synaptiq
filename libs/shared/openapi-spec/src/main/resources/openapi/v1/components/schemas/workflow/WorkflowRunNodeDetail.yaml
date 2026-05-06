@@ -1,0 +1,21 @@
+type: object
+description: Execution details for a single node within a workflow run
+properties:
+  status:
+    $ref: 'NodeExecutionStatus.yaml'
+  durationMs:
+    type: integer
+    format: int64
+    description: Execution duration in milliseconds
+  output:
+    type: string
+    description: Node output text
+  error:
+    type: string
+    description: Error message if the node failed
+  startedAt:
+    type: string
+    format: date-time
+  completedAt:
+    type: string
+    format: date-time

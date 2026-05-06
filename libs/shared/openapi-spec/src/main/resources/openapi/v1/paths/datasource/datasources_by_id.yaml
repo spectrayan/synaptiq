@@ -1,0 +1,32 @@
+get:
+  operationId: getDataSource
+  summary: Get data source by ID
+  tags: [DataSources]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: dataSourceId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Data source details
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/datasource/DataSourceResponse.yaml'
+delete:
+  operationId: deleteDataSource
+  summary: Delete a data source
+  tags: [DataSources]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: dataSourceId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '204':
+      description: Data source deleted

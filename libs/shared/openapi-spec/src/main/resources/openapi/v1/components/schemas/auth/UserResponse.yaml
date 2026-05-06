@@ -1,0 +1,15 @@
+type: object
+properties:
+  uid:
+    type: string
+  email:
+    type: string
+    format: email
+  displayName:
+    type: string
+  role:
+    type: string
+  emailVerified:
+    type: boolean
+  tenantId:
+    type: string

@@ -1,0 +1,16 @@
+type: object
+properties:
+  totalTokensInput:
+    type: integer
+  totalTokensOutput:
+    type: integer
+  totalTokens:
+    type: integer
+  estimatedCostUsd:
+    type: number
+    format: double
+  planTokenLimit:
+    type: integer
+  usagePercent:
+    type: number
+    format: double

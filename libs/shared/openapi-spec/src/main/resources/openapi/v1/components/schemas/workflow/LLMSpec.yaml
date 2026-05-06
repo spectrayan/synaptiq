@@ -1,0 +1,20 @@
+type: object
+description: LLM configuration for an agent node
+properties:
+  provider:
+    type: string
+    enum: [VERTEXAI, OPENAI, ANTHROPIC]
+  model:
+    type: string
+  temperature:
+    type: number
+    format: double
+    default: 0.0
+  maxTokens:
+    type: integer
+  streaming:
+    type: boolean
+    default: true
+  params:
+    type: object
+    additionalProperties: true

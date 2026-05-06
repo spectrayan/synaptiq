@@ -1,0 +1,6 @@
+type: object
+properties:
+  themes:
+    type: array
+    items:
+      $ref: 'ThemePresetResponse.yaml'

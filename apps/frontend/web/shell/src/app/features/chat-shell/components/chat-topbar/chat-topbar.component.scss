@@ -40,7 +40,7 @@
   transition: all var(--sq-transition-fast);
 
   &:hover {
-    background: var(--sq-surface-overlay);
+    background: var(--mat-sys-surface-container-highest);
     border-color: var(--sq-primary);
     color: var(--sq-primary);
   }
@@ -112,3 +112,5 @@
     }
   }
 }
+
+

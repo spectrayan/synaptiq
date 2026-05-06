@@ -1,0 +1,15 @@
+type: object
+properties:
+  foreground:
+    type: string
+  background:
+    type: string
+  ratio:
+    type: number
+    format: double
+  aaNormal:
+    type: boolean
+  aaLarge:
+    type: boolean
+  aaaNormal:
+    type: boolean

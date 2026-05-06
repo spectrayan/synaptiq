@@ -1,0 +1,19 @@
+post:
+  operationId: regeneratePrompt
+  summary: Regenerate a system prompt for a workflow node using AI
+  tags: [Workflows]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/workflow/RegeneratePromptRequest.yaml'
+  responses:
+    '200':
+      description: Regenerated prompt
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/workflow/RegeneratePromptResponse.yaml'

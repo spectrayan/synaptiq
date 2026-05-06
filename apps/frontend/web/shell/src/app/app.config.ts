@@ -16,6 +16,7 @@ import { ENVIRONMENT } from '@synaptiq/utils';
 import { environment } from '../environments/environment';
 import { GlobalErrorHandler } from './core/global-error-handler';
 import { ThemeService } from './core/theme.service';
+import { provideApi } from '@synaptiq/client';
 
 /** Load tenant branding during bootstrap (T10.6) */
 function initializeBranding(): () => Promise<void> {
@@ -50,6 +51,9 @@ export const appConfig: ApplicationConfig = {
 
     // Environment config — injectable by library services
     { provide: ENVIRONMENT, useValue: environment },
+
+    // OpenAPI-generated Angular client SDK — basePath for all API calls
+    provideApi({ basePath: environment.apiBaseUrl }),
 
     // Global error boundary — prevents unhandled exceptions from crashing the app
     { provide: ErrorHandler, useClass: GlobalErrorHandler },

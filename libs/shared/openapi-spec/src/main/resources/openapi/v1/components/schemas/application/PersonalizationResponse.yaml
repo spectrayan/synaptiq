@@ -1,0 +1,9 @@
+type: object
+description: End-user personalization options
+properties:
+  allowThemeSwitch:
+    type: boolean
+  allowFontSwitch:
+    type: boolean
+  allowBubbleStyle:
+    type: boolean

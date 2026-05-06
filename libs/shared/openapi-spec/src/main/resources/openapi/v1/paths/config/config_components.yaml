@@ -1,0 +1,32 @@
+﻿get:
+  operationId: getComponentsConfig
+  summary: Get components config
+  tags: [Config]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  responses:
+    '200':
+      description: Config data
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/config/ComponentsToggleResponse.yaml'
+patch:
+  operationId: updateComponentsConfig
+  summary: Update components config
+  tags: [Config]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/config/ComponentsToggleResponse.yaml'
+  responses:
+    '200':
+      description: Config updated
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/config/ComponentsToggleResponse.yaml'

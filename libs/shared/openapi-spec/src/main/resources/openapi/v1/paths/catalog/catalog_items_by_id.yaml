@@ -1,0 +1,57 @@
+﻿get:
+  operationId: getCatalogItem
+  summary: Get a catalog item
+  tags: [Catalog]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: itemId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Item details
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/catalog/CatalogItemResponse.yaml'
+patch:
+  operationId: updateCatalogItem
+  summary: Update a catalog item
+  tags: [Catalog]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: itemId
+      in: path
+      required: true
+      schema:
+        type: string
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          additionalProperties: true
+  responses:
+    '200':
+      description: Item updated
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/catalog/CatalogItemResponse.yaml'
+delete:
+  operationId: deleteCatalogItem
+  summary: Delete a catalog item
+  tags: [Catalog]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: itemId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '204':
+      description: Item deleted

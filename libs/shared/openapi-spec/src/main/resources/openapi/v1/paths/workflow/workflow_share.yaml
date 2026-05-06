@@ -1,0 +1,18 @@
+﻿post:
+  operationId: shareWorkflow
+  summary: Share a workflow
+  tags: [Workflows]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: workflowId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Share token generated
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/workflow/ShareWorkflowResponse.yaml'

@@ -18,6 +18,7 @@ import {
   WorkflowCanvasComponent,
   type WorkflowSpec,
   type WorkflowRunSummary,
+  type ToolDefinition,
   type BrandingConfig,
 } from '@synaptiq/chat';
 import { AuthService } from '@synaptiq/auth';
@@ -266,7 +267,7 @@ export class ChatShellComponent implements OnDestroy {
   async loadSessionHistory(): Promise<void> {
     try {
       const response = await this.sessionService.listSessions();
-      this.sessionHistory.set(response.sessions);
+      this.sessionHistory.set(response.sessions ?? []);
     } catch {
       // Silently fail — sidebar shows empty list
     }
@@ -275,9 +276,9 @@ export class ChatShellComponent implements OnDestroy {
   async loadSession(session: SessionListItem): Promise<void> {
     this.chatService.abort();
     this.isLoading.set(true);
-    this.sessionId = session.session_id;
+    this.sessionId = session.sessionId ?? '';
     this.sessionPersisted = true;
-    this.activeSessionId.set(session.session_id);
+    this.activeSessionId.set(session.sessionId ?? '');
 
     // Close sidebar on mobile
     if (this.isMobile()) {
@@ -285,13 +286,13 @@ export class ChatShellComponent implements OnDestroy {
     }
 
     try {
-      const history = await this.sessionService.getHistory(session.session_id);
-      const restoredMessages: ChatMessage[] = history.turns.map((turn, i) => ({
+      const history = await this.sessionService.getHistory(session.sessionId ?? '');
+      const restoredMessages: ChatMessage[] = (history.turns ?? []).map((turn, i) => ({
         id: `restored-${i}`,
-        role: turn.role,
-        content: turn.content,
+        role: (turn.role as 'user' | 'assistant') ?? 'assistant',
+        content: turn.content ?? '',
         timestamp: turn.timestamp ? new Date(turn.timestamp) : new Date(),
-        uiComponents: (turn.components as ComponentSpec[]) ?? [],
+        uiComponents: [] as ComponentSpec[],
       }));
 
       this.messages.set(
@@ -319,9 +320,9 @@ export class ChatShellComponent implements OnDestroy {
   async deleteSession(session: SessionListItem, event: Event): Promise<void> {
     event.stopPropagation();
     try {
-      await this.sessionService.deleteSession(session.session_id);
-      this.sessionHistory.update((s) => s.filter((h) => h.session_id !== session.session_id));
-      if (this.sessionId === session.session_id) {
+      await this.sessionService.deleteSession(session.sessionId ?? '');
+      this.sessionHistory.update((s) => s.filter((h) => h.sessionId !== session.sessionId));
+      if (this.sessionId === session.sessionId) {
         this.newConversation();
       }
     } catch {
@@ -494,7 +495,7 @@ export class ChatShellComponent implements OnDestroy {
           this.workflowStatus.set(message);
         },
         onComponent: (spec) => {
-          this.currentWorkflow.set(spec);
+          this.currentWorkflow.set(spec as unknown as WorkflowSpec);
           this.mainTab.set('workflow');
           this.workflowStatus.set('');
         },
@@ -530,7 +531,6 @@ export class ChatShellComponent implements OnDestroy {
           ]);
         },
       },
-      authToken,
     );
   }
 
@@ -623,7 +623,7 @@ export class ChatShellComponent implements OnDestroy {
       const authToken = (await this.auth.getIdToken().catch(() => undefined)) ?? undefined;
       const detail = await this.workflowService.getRunDetails(runId, authToken);
       if (detail) {
-        canvas.loadHistoricalRun(detail.run_id, detail.nodes);
+        canvas.loadHistoricalRun(detail.runId, detail.nodes);
       }
     } catch (err) {
       console.error('Failed to load run detail', err);
@@ -903,7 +903,7 @@ export class ChatShellComponent implements OnDestroy {
             {
               type: 'info_banner' as const,
               title: response.success ? 'Action Complete' : 'Action Failed',
-              body: response.message,
+              body: response.message ?? '',
               style: (response.success ? 'success' : 'error') as 'success' | 'error',
               suggestions,
             },
@@ -1057,7 +1057,7 @@ export class ChatShellComponent implements OnDestroy {
     const timer = setInterval(async () => {
       try {
         await this.chatService.streamMessage(
-          { session_id: this.sessionId, message: sourcePrompt, background: true },
+          { sessionId: this.sessionId, message: sourcePrompt, background: true },
           {
             onComponent: (comp) => {
               if (comp.type === 'view' && (comp as any).view_id === viewId) {
@@ -1101,8 +1101,9 @@ export class ChatShellComponent implements OnDestroy {
       this._toolsLoaded = true;
       this.auth.getIdToken().then(token => {
         this.workflowService.getAvailableTools(token ?? undefined).then(catalog => {
-          canvas.loadToolCatalog(catalog.tools);
-          console.log(`[ChatShell] loaded ${catalog.tools.length} tools into canvas`);
+          const tools = catalog.tools ?? [];
+          canvas.loadToolCatalog(tools as ToolDefinition[]);
+          console.log(`[ChatShell] loaded ${tools.length} tools into canvas`);
         }).catch(e => console.warn('[ChatShell] failed to load tool catalog:', e));
       });
     }

@@ -1,0 +1,18 @@
+# Test profile — embedded MongoDB + test-only settings
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017
+      database: synaptiq-test
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ""
+
+synaptiq:
+  debug: true
+  environment: test
+  auth:
+    provider: builtin
+    jwt-secret: test-secret-do-not-use-in-production

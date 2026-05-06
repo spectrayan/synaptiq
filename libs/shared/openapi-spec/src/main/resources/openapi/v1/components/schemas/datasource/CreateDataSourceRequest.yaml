@@ -1,0 +1,16 @@
+type: object
+description: Create a new data source
+required:
+  - name
+  - type
+properties:
+  name:
+    type: string
+  description:
+    type: string
+  type:
+    $ref: '../common/enums/DataSourceType.yaml'
+  connection:
+    $ref: './ConnectionConfigResponse.yaml'
+  credentialRef:
+    $ref: './CredentialRefResponse.yaml'

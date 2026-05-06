@@ -1,0 +1,11 @@
+﻿post:
+  operationId: refreshToken
+  summary: Refresh access token
+  tags: [Auth]
+  responses:
+    '200':
+      description: Token refreshed
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/auth/AuthTokenResponse.yaml'

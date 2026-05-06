@@ -7,7 +7,7 @@
 .sidebar {
   display: flex;
   flex-direction: column;
-  background: var(--sq-surface-container);
+  background: var(--mat-sys-surface-container);
   border-right: 1px solid var(--sq-outline-variant);
   overflow: hidden;
   width: var(--sq-sidebar-width);
@@ -102,7 +102,7 @@
 
   &:hover {
     color: var(--sq-on-surface);
-    background: var(--sq-surface-overlay);
+    background: var(--mat-sys-surface-container-highest);
   }
 
   &.active {
@@ -172,7 +172,7 @@
   }
 
   &:hover {
-    background: var(--sq-surface-overlay);
+    background: var(--mat-sys-surface-container-highest);
     color: var(--sq-on-surface);
 
     .history-meta { opacity: 0; }
@@ -213,7 +213,7 @@
   transition: background 0.15s ease;
 
   &:hover {
-    background: var(--sq-surface-overlay);
+    background: var(--mat-sys-surface-container-highest);
 
     .pinned-item-close {
       opacity: 0.7;
@@ -221,7 +221,7 @@
   }
 
   &.active {
-    background: var(--sq-surface-overlay);
+    background: var(--mat-sys-surface-container-highest);
 
     .pinned-item-icon {
       color: var(--sq-primary);
@@ -323,7 +323,7 @@
 // ─── Light Theme ────────────────────────────────────────────────────────────
 :host-context([data-theme="light"]) {
   .sidebar {
-    background: var(--sq-surface);
+    background: var(--mat-sys-surface);
   }
 
   .history-meta {
@@ -355,3 +355,5 @@
     color: var(--sq-on-primary-cont);
   }
 }
+
+
