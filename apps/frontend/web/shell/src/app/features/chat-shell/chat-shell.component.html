@@ -27,7 +27,7 @@
   <!-- ── Main content ──────────────────────────────────────────────────── -->
   <div class="main">
 
-    <!-- Topbar -->
+    <!-- Topbar (includes tab navigation) -->
     <sq-chat-topbar
       [sidebarOpen]="sidebarOpen()"
       [isMobile]="isMobile()"
@@ -35,37 +35,15 @@
       [isAuthenticated]="auth.isAuthenticated()"
       [useBackend]="useBackend()"
       [isDark]="themeService.isDark()"
+      [activeTab]="mainTab()"
+      [workflowGenerating]="workflowGenerating()"
+      [hasActiveWorkflow]="!!currentWorkflow()"
       (toggleSidebar)="toggleSidebar()"
       (openAuth)="openAuthForm($event)"
       (toggleTheme)="themeService.toggle()"
       (openSettings)="showSettings.set(true)"
+      (tabChange)="mainTab.set($event)"
     />
-
-    <!-- Tab strip: Chat | Workflow -->
-    <nav class="main-tab-strip" aria-label="Main content tabs">
-      <button
-        class="main-tab"
-        [class.active]="mainTab() === 'chat'"
-        (click)="mainTab.set('chat')"
-      >
-        <mat-icon>chat</mat-icon>
-        <span>Chat</span>
-      </button>
-      <button
-        class="main-tab"
-        [class.active]="mainTab() === 'workflow'"
-        (click)="mainTab.set('workflow')"
-      >
-        <mat-icon>account_tree</mat-icon>
-        <span>Workflow</span>
-        @if (workflowGenerating()) {
-          <span class="tab-pulse"></span>
-        }
-        @if (currentWorkflow()) {
-          <span class="tab-dot"></span>
-        }
-      </button>
-    </nav>
 
     @if (mainTab() === 'chat') {
     <!-- Messages -->

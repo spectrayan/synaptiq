@@ -32,36 +32,9 @@
   animation: sparkle 2s ease-in-out infinite;
 }
 
-// ─── Global chip border overrides via ::ng-deep ──────────────────────────────
-
-::ng-deep mat-chip-set .mdc-evolution-chip {
-  border: none !important;
-  --mdc-chip-outline-width: 0 !important;
-  --mdc-chip-flat-outline-width: 0 !important;
-  --mdc-chip-outline-color: transparent !important;
-  --mdc-chip-flat-outline-color: transparent !important;
-
-  &,
-  .mdc-evolution-chip__cell,
-  .mdc-evolution-chip__action,
-  .mdc-evolution-chip__action--primary,
-  .mat-mdc-chip-action-label {
-    border: none !important;
-    outline: none !important;
-  }
-
-  .mat-mdc-chip-ripple {
-    border: none !important;
-  }
-}
-
-::ng-deep .suggestion-chip.mat-mdc-chip {
-  border: none !important;
-  --mdc-chip-outline-width: 0 !important;
-  --mdc-chip-outline-color: transparent !important;
-  --mdc-chip-flat-outline-color: transparent !important;
-  --mdc-chip-elevated-container-shape: 16px;
-}
+// ─── Global chip border overrides ────────────────────────────────────────────
+// Handled in the shell's global _material-overrides.scss using --mat-chip-* tokens.
+// No ::ng-deep needed — global styles apply to all components.
 
 // ─── Base chip styling ──────────────────────────────────────────────────────
 
@@ -71,6 +44,7 @@
   letter-spacing: 0.2px;
   border: none !important;
   outline: none !important;
+  overflow: hidden;
   transition:
     transform 0.22s cubic-bezier(0.2, 0, 0, 1),
     box-shadow 0.22s ease,
@@ -99,26 +73,20 @@
 
 // ─── Position-based coloring via theme tokens ───────────────────────────────
 // Each chip reads --sq-chip-N-{bg,text,glow} from the global :root / [data-theme].
-// This keeps all color values in the design system, not in the component.
+// Uses --mat-chip-* tokens for Angular Material 21 compatibility.
 
 @for $i from 1 through 8 {
   .suggestion-chip:nth-child(#{$i}) {
+    --mat-chip-elevated-container-color: var(--sq-chip-#{$i}-bg) !important;
+    --mat-chip-label-text-color: var(--sq-chip-#{$i}-text) !important;
+    --mat-chip-selected-label-text-color: var(--sq-chip-#{$i}-text) !important;
+    --mat-chip-outline-color: transparent !important;
+    // Legacy fallback
     --mdc-chip-elevated-container-color: var(--sq-chip-#{$i}-bg) !important;
     --mdc-chip-label-text-color: var(--sq-chip-#{$i}-text) !important;
-    --mdc-chip-elevated-selected-container-color: var(--sq-chip-#{$i}-bg) !important;
-    --mdc-chip-outline-color: transparent !important;
 
     &:hover {
       box-shadow: 0 4px 16px var(--sq-chip-#{$i}-glow);
-    }
-  }
-
-  // Force through Material's internal DOM layers
-  ::ng-deep .suggestion-chip:nth-child(#{$i}) .mdc-evolution-chip__cell--primary .mdc-evolution-chip__action--primary {
-    background: var(--sq-chip-#{$i}-bg) !important;
-
-    .mdc-evolution-chip__text-label {
-      color: var(--sq-chip-#{$i}-text) !important;
     }
   }
 }
@@ -126,9 +94,12 @@
 // ─── Primary variant override (uses brand primary from theme) ────────────────
 
 .variant-primary {
+  --mat-chip-elevated-container-color: var(--sq-primary, #7c3aed) !important;
+  --mat-chip-label-text-color: var(--sq-on-primary, #fff) !important;
+  --mat-chip-selected-label-text-color: var(--sq-on-primary, #fff) !important;
+  // Legacy fallback
   --mdc-chip-elevated-container-color: var(--sq-primary, #7c3aed) !important;
   --mdc-chip-label-text-color: var(--sq-on-primary, #fff) !important;
-  --mdc-chip-elevated-selected-container-color: var(--sq-primary, #7c3aed) !important;
 
   &:hover {
     box-shadow: 0 4px 18px rgba(124, 58, 237, 0.45) !important;

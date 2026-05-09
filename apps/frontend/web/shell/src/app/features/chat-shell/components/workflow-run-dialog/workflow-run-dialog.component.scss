@@ -1,6 +1,6 @@
 ::ng-deep .synaptiq-form-field {
   .mdc-text-field--outlined {
-    --mdc-outlined-text-field-container-shape: 8px;
+    --mdc-outlined-text-field-container-shape: var(--sq-radius-sm);
   }
 }
 
@@ -13,21 +13,19 @@
     background: transparent;
   }
   &::-webkit-scrollbar-thumb {
-    background-color: rgba(156, 163, 175, 0.5);
-    border-radius: 20px;
+    background-color: var(--sq-outline);
+    border-radius: var(--sq-radius-full);
   }
 }
 
 .file-upload-wrapper {
-  transition: all 0.2s ease-in-out;
-  
+  transition: all var(--sq-transition-fast);
+
   &:hover {
-    border-color: var(--mdc-theme-primary, #3b82f6);
+    border-color: var(--sq-primary);
   }
-  
+
   &.border-red-500 {
-    border-color: #ef4444;
+    border-color: var(--sq-danger);
   }
 }
-
-

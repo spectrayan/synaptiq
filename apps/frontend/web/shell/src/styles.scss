@@ -1,16 +1,18 @@
 @use '@angular/material' as mat;
+@use 'tokens';
+@use 'colors';
+@use 'material-overrides';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Synaptiq M3 Theme
-// Deep violet primary × electric cyan accent — modern, enterprise-grade
+// Synaptiq Global Styles
+// Deep violet primary × warm tertiary — modern, AI-native, enterprise-grade
 // ─────────────────────────────────────────────────────────────────────────────
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
-@import 'tokens';
-@import 'material-overrides';
-
-// Define custom color palettes using M3 hue values
+// ─────────────────────────────────────────────────────────────────────────────
+// M3 Theme Definitions (base theme for mat.theme())
+// ─────────────────────────────────────────────────────────────────────────────
 $synaptiq-primary: mat.define-theme((
   color: (
     theme-type: dark,
@@ -48,103 +50,16 @@ $synaptiq-light: mat.define-theme((
 ));
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CSS Design Tokens (exposed as custom properties for tenant theming)
-// ─────────────────────────────────────────────────────────────────────────────
-:root {
-  // Surface colours
-  --sq-surface-dim:        #0d0d14;
-  --sq-surface:            #13131f;
-  --sq-surface-container:  #1a1a28;
-  --sq-surface-elevated:   #21212f;
-  --sq-surface-overlay:    rgba(255 255 255 / 0.05);
-
-  // Primary brand
-  --sq-primary:            #b39ddb;
-  --sq-primary-container:  #4527a0;
-  --sq-on-primary:         #12005e;
-  --sq-on-primary-cont:    #ede7f6;
-
-  // Accent
-  --sq-tertiary:           #4dd0e1;
-  --sq-tertiary-container: #00838f;
-
-  // Semantic
-  --sq-error:              #f28b82;
-  --sq-success:            #81c995;
-  --sq-warning:            #fdd663;
-
-  // Text
-  --sq-on-surface:         #e8e8f4;
-  --sq-on-surface-variant: #9e9eb8;
-  --sq-outline:            #3d3d55;
-  --sq-outline-variant:    #2a2a3f;
-
-  // DSL renderer tokens (used by lib components)
-  --syn-text:              #e2e8f0;
-  --syn-text-muted:        #94a3b8;
-  --syn-bg:                #13131f;
-  --syn-border:            rgba(255 255 255 / 0.08);
-
-  // Spacing scale
-  --sq-space-1:  4px;
-  --sq-space-2:  8px;
-  --sq-space-3:  12px;
-  --sq-space-4:  16px;
-  --sq-space-5:  20px;
-  --sq-space-6:  24px;
-  --sq-space-8:  32px;
-  --sq-space-10: 40px;
-  --sq-space-12: 48px;
-  --sq-space-16: 64px;
-
-  // Border radii
-  --sq-radius-xs: 4px;
-  --sq-radius-sm: 8px;
-  --sq-radius-md: 12px;
-  --sq-radius-lg: 16px;
-  --sq-radius-xl: 24px;
-  --sq-radius-full: 9999px;
-
-  // Elevation shadows
-  --sq-shadow-sm: 0 1px 3px rgba(0 0 0 / 0.3), 0 1px 2px rgba(0 0 0 / 0.2);
-  --sq-shadow-md: 0 4px 12px rgba(0 0 0 / 0.4), 0 2px 4px rgba(0 0 0 / 0.3);
-  --sq-shadow-lg: 0 8px 32px rgba(0 0 0 / 0.5), 0 4px 8px rgba(0 0 0 / 0.4);
-
-  // Transitions
-  --sq-transition-fast:   150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --sq-transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
-  --sq-transition-slow:   400ms cubic-bezier(0.4, 0, 0.2, 1);
-
-  // Chat layout
-  --sq-chat-max-width:  760px;
-  --sq-sidebar-width:   280px;
-  --sq-topbar-height:   64px;
-  --sq-input-height:    56px;
-
-  // Chip color palette — position-based auto-coloring for suggestion pills
-  --sq-chip-1-bg: #2d1f5e;  --sq-chip-1-text: #c4b5fd;  --sq-chip-1-glow: rgba(167, 139, 250, 0.35);  // violet
-  --sq-chip-2-bg: #4a1942;  --sq-chip-2-text: #f9a8d4;  --sq-chip-2-glow: rgba(244, 114, 182, 0.35);  // pink
-  --sq-chip-3-bg: #0c3547;  --sq-chip-3-text: #67e8f9;  --sq-chip-3-glow: rgba(34, 211, 238, 0.35);   // cyan
-  --sq-chip-4-bg: #064e3b;  --sq-chip-4-text: #6ee7b7;  --sq-chip-4-glow: rgba(52, 211, 153, 0.35);   // emerald
-  --sq-chip-5-bg: #451a03;  --sq-chip-5-text: #fcd34d;  --sq-chip-5-glow: rgba(251, 191, 36, 0.35);   // amber
-  --sq-chip-6-bg: #1e3a5f;  --sq-chip-6-text: #93c5fd;  --sq-chip-6-glow: rgba(96, 165, 250, 0.35);   // blue
-  --sq-chip-7-bg: #3b1323;  --sq-chip-7-text: #fda4af;  --sq-chip-7-glow: rgba(251, 113, 133, 0.35);  // rose
-  --sq-chip-8-bg: #312e81;  --sq-chip-8-text: #a5b4fc;  --sq-chip-8-glow: rgba(129, 140, 248, 0.35);  // indigo
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Apply M3 theme to Angular Material
+// Apply M3 theme to Angular Material components
 // ─────────────────────────────────────────────────────────────────────────────
 html {
   @include mat.theme($synaptiq-primary);
-  
 
   // Dynamic Tenant Branding Overrides (T10.4)
-  // These map the tenant branding from the DB directly to Material 3 variables
-  --mat-sys-primary: var(--sq-brand-primary, #b39ddb);
-  --mat-sys-secondary: var(--sq-brand-secondary, #4dd0e1);
-  --mat-sys-tertiary: var(--sq-brand-secondary, #4dd0e1);
-  --mat-sys-primary-container: rgba(var(--sq-brand-primary-rgb, 179, 157, 219), 0.2);
+  // ThemeService._applyCSSVars() injects --sq-brand-* from tenant DB.
+  // When present, these override the M3 primary/secondary/tertiary.
+  // NOTE: Do NOT use self-referential fallbacks (var(--x, var(--x)))
+  // — the override is injected dynamically at runtime.
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -161,9 +76,9 @@ html, body {
   min-height: 100dvh;
   background-color: var(--mat-sys-surface-container-low);
   color: var(--sq-on-surface);
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: var(--sq-font-sans);
   font-size: 16px;
-  line-height: 1.5;
+  line-height: var(--sq-leading-normal);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -190,14 +105,14 @@ html, body {
 }
 
 .sq-glass {
-  background: rgba(255 255 255 / 0.04);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255 255 255 / 0.08);
+  background: var(--sq-glass-bg);
+  backdrop-filter: blur(var(--sq-glass-blur));
+  -webkit-backdrop-filter: blur(var(--sq-glass-blur));
+  border: 1px solid var(--sq-glass-border);
 }
 
 .sq-gradient-text {
-  background: linear-gradient(135deg, var(--sq-primary) 0%, var(--sq-tertiary) 100%);
+  background: var(--sq-gradient-brand);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -233,89 +148,15 @@ html, body {
 // ─────────────────────────────────────────────────────────────────────────────
 // Light Theme Override
 // Activated via [data-theme="light"] on <html>
+// _colors.scss handles the specific hex overrides via mat.theme-overrides().
+// This block provides the structural light M3 theme (typography, density, states).
 // ─────────────────────────────────────────────────────────────────────────────
 html[data-theme="light"] {
-  // Apply light Material theme to all Angular Material components
   @include mat.theme($synaptiq-light);
-  
-
-  // Surface colours
-  --sq-surface-dim:        #f5f5f8;
-  --sq-surface:            #ffffff;
-  --sq-surface-container:  #f0f0f5;
-  --sq-surface-elevated:   #e8e8f0;
-  --sq-surface-overlay:    rgba(0 0 0 / 0.04);
-
-  // Primary brand (darkened for contrast on light bg)
-  --sq-primary:            #7c4dff;
-  --sq-primary-container:  #ede7f6;
-  --sq-on-primary:         #ffffff;
-  --sq-on-primary-cont:    #311b92;
-
-  // Accent
-  --sq-tertiary:           #00838f;
-  --sq-tertiary-container: #e0f7fa;
-
-  // Semantic
-  --sq-error:              #d32f2f;
-  --sq-success:            #2e7d32;
-  --sq-warning:            #f57f17;
-
-  // Text
-  --sq-on-surface:         #1a1a2e;
-  --sq-on-surface-variant: #5c5c7a;
-  --sq-outline:            #d0d0e0;
-  --sq-outline-variant:    #e0e0eb;
-
-  // DSL renderer tokens (light-mode overrides)
-  --syn-text:              #1e293b;
-  --syn-text-muted:        #475569;
-  --syn-bg:                #ffffff;
-  --syn-border:            rgba(0 0 0 / 0.1);
-
-  // Elevation shadows (lighter)
-  --sq-shadow-sm: 0 1px 3px rgba(0 0 0 / 0.08), 0 1px 2px rgba(0 0 0 / 0.04);
-  --sq-shadow-md: 0 4px 12px rgba(0 0 0 / 0.1), 0 2px 4px rgba(0 0 0 / 0.06);
-  --sq-shadow-lg: 0 8px 32px rgba(0 0 0 / 0.12), 0 4px 8px rgba(0 0 0 / 0.08);
-
-  // Chip color palette — light-mode overrides (pastel bg, dark text)
-  --sq-chip-1-bg: #ede9fe;  --sq-chip-1-text: #5b21b6;  --sq-chip-1-glow: rgba(124, 58, 237, 0.2);
-  --sq-chip-2-bg: #fce7f3;  --sq-chip-2-text: #be185d;  --sq-chip-2-glow: rgba(236, 72, 153, 0.2);
-  --sq-chip-3-bg: #e0f2fe;  --sq-chip-3-text: #0369a1;  --sq-chip-3-glow: rgba(14, 165, 233, 0.2);
-  --sq-chip-4-bg: #d1fae5;  --sq-chip-4-text: #047857;  --sq-chip-4-glow: rgba(16, 185, 129, 0.2);
-  --sq-chip-5-bg: #fef3c7;  --sq-chip-5-text: #b45309;  --sq-chip-5-glow: rgba(245, 158, 11, 0.2);
-  --sq-chip-6-bg: #dbeafe;  --sq-chip-6-text: #1d4ed8;  --sq-chip-6-glow: rgba(59, 130, 246, 0.2);
-  --sq-chip-7-bg: #ffe4e6;  --sq-chip-7-text: #be123c;  --sq-chip-7-glow: rgba(244, 63, 94, 0.2);
-  --sq-chip-8-bg: #e0e7ff;  --sq-chip-8-text: #3730a3;  --sq-chip-8-glow: rgba(99, 102, 241, 0.2);
 }
 
 // Override glass effect in light mode
 html[data-theme="light"] .sq-glass {
-  background: rgba(255 255 255 / 0.7);
-  border-color: rgba(0 0 0 / 0.08);
+  background: var(--sq-glass-bg);
+  border-color: var(--sq-glass-border);
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Global Material Chip Overrides — suggestion chips should be borderless pills
-// ─────────────────────────────────────────────────────────────────────────────
-.suggestion-chip.mat-mdc-chip {
-  border: none !important;
-  --mdc-chip-outline-width: 0 !important;
-  --mdc-chip-outline-color: transparent !important;
-  --mdc-chip-flat-outline-color: transparent !important;
-  --mdc-chip-elevated-container-shape: 16px;
-
-  .mdc-evolution-chip__action--primary {
-    border: none !important;
-    outline: none !important;
-  }
-
-  .mat-mdc-chip-ripple {
-    border: none !important;
-  }
-}
-
-
-
-
-

@@ -18,8 +18,14 @@ export class ChatTopbarComponent {
   readonly useBackend = input(true);
   readonly isDark = input(false);
 
+  // Tab state
+  readonly activeTab = input<'chat' | 'workflow'>('chat');
+  readonly workflowGenerating = input(false);
+  readonly hasActiveWorkflow = input(false);
+
   readonly toggleSidebar = output<void>();
   readonly openAuth = output<'signin' | 'signup'>();
   readonly toggleTheme = output<void>();
   readonly openSettings = output<void>();
+  readonly tabChange = output<'chat' | 'workflow'>();
 }

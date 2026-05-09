@@ -63,79 +63,14 @@
 // ─── Main area ──────────────────────────────────────────────────────────────
 .main {
   display: grid;
-  grid-template-rows: auto auto 1fr auto;
+  grid-template-rows: auto 1fr auto;
   overflow: hidden;
   background: var(--mat-sys-surface-container-low);
   position: relative;
 }
 
-// ─── Main Tab Strip (Chat | Workflow) ───────────────────────────────────────
-.main-tab-strip {
-  display: flex;
-  gap: 2px;
-  padding: 0 var(--sq-space-4);
-  background: var(--mat-sys-surface-container);
-  border-bottom: 1px solid var(--sq-outline-variant);
-  z-index: 9;
-}
 
-.main-tab {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 16px;
-  border: none;
-  background: transparent;
-  color: var(--sq-on-surface-variant);
-  font-size: 13px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  position: relative;
-  transition: all var(--sq-transition-fast);
-  border-bottom: 2px solid transparent;
 
-  mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-  }
-
-  &:hover:not(:disabled) {
-    color: var(--sq-on-surface);
-    background: var(--mat-sys-surface-container-highest);
-  }
-
-  &.active {
-    color: var(--sq-primary);
-    border-bottom-color: var(--sq-primary);
-  }
-
-  &:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-}
-
-.tab-pulse {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--sq-primary);
-  animation: tab-pulse-anim 1.2s ease-in-out infinite;
-}
-
-@keyframes tab-pulse-anim {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.7); }
-}
-
-.tab-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #22c55e;
-}
 
 // ─── Workflow Area ──────────────────────────────────────────────────────────
 .workflow-area {

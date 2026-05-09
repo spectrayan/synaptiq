@@ -2,7 +2,7 @@
   margin-top: var(--sq-space-3);
   padding: var(--sq-space-5);
   border-radius: var(--sq-radius-xl);
-  background: var(--glass-bg);
+  background: var(--sq-glass-bg);
   backdrop-filter: blur(16px);
   display: flex;
   flex-direction: column;
@@ -25,7 +25,7 @@
     font-family: inherit;
     font-size: 0.875rem;
     color: var(--sq-on-surface);
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--sq-surface-overlay);
     border: none;
     border-radius: var(--sq-radius-md);
     padding: var(--sq-space-2) var(--sq-space-3);
@@ -33,7 +33,7 @@
     transition: background var(--sq-transition-fast), box-shadow var(--sq-transition-fast);
 
     &:focus {
-      background: rgba(255, 255, 255, 0.1);
+      background: var(--mat-sys-surface-container-high);
       box-shadow: 0 0 0 2px var(--sq-primary);
     }
 
@@ -124,7 +124,7 @@
   padding: var(--sq-space-2) 0;
 
   & + .config-action-row {
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid var(--sq-glass-border);
   }
 }
 
@@ -142,7 +142,7 @@
   font-family: inherit;
   font-size: 0.875rem;
   color: var(--sq-on-surface);
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--sq-surface-overlay);
   border: none;
   border-radius: var(--sq-radius-md);
   padding: var(--sq-space-1) var(--sq-space-2);
@@ -150,7 +150,7 @@
   transition: background var(--sq-transition-fast), box-shadow var(--sq-transition-fast);
 
   &:focus {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--mat-sys-surface-container-high);
     box-shadow: 0 0 0 2px var(--sq-primary);
   }
 }
@@ -165,7 +165,7 @@
     width: 40px;
     height: 40px;
     padding: 2px;
-    border: 2px solid rgba(255, 255, 255, 0.12);
+    border: 2px solid var(--sq-glass-border);
     border-radius: var(--sq-radius-md);
     cursor: pointer;
     background: transparent;
@@ -197,13 +197,13 @@
   mat-icon { font-size: 18px; width: 18px; height: 18px; }
 
   &.pass {
-    background: rgba(76, 175, 80, 0.15);
-    color: #66bb6a;
+    background: var(--sq-success-soft);
+    color: var(--sq-success);
   }
 
   &.fail {
-    background: rgba(244, 67, 54, 0.15);
-    color: #ef5350;
+    background: var(--sq-danger-soft);
+    color: var(--sq-danger);
   }
 }
 
@@ -218,8 +218,8 @@
   height: 48px;
   border-radius: var(--sq-radius-md);
   object-fit: contain;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--sq-surface-overlay);
+  border: 1px solid var(--sq-glass-border);
 }
 
 .config-btn {
@@ -253,8 +253,8 @@
 .config-theme-card {
   padding: var(--sq-space-3);
   border-radius: var(--sq-radius-lg);
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--sq-surface-overlay);
+  border: 1px solid var(--sq-glass-border);
   transition: border-color var(--sq-transition-fast);
 
   &:hover { border-color: var(--sq-primary); }
@@ -345,13 +345,11 @@
   }
 
   .config-theme-card {
-    background: rgba(0, 0, 0, 0.02);
-    border-color: rgba(0, 0, 0, 0.08);
+    background: var(--sq-surface-overlay);
+    border-color: var(--sq-glass-border);
   }
 
   .config-swatch {
-    border-color: rgba(0, 0, 0, 0.15);
+    border-color: var(--sq-glass-border);
   }
 }
-
-

@@ -4,7 +4,37 @@
       <mat-icon>menu</mat-icon>
     </button>
   }
-  <div class="topbar-title">{{ isAdminMode() ? 'Admin Console' : 'AI Assistant' }}</div>
+
+  <!-- Tab navigation (replaces "AI Assistant" title) -->
+  <nav class="topbar-tabs" aria-label="Main content tabs">
+    <button
+      class="topbar-tab"
+      [class.active]="activeTab() === 'chat'"
+      (click)="tabChange.emit('chat')"
+    >
+      <mat-icon>chat</mat-icon>
+      <span>Chat</span>
+    </button>
+    <button
+      class="topbar-tab"
+      [class.active]="activeTab() === 'workflow'"
+      (click)="tabChange.emit('workflow')"
+    >
+      <mat-icon>account_tree</mat-icon>
+      <span>Workflow</span>
+      @if (workflowGenerating()) {
+        <span class="tab-pulse"></span>
+      }
+      @if (hasActiveWorkflow()) {
+        <span class="tab-dot"></span>
+      }
+    </button>
+  </nav>
+
+  <!-- Spacer -->
+  <div class="topbar-spacer"></div>
+
+  <!-- Right-side actions -->
   <div class="topbar-actions">
     @if (isAdminMode()) {
       <span class="mode-badge admin">⚙ Admin</span>

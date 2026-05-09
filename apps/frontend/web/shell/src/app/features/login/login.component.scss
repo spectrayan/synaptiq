@@ -3,48 +3,48 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 1.5rem;
-  background: var(--sq-bg-primary, #0a0a0f);
+  padding: var(--sq-space-6);
+  background: var(--mat-sys-surface);
   background-image:
-    radial-gradient(ellipse at 20% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.06) 0%, transparent 50%);
+    radial-gradient(ellipse at 20% 50%, rgba(103, 80, 164, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(126, 82, 96, 0.06) 0%, transparent 50%);
 }
 
 .login-card {
   width: 100%;
   max-width: 420px;
-  padding: 2.5rem;
-  border-radius: 1.25rem;
-  background: var(--glass-bg);
-  border: 1px solid var(--sq-border, rgba(255, 255, 255, 0.08));
+  padding: var(--sq-space-10);
+  border-radius: var(--sq-radius-xl);
+  background: var(--sq-glass-bg);
+  border: 1px solid var(--sq-glass-border);
   backdrop-filter: blur(20px);
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.03),
-    0 24px 48px rgba(0, 0, 0, 0.4);
+    var(--sq-shadow-2xl);
 }
 
 // ─── Header ───────────────────────────────────────────────────
 .login-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: var(--sq-space-8);
 
   .logo-mark {
     display: inline-flex;
-    margin-bottom: 0.75rem;
+    margin-bottom: var(--sq-space-3);
   }
 
   .brand-name {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--sq-text-primary, #f0f0f5);
+    font-size: var(--sq-text-4xl);
+    font-weight: var(--sq-weight-bold);
+    color: var(--sq-on-surface);
     margin: 0;
-    letter-spacing: -0.02em;
+    letter-spacing: var(--sq-tracking-tight);
   }
 
   .brand-tagline {
-    font-size: 0.875rem;
-    color: var(--sq-text-secondary, rgba(255, 255, 255, 0.5));
-    margin: 0.25rem 0 0;
+    font-size: var(--sq-text-base);
+    color: var(--sq-on-surface-variant);
+    margin: var(--sq-space-1) 0 0;
   }
 }
 
@@ -52,20 +52,20 @@
 .error-banner {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  margin-bottom: 1.25rem;
-  border-radius: 0.75rem;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  color: #fca5a5;
-  font-size: 0.8125rem;
+  gap: var(--sq-space-2);
+  padding: var(--sq-space-3) var(--sq-space-4);
+  margin-bottom: var(--sq-space-5);
+  border-radius: var(--sq-radius-md);
+  background: var(--sq-danger-soft);
+  border: 1px solid rgba(248, 113, 113, 0.2);
+  color: var(--sq-danger);
+  font-size: var(--sq-text-md);
 
   mat-icon:first-child {
     font-size: 18px;
     width: 18px;
     height: 18px;
-    color: #ef4444;
+    color: var(--sq-danger);
   }
 
   span {
@@ -83,32 +83,32 @@
 .mode-toggle {
   display: flex;
   gap: 0;
-  margin-bottom: 1.5rem;
-  border-radius: 0.625rem;
-  background: rgba(255, 255, 255, 0.04);
+  margin-bottom: var(--sq-space-6);
+  border-radius: var(--sq-radius-md);
+  background: var(--sq-surface-overlay);
   padding: 3px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--sq-glass-border);
 
   button {
     flex: 1;
-    padding: 0.5rem 1rem;
+    padding: var(--sq-space-2) var(--sq-space-4);
     border: none;
-    border-radius: 0.5rem;
+    border-radius: var(--sq-radius-sm);
     background: transparent;
-    color: var(--sq-text-secondary, rgba(255, 255, 255, 0.5));
-    font-size: 0.875rem;
-    font-weight: 500;
+    color: var(--sq-on-surface-variant);
+    font-size: var(--sq-text-base);
+    font-weight: var(--sq-weight-medium);
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all var(--sq-transition-fast);
 
     &.active {
-      background: var(--sq-primary, #6366f1);
-      color: white;
-      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+      background: var(--sq-primary);
+      color: var(--sq-on-primary);
+      box-shadow: var(--sq-shadow-md);
     }
 
     &:hover:not(.active) {
-      color: var(--sq-text-primary, #f0f0f5);
+      color: var(--sq-on-surface);
     }
   }
 }
@@ -117,7 +117,7 @@
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--sq-space-1);
 }
 
 .full-width {
@@ -125,18 +125,18 @@
 }
 
 .submit-btn {
-  margin-top: 0.5rem;
+  margin-top: var(--sq-space-2);
   height: 48px;
-  border-radius: 0.75rem !important;
-  font-size: 0.9375rem;
-  font-weight: 600;
+  border-radius: var(--sq-radius-md) !important;
+  font-size: var(--sq-text-md);
+  font-weight: var(--sq-weight-semibold);
   letter-spacing: 0.01em;
-  background: var(--sq-primary, #6366f1) !important;
-  transition: all 0.2s ease;
+  background: var(--sq-primary) !important;
+  transition: all var(--sq-transition-fast);
 
   &:hover:not(:disabled) {
-    background: var(--sq-primary-hover, #5558e6) !important;
-    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
+    filter: brightness(1.1);
+    box-shadow: var(--sq-shadow-lg);
   }
 
   &:disabled {
@@ -146,8 +146,8 @@
 
 // ─── Divider ──────────────────────────────────────────────────
 mat-divider {
-  margin: 1.5rem 0;
-  border-color: rgba(255, 255, 255, 0.08) !important;
+  margin: var(--sq-space-6) 0;
+  border-color: var(--sq-outline-variant) !important;
 }
 
 .social-section {
@@ -155,26 +155,26 @@ mat-divider {
 }
 
 .divider-text {
-  font-size: 0.8125rem;
-  color: var(--sq-text-secondary, rgba(255, 255, 255, 0.4));
-  margin-bottom: 1rem;
+  font-size: var(--sq-text-md);
+  color: var(--sq-on-surface-variant);
+  margin-bottom: var(--sq-space-4);
 }
 
 .google-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
+  gap: var(--sq-space-3);
   height: 44px;
-  border-radius: 0.75rem !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
-  color: var(--sq-text-primary, #f0f0f5) !important;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  border-radius: var(--sq-radius-md) !important;
+  border-color: var(--sq-outline-variant) !important;
+  color: var(--sq-on-surface) !important;
+  font-weight: var(--sq-weight-medium);
+  transition: all var(--sq-transition-fast);
 
   &:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.06) !important;
-    border-color: rgba(255, 255, 255, 0.2) !important;
+    background: var(--sq-surface-overlay) !important;
+    border-color: var(--sq-primary) !important;
   }
 
   .google-icon {
@@ -185,30 +185,31 @@ mat-divider {
 // ─── Footer ───────────────────────────────────────────────────
 .footer-text {
   text-align: center;
-  font-size: 0.75rem;
-  color: var(--sq-text-tertiary, rgba(255, 255, 255, 0.3));
-  margin-top: 1.5rem;
-  line-height: 1.5;
+  font-size: var(--sq-text-sm);
+  color: var(--sq-on-surface-variant);
+  opacity: 0.7;
+  margin-top: var(--sq-space-6);
+  line-height: var(--sq-leading-normal);
 }
 
 // ─── Success Banner ───────────────────────────────────────────
 .success-banner {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  margin-bottom: 1.25rem;
-  border-radius: 0.75rem;
-  background: rgba(34, 197, 94, 0.1);
-  border: 1px solid rgba(34, 197, 94, 0.2);
-  color: #86efac;
-  font-size: 0.8125rem;
+  gap: var(--sq-space-2);
+  padding: var(--sq-space-3) var(--sq-space-4);
+  margin-bottom: var(--sq-space-5);
+  border-radius: var(--sq-radius-md);
+  background: var(--sq-success-soft);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  color: var(--sq-success);
+  font-size: var(--sq-text-md);
 
   mat-icon {
     font-size: 18px;
     width: 18px;
     height: 18px;
-    color: #22c55e;
+    color: var(--sq-success);
   }
 }
 
@@ -216,77 +217,75 @@ mat-divider {
 .change-password-section {
   .change-pw-header {
     text-align: center;
-    margin-bottom: 1.5rem;
+    margin-bottom: var(--sq-space-6);
 
     .lock-icon {
       font-size: 40px;
       width: 40px;
       height: 40px;
-      color: var(--sq-primary, #6366f1);
-      margin-bottom: 0.5rem;
+      color: var(--sq-primary);
+      margin-bottom: var(--sq-space-2);
     }
 
     h2 {
-      font-size: 1.25rem;
-      font-weight: 600;
-      color: var(--sq-text-primary, #f0f0f5);
-      margin: 0 0 0.25rem;
+      font-size: var(--sq-text-2xl);
+      font-weight: var(--sq-weight-semibold);
+      color: var(--sq-on-surface);
+      margin: 0 0 var(--sq-space-1);
     }
 
     p {
-      font-size: 0.8125rem;
-      color: var(--sq-text-secondary, rgba(255, 255, 255, 0.5));
+      font-size: var(--sq-text-md);
+      color: var(--sq-on-surface-variant);
       margin: 0;
     }
   }
 }
 
 .password-mismatch {
-  font-size: 0.8125rem;
-  color: #fca5a5;
-  margin: -0.25rem 0 0.5rem 0.25rem;
+  font-size: var(--sq-text-md);
+  color: var(--sq-danger);
+  margin: -4px 0 var(--sq-space-2) var(--sq-space-1);
 }
 
 // ─── Builtin Auth Hint ────────────────────────────────────────
 .builtin-hint {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  margin-top: 1.25rem;
-  border-radius: 0.75rem;
-  background: rgba(99, 102, 241, 0.08);
-  border: 1px solid rgba(99, 102, 241, 0.15);
-  color: var(--sq-text-secondary, rgba(255, 255, 255, 0.6));
-  font-size: 0.8125rem;
+  gap: var(--sq-space-2);
+  padding: var(--sq-space-3) var(--sq-space-4);
+  margin-top: var(--sq-space-5);
+  border-radius: var(--sq-radius-md);
+  background: var(--sq-info-soft);
+  border: 1px solid rgba(96, 165, 250, 0.15);
+  color: var(--sq-on-surface-variant);
+  font-size: var(--sq-text-md);
 
   mat-icon {
     font-size: 18px;
     width: 18px;
     height: 18px;
-    color: var(--sq-primary, #6366f1);
+    color: var(--sq-info);
   }
 
   code {
-    font-family: 'JetBrains Mono', 'Fira Code', monospace;
-    font-size: 0.8125rem;
-    padding: 0.1rem 0.35rem;
-    border-radius: 0.25rem;
-    background: rgba(255, 255, 255, 0.06);
-    color: var(--sq-text-primary, #f0f0f5);
+    font-family: var(--sq-font-mono);
+    font-size: var(--sq-text-md);
+    padding: 1px 5px;
+    border-radius: var(--sq-radius-xs);
+    background: var(--sq-surface-overlay);
+    color: var(--sq-on-surface);
   }
 }
 
-// ─── Material Overrides (dark theme) ──────────────────────────
+// ─── Material Overrides (scoped) ──────────────────────────────
 ::ng-deep {
   .mat-mdc-form-field {
-    --mdc-outlined-text-field-outline-color: rgba(255, 255, 255, 0.12);
-    --mdc-outlined-text-field-hover-outline-color: rgba(255, 255, 255, 0.2);
-    --mdc-outlined-text-field-focus-outline-color: var(--sq-primary, #6366f1);
-    --mdc-outlined-text-field-input-text-color: var(--sq-text-primary, #f0f0f5);
-    --mdc-outlined-text-field-label-text-color: var(--sq-text-secondary, rgba(255, 255, 255, 0.5));
-    --mdc-outlined-text-field-input-text-placeholder-color: rgba(255, 255, 255, 0.25);
+    --mdc-outlined-text-field-outline-color: var(--sq-outline-variant);
+    --mdc-outlined-text-field-hover-outline-color: var(--sq-outline);
+    --mdc-outlined-text-field-focus-outline-color: var(--sq-primary);
+    --mdc-outlined-text-field-input-text-color: var(--sq-on-surface);
+    --mdc-outlined-text-field-label-text-color: var(--sq-on-surface-variant);
+    --mdc-outlined-text-field-input-text-placeholder-color: var(--sq-on-surface-variant);
   }
 }
-
-
