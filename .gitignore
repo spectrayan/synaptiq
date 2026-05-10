@@ -18,14 +18,16 @@ __pycache__/
 .venv/
 .venv*/
 uv.lock
-dist/
 *.whl
 
-# Environment
+# Environment & Secrets
 .env
 .env.local
 .env.*.local
 !.env.example
+,env
+**/application-local.yml
+**/application-local.yaml
 
 # IDE
 .idea/
