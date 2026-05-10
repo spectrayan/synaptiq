@@ -47,7 +47,7 @@ import { ENVIRONMENT } from '@synaptiq/utils';
             </svg>
           </div>
           <h1 class="brand-name">Synaptiq</h1>
-          <p class="brand-tagline">Intelligent catalog discovery</p>
+          <p class="brand-tagline">AI-native data application platform</p>
         </div>
 
         <!-- Error Banner -->
