@@ -115,6 +115,21 @@ export function isWorkflowIntent(msg: string): boolean {
   return WORKFLOW_INTENT_KEYWORDS.some((k) => lower.includes(k));
 }
 
+/** Translates internal command tokens to human-readable text for the UI. */
+export function resolveCommandToDisplayLabel(msg: string): string {
+  const trimmed = msg.trim();
+  if (trimmed === CMD_SIGN_IN) return 'Sign In';
+  if (trimmed === CMD_SIGN_UP) return 'Sign Up';
+  
+  const chip = ALL_ADMIN_SUGGESTION_CHIPS.find(c => c.prompt === trimmed);
+  if (chip) {
+    // Strip emojis if desired, or return as-is
+    return chip.label;
+  }
+  
+  return msg;
+}
+
 // ── Storage keys ────────────────────────────────────────────────────────────
 
 export const PINNED_VIEWS_KEY = 'synaptiq:pinned_views';

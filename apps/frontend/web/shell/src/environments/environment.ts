@@ -16,6 +16,6 @@ export const environment = {
     messagingSenderId: '000000000000',
     appId: '1:000000000000:web:0000000000000000',
   },
-  tenantId: 'demo-tenant', // Default tenant for local dev (matches seed_dev.py + seed_e2e_data.py)
+  tenantId: 'demo-tenant', // Default tenant for local dev (matches seed data)
   useEmulators: false, // Not needed with builtin auth
 } as const;

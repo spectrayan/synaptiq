@@ -28,9 +28,12 @@
   gap: var(--sq-space-2);
 }
 
-.brand-icon {
-  font-size: 20px;
-  filter: drop-shadow(0 0 8px rgba(179, 157, 219, 0.6));
+.brand-logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 .brand-name {

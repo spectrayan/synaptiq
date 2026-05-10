@@ -18,6 +18,11 @@
           {
             "glob": "**/*",
             "input": "apps/frontend/web/shell/public"
+          },
+          {
+            "glob": "**/*",
+            "input": "apps/frontend/web/shell/src/app/assets",
+            "output": "app/assets"
           }
         ],
         "styles": [
