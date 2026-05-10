@@ -46,6 +46,7 @@ import {
   MSG_AUTH_SIGNUP,
   MSG_AUTH_SIGNIN,
   isWorkflowIntent,
+  resolveCommandToDisplayLabel,
 } from './chat-shell.constants';
 import { buildWelcomeMessages, type WelcomeMessageContext } from './welcome-message.builder';
 import { ChatStreamOrchestrator, type StreamCallbacks } from './services/chat-stream.orchestrator';
@@ -511,10 +512,27 @@ export class ChatShellComponent implements OnDestroy {
             },
           ]);
         },
-        onDone: () => {
+        onDone: async () => {
           this.workflowGenerating.set(false);
           this.workflowStatus.set('');
-          // Refresh the sidebar workflow list since backend auto-saves generated workflows
+
+          // Persist the generated workflow to the database.
+          // The Gemini generation service returns a spec without an id,
+          // so we must explicitly save it to get a persisted ID back.
+          const wf = this.currentWorkflow();
+          if (wf && !wf.id) {
+            try {
+              const authToken = (await this.auth.getIdToken().catch(() => undefined)) ?? undefined;
+              const saved = await this.workflowService.saveWorkflow(wf, authToken);
+              console.log(`[ChatShell] persisted generated workflow, id=${saved.id}`);
+              // Update local state with the persisted spec (includes id)
+              this.currentWorkflow.set(saved);
+            } catch (e) {
+              console.error('[ChatShell] failed to persist generated workflow:', e);
+            }
+          }
+
+          // Refresh the sidebar workflow list
           this.loadSavedWorkflows();
         },
         onError: (message) => {
@@ -641,10 +659,12 @@ export class ChatShellComponent implements OnDestroy {
     const msg = text.trim();
     if (!msg || this.isLoading()) return;
 
-    // Add user message
+    // Add user message with human-readable label if it's a hidden command token
+    const displayContent = resolveCommandToDisplayLabel(msg);
+
     this.messages.update((msgs) => [
       ...msgs,
-      { id: crypto.randomUUID(), role: 'user', content: msg, timestamp: new Date() },
+      { id: crypto.randomUUID(), role: 'user', content: displayContent, timestamp: new Date() },
     ]);
 
     // ── Workflow intent detection ──
