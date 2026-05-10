@@ -1,6 +1,0 @@
-type: string
-description: Status of a catalog item
-enum:
-  - DRAFT
-  - PUBLISHED
-  - ARCHIVED

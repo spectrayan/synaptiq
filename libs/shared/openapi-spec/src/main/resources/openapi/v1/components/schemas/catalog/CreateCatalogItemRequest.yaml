@@ -1,8 +1,0 @@
-type: object
-required: [data]
-properties:
-  data:
-    type: object
-    additionalProperties: true
-  status:
-    $ref: '../common/enums/CatalogItemStatus.yaml'
