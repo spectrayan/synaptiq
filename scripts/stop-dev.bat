@@ -3,7 +3,7 @@ REM ============================================================================
 REM  Synaptiq — Stop Local Development Environment (Windows)
 REM
 REM  Stops all running Synaptiq processes:
-REM    - Kills FastAPI backend and Angular frontend windows
+REM    - Kills Spring Boot backend and Angular frontend windows
 REM    - Stops Docker services (MongoDB, Redis, Firebase Auth)
 REM
 REM  Usage: scripts\stop-dev.bat
@@ -25,7 +25,7 @@ echo.
 
 REM ── Kill backend window ─────────────────────────────────────────────────────
 
-echo %YELLOW%[1/3]%RESET% Stopping FastAPI backend...
+echo %YELLOW%[1/3]%RESET% Stopping Spring Boot backend...
 taskkill /FI "WINDOWTITLE eq Synaptiq API*" /F >nul 2>&1
 echo %GREEN%  ✓ Backend stopped%RESET%
 

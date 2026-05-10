@@ -4,14 +4,13 @@
 #
 #  Starts the full local stack:
 #    1. Docker services (MongoDB, Redis, Firebase Auth Emulator)
-#    2. FastAPI backend (hot-reload)
+#    2. Spring Boot backend (dev profile)
 #    3. Angular frontend (dev server)
 #
 #  Prerequisites:
 #    - Docker / Docker Compose installed
 #    - Node.js + pnpm installed
-#    - Python 3.12+ with uv installed
-#    - Copy apps/backend/api/.env.example -> apps/backend/api/.env
+#    - Java 21+ with Maven installed
 #
 #  Usage: ./scripts/start-dev.sh
 # ============================================================================
@@ -48,7 +47,8 @@ check_cmd() {
 
 check_cmd "docker"  "Install Docker from https://docs.docker.com/get-docker/"
 check_cmd "pnpm"    "Install via: npm install -g pnpm"
-check_cmd "uv"      "Install via: pip install uv  OR  curl -LsSf https://astral.sh/uv/install.sh | sh"
+check_cmd "java"    "Install Temurin JDK 21 from https://adoptium.net/"
+check_cmd "mvn"     "Install Maven from https://maven.apache.org/install.html"
 
 # Check Docker daemon is running
 if ! docker info &> /dev/null; then
@@ -60,17 +60,16 @@ fi
 echo -e "${GREEN}  ✓ All prerequisites met${NC}"
 echo ""
 
-# ── Step 2: Check .env file ──────────────────────────────────────────────────
+# ── Step 2: Check Java version ───────────────────────────────────────────────
 
-echo -e "${YELLOW}[2/5]${NC} Checking backend .env configuration..."
+echo -e "${YELLOW}[2/5]${NC} Checking Java version..."
 
-if [ ! -f "apps/backend/api/.env" ]; then
-    echo -e "${YELLOW}  ! No .env file found — copying from .env.example${NC}"
-    cp "apps/backend/api/.env.example" "apps/backend/api/.env"
-    echo -e "${YELLOW}  ! Edit apps/backend/api/.env to add your API keys${NC}"
-else
-    echo -e "${GREEN}  ✓ .env file exists${NC}"
+JAVA_VERSION=$(java -version 2>&1 | head -1 | grep -oP '(?<=")\d+' | head -1)
+if [ "$JAVA_VERSION" -lt 21 ] 2>/dev/null; then
+    echo -e "${RED}ERROR: Java 21+ required (found Java $JAVA_VERSION).${NC}"
+    exit 1
 fi
+echo -e "${GREEN}  ✓ Java $JAVA_VERSION detected${NC}"
 echo ""
 
 # ── Step 3: Start Docker services ────────────────────────────────────────────
@@ -108,30 +107,18 @@ fi
 echo -e "${GREEN}  ✓ All Docker services healthy${NC}"
 echo ""
 
-# ── Step 4: Start FastAPI backend ────────────────────────────────────────────
+# ── Step 4: Start Spring Boot backend ────────────────────────────────────────
 
-echo -e "${YELLOW}[4/5]${NC} Starting FastAPI backend (hot-reload on port 8000)..."
+echo -e "${YELLOW}[4/5]${NC} Starting Spring Boot backend (dev profile on port 8080)..."
 
-pushd "apps/backend/api" > /dev/null
-
-# Install Python deps if venv doesn't exist
-if [ ! -d ".venv" ]; then
-    echo -e "${YELLOW}     Installing Python dependencies...${NC}"
-    uv sync
-fi
-
-# Start backend in the background
-uv run uvicorn synaptiq_api.main:app \
-    --host 0.0.0.0 \
-    --port 8000 \
-    --reload \
+mvn spring-boot:run \
+    -f apps/backend/spring-apis/pom.xml \
+    -Dspring-boot.run.profiles=dev \
     &> /tmp/synaptiq-api.log &
 API_PID=$!
 
-popd > /dev/null
-
-echo -e "${GREEN}  ✓ Backend starting on http://localhost:8000 (PID: $API_PID)${NC}"
-echo -e "${GREEN}    API docs: http://localhost:8000/docs${NC}"
+echo -e "${GREEN}  ✓ Backend starting on http://localhost:8080 (PID: $API_PID)${NC}"
+echo -e "${GREEN}    Swagger UI: http://localhost:8080/swagger-ui.html${NC}"
 echo ""
 
 # ── Step 5: Start Angular frontend ───────────────────────────────────────────
@@ -157,8 +144,8 @@ echo -e "${CYAN}  Synaptiq is starting up!${NC}"
 echo -e "${CYAN}============================================================${NC}"
 echo ""
 echo -e "  ${GREEN}Frontend:${NC}    http://localhost:4200"
-echo -e "  ${GREEN}Backend:${NC}     http://localhost:8000"
-echo -e "  ${GREEN}API Docs:${NC}    http://localhost:8000/docs"
+echo -e "  ${GREEN}Backend:${NC}     http://localhost:8080"
+echo -e "  ${GREEN}Swagger UI:${NC}  http://localhost:8080/swagger-ui.html"
 echo -e "  ${GREEN}MongoDB:${NC}     mongodb://localhost:27017"
 echo -e "  ${GREEN}Redis:${NC}       redis://localhost:6379"
 echo -e "  ${GREEN}Firebase UI:${NC} http://localhost:4000"

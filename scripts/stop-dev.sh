@@ -3,7 +3,7 @@
 #  Synaptiq — Stop Local Development Environment (macOS / Linux)
 #
 #  Stops all running Synaptiq processes:
-#    - Kills FastAPI backend and Angular frontend
+#    - Kills Spring Boot backend and Angular frontend
 #    - Stops Docker services (MongoDB, Redis, Firebase Auth)
 #
 #  Usage: ./scripts/stop-dev.sh
@@ -25,14 +25,15 @@ echo ""
 
 # ── Kill backend ─────────────────────────────────────────────────────────────
 
-echo -e "${YELLOW}[1/3]${NC} Stopping FastAPI backend..."
+echo -e "${YELLOW}[1/3]${NC} Stopping Spring Boot backend..."
 if [ -f /tmp/synaptiq-api.pid ]; then
     PID=$(cat /tmp/synaptiq-api.pid)
     kill "$PID" 2>/dev/null || true
     rm -f /tmp/synaptiq-api.pid
 fi
-# Also kill any uvicorn processes for this project
-pkill -f "uvicorn synaptiq_api.main:app" 2>/dev/null || true
+# Also kill any Spring Boot processes for this project
+pkill -f "spring-boot:run.*spring-apis" 2>/dev/null || true
+pkill -f "spring-apis.*SNAPSHOT.jar" 2>/dev/null || true
 echo -e "${GREEN}  ✓ Backend stopped${NC}"
 
 # ── Kill frontend ────────────────────────────────────────────────────────────

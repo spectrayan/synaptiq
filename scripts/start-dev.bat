@@ -4,14 +4,13 @@ REM  Synaptiq — Local Development Startup Script (Windows)
 REM
 REM  Starts the full local stack:
 REM    1. Docker services (MongoDB, Redis, Firebase Auth Emulator)
-REM    2. FastAPI backend (hot-reload)
+REM    2. Spring Boot backend (dev profile)
 REM    3. Angular frontend (dev server)
 REM
 REM  Prerequisites:
 REM    - Docker Desktop running
 REM    - Node.js + pnpm installed
-REM    - Python 3.12+ with uv installed
-REM    - Copy apps/backend/api/.env.example -> apps/backend/api/.env
+REM    - Java 21+ with Maven installed
 REM
 REM  Usage: scripts\start-dev.bat
 REM ============================================================================
@@ -59,27 +58,28 @@ if %ERRORLEVEL% neq 0 (
     exit /b 1
 )
 
-where uv >nul 2>&1
+where java >nul 2>&1
 if %ERRORLEVEL% neq 0 (
-    echo %RED%ERROR: uv is not installed.%RESET%
-    echo        Install via: pip install uv
+    echo %RED%ERROR: Java is not installed.%RESET%
+    echo        Install Temurin JDK 21 from https://adoptium.net/
+    exit /b 1
+)
+
+where mvn >nul 2>&1
+if %ERRORLEVEL% neq 0 (
+    echo %RED%ERROR: Maven is not installed.%RESET%
+    echo        Install Maven from https://maven.apache.org/install.html
     exit /b 1
 )
 
 echo %GREEN%  ✓ All prerequisites met%RESET%
 echo.
 
-REM ── Step 2: Check .env file ─────────────────────────────────────────────────
+REM ── Step 2: Check Java version ──────────────────────────────────────────────
 
-echo %YELLOW%[2/5]%RESET% Checking backend .env configuration...
-
-if not exist "apps\backend\api\.env" (
-    echo %YELLOW%  ! No .env file found — copying from .env.example%RESET%
-    copy "apps\backend\api\.env.example" "apps\backend\api\.env" >nul
-    echo %YELLOW%  ! Edit apps\backend\api\.env to add your API keys%RESET%
-) else (
-    echo %GREEN%  ✓ .env file exists%RESET%
-)
+echo %YELLOW%[2/5]%RESET% Checking Java version...
+java -version 2>&1 | findstr /r "version" >nul
+echo %GREEN%  ✓ Java detected%RESET%
 echo.
 
 REM ── Step 3: Start Docker services ───────────────────────────────────────────
@@ -117,25 +117,15 @@ if %ERRORLEVEL% equ 0 (
 echo %GREEN%  ✓ All Docker services healthy%RESET%
 echo.
 
-REM ── Step 4: Start FastAPI backend ───────────────────────────────────────────
+REM ── Step 4: Start Spring Boot backend ───────────────────────────────────────
 
-echo %YELLOW%[4/5]%RESET% Starting FastAPI backend (hot-reload on port 8000)...
-
-pushd "apps\backend\api"
-
-REM Install Python deps if venv doesn't exist
-if not exist ".venv" (
-    echo %YELLOW%     Installing Python dependencies...%RESET%
-    uv sync
-)
+echo %YELLOW%[4/5]%RESET% Starting Spring Boot backend (dev profile on port 8080)...
 
 REM Start backend in a new window
-start "Synaptiq API" cmd /k "cd /d %ROOT_DIR%\apps\backend\api && uv run uvicorn synaptiq_api.main:app --host 0.0.0.0 --port 8000 --reload"
+start "Synaptiq API" cmd /k "cd /d %ROOT_DIR% && mvn spring-boot:run -f apps/backend/spring-apis/pom.xml -Dspring-boot.run.profiles=dev"
 
-popd
-
-echo %GREEN%  ✓ Backend starting on http://localhost:8000%RESET%
-echo %GREEN%    API docs: http://localhost:8000/docs%RESET%
+echo %GREEN%  ✓ Backend starting on http://localhost:8080%RESET%
+echo %GREEN%    Swagger UI: http://localhost:8080/swagger-ui.html%RESET%
 echo.
 
 REM ── Step 5: Start Angular frontend ──────────────────────────────────────────
@@ -155,8 +145,8 @@ echo %CYAN%  Synaptiq is starting up!%RESET%
 echo %CYAN%============================================================%RESET%
 echo.
 echo   %GREEN%Frontend:%RESET%    http://localhost:4200
-echo   %GREEN%Backend:%RESET%     http://localhost:8000
-echo   %GREEN%API Docs:%RESET%    http://localhost:8000/docs
+echo   %GREEN%Backend:%RESET%     http://localhost:8080
+echo   %GREEN%Swagger UI:%RESET%  http://localhost:8080/swagger-ui.html
 echo   %GREEN%MongoDB:%RESET%     mongodb://localhost:27017
 echo   %GREEN%Redis:%RESET%       redis://localhost:6379
 echo   %GREEN%Firebase UI:%RESET% http://localhost:4000

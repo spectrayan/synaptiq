@@ -7,7 +7,7 @@
 #
 #  Expects:
 #    - MongoDB running on localhost:27017
-#    - Python 3.11+ with uv installed
+#    - Python 3.12+ with pymongo installed
 #
 #  Usage:
 #    ./scripts/seed-db.sh          # Seed everything
@@ -27,7 +27,6 @@ ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
 
 SEED_DIR="$ROOT_DIR/seed-data"
-BACKEND_DIR="$ROOT_DIR/apps/backend/api"
 RESET=false
 
 # Parse args
@@ -48,13 +47,25 @@ echo ""
 
 echo -e "${YELLOW}[1/3]${NC} Checking prerequisites..."
 
-if ! command -v uv &> /dev/null; then
-    echo -e "${RED}ERROR: uv is not installed.${NC}"
-    echo "       Install via: pip install uv  OR  curl -LsSf https://astral.sh/uv/install.sh | sh"
+if ! command -v python3 &> /dev/null && ! command -v python &> /dev/null; then
+    echo -e "${RED}ERROR: Python 3 is not installed.${NC}"
+    echo "       Install Python 3.12+ from https://www.python.org/downloads/"
     exit 1
 fi
 
-echo -e "${GREEN}  ✓ uv available${NC}"
+# Determine python command
+PYTHON_CMD="python3"
+if ! command -v python3 &> /dev/null; then
+    PYTHON_CMD="python"
+fi
+
+# Check pymongo is installed
+if ! $PYTHON_CMD -c "import pymongo" 2>/dev/null; then
+    echo -e "${YELLOW}  ! pymongo not found — installing...${NC}"
+    $PYTHON_CMD -m pip install --quiet pymongo
+fi
+
+echo -e "${GREEN}  ✓ Python + pymongo available${NC}"
 
 # ── Check MongoDB connectivity ───────────────────────────────────────────────
 
@@ -110,18 +121,7 @@ fi
 echo -e "${YELLOW}[3/3]${NC} Seeding database..."
 echo ""
 
-# Use the backend venv which already has motor/pymongo installed
-if [ ! -d "$BACKEND_DIR/.venv" ]; then
-    echo -e "${YELLOW}     Backend venv not found — installing dependencies...${NC}"
-    pushd "$BACKEND_DIR" > /dev/null
-    uv sync
-    popd > /dev/null
-fi
-
-# Run the master seed script using the backend's Python (which has motor)
-pushd "$BACKEND_DIR" > /dev/null
-uv run python "$SEED_DIR/seed_all.py"
-popd > /dev/null
+$PYTHON_CMD "$SEED_DIR/seed_all.py"
 
 echo ""
 echo -e "${CYAN}============================================================${NC}"

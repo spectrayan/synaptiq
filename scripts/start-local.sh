@@ -3,7 +3,7 @@
 #  Synaptiq — Local Development (No Docker)
 #
 #  Starts the full stack without Docker:
-#    1. FastAPI backend (hot-reload on port 8000)
+#    1. Spring Boot backend (dev profile on port 8080)
 #    2. Angular frontend (dev server on port 4200)
 #
 #  Auth mode (set AUTH_PROVIDER env var):
@@ -13,7 +13,7 @@
 #  Expects:
 #    - MongoDB already running on localhost:27017
 #    - Node.js + pnpm installed
-#    - Python 3.12+ with uv installed
+#    - Java 21+ with Maven installed
 #
 #  Usage: ./scripts/start-local.sh
 #         AUTH_PROVIDER=firebase ./scripts/start-local.sh
@@ -46,7 +46,7 @@ cleanup() {
     if [ "$AUTH_PROVIDER" = "firebase" ]; then
         pkill -f "firebase emulators:start" 2>/dev/null || true
     fi
-    pkill -f "uvicorn synaptiq_api.main:app" 2>/dev/null || true
+    pkill -f "spring-boot:run.*spring-apis" 2>/dev/null || true
     pkill -f "nx serve shell" 2>/dev/null || true
     rm -f /tmp/synaptiq-api.pid /tmp/synaptiq-shell.pid /tmp/synaptiq-firebase.pid
     echo -e "${GREEN}Done.${NC}"
@@ -78,7 +78,8 @@ check_cmd() {
 }
 
 check_cmd "pnpm"     "Install via: npm install -g pnpm"
-check_cmd "uv"       "Install via: pip install uv  OR  curl -LsSf https://astral.sh/uv/install.sh | sh"
+check_cmd "java"     "Install Temurin JDK 21 from https://adoptium.net/"
+check_cmd "mvn"      "Install Maven from https://maven.apache.org/install.html"
 if [ "$AUTH_PROVIDER" = "firebase" ]; then
     check_cmd "firebase" "Install via: npm install -g firebase-tools"
 fi
@@ -156,18 +157,10 @@ else
     STEP_NEXT=$((STEP_NEXT + 1))
 fi
 
-# ── Step N: Start FastAPI backend ────────────────────────────────────────────
+# ── Step N: Start Spring Boot backend + Angular frontend ─────────────────────
 
-echo -e "${YELLOW}[${STEP_NEXT}/${TOTAL_STEPS}]${NC} Starting FastAPI backend + Angular frontend..."
+echo -e "${YELLOW}[${STEP_NEXT}/${TOTAL_STEPS}]${NC} Starting Spring Boot backend + Angular frontend..."
 STEP_NEXT=$((STEP_NEXT + 1))
-
-pushd "apps/backend/api" > /dev/null
-
-# Install Python deps if venv doesn't exist
-if [ ! -d ".venv" ]; then
-    echo -e "${YELLOW}     Installing Python dependencies...${NC}"
-    uv sync
-fi
 
 # Export auth provider setting
 export AUTH_PROVIDER="$AUTH_PROVIDER"
@@ -175,21 +168,17 @@ export AUTH_PROVIDER="$AUTH_PROVIDER"
 # Firebase env vars (only relevant when AUTH_PROVIDER=firebase)
 if [ "$AUTH_PROVIDER" = "firebase" ]; then
     export FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
-    export FIREBASE_PROJECT_ID=synaptiq-dev
 fi
 
-uv run uvicorn synaptiq_api.main:app \
-    --host 0.0.0.0 \
-    --port 8000 \
-    --reload \
+mvn spring-boot:run \
+    -f apps/backend/spring-apis/pom.xml \
+    -Dspring-boot.run.profiles=dev \
     &> /tmp/synaptiq-api.log &
 API_PID=$!
 PIDS+=("$API_PID")
 echo "$API_PID" > /tmp/synaptiq-api.pid
 
-popd > /dev/null
-
-echo -e "${GREEN}  ✓ Backend starting on http://localhost:8000 (PID: $API_PID)${NC}"
+echo -e "${GREEN}  ✓ Backend starting on http://localhost:8080 (PID: $API_PID)${NC}"
 
 # ── Start Angular frontend ───────────────────────────────────────────────────
 
@@ -208,8 +197,8 @@ echo -e "${CYAN}  Synaptiq is starting up!${NC}"
 echo -e "${CYAN}============================================================${NC}"
 echo ""
 echo -e "  ${GREEN}Frontend:${NC}    http://localhost:4200"
-echo -e "  ${GREEN}Backend:${NC}     http://localhost:8000"
-echo -e "  ${GREEN}API Docs:${NC}    http://localhost:8000/docs"
+echo -e "  ${GREEN}Backend:${NC}     http://localhost:8080"
+echo -e "  ${GREEN}Swagger UI:${NC}  http://localhost:8080/swagger-ui.html"
 echo -e "  ${GREEN}MongoDB:${NC}     mongodb://localhost:27017"
 if [ "$AUTH_PROVIDER" = "firebase" ]; then
     echo -e "  ${GREEN}Firebase:${NC}    http://localhost:9099 (Auth Emulator)"

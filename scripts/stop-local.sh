@@ -4,7 +4,7 @@
 #
 #  Stops processes started by start-local.sh:
 #    - Firebase Auth Emulator
-#    - FastAPI backend
+#    - Spring Boot backend
 #    - Angular frontend
 #
 #  Usage: ./scripts/stop-local.sh
@@ -34,13 +34,14 @@ echo -e "${GREEN}  ✓ Firebase emulator stopped${NC}"
 
 # ── Kill backend ─────────────────────────────────────────────────────────────
 
-echo -e "${YELLOW}[2/4]${NC} Stopping FastAPI backend..."
+echo -e "${YELLOW}[2/4]${NC} Stopping Spring Boot backend..."
 if [ -f /tmp/synaptiq-api.pid ]; then
     PID=$(cat /tmp/synaptiq-api.pid)
     kill "$PID" 2>/dev/null || true
     rm -f /tmp/synaptiq-api.pid
 fi
-pkill -f "uvicorn synaptiq_api.main:app" 2>/dev/null || true
+pkill -f "spring-boot:run.*spring-apis" 2>/dev/null || true
+pkill -f "spring-apis.*SNAPSHOT.jar" 2>/dev/null || true
 echo -e "${GREEN}  ✓ Backend stopped${NC}"
 
 # ── Kill frontend ────────────────────────────────────────────────────────────
@@ -54,10 +55,10 @@ fi
 pkill -f "nx serve shell" 2>/dev/null || true
 echo -e "${GREEN}  ✓ Frontend stopped${NC}"
 
-# ── Kill anything still holding ports 4200 / 8000 ────────────────────────────
+# ── Kill anything still holding ports 4200 / 8080 ───────────────────────────
 
-echo -e "${YELLOW}[4/4]${NC} Freeing ports 4200 and 8000..."
-for PORT in 4200 8000; do
+echo -e "${YELLOW}[4/4]${NC} Freeing ports 4200 and 8080..."
+for PORT in 4200 8080; do
     PIDS=$(lsof -ti :"$PORT" 2>/dev/null || true)
     if [ -n "$PIDS" ]; then
         echo "$PIDS" | xargs kill -9 2>/dev/null || true
