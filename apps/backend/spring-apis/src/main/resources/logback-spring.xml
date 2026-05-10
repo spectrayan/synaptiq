@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Synaptiq Structured Logging Configuration
+  ═══════════════════════════════════════════
+  • dev/local profile  → colorized console output (human-readable)
+  • prod profile       → JSON structured output via logstash-logback-encoder
+  • Correlation IDs    → MDC-based requestId propagated in all log entries
+-->
+<configuration>
+
+    <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="synaptiq"/>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         Console Appender — Human-Readable (dev/local)
+         ══════════════════════════════════════════════════════════════ -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %highlight(%-5level) [%thread] %cyan(%logger{36}) - %X{requestId:--} %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         JSON Appender — Structured (prod)
+         Uses logstash-logback-encoder (already in pom.xml)
+         ══════════════════════════════════════════════════════════════ -->
+    <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"app":"${appName}","env":"${ENV:-production}"}</customFields>
+            <fieldNames>
+                <timestamp>@timestamp</timestamp>
+                <version>[ignore]</version>
+            </fieldNames>
+            <!-- Include MDC fields (requestId, tenantId, userId) -->
+            <includeMdcKeyName>requestId</includeMdcKeyName>
+            <includeMdcKeyName>tenantId</includeMdcKeyName>
+            <includeMdcKeyName>userId</includeMdcKeyName>
+        </encoder>
+    </appender>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         Profile-based Root Logger Selection
+         ══════════════════════════════════════════════════════════════ -->
+
+    <!-- Development (default) -->
+    <springProfile name="default | dev | local">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+        <logger name="com.spectrayan.synaptiq" level="DEBUG"/>
+        <logger name="org.springframework.data.mongodb" level="WARN"/>
+        <logger name="org.springframework.security" level="WARN"/>
+    </springProfile>
+
+    <!-- Production -->
+    <springProfile name="prod | production">
+        <root level="WARN">
+            <appender-ref ref="JSON"/>
+        </root>
+        <logger name="com.spectrayan.synaptiq" level="INFO"/>
+        <logger name="org.springframework.data.mongodb" level="WARN"/>
+        <logger name="org.springframework.security" level="WARN"/>
+        <logger name="org.springframework.modulith" level="WARN"/>
+    </springProfile>
+
+</configuration>

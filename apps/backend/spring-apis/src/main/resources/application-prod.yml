@@ -1,0 +1,88 @@
+# ═══════════════════════════════════════════════════════════════
+# Synaptiq — Production Profile
+# ═══════════════════════════════════════════════════════════════
+# Activated via: SPRING_PROFILES_ACTIVE=prod
+#
+# All secrets MUST be provided via environment variables.
+# The app will fail to start if required secrets are missing
+# (enforced by StartupValidationGuard).
+
+spring:
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:}
+      database: ${MONGODB_DATABASE:synaptiq}
+    redis:
+      url: ${REDIS_URL:}
+
+# ── Synaptiq Custom Properties ─────────────────────────────────
+synaptiq:
+  debug: false
+  environment: production
+  cors-origins: ${SYNAPTIQ_CORS_ORIGINS:}   # e.g. https://app.synaptiq.dev
+  auth:
+    jwt-secret: ${JWT_SECRET:}               # REQUIRED — no default, fail fast
+    jwt-expiry-hours: 24
+    refresh-expiry-days: 7
+  llm:
+    gemini-api-key: ${GEMINI_API_KEY:}
+    gemini-model: ${GEMINI_MODEL:gemini-2.5-flash}
+  rate-limit:
+    enabled: true
+    requests-per-second: 50
+    login-requests-per-minute: 3
+  cache:
+    type: ${SYNAPTIQ_CACHE_TYPE:redis}       # redis in prod, caffeine fallback
+
+# ── Server ─────────────────────────────────────────────────────
+server:
+  shutdown: graceful
+
+spring.lifecycle:
+  timeout-per-shutdown-phase: 30s
+
+# ── Actuator: restrict to health + prometheus only ─────────────
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+  metrics:
+    tags:
+      application: synaptiq
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
+      slo:
+        http.server.requests: 50ms, 100ms, 250ms, 500ms, 1s, 5s
+    export:
+      prometheus:
+        enabled: true
+
+# ── SSE (restrict CORS to actual origin) ───────────────────────
+spectrayan:
+  sse:
+    server:
+      cors:
+        allowed-origins: ${SYNAPTIQ_CORS_ORIGINS:}
+
+# ── Logging: structured JSON via logback-spring.xml ────────────
+logging:
+  level:
+    root: WARN
+    com.spectrayan.synaptiq: INFO
+    org.springframework.data.mongodb: WARN
+    org.springframework.security: WARN
+    org.springframework.modulith: WARN
+
+# ── Swagger: disabled in prod ──────────────────────────────────
+springdoc:
+  swagger-ui:
+    enabled: false
+  api-docs:
+    enabled: false
