@@ -35,6 +35,7 @@ import {
   type RegeneratePromptRequest,
   type RegeneratePromptResponse,
 } from '@synaptiq/client';
+export type { LLMSpec } from '@synaptiq/client';
 
 // Re-export SDK types — downstream consumers import from @synaptiq/chat, not @synaptiq/client
 export type {
@@ -46,7 +47,6 @@ export type {
   AgentSpec,
   EdgeSpec,
   ToolSpec,
-  LLMSpec,
   MCPServerSpec,
   ExecutionPolicySpec,
   ToolCatalogResponse,
@@ -188,33 +188,55 @@ export class WorkflowService {
   /** List workflows for the current tenant. */
   async listWorkflows(_authToken?: string): Promise<WorkflowSpec[]> {
     const response = await firstValueFrom(this.api.listWorkflows({}));
-    return (response.workflows ?? []) as unknown as WorkflowSpec[];
+    // Each item in the list is a WorkflowResponse { id, tenantId, spec: {...} }
+    return (response.workflows ?? []).map((wr: unknown) => {
+      const r = wr as { id?: string; spec?: Record<string, unknown> };
+      const spec = { ...(r.spec as unknown as WorkflowSpec) };
+      if (r.id) spec.id = r.id;
+      return spec;
+    });
   }
 
   /** Get a single workflow by ID. */
   async getWorkflow(workflowId: string, _authToken?: string): Promise<WorkflowSpec | null> {
     try {
       const response = await firstValueFrom(this.api.getWorkflow({ workflowId }));
-      return response as unknown as WorkflowSpec;
+      // WorkflowResponse has { id, tenantId, spec: {...} } — merge id into the spec
+      const res = response as unknown as { id?: string; spec?: Record<string, unknown> };
+      const spec: WorkflowSpec = { ...(res.spec as unknown as WorkflowSpec) };
+      if (res.id) spec.id = res.id;
+      return spec;
     } catch {
       return null;
     }
   }
 
-  /** Save a new workflow. */
+  /** Save a new workflow. Returns the spec with the persisted id. */
   async saveWorkflow(spec: WorkflowSpec, _authToken?: string): Promise<WorkflowSpec> {
+    // SaveWorkflowRequest schema: { spec: FlowSettingsSpec }
+    const body = { spec } as unknown as SaveWorkflowRequest;
     const response = await firstValueFrom(
-      this.api.saveWorkflow({ saveWorkflowRequest: spec as unknown as SaveWorkflowRequest }),
+      this.api.saveWorkflow({ saveWorkflowRequest: body }),
     );
-    return response as unknown as WorkflowSpec;
+    // WorkflowResponse has { id, tenantId, spec: {...} } — merge id into the spec
+    const res = response as unknown as { id?: string; spec?: Record<string, unknown> };
+    const saved: WorkflowSpec = { ...(res.spec as unknown as WorkflowSpec) };
+    if (res.id) saved.id = res.id;
+    return saved;
   }
 
   /** Update an existing workflow. */
   async updateWorkflow(workflowId: string, spec: WorkflowSpec, _authToken?: string): Promise<WorkflowSpec> {
+    // SaveWorkflowRequest schema: { spec: FlowSettingsSpec }
+    const body = { spec } as unknown as SaveWorkflowRequest;
     const response = await firstValueFrom(
-      this.api.updateWorkflow({ workflowId, saveWorkflowRequest: spec as unknown as SaveWorkflowRequest }),
+      this.api.updateWorkflow({ workflowId, saveWorkflowRequest: body }),
     );
-    return response as unknown as WorkflowSpec;
+    // WorkflowResponse has { id, tenantId, spec: {...} } — merge id into the spec
+    const res = response as unknown as { id?: string; spec?: Record<string, unknown> };
+    const saved: WorkflowSpec = { ...(res.spec as unknown as WorkflowSpec) };
+    if (res.id) saved.id = res.id;
+    return saved;
   }
 
   /** Delete a workflow. */
