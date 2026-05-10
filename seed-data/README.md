@@ -1,48 +1,72 @@
 # Synaptiq Seed Data
 
-Realistic seed data for all Synaptiq collections — business, catalog, and observability.
+> Realistic seed data for all Synaptiq collections — tenants, catalogs, users, and analytics.
 
-## Usage
+[![Part of Synaptiq](https://img.shields.io/badge/part%20of-Synaptiq-7C4DFF?style=flat-square)](../README.md)
+
+## Overview
+
+This directory contains scripts and data files for populating a fresh Synaptiq MongoDB instance with realistic demo data. The seed data covers all major bounded contexts and is designed to showcase the full feature set of the platform.
+
+## Collections Seeded
+
+| Collection | Records | Description |
+|------------|---------|-------------|
+| `tenants` | 3 | Demo tenants with different plans and configurations |
+| `users` | 6 | Admin and viewer users across tenants |
+| `catalog_schemas` | 3 | Product schemas (electronics, furniture, SaaS tools) |
+| `catalog_items` | 50+ | Sample products with rich metadata |
+| `chat_sessions` | 10 | Example conversation histories |
+| `analytics_events` | 100+ | Usage metrics and billing data |
+| `branding_configs` | 3 | Per-tenant theme and branding configurations |
+
+## Quick Start
+
+### Using the batch script (recommended)
 
 ```bash
-# Seed everything (requires MongoDB running on localhost:27017)
-python seed-data/seed_all.py
+# Windows
+scripts\seed-data.bat
 
-# Or seed individual collections:
-python seed-data/seed_tenant.py
-python seed-data/seed_catalog.py
-python seed-data/seed_business_data.py
-python seed-data/seed_observability.py
-python seed-data/seed_schema_registry.py
+# macOS / Linux
+python seed-data/seed_all.py
 ```
 
-## Requirements
+### Manual
 
-- Python 3.11+
-- MongoDB running (default: `mongodb://localhost:27017`)
-- `motor` and `pymongo` packages (included in backend deps)
+```bash
+# Prerequisites
+pip install pymongo
 
-## Collections
+# Run the seed script
+python seed-data/seed_all.py
 
-### Business Data
-| Collection | Records | Description |
-|-----------|---------|-------------|
-| `products` | 8 | Product catalog with pricing and sales data |
-| `orders` | 30 | Customer orders with status tracking |
-| `sales_metrics` | 90 | Daily aggregated sales data (90 days) |
-| `monthly_sales` | 4 | Monthly summaries |
-| `category_sales` | 6 | Revenue by category |
-| `regional_sales` | 5 | Revenue by region |
-| `tasks` | 8 | Project management tasks |
-| `events` | 6 | Audit/event timeline |
-| `support_tickets` | 3 | Customer support tickets |
+# Or seed individual collections
+python seed-data/seed_tenants.py
+python seed-data/seed_catalog.py
+```
 
-### Observability Data
-| Collection | Records | Description |
-|-----------|---------|-------------|
-| `api_metrics` | ~2,016 | 5-min interval API endpoint metrics (7 days) |
-| `infra_metrics` | ~1,440 | 1-min interval infrastructure metrics (24 hours) |
-| `llm_metrics` | ~2,016 | 5-min interval LLM usage/cost metrics (7 days) |
-| `error_logs` | ~200 | Application error logs (7 days) |
-| `slo_metrics` | ~360 | Daily SLO compliance (90 days, 4 SLOs) |
-| `user_analytics` | ~168 | Hourly user engagement (7 days) |
+## Configuration
+
+The seed scripts connect to MongoDB using these defaults:
+
+| Variable | Default |
+|----------|---------|
+| `MONGODB_URI` | `mongodb://localhost:27017` |
+| `MONGODB_DB` | `synaptiq` |
+
+Override via environment variables:
+
+```bash
+MONGODB_URI=mongodb://myhost:27017 python seed-data/seed_all.py
+```
+
+## Default Credentials
+
+After seeding, you can log in with:
+
+| Email | Password | Role |
+|-------|----------|------|
+| `admin@synaptiq.local` | `admin` | Platform Admin |
+| `tenant@demo.com` | `demo123` | Tenant Admin |
+| `viewer@demo.com` | `demo123` | Tenant Viewer |
