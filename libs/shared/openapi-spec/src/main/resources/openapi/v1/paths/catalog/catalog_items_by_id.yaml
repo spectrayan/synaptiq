@@ -16,6 +16,16 @@
         application/json:
           schema:
             $ref: '../../components/schemas/catalog/CatalogItemResponse.yaml'
+    '400':
+      $ref: '../../components/responses/BadRequest.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+    '403':
+      $ref: '../../components/responses/Forbidden.yaml'
+    '500':
+      $ref: '../../components/responses/InternalServerError.yaml'
+    '404':
+      $ref: '../../components/responses/NotFound.yaml'
 patch:
   operationId: updateCatalogItem
   summary: Update a catalog item
@@ -41,6 +51,16 @@ patch:
         application/json:
           schema:
             $ref: '../../components/schemas/catalog/CatalogItemResponse.yaml'
+    '400':
+      $ref: '../../components/responses/BadRequest.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+    '403':
+      $ref: '../../components/responses/Forbidden.yaml'
+    '500':
+      $ref: '../../components/responses/InternalServerError.yaml'
+    '404':
+      $ref: '../../components/responses/NotFound.yaml'
 delete:
   operationId: deleteCatalogItem
   summary: Delete a catalog item
@@ -55,3 +75,14 @@ delete:
   responses:
     '204':
       description: Item deleted
+
+    '400':
+      $ref: '../../components/responses/BadRequest.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+    '403':
+      $ref: '../../components/responses/Forbidden.yaml'
+    '500':
+      $ref: '../../components/responses/InternalServerError.yaml'
+    '404':
+      $ref: '../../components/responses/NotFound.yaml'

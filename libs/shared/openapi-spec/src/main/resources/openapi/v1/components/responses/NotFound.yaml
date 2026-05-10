@@ -1,5 +1,5 @@
 description: Not Found
 content:
-  application/json:
+  application/problem+json:
     schema:
       $ref: '../schemas/common/ProblemDetails.yaml'

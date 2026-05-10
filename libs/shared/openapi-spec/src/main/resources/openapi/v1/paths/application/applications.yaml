@@ -16,6 +16,14 @@ get:
                 type: array
                 items:
                   $ref: '../../components/schemas/application/ApplicationResponse.yaml'
+    '400':
+      $ref: '../../components/responses/BadRequest.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+    '403':
+      $ref: '../../components/responses/Forbidden.yaml'
+    '500':
+      $ref: '../../components/responses/InternalServerError.yaml'
 post:
   operationId: createApplication
   summary: Create a new application
@@ -35,3 +43,12 @@ post:
         application/json:
           schema:
             $ref: '../../components/schemas/application/ApplicationResponse.yaml'
+
+    '400':
+      $ref: '../../components/responses/BadRequest.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+    '403':
+      $ref: '../../components/responses/Forbidden.yaml'
+    '500':
+      $ref: '../../components/responses/InternalServerError.yaml'

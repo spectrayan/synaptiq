@@ -62,6 +62,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/health/ready:
     get:
       operationId: readinessCheck
@@ -75,6 +83,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/auth/signup:
     post:
       operationId: signup
@@ -94,8 +110,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/auth/login:
     post:
       operationId: login
@@ -115,8 +139,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthTokenResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/auth/refresh:
     post:
       operationId: refreshToken
@@ -130,6 +160,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthTokenResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/auth/me:
     get:
       operationId: getCurrentUser
@@ -143,6 +181,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/auth/me/role:
     patch:
       operationId: updateUserRole
@@ -162,6 +208,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/auth/change-password:
     post:
       operationId: changePassword
@@ -177,6 +231,14 @@ paths:
       responses:
         '204':
           description: Password changed
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/tenants:
     post:
       operationId: createTenant
@@ -196,6 +258,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TenantResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/tenants/{tenantId}:
     get:
       operationId: getTenant
@@ -215,6 +285,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TenantResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     patch:
       operationId: updateTenant
       summary: Update tenant
@@ -239,6 +319,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TenantResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/tenants/{tenantId}/admins:
     get:
       operationId: listTenantAdmins
@@ -260,6 +350,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/TenantAdminResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     post:
       operationId: inviteAdmin
       summary: Invite a tenant admin
@@ -284,6 +382,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TenantAdminResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/applications:
     get:
       operationId: listApplications
@@ -304,6 +410,14 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/ApplicationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     post:
       operationId: createApplication
       summary: Create a new application
@@ -324,6 +438,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApplicationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/applications/{appId}:
     get:
       operationId: getApplication
@@ -344,6 +466,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApplicationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     delete:
       operationId: deleteApplication
       summary: Delete an application
@@ -359,6 +491,16 @@ paths:
       responses:
         '204':
           description: Application deleted
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/datasources:
     get:
       operationId: listDataSources
@@ -379,6 +521,14 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/DataSourceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     post:
       operationId: createDataSource
       summary: Create a new data source
@@ -399,6 +549,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DataSourceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/datasources/{dataSourceId}:
     get:
       operationId: getDataSource
@@ -419,6 +577,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DataSourceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     delete:
       operationId: deleteDataSource
       summary: Delete a data source
@@ -434,6 +602,16 @@ paths:
       responses:
         '204':
           description: Data source deleted
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/catalog/schema:
     get:
       operationId: getActiveSchema
@@ -449,6 +627,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CatalogSchemaResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/catalog/items:
     post:
       operationId: createCatalogItem
@@ -470,6 +656,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CatalogItemResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     get:
       operationId: listCatalogItems
       summary: List catalog items
@@ -498,6 +692,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CatalogItemListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/catalog/items/{itemId}:
     get:
       operationId: getCatalogItem
@@ -518,6 +720,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CatalogItemResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     patch:
       operationId: updateCatalogItem
       summary: Update a catalog item
@@ -544,6 +756,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CatalogItemResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     delete:
       operationId: deleteCatalogItem
       summary: Delete a catalog item
@@ -559,6 +781,16 @@ paths:
       responses:
         '204':
           description: Item deleted
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/catalog/import:
     post:
       operationId: importCatalogItems
@@ -584,6 +816,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CatalogImportResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/chat/message:
     post:
       operationId: postChatMessage
@@ -605,6 +845,14 @@ paths:
             text/event-stream:
               schema:
                 type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/chat/sessions:
     post:
       operationId: createSession
@@ -626,6 +874,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SessionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     get:
       operationId: listSessions
       summary: List sessions
@@ -650,6 +906,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SessionListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/chat/sessions/{sessionId}:
     patch:
       operationId: updateSession
@@ -676,6 +940,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SessionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     delete:
       operationId: deleteSession
       summary: Delete session
@@ -691,6 +965,16 @@ paths:
       responses:
         '204':
           description: Session deleted
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/chat/sessions/{sessionId}/history:
     get:
       operationId: getSessionHistory
@@ -711,6 +995,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SessionHistoryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/chat/sessions/{sessionId}/reset:
     post:
       operationId: resetSession
@@ -727,6 +1019,14 @@ paths:
       responses:
         '204':
           description: Session reset
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/actions/execute:
     post:
       operationId: executeAction
@@ -748,6 +1048,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ActionResultResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/actions/saved-items:
     get:
       operationId: listSavedItems
@@ -768,6 +1076,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SavedItemListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/actions/saved-items/{itemId}:
     delete:
       operationId: removeSavedItem
@@ -789,6 +1105,16 @@ paths:
       responses:
         '204':
           description: Item removed
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/workflow/save:
     post:
       operationId: saveWorkflow
@@ -810,6 +1136,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkflowResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/workflow/list:
     get:
       operationId: listWorkflows
@@ -830,6 +1164,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkflowListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/workflow/{workflowId}:
     get:
       operationId: getWorkflow
@@ -850,6 +1192,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkflowResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     patch:
       operationId: updateWorkflow
       summary: Update a workflow
@@ -875,6 +1227,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkflowResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     delete:
       operationId: deleteWorkflow
       summary: Delete a workflow
@@ -890,6 +1252,16 @@ paths:
       responses:
         '204':
           description: Workflow deleted
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/workflow/{workflowId}/duplicate:
     post:
       operationId: duplicateWorkflow
@@ -910,6 +1282,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkflowResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/workflow/{workflowId}/share:
     post:
       operationId: shareWorkflow
@@ -930,6 +1310,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ShareWorkflowResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/workflow/shared/{shareToken}:
     get:
       operationId: getSharedWorkflow
@@ -949,6 +1337,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkflowResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/workflow/templates:
     get:
       operationId: listWorkflowTemplates
@@ -962,6 +1358,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkflowListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/workflow/tools:
     get:
       operationId: listWorkflowTools
@@ -975,6 +1379,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ToolCatalogResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/workflow/{workflowId}/runs:
     get:
       operationId: listWorkflowRuns
@@ -1003,6 +1415,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/WorkflowRunSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/workflow/runs/{runId}:
     get:
       operationId: getWorkflowRunDetail
@@ -1023,8 +1443,16 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkflowRunDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '404':
           description: Run not found
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/workflow/execute:
     post:
       operationId: executeWorkflow
@@ -1047,6 +1475,14 @@ paths:
               schema:
                 type: string
                 description: Server-Sent Events stream with node status updates
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/workflow/generate:
     post:
       operationId: generateWorkflow
@@ -1069,6 +1505,14 @@ paths:
               schema:
                 type: string
                 description: Server-Sent Events stream with workflow spec components
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/workflow/regenerate-prompt:
     post:
       operationId: regeneratePrompt
@@ -1090,6 +1534,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RegeneratePromptResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/analytics/summary:
     get:
       operationId: getAnalyticsSummary
@@ -1115,6 +1567,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AnalyticsSummaryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/analytics/tokens:
     get:
       operationId: getTokenUsage
@@ -1140,6 +1600,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/TokenUsageResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/analytics/billing:
     get:
       operationId: getBilling
@@ -1165,6 +1633,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BillingResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/analytics/platform:
     get:
       operationId: getPlatformRollup
@@ -1189,6 +1665,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlatformRollupResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/config/branding:
     get:
       operationId: getBranding
@@ -1204,6 +1688,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BrandingResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     patch:
       operationId: updateBranding
       summary: Update branding
@@ -1224,6 +1716,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BrandingResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/config/branding/public:
     get:
       summary: Get Public Branding
@@ -1244,6 +1744,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BrandingResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '404':
           description: Tenant not found
         '500':
@@ -1263,6 +1769,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ThemeListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/config/contrast:
     get:
       operationId: checkContrast
@@ -1287,6 +1801,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ContrastCheckResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/config/personalization:
     get:
       operationId: getPersonalization
@@ -1302,6 +1824,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PersonalizationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     patch:
       operationId: updatePersonalization
       summary: Update personalization
@@ -1322,6 +1852,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PersonalizationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/config/ai:
     get:
       operationId: getAiConfig
@@ -1337,6 +1875,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AiPersonaResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     patch:
       operationId: updateAiConfig
       summary: Update ai config
@@ -1357,6 +1903,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AiPersonaResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/config/guardrails:
     get:
       operationId: getGuardrailsConfig
@@ -1372,6 +1926,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GuardrailsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     patch:
       operationId: updateGuardrailsConfig
       summary: Update guardrails config
@@ -1392,6 +1954,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GuardrailsResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/config/llm:
     get:
       operationId: getLlmConfig
@@ -1407,6 +1977,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LlmProviderResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     patch:
       operationId: updateLlmConfig
       summary: Update llm config
@@ -1427,6 +2005,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LlmProviderResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/config/components:
     get:
       operationId: getComponentsConfig
@@ -1442,6 +2028,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ComponentsToggleResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     patch:
       operationId: updateComponentsConfig
       summary: Update components config
@@ -1462,6 +2056,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ComponentsToggleResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/config/actions:
     get:
       operationId: getActionsConfig
@@ -1477,6 +2079,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ActionsConfigResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     patch:
       operationId: updateActionsConfig
       summary: Update actions config
@@ -1497,6 +2107,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ActionsConfigResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/schema-registry/collections:
     get:
       operationId: listCollections
@@ -1512,6 +2130,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CollectionListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/schema-registry/infer/{collection}:
     get:
       operationId: inferSchema
@@ -1532,6 +2158,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InferredSchemaResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /api/v1/schema-registry/query/{collection}:
     post:
       operationId: queryCollection
@@ -1563,6 +2197,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/QueryResultResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   securitySchemes:
     BearerAuth:
@@ -1631,19 +2273,40 @@ components:
       properties:
         type:
           type: string
+          format: uri
           description: URI reference identifying the problem type
         title:
           type: string
           description: Short human-readable summary
         status:
           type: integer
+          format: int32
           description: HTTP status code
         detail:
           type: string
           description: Human-readable explanation
         instance:
           type: string
+          format: uri
           description: URI reference identifying the specific occurrence
+        code:
+          type: string
+          description: Machine-readable error code for frontend translation
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp of the error
+        traceId:
+          type: string
+          description: Unique identifier for request tracing
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationError'
+      required:
+        - type
+        - title
+        - status
     ValidationError:
       type: object
       properties:
@@ -1652,6 +2315,8 @@ components:
         message:
           type: string
         rejectedValue:
+          type: string
+        code:
           type: string
     SignupRequest:
       type: object
@@ -3012,36 +3677,36 @@ components:
     BadRequest:
       description: Bad Request
       content:
-        application/json:
+        application/problem+json:
           schema:
             $ref: '#/components/schemas/ProblemDetails'
     Unauthorized:
       description: Unauthorized
       content:
-        application/json:
+        application/problem+json:
           schema:
             $ref: '#/components/schemas/ProblemDetails'
     Forbidden:
       description: Forbidden
       content:
-        application/json:
+        application/problem+json:
           schema:
             $ref: '#/components/schemas/ProblemDetails'
     NotFound:
       description: Not Found
       content:
-        application/json:
+        application/problem+json:
           schema:
             $ref: '#/components/schemas/ProblemDetails'
     Conflict:
       description: Conflict
       content:
-        application/json:
+        application/problem+json:
           schema:
             $ref: '#/components/schemas/ProblemDetails'
     InternalServerError:
       description: Internal Server Error
       content:
-        application/json:
+        application/problem+json:
           schema:
             $ref: '#/components/schemas/ProblemDetails'

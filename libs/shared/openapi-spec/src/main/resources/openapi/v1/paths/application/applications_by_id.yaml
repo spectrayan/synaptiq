@@ -16,6 +16,16 @@ get:
         application/json:
           schema:
             $ref: '../../components/schemas/application/ApplicationResponse.yaml'
+    '400':
+      $ref: '../../components/responses/BadRequest.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+    '403':
+      $ref: '../../components/responses/Forbidden.yaml'
+    '500':
+      $ref: '../../components/responses/InternalServerError.yaml'
+    '404':
+      $ref: '../../components/responses/NotFound.yaml'
 delete:
   operationId: deleteApplication
   summary: Delete an application
@@ -30,3 +40,14 @@ delete:
   responses:
     '204':
       description: Application deleted
+
+    '400':
+      $ref: '../../components/responses/BadRequest.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+    '403':
+      $ref: '../../components/responses/Forbidden.yaml'
+    '500':
+      $ref: '../../components/responses/InternalServerError.yaml'
+    '404':
+      $ref: '../../components/responses/NotFound.yaml'

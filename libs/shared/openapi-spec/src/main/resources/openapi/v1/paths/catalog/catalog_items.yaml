@@ -17,6 +17,14 @@
         application/json:
           schema:
             $ref: '../../components/schemas/catalog/CatalogItemResponse.yaml'
+    '400':
+      $ref: '../../components/responses/BadRequest.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+    '403':
+      $ref: '../../components/responses/Forbidden.yaml'
+    '500':
+      $ref: '../../components/responses/InternalServerError.yaml'
 get:
   operationId: listCatalogItems
   summary: List catalog items
@@ -44,3 +52,12 @@ get:
         application/json:
           schema:
             $ref: '../../components/schemas/catalog/CatalogItemListResponse.yaml'
+
+    '400':
+      $ref: '../../components/responses/BadRequest.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+    '403':
+      $ref: '../../components/responses/Forbidden.yaml'
+    '500':
+      $ref: '../../components/responses/InternalServerError.yaml'

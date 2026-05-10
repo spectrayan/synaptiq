@@ -6,3 +6,5 @@ properties:
     type: string
   rejectedValue:
     type: string
+  code:
+    type: string

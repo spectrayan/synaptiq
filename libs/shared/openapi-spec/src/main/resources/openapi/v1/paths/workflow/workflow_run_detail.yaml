@@ -18,3 +18,12 @@ get:
             $ref: '../../components/schemas/workflow/WorkflowRunDetail.yaml'
     '404':
       description: Run not found
+
+    '400':
+      $ref: '../../components/responses/BadRequest.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+    '403':
+      $ref: '../../components/responses/Forbidden.yaml'
+    '500':
+      $ref: '../../components/responses/InternalServerError.yaml'

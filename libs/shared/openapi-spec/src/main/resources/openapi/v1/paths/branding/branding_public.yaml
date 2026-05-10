@@ -21,3 +21,10 @@ get:
       description: Tenant not found
     '500':
       description: Internal server error
+
+    '400':
+      $ref: '../../components/responses/BadRequest.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+    '403':
+      $ref: '../../components/responses/Forbidden.yaml'

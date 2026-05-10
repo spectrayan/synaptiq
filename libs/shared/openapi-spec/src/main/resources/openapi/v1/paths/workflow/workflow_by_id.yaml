@@ -16,6 +16,16 @@
         application/json:
           schema:
             $ref: '../../components/schemas/workflow/WorkflowResponse.yaml'
+    '400':
+      $ref: '../../components/responses/BadRequest.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+    '403':
+      $ref: '../../components/responses/Forbidden.yaml'
+    '500':
+      $ref: '../../components/responses/InternalServerError.yaml'
+    '404':
+      $ref: '../../components/responses/NotFound.yaml'
 patch:
   operationId: updateWorkflow
   summary: Update a workflow
@@ -40,6 +50,16 @@ patch:
         application/json:
           schema:
             $ref: '../../components/schemas/workflow/WorkflowResponse.yaml'
+    '400':
+      $ref: '../../components/responses/BadRequest.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+    '403':
+      $ref: '../../components/responses/Forbidden.yaml'
+    '500':
+      $ref: '../../components/responses/InternalServerError.yaml'
+    '404':
+      $ref: '../../components/responses/NotFound.yaml'
 delete:
   operationId: deleteWorkflow
   summary: Delete a workflow
@@ -54,3 +74,14 @@ delete:
   responses:
     '204':
       description: Workflow deleted
+
+    '400':
+      $ref: '../../components/responses/BadRequest.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+    '403':
+      $ref: '../../components/responses/Forbidden.yaml'
+    '500':
+      $ref: '../../components/responses/InternalServerError.yaml'
+    '404':
+      $ref: '../../components/responses/NotFound.yaml'
