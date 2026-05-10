@@ -1,0 +1,18 @@
+type: object
+description: Describes a single parameter for a template
+properties:
+  name:
+    type: string
+  displayName:
+    type: string
+  description:
+    type: string
+  type:
+    type: string
+    description: "Parameter type: string, number, boolean, secret, cron"
+  required:
+    type: boolean
+  defaultValue:
+    type: string
+  placeholder:
+    type: string

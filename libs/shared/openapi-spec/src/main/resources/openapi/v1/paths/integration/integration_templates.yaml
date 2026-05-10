@@ -1,0 +1,21 @@
+get:
+  operationId: listIntegrationTemplates
+  summary: List available integration templates
+  description: Returns all built-in integration templates that tenants can browse and configure
+  tags: [Integrations]
+  responses:
+    '200':
+      description: Template catalog
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              templates:
+                type: array
+                items:
+                  $ref: '../../components/schemas/integration/TemplateDescriptorResponse.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+    '500':
+      $ref: '../../components/responses/InternalServerError.yaml'

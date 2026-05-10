@@ -1,0 +1,18 @@
+type: object
+required: [slug, displayName, resource, action]
+properties:
+  slug:
+    type: string
+    description: "Scope identifier, e.g. workflow:create"
+  displayName:
+    type: string
+    description: Human-readable scope name
+  description:
+    type: string
+    description: Scope description
+  resource:
+    type: string
+    description: "Resource category, e.g. workflow"
+  action:
+    type: string
+    description: "Action within the resource, e.g. create"

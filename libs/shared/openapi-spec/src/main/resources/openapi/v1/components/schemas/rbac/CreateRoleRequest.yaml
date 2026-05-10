@@ -1,0 +1,23 @@
+type: object
+required: [slug, displayName, scopeSlugs]
+properties:
+  slug:
+    type: string
+    description: Unique role identifier, e.g. "custom:marketing-editor"
+    minLength: 3
+    maxLength: 100
+  displayName:
+    type: string
+    description: Human-readable name for admin UI
+    minLength: 1
+    maxLength: 100
+  description:
+    type: string
+    description: Role description for admin UI
+    maxLength: 500
+  scopeSlugs:
+    type: array
+    description: List of scope slugs this role grants
+    items:
+      type: string
+    minItems: 1

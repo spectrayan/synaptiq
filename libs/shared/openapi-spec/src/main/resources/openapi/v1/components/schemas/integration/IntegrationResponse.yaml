@@ -1,0 +1,39 @@
+type: object
+description: Integration route configuration
+properties:
+  routeConfigId:
+    type: string
+  tenantId:
+    type: string
+  name:
+    type: string
+  description:
+    type: string
+  connectorType:
+    $ref: '../common/enums/ConnectorType.yaml'
+  templateId:
+    type: string
+  parameters:
+    type: object
+    additionalProperties:
+      type: string
+  status:
+    $ref: '../common/enums/RouteStatus.yaml'
+  credentialRef:
+    type: string
+  camelRouteId:
+    type: string
+  lastTestedAt:
+    type: string
+    format: date-time
+  lastExecutedAt:
+    type: string
+    format: date-time
+  lastError:
+    type: string
+  createdAt:
+    type: string
+    format: date-time
+  updatedAt:
+    type: string
+    format: date-time

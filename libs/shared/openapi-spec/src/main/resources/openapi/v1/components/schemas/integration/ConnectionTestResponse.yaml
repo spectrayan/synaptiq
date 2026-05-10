@@ -1,0 +1,13 @@
+type: object
+description: Result of a connection test
+properties:
+  success:
+    type: boolean
+  message:
+    type: string
+  durationMs:
+    type: integer
+    format: int64
+  testedAt:
+    type: string
+    format: date-time

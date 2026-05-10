@@ -1,0 +1,53 @@
+get:
+  operationId: listIntegrations
+  summary: List integrations for a tenant
+  tags: [Integrations]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  responses:
+    '200':
+      description: Integration list
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              integrations:
+                type: array
+                items:
+                  $ref: '../../components/schemas/integration/IntegrationResponse.yaml'
+    '400':
+      $ref: '../../components/responses/BadRequest.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+    '403':
+      $ref: '../../components/responses/Forbidden.yaml'
+    '500':
+      $ref: '../../components/responses/InternalServerError.yaml'
+post:
+  operationId: createIntegration
+  summary: Create a new integration
+  tags: [Integrations]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/integration/CreateIntegrationRequest.yaml'
+  responses:
+    '201':
+      description: Integration created
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/integration/IntegrationResponse.yaml'
+    '400':
+      $ref: '../../components/responses/BadRequest.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+    '403':
+      $ref: '../../components/responses/Forbidden.yaml'
+    '500':
+      $ref: '../../components/responses/InternalServerError.yaml'

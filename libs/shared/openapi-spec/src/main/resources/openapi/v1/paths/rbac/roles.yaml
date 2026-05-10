@@ -1,0 +1,53 @@
+get:
+  operationId: listRoles
+  summary: List available roles for a tenant
+  tags: [Roles]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  responses:
+    '200':
+      description: Role list
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              roles:
+                type: array
+                items:
+                  $ref: '../../components/schemas/rbac/RoleResponse.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+    '403':
+      $ref: '../../components/responses/Forbidden.yaml'
+    '500':
+      $ref: '../../components/responses/InternalServerError.yaml'
+post:
+  operationId: createRole
+  summary: Create a custom role
+  tags: [Roles]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/rbac/CreateRoleRequest.yaml'
+  responses:
+    '201':
+      description: Role created
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/rbac/RoleResponse.yaml'
+    '400':
+      $ref: '../../components/responses/BadRequest.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+    '403':
+      $ref: '../../components/responses/Forbidden.yaml'
+    '409':
+      $ref: '../../components/responses/Conflict.yaml'
+    '500':
+      $ref: '../../components/responses/InternalServerError.yaml'

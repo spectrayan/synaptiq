@@ -1,0 +1,27 @@
+post:
+  operationId: activateIntegration
+  summary: Activate an integration route
+  description: Loads the integration route into the Camel engine and starts processing
+  tags: [Integrations]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: routeConfigId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Integration activated
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/integration/IntegrationResponse.yaml'
+    '400':
+      $ref: '../../components/responses/BadRequest.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+    '404':
+      $ref: '../../components/responses/NotFound.yaml'
+    '500':
+      $ref: '../../components/responses/InternalServerError.yaml'

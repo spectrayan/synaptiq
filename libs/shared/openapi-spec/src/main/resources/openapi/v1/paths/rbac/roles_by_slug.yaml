@@ -1,0 +1,79 @@
+get:
+  operationId: getRole
+  summary: Get a role by slug
+  tags: [Roles]
+  parameters:
+    - name: roleSlug
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Role details
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/rbac/RoleResponse.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+    '403':
+      $ref: '../../components/responses/Forbidden.yaml'
+    '404':
+      $ref: '../../components/responses/NotFound.yaml'
+    '500':
+      $ref: '../../components/responses/InternalServerError.yaml'
+put:
+  operationId: updateRole
+  summary: Update a custom role
+  tags: [Roles]
+  parameters:
+    - name: roleSlug
+      in: path
+      required: true
+      schema:
+        type: string
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/rbac/UpdateCustomRoleRequest.yaml'
+  responses:
+    '200':
+      description: Role updated
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/rbac/RoleResponse.yaml'
+    '400':
+      $ref: '../../components/responses/BadRequest.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+    '403':
+      $ref: '../../components/responses/Forbidden.yaml'
+    '404':
+      $ref: '../../components/responses/NotFound.yaml'
+    '500':
+      $ref: '../../components/responses/InternalServerError.yaml'
+delete:
+  operationId: deleteRole
+  summary: Delete a custom role
+  tags: [Roles]
+  parameters:
+    - name: roleSlug
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '204':
+      description: Role deleted
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+    '403':
+      $ref: '../../components/responses/Forbidden.yaml'
+    '404':
+      $ref: '../../components/responses/NotFound.yaml'
+    '500':
+      $ref: '../../components/responses/InternalServerError.yaml'

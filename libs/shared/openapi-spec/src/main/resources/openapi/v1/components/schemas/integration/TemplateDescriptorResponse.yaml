@@ -1,0 +1,21 @@
+type: object
+description: Describes a built-in integration template available for tenant use
+properties:
+  templateId:
+    type: string
+  displayName:
+    type: string
+  description:
+    type: string
+  icon:
+    type: string
+  category:
+    type: string
+  connectorType:
+    $ref: '../common/enums/ConnectorType.yaml'
+  requiresCredential:
+    type: boolean
+  parameters:
+    type: array
+    items:
+      $ref: './TemplateParameterResponse.yaml'

@@ -1,0 +1,199 @@
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  Header Bar                                            -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="integrations-manager">
+  <header class="im-header">
+    <div class="im-title-row">
+      <h2>
+        <mat-icon>cable</mat-icon>
+        Integrations
+      </h2>
+      <div class="im-header-actions">
+        @if (facade.viewMode() !== 'list') {
+          <button mat-button (click)="facade.navigateTo('list')">
+            <mat-icon>arrow_back</mat-icon> Back
+          </button>
+        }
+        @if (facade.viewMode() === 'list') {
+          <button class="im-btn-add" (click)="facade.navigateTo('templates')">
+            <mat-icon>add</mat-icon> New Integration
+          </button>
+        }
+      </div>
+    </div>
+    <p class="im-subtitle">
+      @switch (facade.viewMode()) {
+        @case ('list') { Manage your active integrations and connectors }
+        @case ('templates') { Choose a connector template to get started }
+        @case ('create') { Configure {{ facade.selectedTemplate()?.displayName }} }
+      }
+    </p>
+  </header>
+
+  <!-- ═════════════════════════════════════════════════════ -->
+  <!--  Integration List View                                -->
+  <!-- ═════════════════════════════════════════════════════ -->
+  @if (facade.viewMode() === 'list') {
+    @if (facade.loading()) {
+      <div class="im-loading">
+        <mat-spinner diameter="32"></mat-spinner>
+        <span>Loading integrations...</span>
+      </div>
+    } @else if (facade.integrations().length === 0) {
+      <div class="im-empty">
+        <div class="im-empty-icon">🔌</div>
+        <h3>No integrations configured</h3>
+        <p>Connect external services like Slack, REST APIs, databases, and more.</p>
+        <button class="im-btn-add" (click)="facade.navigateTo('templates')">
+          <mat-icon>add</mat-icon> Add First Integration
+        </button>
+      </div>
+    } @else {
+      <div class="im-grid">
+        @for (integration of facade.integrations(); track integration.routeConfigId) {
+          <div class="im-card" [class]="'im-card--' + integration.status?.toLowerCase()">
+            <div class="im-card-header">
+              <div class="im-card-icon">{{ facade.getConnectorIcon(integration.connectorType) }}</div>
+              <div class="im-card-info">
+                <h4>{{ integration.name }}</h4>
+                <span class="im-connector-type">{{ integration.connectorType }}</span>
+              </div>
+              <span class="im-status" [class]="'im-status--' + integration.status?.toLowerCase()">
+                {{ integration.status }}
+              </span>
+            </div>
+            @if (integration.description) {
+              <p class="im-card-desc">{{ integration.description }}</p>
+            }
+            <div class="im-card-actions">
+              @if (integration.status === 'PENDING' || integration.status === 'DISABLED' || integration.status === 'ERROR') {
+                <button class="im-btn-sm im-btn-activate"
+                        (click)="facade.activate(integration.routeConfigId!)"
+                        [disabled]="facade.actionLoading()">
+                  <mat-icon>play_arrow</mat-icon> Activate
+                </button>
+              }
+              @if (integration.status === 'ACTIVE') {
+                <button class="im-btn-sm im-btn-deactivate"
+                        (click)="facade.deactivate(integration.routeConfigId!)"
+                        [disabled]="facade.actionLoading()">
+                  <mat-icon>pause</mat-icon> Deactivate
+                </button>
+              }
+              <button class="im-btn-sm im-btn-test"
+                      (click)="facade.testConnection(integration.routeConfigId!)"
+                      [disabled]="facade.actionLoading()">
+                <mat-icon>network_check</mat-icon> Test
+              </button>
+              <button class="im-btn-sm im-btn-delete"
+                      (click)="facade.deleteIntegration(integration.routeConfigId!)"
+                      [disabled]="facade.actionLoading()">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+            @if (integration.lastError) {
+              <div class="im-error-banner">
+                <mat-icon>error</mat-icon> {{ integration.lastError }}
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+
+  <!-- ═════════════════════════════════════════════════════ -->
+  <!--  Template Catalog View                                -->
+  <!-- ═════════════════════════════════════════════════════ -->
+  @if (facade.viewMode() === 'templates') {
+    <div class="im-template-grid">
+      @for (template of facade.templates(); track template.templateId) {
+        <div class="im-template-card" (click)="facade.selectTemplate(template)">
+          <div class="im-template-icon">{{ facade.getConnectorIcon(template.connectorType) }}</div>
+          <h4>{{ template.displayName }}</h4>
+          <p>{{ template.description }}</p>
+          <div class="im-template-meta">
+            <span class="im-category-chip">{{ template.category }}</span>
+            @if (template.requiresCredential) {
+              <mat-icon class="im-lock-icon" title="Requires credentials">lock</mat-icon>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ═════════════════════════════════════════════════════ -->
+  <!--  Create / Configure View                              -->
+  <!-- ═════════════════════════════════════════════════════ -->
+  @if (facade.viewMode() === 'create' && facade.selectedTemplate()) {
+    <div class="im-create-form">
+      <div class="im-form-group">
+        <label for="im-name">Name</label>
+        <input id="im-name"
+               type="text"
+               [(ngModel)]="formName"
+               placeholder="My REST Integration" />
+      </div>
+      <div class="im-form-group">
+        <label for="im-desc">Description</label>
+        <input id="im-desc"
+               type="text"
+               [(ngModel)]="formDescription"
+               placeholder="Optional description" />
+      </div>
+
+      @for (param of facade.selectedTemplate()!.parameters || []; track param.name) {
+        <div class="im-form-group">
+          <label [for]="'im-param-' + param.name">
+            {{ param.displayName || param.name }}
+            @if (param.required) { <span class="im-required">*</span> }
+          </label>
+          <input
+            [id]="'im-param-' + param.name"
+            [type]="param.type === 'secret' ? 'password' : param.type === 'number' ? 'number' : 'text'"
+            [placeholder]="param.placeholder || ''"
+            [value]="facade.formParams()[param.name!] || param.defaultValue || ''"
+            (input)="facade.setFormParam(param.name!, $any($event.target).value)"
+          />
+          @if (param.description) {
+            <small class="im-hint">{{ param.description }}</small>
+          }
+        </div>
+      }
+
+      @if (facade.selectedTemplate()!.requiresCredential) {
+        <div class="im-form-group">
+          <label for="im-credential">Credential Reference <span class="im-required">*</span></label>
+          <input id="im-credential"
+                 type="text"
+                 [(ngModel)]="formCredentialRef"
+                 placeholder="credential/my-secret" />
+          <small class="im-hint">Reference to the stored credential</small>
+        </div>
+      }
+
+      <div class="im-form-actions">
+        <button class="im-btn-cancel" (click)="facade.navigateTo('templates')">Cancel</button>
+        <button class="im-btn-create"
+                (click)="onCreateClick()"
+                [disabled]="facade.actionLoading()">
+          @if (facade.actionLoading()) {
+            <mat-spinner diameter="16"></mat-spinner>
+          }
+          Create Integration
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ═════════════════════════════════════════════════════ -->
+  <!--  Toast / Status Bar                                   -->
+  <!-- ═════════════════════════════════════════════════════ -->
+  @if (facade.toast(); as t) {
+    <div class="im-toast" [class.im-toast--error]="t.isError">
+      <mat-icon>{{ t.isError ? 'error' : 'check_circle' }}</mat-icon>
+      {{ t.message }}
+    </div>
+  }
+</div>

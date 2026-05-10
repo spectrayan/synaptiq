@@ -1,0 +1,9 @@
+type: object
+properties:
+  items:
+    type: array
+    items:
+      $ref: 'NotificationResponse.yaml'
+  hasMore:
+    type: boolean
+    description: Whether older notifications exist beyond this page

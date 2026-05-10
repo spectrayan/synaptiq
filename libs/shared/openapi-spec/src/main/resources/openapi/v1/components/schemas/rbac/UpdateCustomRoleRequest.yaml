@@ -1,0 +1,17 @@
+type: object
+properties:
+  displayName:
+    type: string
+    description: Updated display name
+    minLength: 1
+    maxLength: 100
+  description:
+    type: string
+    description: Updated description
+    maxLength: 500
+  scopeSlugs:
+    type: array
+    description: Updated scope slugs this role grants
+    items:
+      type: string
+    minItems: 1

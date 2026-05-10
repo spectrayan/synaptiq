@@ -1,0 +1,30 @@
+type: object
+required: [id, slug, displayName, systemRole, roleType, scopeSlugs]
+properties:
+  id:
+    type: string
+    description: Unique role ID
+  slug:
+    type: string
+    description: Stable role identifier
+  tenantId:
+    type: string
+    description: Owning tenant ID, null for global roles
+  displayName:
+    type: string
+    description: Human-readable role name
+  description:
+    type: string
+    description: Role description
+  systemRole:
+    type: boolean
+    description: Whether this role is system-managed (immutable)
+  roleType:
+    type: string
+    description: Role type, either global or tenant
+    enum: [global, tenant]
+  scopeSlugs:
+    type: array
+    description: Scope slugs granted by this role
+    items:
+      type: string

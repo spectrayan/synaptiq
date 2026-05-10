@@ -1,0 +1,7 @@
+type: string
+description: Lifecycle status of an integration route
+enum:
+  - PENDING
+  - ACTIVE
+  - ERROR
+  - DISABLED

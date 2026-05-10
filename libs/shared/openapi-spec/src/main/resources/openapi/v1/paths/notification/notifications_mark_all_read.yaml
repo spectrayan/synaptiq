@@ -1,0 +1,13 @@
+post:
+  operationId: markAllNotificationsRead
+  summary: Mark all notifications as read
+  description: |
+    Marks all unread notifications as read for the authenticated user in the specified tenant.
+  tags: [Notifications]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  responses:
+    '204':
+      description: All notifications marked as read
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'

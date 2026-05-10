@@ -1,0 +1,12 @@
+type: string
+description: Type of integration connector
+enum:
+  - REST_API
+  - WEBHOOK
+  - DATABASE
+  - SLACK
+  - EMAIL
+  - MCP_SERVER
+  - MESSAGE_QUEUE
+  - FILE_STORAGE
+  - CUSTOM_YAML

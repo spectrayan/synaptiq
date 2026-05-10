@@ -1,0 +1,48 @@
+get:
+  operationId: getIntegration
+  summary: Get integration by ID
+  tags: [Integrations]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: routeConfigId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Integration details
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/integration/IntegrationResponse.yaml'
+    '400':
+      $ref: '../../components/responses/BadRequest.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+    '404':
+      $ref: '../../components/responses/NotFound.yaml'
+    '500':
+      $ref: '../../components/responses/InternalServerError.yaml'
+delete:
+  operationId: deleteIntegration
+  summary: Delete an integration
+  tags: [Integrations]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: routeConfigId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '204':
+      description: Integration deleted
+    '400':
+      $ref: '../../components/responses/BadRequest.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+    '404':
+      $ref: '../../components/responses/NotFound.yaml'
+    '500':
+      $ref: '../../components/responses/InternalServerError.yaml'
