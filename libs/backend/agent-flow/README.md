@@ -1,33 +1,16 @@
-# Agent Flow Engine
+# ⚠️ DEPRECATED — Python Agent Flow Library
 
-Dynamic JSON-based AI agent workflow engine for Synaptiq. Uses LangGraph for orchestration and supports `static`, `dynamic`, and `hybrid` flow types.
+> **This library has been superseded by [`libs/backend/agent-flow-spring/`](../agent-flow-spring/).**
 
-## Architecture
+The Spring-based `agent-flow-spring` library is the finalized production implementation of the agent workflow engine. This Python codebase is retained for historical reference only and is **no longer maintained**.
 
-- **Builder** — Translates `FlowSpec` JSON into compiled LangGraph graphs
-- **Coordinator** — Orchestrates multi-agent workflows with iteration-based planning/execution
-- **Executor** — Provides the runtime API for starting and streaming workflow runs
-- **Flow Generation** — LLM-powered workflow specification generation from natural language
+## Migration
 
-## Flow Types
+All agent workflow functionality is now available in the Spring Boot backend:
 
-| Type | Description |
-|------|-------------|
-| `static` | Pre-defined agent graph with fixed edges |
-| `dynamic` | LLM generates the workflow spec at runtime |
-| `hybrid` | Static structure with dynamic sub-flows |
-
-## Usage
-
-```python
-from agent_flow.builder.builder import build_workflow
-from agent_flow.executor.engine import FlowExecutor
-
-# Build from spec
-graph, settings, ctx = build_workflow(spec_dict)
-
-# Execute
-executor = FlowExecutor(graph, settings)
-async for event in executor.stream(input_data):
-    print(event)
+```bash
+# The active implementation:
+libs/backend/agent-flow-spring/
 ```
+
+See the [agent-flow-spring README](../agent-flow-spring/README.md) for current documentation.

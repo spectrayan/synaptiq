@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Synaptiq CI — Nx monorepo + Python backend
+# Synaptiq CI — Nx monorepo + Spring Boot backend
 # ─────────────────────────────────────────────────────────────────────────────
 name: CI
 
@@ -63,43 +63,36 @@ jobs:
           path: dist/apps/frontend/web/shell
           retention-days: 7
 
-  # ─── Backend (Python / FastAPI) ──────────────────────────────────────────
+  # ─── Backend (Java / Spring Boot) ────────────────────────────────────────
   backend:
-    name: Backend — Lint · Test
+    name: Backend — Build · Test
     runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash
-        working-directory: apps/backend/api
+        working-directory: apps/backend/spring-apis
 
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-java@v4
         with:
-          python-version: "3.14"
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
 
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('apps/backend/api/pyproject.toml') }}
-          restore-keys: ${{ runner.os }}-pip-
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev]" 2>/dev/null || pip install -e . && pip install ruff pytest pytest-asyncio pytest-cov
-
-      - name: Lint (ruff)
-        run: ruff check src/
-
-      - name: Type surface check
-        run: python -c "from synaptiq_api.main import app; print('✓ API module imports clean')"
+      - name: Build (skip tests)
+        run: mvn clean package -DskipTests -B -q
 
       - name: Test
-        run: pytest tests/ -x --tb=short -q 2>/dev/null || echo "⚠ No tests found — skipping"
+        run: mvn test -B
         env:
           CI: true
-          MONGO_URI: "mongodb://localhost:27017"
-          SYNAPTIQ_ENV: "test"
+
+      - name: Upload JAR artifact
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: spring-apis-jar
+          path: apps/backend/spring-apis/target/spring-apis-*.jar
+          retention-days: 7

@@ -3,21 +3,6 @@
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/backend/agent-flow/src",
   "projectType": "library",
-  "tags": ["scope:backend", "type:lib"],
-  "targets": {
-    "lint": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "ruff check libs/backend/agent-flow/src",
-        "cwd": "{workspaceRoot}"
-      }
-    },
-    "test": {
-      "executor": "nx:run-commands",
-      "options": {
-        "command": "python -m pytest libs/backend/agent-flow/tests",
-        "cwd": "{workspaceRoot}"
-      }
-    }
-  }
+  "tags": ["scope:backend", "type:lib", "deprecated"],
+  "targets": {}
 }

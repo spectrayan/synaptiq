@@ -35,25 +35,25 @@
                │                       │                       │
                └───────────────────────┼───────────────────────┘
                                        │
-                        ┌──────────────▼──────────────┐
-                        │     Next.js Frontend         │
-                        │  (Cloud Run — containerized) │
-                        │  Middleware: tenant resolver  │
-                        └──────────────┬──────────────┘
+                         ┌──────────────▼──────────────┐
+                         │    Angular 21 SSR Frontend   │
+                         │  (Cloud Run — containerized) │
+                         │  Middleware: tenant resolver  │
+                         └──────────────┬──────────────┘
                                        │ REST + SSE
                         ┌──────────────▼──────────────┐
-                        │     Python FastAPI Backend   │
+                        │   Spring Boot 4 Backend      │
                         │  (Cloud Run — containerized) │
                         │  Modules: chat, catalog,     │
                         │  tenant, actions, usage,     │
                         │  search, analytics           │
                         └──┬───────────┬──────────────┘
                            │           │
-              ┌────────────▼─┐   ┌─────▼──────────────┐
-              │ Cloud SQL     │   │  Upstash Redis      │
-              │ PostgreSQL    │   │  (Cache + Rate Limit│
-              │ + pgvector    │   │   + Sessions)       │
-              └────────────┬─┘   └─────────────────────┘
+               ┌────────────▼─┐   ┌─────▼────────────┐
+               │ MongoDB Atlas │   │  Redis 7            │
+               │ + Vector      │   │  (Cache + Rate Limit│
+               │   Search      │   │   + Sessions)       │
+               └────────────┬─┘   └─────────────────────┘
                            │
               ┌────────────▼──────────────┐
               │  Vertex AI (Gemini)        │
@@ -81,13 +81,14 @@
 ### 3.2 Backend
 | Choice | Technology | Rationale |
 |---|---|---|
-| Framework | **Python FastAPI** | Best LLM ecosystem (LangChain, instructor), native async, fast SSE streaming |
-| LLM Orchestration | **LangChain** (slim, chains only) | Provider-agnostic, prompt templates, streaming |
-| Structured Output | **Instructor** (Pydantic) | Forces LLM to output valid Component DSL — no hallucinated schemas |
-| Vector Search | **pgvector** (Postgres extension) | No separate infra; semantic search on same DB |
+| Framework | **Spring Boot 4 (WebFlux)** | Reactive non-blocking I/O, strong enterprise ecosystem, Spring AI for LLM integration |
+| Architecture | **Spring Modulith** (hexagonal) | Bounded context enforcement, clean port/adapter boundaries, OpenAPI-first contracts |
+| LLM Integration | **Spring AI** (Vertex AI Gemini) | Spring-native, provider-agnostic, streaming support |
+| API Contracts | **OpenAPI 3.0** (code-first → generated) | SpringDoc generates spec; Angular SDK auto-generated from spec |
+| Vector Search | **MongoDB Atlas Vector Search** | Managed service, no separate infra, tenant-scoped |
 | Embeddings | **Vertex AI text-embedding-004** | Consistent with GCP; high quality |
-| Cache / Rate Limit | **Upstash Redis** | Serverless Redis; HTTP-based (works in Cloud Run) |
-| Auth validation | **Firebase Admin SDK** | Verify Firebase tokens on protected routes |
+| Cache / Rate Limit | **Redis 7** (reactive via Lettuce) | Reactive driver, works with WebFlux |
+| Auth validation | **Firebase Admin SDK + JWT** | Verify Firebase tokens on protected routes, built-in JWT fallback |
 | Task Queue | **Cloud Tasks** (GCP) | Async jobs: CSV ingestion, embedding generation, analytics rollup |
 
 ### 3.3 Data
@@ -96,7 +97,7 @@
 | Primary DB | **MongoDB Atlas** | All data: tenants, schema, catalog items, action logs, usage ledger — document model fits dynamic catalog fields perfectly |
 | Vector Index | **MongoDB Atlas Vector Search** | Per-collection vector index on `embedding` field; tenant-scoped via `tenantId` filter |
 | Conversation History | **Redis** (TTL 2hr) + **MongoDB** (last 50 turns persisted) | Redis for active sessions; MongoDB fallback for longer context |
-| Cache | **Upstash Redis** | System prompt cache, rate limit counters, tenant config cache |
+| Cache | **Redis 7** | System prompt cache, rate limit counters, tenant config cache |
 | Object Storage | **Google Cloud Storage** | Logo uploads, CSV imports, exports |
 
 **Why MongoDB over PostgreSQL:**
@@ -124,7 +125,7 @@
 ```
 Request: GET https://acme.platform.com/
 
-Next.js Middleware (runs on edge):
+Angular Middleware (route guard / interceptor):
   1. Extract tenant slug from Host header → "acme"
   2. Check Redis: GET tenant:acme:config
      ├── HIT  → use cached config (TTL: 5 min)
@@ -138,13 +139,13 @@ Admin route: https://acme.platform.com/admin/*
   → Renders admin chat interface (different component set)
 
 Platform admin: https://admin.platform.com
-  → Separate Next.js route group
+  → Separate Angular route group
   → Requires platform-level Firebase Auth role
 ```
 
 **DNS Setup:**
 - `*.platform.com` → Cloudflare → Cloud Run (single service)
-- Next.js middleware handles all tenant resolution at the edge
+- Angular SSR middleware handles all tenant resolution
 
 ---
 
@@ -167,7 +168,7 @@ Step 2 — Context Build
 
 Step 3 — Vector Search (catalog retrieval)
   ├── Embed user message → Vertex AI text-embedding-004
-  ├── Query pgvector: top-8 similar items WHERE tenant_id = X
+  ├── Query Atlas Vector Search: top-8 similar items WHERE tenant_id = X
   │     filter: status = 'active'
   │     strip: admin_only fields from results
   └── Retrieved items injected into LLM context
@@ -180,7 +181,7 @@ Step 4 — LLM Call (streaming)
 
 Step 5 — Component DSL Parsing & Validation
   ├── Extract Component Spec blocks from LLM output
-  ├── Validate each spec against Pydantic schema (via Instructor)
+  ├── Validate each spec against OpenAPI-generated DTOs (Jackson)
   ├── Hydrate: resolve item_ids → full item data from DB
   │     (strip admin_only fields)
   └── INVALID spec → fall back to plain text, log warning
@@ -224,38 +225,49 @@ Every LLM response is a sequence of `MessagePart` objects:
 }
 ```
 
-### 6.2 Component Spec Schema (Pydantic)
+### 6.2 Component Spec Schema (Java Records)
 
-```python
-class ItemGridSpec(BaseModel):
-    component: Literal["item-grid"]
-    props: ItemGridProps
+```java
+public record ItemGridSpec(
+    @JsonProperty("component") String component,  // "item-grid"
+    @JsonProperty("props") ItemGridProps props
+) {}
 
-class ItemGridProps(BaseModel):
-    layout: Literal["2-col", "3-col", "4-col"] = "3-col"
-    items: List[str]          # item_ids only — resolved by backend
-    highlight: List[str] = [] # field_ids to visually emphasize
+public record ItemGridProps(
+    @JsonProperty("layout") String layout,         // "2-col", "3-col", "4-col"
+    @JsonProperty("items") List<String> items,      // item_ids only — resolved by backend
+    @JsonProperty("highlight") List<String> highlight // field_ids to visually emphasize
+) {}
 
-class ComparisonTableSpec(BaseModel):
-    component: Literal["comparison-table"]
-    props: ComparisonTableProps
+public record ComparisonTableSpec(
+    @JsonProperty("component") String component,  // "comparison-table"
+    @JsonProperty("props") ComparisonTableProps props
+) {}
 
-class ComparisonTableProps(BaseModel):
-    items: List[str]  # 2–4 item_ids
-    fields: List[str] # field_ids to compare
+public record ComparisonTableProps(
+    @JsonProperty("items") List<String> items,    // 2–4 item_ids
+    @JsonProperty("fields") List<String> fields   // field_ids to compare
+) {}
 
-# ... one Pydantic class per component type
+// ... one record class per component type
 ```
 
 ### 6.3 Hydration (Backend)
 After parsing the spec, the backend resolves all `item_id` references:
 
-```python
-async def hydrate_spec(spec, tenant_id):
-    item_ids = extract_item_ids(spec)
-    items = await db.fetch_items(item_ids, tenant_id)
-    items = strip_admin_only_fields(items, tenant_schema)
-    return inject_items_into_spec(spec, items)
+```java
+@Service
+public class SpecHydrationService {
+    private final CatalogItemRepository catalogRepo;
+    private final SchemaFieldService schemaService;
+
+    public Mono<ComponentSpec> hydrate(ComponentSpec spec, String tenantId) {
+        List<String> itemIds = extractItemIds(spec);
+        return catalogRepo.findByIdInAndTenantId(itemIds, tenantId)
+            .map(items -> stripAdminOnlyFields(items, schemaService.getSchema(tenantId)))
+            .map(items -> injectItemsIntoSpec(spec, items));
+    }
+}
 ```
 
 The frontend **never** fetches items — it receives fully hydrated specs.
@@ -422,35 +434,36 @@ All cache keys are namespaced by `tenant_id` to enforce isolation.
 
 ## 9. LLM Provider Adapter
 
-```python
-from abc import ABC, abstractmethod
+```java
+public interface LlmAdapter {
+    Flux<String> stream(List<ChatMessage> messages, LlmConfig config);
+    int countTokens(String text);
+}
 
-class LLMAdapter(ABC):
-    @abstractmethod
-    async def stream(self, messages: list, config: LLMConfig) -> AsyncIterator[str]:
-        ...
-    
-    @abstractmethod
-    def count_tokens(self, text: str) -> int:
-        ...
+@Component
+public class GeminiAdapter implements LlmAdapter {      // Platform default
+    // Uses Spring AI VertexAiGeminiChatModel
+    public Flux<String> stream(List<ChatMessage> messages, LlmConfig config) { ... }
+    public int countTokens(String text) { ... }
+}
 
-class GeminiAdapter(LLMAdapter):      # Platform default
-    async def stream(self, messages, config): ...
+@Component
+public class OpenAiAdapter implements LlmAdapter {       // BYOK
+    // Uses Spring AI OpenAiChatModel
+    public Flux<String> stream(List<ChatMessage> messages, LlmConfig config) { ... }
+    public int countTokens(String text) { ... }
+}
 
-class OpenAIAdapter(LLMAdapter):       # BYOK
-    async def stream(self, messages, config): ...
-
-class AnthropicAdapter(LLMAdapter):    # BYOK
-    async def stream(self, messages, config): ...
-
-def get_adapter(tenant_config: TenantConfig) -> LLMAdapter:
-    if tenant_config.byok_provider == "openai":
-        key = decrypt(tenant_config.byok_key_encrypted)
-        return OpenAIAdapter(api_key=key, model=tenant_config.byok_model)
-    if tenant_config.byok_provider == "anthropic":
-        key = decrypt(tenant_config.byok_key_encrypted)
-        return AnthropicAdapter(api_key=key, model=tenant_config.byok_model)
-    return GeminiAdapter(project=GCP_PROJECT, model="gemini-1.5-pro")
+@Component
+public class LlmAdapterFactory {
+    public LlmAdapter getAdapter(TenantConfig tenantConfig) {
+        if ("openai".equals(tenantConfig.getByokProvider())) {
+            String key = secretManager.decrypt(tenantConfig.getByokKeyEncrypted());
+            return new OpenAiAdapter(key, tenantConfig.getByokModel());
+        }
+        return geminiAdapter; // Platform default
+    }
+}
 ```
 
 BYOK keys decrypted **in-memory only** using GCP Secret Manager envelope encryption. Never logged.
@@ -497,50 +510,56 @@ Never output raw HTML. Always validate item IDs against Retrieved Items.
 ## 11. Frontend Architecture
 
 ```
-app/
-├── middleware.ts              # Tenant resolver — reads Host, injects tenant context
-├── (chat)/
-│   └── page.tsx              # End-user chat interface
-├── (admin)/
-│   ├── layout.tsx            # Firebase Auth guard
-│   └── page.tsx              # Admin chat interface
-├── components/
-│   ├── chat/
-│   │   ├── ChatWindow.tsx    # Main chat container + SSE handler
-│   │   ├── MessageList.tsx   # Renders message history
-│   │   ├── MessageInput.tsx  # Input + starter prompts
-│   │   └── TypingIndicator.tsx
-│   ├── renderer/
-│   │   ├── ComponentRenderer.tsx  # Switch: spec.component → React component
-│   │   ├── ItemCard.tsx
-│   │   ├── ItemGrid.tsx
-│   │   ├── ItemDetail.tsx
-│   │   ├── ComparisonTable.tsx
-│   │   ├── FilterSummary.tsx
-│   │   ├── ActionConfirm.tsx
-│   │   ├── KpiCard.tsx
-│   │   └── EmptyState.tsx
-│   └── admin/
-│       ├── SchemaFormComponent.tsx    # Admin: edit schema inline in chat
-│       ├── MetricsDashboardComponent.tsx
-│       └── ColorPickerComponent.tsx
-├── lib/
-│   ├── streaming.ts          # SSE client, event parser
-│   ├── tenantContext.ts      # Tenant config provider (React context)
-│   └── theme.ts              # CSS variable injector from tenant theme
-└── store/
-    ├── chatStore.ts          # Zustand: messages, loading state
-    └── tenantStore.ts        # Zustand: tenant config, theme
+apps/frontend/web/shell/src/
+├── app/
+│   ├── app.routes.ts                # Route config: /chat, /admin, guards
+│   ├── app.component.ts             # Root shell (sidebar + topbar + router-outlet)
+│   └── pages/
+│       ├── chat/                    # End-user chat page
+│       └── admin/                   # Admin dashboard (behind AuthGuard)
+├── environments/
+│   ├── environment.ts               # Dev config (builtin auth, localhost:8080)
+│   └── environment.prod.ts           # Prod config (Firebase auth, Cloud Run)
+└── styles.scss                      # Global M3 dark theme + design tokens
+
+libs/frontend/
+├── chat/src/lib/
+│   ├── chat-window/                 # Main chat container + SSE handler
+│   ├── message-list/                # Renders message history
+│   ├── message-input/               # Input + starter prompts
+│   ├── typing-indicator/            # 3-dot pulse animation
+│   └── workflow/                    # Workflow canvas + collaboration
+├── dsl-renderer/src/lib/
+│   ├── dsl-renderer.component.ts    # @switch dispatcher on spec.component
+│   ├── item-card/                   # 3 variants: standard, compact, featured
+│   ├── item-grid/                   # Responsive 2–6 column grid
+│   ├── item-detail/                 # Full detail panel
+│   ├── comparison-table/            # Side-by-side 2–4 items
+│   ├── filter-summary/              # Dismissible filter chips
+│   ├── action-confirm/              # Confirmation before writes
+│   └── empty-state/                 # Configurable no-results
+├── auth/src/lib/
+│   ├── auth.service.ts              # Signals-based: login, logout, token refresh
+│   ├── auth.guard.ts                # CanActivate guard for admin routes
+│   └── login-page/                  # Email/password + Google SSO
+└── theme/src/lib/
+    ├── theme.service.ts             # Load tenant theme, apply CSS vars
+    ├── breakpoints.ts               # Mobile/Tablet/Desktop via CDK
+    └── layout.scss                  # Grid utilities (stack, cluster, item-grid)
 ```
 
 ### Theme Injection (CSS Variables)
 ```typescript
-// Applied once on tenant config load
-function applyTenantTheme(theme: TenantTheme) {
-  document.documentElement.style.setProperty('--color-primary', theme.primaryColor);
-  document.documentElement.style.setProperty('--color-secondary', theme.secondaryColor);
-  document.documentElement.style.setProperty('--font-heading', theme.headingFont);
-  document.documentElement.style.setProperty('--font-body', theme.bodyFont);
+// libs/frontend/theme/src/lib/theme.service.ts
+@Injectable({ providedIn: 'root' })
+export class ThemeService {
+  applyTenantTheme(theme: TenantTheme): void {
+    const root = document.documentElement;
+    root.style.setProperty('--color-primary', theme.primaryColor);
+    root.style.setProperty('--color-secondary', theme.secondaryColor);
+    root.style.setProperty('--font-heading', theme.headingFont);
+    root.style.setProperty('--font-body', theme.bodyFont);
+  }
 }
 // All components use var(--color-primary) etc. — never hardcoded colors
 ```
@@ -551,46 +570,26 @@ function applyTenantTheme(theme: TenantTheme) {
 
 ```
 backend/
-├── main.py                    # FastAPI app, middleware, CORS
-├── routers/
-│   ├── chat.py               # POST /chat (SSE stream)
-│   ├── catalog.py            # CRUD /catalog/items
-│   ├── schema.py             # GET/PUT /schema/fields
-│   ├── tenant.py             # Tenant management (L0)
-│   ├── actions.py            # POST /actions/execute
-│   ├── analytics.py          # GET /analytics/metrics
-│   └── usage.py              # GET /usage/report
-├── services/
-│   ├── llm/
-│   │   ├── adapter.py        # Abstract LLMAdapter + factory
-│   │   ├── gemini.py         # GeminiAdapter
-│   │   ├── openai.py         # OpenAIAdapter
-│   │   └── anthropic.py      # AnthropicAdapter
-│   ├── prompt/
-│   │   ├── builder.py        # System prompt compiler
-│   │   └── templates.py      # Prompt section templates
-│   ├── search/
-│   │   ├── vector.py         # pgvector query wrapper
-│   │   └── embeddings.py     # Vertex AI embedding client
-│   ├── dsl/
-│   │   ├── parser.py         # Extract component specs from LLM output
-│   │   ├── validator.py      # Pydantic validation of specs
-│   │   └── hydrator.py       # Resolve item_ids → full data
-│   ├── cache/
-│   │   └── redis.py          # Upstash Redis wrapper
-│   └── usage/
-│       └── ledger.py         # Append-only event writer
-├── models/
-│   ├── tenant.py             # SQLAlchemy models
-│   ├── catalog.py
-│   ├── schema_field.py
-│   └── usage.py
-└── core/
-    ├── auth.py               # Firebase token verification
-    ├── rate_limiter.py       # Redis sliding window
-    ├── circuit_breaker.py    # LLM circuit breaker
-    └── tenant_resolver.py    # Tenant config loader (cache-first)
+├── SynaptiqApplication.java       # Spring Boot main class
+├── auth/                          # Firebase + JWT authentication module
+├── tenant/                        # Tenant CRUD + lifecycle
+├── catalog/                       # Schema import, item CRUD, CSV
+├── chat/                          # SSE streaming chat + LLM orchestration
+├── tenantconfig/                  # AI persona, guardrails, BYOK
+├── branding/                      # Theme, logo, colors
+├── action/                        # Save item, contact enquiry
+├── analytics/                     # Metrics, billing, usage
+├── workflow/                      # Agent workflow engine
+├── schemaregistry/                # Schema registry module
+├── datasource/                    # Data source management
+└── shared/                        # Cross-cutting config, security, events
+    ├── config/                    # CORS, Jackson, security, tenant filter
+    ├── domain/                    # Shared domain types
+    ├── event/                     # Domain events
+    ├── exception/                 # Global error handling
+    └── infrastructure/            # Cross-cutting infra (web, config)
 ```
+
 
 ---
 
@@ -668,12 +667,12 @@ readonly isMobile = toSignal(
 |---|---|---|
 | Frontend framework | **Angular 21** (Nx) | Next.js: team expertise in Angular makes delivery faster; RxJS handles SSE natively |
 | Monorepo | **Nx** | Single repo — shared domain models, API clients, design tokens across frontend + future mobile |
-| Backend language | **Python FastAPI** | Node.js: weaker LLM tooling; Go: too low-level for LLM work |
+| Backend language | **Java 21 / Spring Boot 4** | Python: Spring offers stronger enterprise tooling, type safety, and Spring AI is now on par with LangChain |
 | Primary DB | **MongoDB Atlas** | PostgreSQL: catalog items are dynamic documents — SQL schema fights the schema builder |
 | Vector search | **Atlas Vector Search** | pgvector: Atlas VS is managed, no extension maintenance, supports per-tenant dimension variation |
 | Embedding provider | **Per-tenant** (Vertex or OpenAI) | Normalized: limits BYOK flexibility; `embeddingDim` stored per document handles mixed dimensions |
 | Conversation history | **Redis + MongoDB** | Redis only: 2hr TTL loses context; MongoDB: persists last 50 turns, 30-day TTL index |
-| LLM structured output | **Instructor + Pydantic** | Plain prompting: too unreliable for Component DSL contract |
+| LLM structured output | **Spring AI + Jackson DTOs** | Plain prompting: too unreliable for Component DSL contract |
 | Streaming protocol | **SSE** | WebSockets: overkill for unidirectional LLM streaming |
 | Deployment | **Cloud Run** | GKE: over-engineered for MVP; App Engine: less flexible |
 | Auth | **Single Firebase project** | Separate L0/L1 projects: unnecessary operational complexity for MVP |
@@ -692,15 +691,15 @@ All questions resolved — see top of document.
 spectrayan/
 ├── apps/
 │   ├── shell/              # Angular 21 — end-user + admin chat (SSR via Angular Universal)
-│   └── api/                # Python FastAPI — backend (separate Cloud Run service)
+│   └── spring-apis/        # Spring Boot 4 — backend (separate Cloud Run service)
 ├── libs/
 │   ├── domain/             # Shared TypeScript interfaces: TenantConfig, ComponentSpec, SchemaField
 │   ├── ui/                 # Shared Angular component library (ChatWindow, ComponentRenderer, etc.)
-│   ├── api-client/         # Auto-generated API client from FastAPI OpenAPI spec
+│   ├── api-client/         # Auto-generated API client from OpenAPI spec
 │   └── theme/              # CSS design token system, tenant theme utilities
 ├── nx.json
 └── package.json
 ```
 
 > [!NOTE]
-> The Python FastAPI backend lives in `apps/api/` as an Nx project with a custom executor for `uvicorn`. Nx handles task dependencies: `api-client` generation runs after `api` build, `shell` build depends on `api-client`.
+> The Spring Boot backend lives in `apps/backend/spring-apis/` as an Nx project with a custom executor for Maven. Nx handles task dependencies: `api-client` generation runs after OpenAPI spec update, `shell` build depends on the generated SDK.

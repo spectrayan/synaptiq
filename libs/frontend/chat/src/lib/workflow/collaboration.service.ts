@@ -27,8 +27,8 @@ export class CollaborationService implements OnDestroy {
     
     // Determine protocol based on current location
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    // For local dev, api is on 8000, or proxy. Let's assume proxy routes /api/v1/workflow to the backend.
-    // In dev mode, window.location.host is localhost:4200, which proxies /api to localhost:8000.
+    // For local dev, api is on 8080, or proxy. Let's assume proxy routes /api/v1/workflow to the backend.
+    // In dev mode, window.location.host is localhost:4200, which proxies /api to localhost:8080.
     // WebSockets should also be proxied if configured, or we connect directly.
     const host = window.location.host;
     let wsUrl = `${protocol}//${host}/api/v1/workflow/${workflowId}/sync`;

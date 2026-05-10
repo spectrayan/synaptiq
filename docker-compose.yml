@@ -5,8 +5,8 @@
 #   - mongodb     : MongoDB Atlas Local (supports vector search + replica set)
 #   - redis       : Redis 7 for rate limiting and prompt caching
 #   - firebase-auth : Firebase Auth Emulator (no real credentials needed)
-#   - api         : FastAPI backend (hot-reload via volume mount)
-#   - seed        : One-shot seeder for demo tenant + catalog data
+#   - spring-apis : Spring Boot 4 backend (WebFlux + Modulith)
+#   - seed        : One-shot seeder for demo tenant + catalog data (Python utility)
 #
 # The Angular frontend runs outside Docker via `pnpm nx serve shell`
 
@@ -70,36 +70,6 @@ services:
       retries: 5
       start_period: 30s
 
-  # ── FastAPI Backend ────────────────────────────────────────────────────
-  api:
-    build:
-      context: ./apps/backend/api
-      dockerfile: Dockerfile
-    container_name: synaptiq-api
-    ports:
-      - "8000:8080"
-    environment:
-      - MONGODB_URI=mongodb://mongodb:27017
-      - REDIS_URL=redis://redis:6379
-      - DEBUG=true
-      - ENVIRONMENT=development
-      - SYNAPTIQ_CORS_ORIGINS=http://localhost:4200,http://localhost:4201
-      # Connect to Firebase Auth Emulator for token verification
-      - FIREBASE_AUTH_EMULATOR_HOST=firebase-auth:9099
-      - FIREBASE_PROJECT_ID=synaptiq-dev
-    env_file:
-      - ./apps/backend/api/.env
-    depends_on:
-      mongodb:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      firebase-auth:
-        condition: service_healthy
-    volumes:
-      - ./apps/backend/api/src:/app/src
-    restart: unless-stopped
-
   # ── Spring Boot Backend ────────────────────────────────────────────────
   spring-apis:
     build:
@@ -107,7 +77,7 @@ services:
       dockerfile: Dockerfile
     container_name: synaptiq-spring-apis
     ports:
-      - "8081:8080"
+      - "8080:8080"
     environment:
       - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/synaptiq
       - SPRING_DATA_REDIS_HOST=redis
@@ -123,21 +93,23 @@ services:
     restart: unless-stopped
 
   # ── One-shot seed runner ───────────────────────────────────────────────
-  # Populates demo tenant + catalog data on first start
+  # Populates demo tenant + catalog data on first start.
+  # Uses the Python seed scripts as a standalone utility.
   seed:
-    build:
-      context: ./apps/backend/api
-      dockerfile: Dockerfile
+    image: python:3.12-slim
     container_name: synaptiq-seed
-    entrypoint: [ "uv", "run", "python", "-m", "synaptiq_api.scripts.seed_dev" ]
+    working_dir: /app
+    entrypoint: ["sh", "-c"]
+    command:
+      - |
+        pip install --no-cache-dir pymongo &&
+        python seed-data/seed_all.py
     environment:
       - MONGODB_URI=mongodb://mongodb:27017
-      - REDIS_URL=redis://redis:6379
-      - ENVIRONMENT=development
+    volumes:
+      - ./seed-data:/app/seed-data:ro
     depends_on:
       mongodb:
-        condition: service_healthy
-      redis:
         condition: service_healthy
     restart: "no"
 
@@ -145,5 +117,3 @@ volumes:
   mongo_data:
   redis_data:
   firebase_data:
-
-
