@@ -2,13 +2,13 @@ openapi: 3.1.0
 info:
   title: Synaptiq API
   description: |
-    AI-Powered Conversational Commerce Platform — REST API
+    AI-Native Application Platform — REST API
 
-    Synaptiq enables businesses to deploy intelligent, context-aware AI shopping assistants
-    with full catalog management, conversation orchestration, workflow automation,
-    and multi-tenant governance. This specification covers all bounded contexts:
-    Authentication, Tenants, Catalog, Chat, Actions, Workflows, Analytics,
-    Branding, Tenant Configuration, and Schema Registry.
+    Synaptiq enables businesses to connect any data source and dynamically generate
+    dashboards, workflows, reports, and UI experiences through natural language.
+    This specification covers all bounded contexts:
+    Authentication, Tenants, DataSources, Chat, Actions, Workflows, Analytics,
+    Branding, Tenant Configuration, Integrations, and Schema Registry.
   version: 1.0.0
   contact:
     name: Synaptiq Team
@@ -44,8 +44,7 @@ components:
       $ref: 'v1/components/schemas/common/enums/AdminRole.yaml'
     ActionOutcome:
       $ref: 'v1/components/schemas/common/enums/ActionOutcome.yaml'
-    CatalogItemStatus:
-      $ref: 'v1/components/schemas/common/enums/CatalogItemStatus.yaml'
+
     ConversationRole:
       $ref: 'v1/components/schemas/common/enums/ConversationRole.yaml'
     ProblemDetails:
@@ -109,19 +108,7 @@ components:
     CredentialType:
       $ref: 'v1/components/schemas/common/enums/CredentialType.yaml'
 
-    # ── Catalog ──
-    CatalogSchemaResponse:
-      $ref: 'v1/components/schemas/catalog/CatalogSchemaResponse.yaml'
-    SchemaFieldResponse:
-      $ref: 'v1/components/schemas/catalog/SchemaFieldResponse.yaml'
-    CreateCatalogItemRequest:
-      $ref: 'v1/components/schemas/catalog/CreateCatalogItemRequest.yaml'
-    CatalogItemResponse:
-      $ref: 'v1/components/schemas/catalog/CatalogItemResponse.yaml'
-    CatalogItemListResponse:
-      $ref: 'v1/components/schemas/catalog/CatalogItemListResponse.yaml'
-    CatalogImportResponse:
-      $ref: 'v1/components/schemas/catalog/CatalogImportResponse.yaml'
+
 
     # ── Chat ──
     ChatMessageRequest:
@@ -243,9 +230,43 @@ components:
     QueryResultResponse:
       $ref: 'v1/components/schemas/registry/QueryResultResponse.yaml'
 
+    # ── Notification ──
+    NotificationResponse:
+      $ref: 'v1/components/schemas/notification/NotificationResponse.yaml'
+    NotificationListResponse:
+      $ref: 'v1/components/schemas/notification/NotificationListResponse.yaml'
+    NotificationCountResponse:
+      $ref: 'v1/components/schemas/notification/NotificationCountResponse.yaml'
+
     # ── Health ──
     HealthResponse:
       $ref: 'v1/components/schemas/health/HealthResponse.yaml'
+
+    # ── Integration ──
+    ConnectorType:
+      $ref: 'v1/components/schemas/common/enums/ConnectorType.yaml'
+    RouteStatus:
+      $ref: 'v1/components/schemas/common/enums/RouteStatus.yaml'
+    IntegrationResponse:
+      $ref: 'v1/components/schemas/integration/IntegrationResponse.yaml'
+    CreateIntegrationRequest:
+      $ref: 'v1/components/schemas/integration/CreateIntegrationRequest.yaml'
+    ConnectionTestResponse:
+      $ref: 'v1/components/schemas/integration/ConnectionTestResponse.yaml'
+    TemplateDescriptorResponse:
+      $ref: 'v1/components/schemas/integration/TemplateDescriptorResponse.yaml'
+    TemplateParameterResponse:
+      $ref: 'v1/components/schemas/integration/TemplateParameterResponse.yaml'
+
+    # ── RBAC ──
+    CreateRoleRequest:
+      $ref: 'v1/components/schemas/rbac/CreateRoleRequest.yaml'
+    UpdateCustomRoleRequest:
+      $ref: 'v1/components/schemas/rbac/UpdateCustomRoleRequest.yaml'
+    RoleResponse:
+      $ref: 'v1/components/schemas/rbac/RoleResponse.yaml'
+    ScopeResponse:
+      $ref: 'v1/components/schemas/rbac/ScopeResponse.yaml'
 
   responses:
     BadRequest:
@@ -266,8 +287,7 @@ tags:
     description: Authentication — signup, login, token management
   - name: Tenants
     description: Tenant lifecycle — creation, configuration, admin management
-  - name: Catalog
-    description: Catalog Registry — schema management, item CRUD, embedding
+
   - name: Chat
     description: Conversational AI — sessions, messages, context management
   - name: Actions
@@ -288,6 +308,12 @@ tags:
     description: Application lifecycle — create, read, delete application configurations
   - name: DataSources
     description: DataSource management — create, read, delete data source connections
+  - name: Notifications
+    description: Notifications — in-app notifications, bell badge, mark-as-read
+  - name: Roles
+    description: Role management — RBAC roles and scopes
+  - name: Integrations
+    description: Integration Engine — dynamic connectors, templates, route lifecycle
 
 paths:
   # ── Health ──
@@ -330,15 +356,7 @@ paths:
   /api/v1/datasources/{dataSourceId}:
     $ref: 'v1/paths/datasource/datasources_by_id.yaml'
 
-  # ── Catalog ──
-  /api/v1/catalog/schema:
-    $ref: 'v1/paths/catalog/catalog_schema.yaml'
-  /api/v1/catalog/items:
-    $ref: 'v1/paths/catalog/catalog_items.yaml'
-  /api/v1/catalog/items/{itemId}:
-    $ref: 'v1/paths/catalog/catalog_items_by_id.yaml'
-  /api/v1/catalog/import:
-    $ref: 'v1/paths/catalog/catalog_import.yaml'
+
 
   # ── Chat ──
   /api/v1/chat/message:
@@ -429,3 +447,35 @@ paths:
     $ref: 'v1/paths/registry/registry_infer.yaml'
   /api/v1/schema-registry/query/{collection}:
     $ref: 'v1/paths/registry/registry_query.yaml'
+
+  # ── Notifications ──
+  /api/v1/notifications:
+    $ref: 'v1/paths/notification/notifications.yaml'
+  /api/v1/notifications/{id}:
+    $ref: 'v1/paths/notification/notifications_by_id.yaml'
+  /api/v1/notifications/unread-count:
+    $ref: 'v1/paths/notification/notifications_unread_count.yaml'
+  /api/v1/notifications/read-all:
+    $ref: 'v1/paths/notification/notifications_mark_all_read.yaml'
+
+  # ── RBAC ──
+  /api/v1/roles:
+    $ref: 'v1/paths/rbac/roles.yaml'
+  /api/v1/roles/{roleSlug}:
+    $ref: 'v1/paths/rbac/roles_by_slug.yaml'
+  /api/v1/scopes:
+    $ref: 'v1/paths/rbac/scopes.yaml'
+
+  # ── Integrations ──
+  /api/v1/integrations/templates:
+    $ref: 'v1/paths/integration/integration_templates.yaml'
+  /api/v1/integrations:
+    $ref: 'v1/paths/integration/integrations.yaml'
+  /api/v1/integrations/{routeConfigId}:
+    $ref: 'v1/paths/integration/integrations_by_id.yaml'
+  /api/v1/integrations/{routeConfigId}/activate:
+    $ref: 'v1/paths/integration/integrations_activate.yaml'
+  /api/v1/integrations/{routeConfigId}/deactivate:
+    $ref: 'v1/paths/integration/integrations_deactivate.yaml'
+  /api/v1/integrations/{routeConfigId}/test:
+    $ref: 'v1/paths/integration/integrations_test.yaml'

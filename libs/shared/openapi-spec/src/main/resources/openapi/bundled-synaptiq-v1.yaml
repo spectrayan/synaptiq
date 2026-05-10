@@ -2,13 +2,13 @@ openapi: 3.1.0
 info:
   title: Synaptiq API
   description: |
-    AI-Powered Conversational Commerce Platform — REST API
+    AI-Native Application Platform — REST API
 
-    Synaptiq enables businesses to deploy intelligent, context-aware AI shopping assistants
-    with full catalog management, conversation orchestration, workflow automation,
-    and multi-tenant governance. This specification covers all bounded contexts:
-    Authentication, Tenants, Catalog, Chat, Actions, Workflows, Analytics,
-    Branding, Tenant Configuration, and Schema Registry.
+    Synaptiq enables businesses to connect any data source and dynamically generate
+    dashboards, workflows, reports, and UI experiences through natural language.
+    This specification covers all bounded contexts:
+    Authentication, Tenants, DataSources, Chat, Actions, Workflows, Analytics,
+    Branding, Tenant Configuration, Integrations, and Schema Registry.
   version: 1.0.0
   contact:
     name: Synaptiq Team
@@ -26,8 +26,6 @@ tags:
     description: Authentication — signup, login, token management
   - name: Tenants
     description: Tenant lifecycle — creation, configuration, admin management
-  - name: Catalog
-    description: Catalog Registry — schema management, item CRUD, embedding
   - name: Chat
     description: Conversational AI — sessions, messages, context management
   - name: Actions
@@ -48,6 +46,12 @@ tags:
     description: Application lifecycle — create, read, delete application configurations
   - name: DataSources
     description: DataSource management — create, read, delete data source connections
+  - name: Notifications
+    description: Notifications — in-app notifications, bell badge, mark-as-read
+  - name: Roles
+    description: Role management — RBAC roles and scopes
+  - name: Integrations
+    description: Integration Engine — dynamic connectors, templates, route lifecycle
 paths:
   /api/v1/health:
     get:
@@ -610,218 +614,6 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-  /api/v1/catalog/schema:
-    get:
-      operationId: getActiveSchema
-      summary: Get active catalog schema
-      tags:
-        - Catalog
-      parameters:
-        - $ref: '#/components/parameters/TenantIdHeader'
-      responses:
-        '200':
-          description: Active schema
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CatalogSchemaResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-  /api/v1/catalog/items:
-    post:
-      operationId: createCatalogItem
-      summary: Create a catalog item
-      tags:
-        - Catalog
-      parameters:
-        - $ref: '#/components/parameters/TenantIdHeader'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateCatalogItemRequest'
-      responses:
-        '201':
-          description: Item created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CatalogItemResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    get:
-      operationId: listCatalogItems
-      summary: List catalog items
-      tags:
-        - Catalog
-      parameters:
-        - $ref: '#/components/parameters/TenantIdHeader'
-        - name: statusFilter
-          in: query
-          schema:
-            type: string
-        - name: skip
-          in: query
-          schema:
-            type: integer
-            default: 0
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            default: 20
-      responses:
-        '200':
-          description: Item list
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CatalogItemListResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-  /api/v1/catalog/items/{itemId}:
-    get:
-      operationId: getCatalogItem
-      summary: Get a catalog item
-      tags:
-        - Catalog
-      parameters:
-        - $ref: '#/components/parameters/TenantIdHeader'
-        - name: itemId
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Item details
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CatalogItemResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    patch:
-      operationId: updateCatalogItem
-      summary: Update a catalog item
-      tags:
-        - Catalog
-      parameters:
-        - $ref: '#/components/parameters/TenantIdHeader'
-        - name: itemId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              additionalProperties: true
-      responses:
-        '200':
-          description: Item updated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CatalogItemResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    delete:
-      operationId: deleteCatalogItem
-      summary: Delete a catalog item
-      tags:
-        - Catalog
-      parameters:
-        - $ref: '#/components/parameters/TenantIdHeader'
-        - name: itemId
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '204':
-          description: Item deleted
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-  /api/v1/catalog/import:
-    post:
-      operationId: importCatalogItems
-      summary: Import catalog items from CSV
-      tags:
-        - Catalog
-      parameters:
-        - $ref: '#/components/parameters/TenantIdHeader'
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                file:
-                  type: string
-                  format: binary
-      responses:
-        '200':
-          description: Import results
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CatalogImportResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '403':
-          $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/InternalServerError'
   /api/v1/chat/message:
@@ -2205,6 +1997,515 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /api/v1/notifications:
+    get:
+      operationId: listNotifications
+      summary: List notifications
+      description: |
+        Cursor-based notification list for the authenticated user.
+        Returns notifications for the specified tenant, ordered by creation time descending.
+      tags:
+        - Notifications
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: unreadOnly
+          in: query
+          required: false
+          description: If true, only return unread notifications
+          schema:
+            type: boolean
+            default: false
+        - name: before
+          in: query
+          required: false
+          description: ISO 8601 cursor — only return notifications created before this timestamp
+          schema:
+            type: string
+            format: date-time
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of notifications to return (capped at 50)
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Paginated notification list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationListResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      operationId: clearAllNotifications
+      summary: Clear all notifications
+      description: |
+        Deletes all notifications for the authenticated user in the specified tenant.
+      tags:
+        - Notifications
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      responses:
+        '204':
+          description: All notifications cleared
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/v1/notifications/{id}:
+    patch:
+      operationId: markNotificationAsRead
+      summary: Mark a notification as read
+      description: Marks a single notification as read for the authenticated user.
+      tags:
+        - Notifications
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Notification ID
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Notification marked as read
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      operationId: dismissNotification
+      summary: Dismiss a notification
+      description: Permanently deletes a single notification for the authenticated user.
+      tags:
+        - Notifications
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Notification ID
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Notification dismissed
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/v1/notifications/unread-count:
+    get:
+      operationId: getUnreadNotificationCount
+      summary: Get unread notification count
+      description: Returns the number of unread notifications for the bell badge.
+      tags:
+        - Notifications
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      responses:
+        '200':
+          description: Unread count
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationCountResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/v1/notifications/read-all:
+    post:
+      operationId: markAllNotificationsRead
+      summary: Mark all notifications as read
+      description: |
+        Marks all unread notifications as read for the authenticated user in the specified tenant.
+      tags:
+        - Notifications
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      responses:
+        '204':
+          description: All notifications marked as read
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/v1/roles:
+    get:
+      operationId: listRoles
+      summary: List available roles for a tenant
+      tags:
+        - Roles
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      responses:
+        '200':
+          description: Role list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  roles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RoleResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      operationId: createRole
+      summary: Create a custom role
+      tags:
+        - Roles
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRoleRequest'
+      responses:
+        '201':
+          description: Role created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/v1/roles/{roleSlug}:
+    get:
+      operationId: getRole
+      summary: Get a role by slug
+      tags:
+        - Roles
+      parameters:
+        - name: roleSlug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Role details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      operationId: updateRole
+      summary: Update a custom role
+      tags:
+        - Roles
+      parameters:
+        - name: roleSlug
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomRoleRequest'
+      responses:
+        '200':
+          description: Role updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: deleteRole
+      summary: Delete a custom role
+      tags:
+        - Roles
+      parameters:
+        - name: roleSlug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Role deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/v1/scopes:
+    get:
+      operationId: listScopes
+      summary: List all available scopes
+      tags:
+        - Roles
+      responses:
+        '200':
+          description: Scope list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  scopes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ScopeResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/v1/integrations/templates:
+    get:
+      operationId: listIntegrationTemplates
+      summary: List available integration templates
+      description: Returns all built-in integration templates that tenants can browse and configure
+      tags:
+        - Integrations
+      responses:
+        '200':
+          description: Template catalog
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  templates:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TemplateDescriptorResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/v1/integrations:
+    get:
+      operationId: listIntegrations
+      summary: List integrations for a tenant
+      tags:
+        - Integrations
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      responses:
+        '200':
+          description: Integration list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  integrations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/IntegrationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      operationId: createIntegration
+      summary: Create a new integration
+      tags:
+        - Integrations
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateIntegrationRequest'
+      responses:
+        '201':
+          description: Integration created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/v1/integrations/{routeConfigId}:
+    get:
+      operationId: getIntegration
+      summary: Get integration by ID
+      tags:
+        - Integrations
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: routeConfigId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Integration details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      operationId: deleteIntegration
+      summary: Delete an integration
+      tags:
+        - Integrations
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: routeConfigId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Integration deleted
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/v1/integrations/{routeConfigId}/activate:
+    post:
+      operationId: activateIntegration
+      summary: Activate an integration route
+      description: Loads the integration route into the Camel engine and starts processing
+      tags:
+        - Integrations
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: routeConfigId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Integration activated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/v1/integrations/{routeConfigId}/deactivate:
+    post:
+      operationId: deactivateIntegration
+      summary: Deactivate an integration route
+      description: Stops and removes the integration route from the Camel engine
+      tags:
+        - Integrations
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: routeConfigId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Integration deactivated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /api/v1/integrations/{routeConfigId}/test:
+    post:
+      operationId: testIntegrationConnection
+      summary: Test integration connectivity
+      description: Validates the configuration and tests connectivity without activating the route
+      tags:
+        - Integrations
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: routeConfigId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Connection test result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectionTestResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   securitySchemes:
     BearerAuth:
@@ -2253,13 +2554,6 @@ components:
         - FAILURE
         - PENDING
         - SKIPPED
-    CatalogItemStatus:
-      type: string
-      description: Status of a catalog item
-      enum:
-        - DRAFT
-        - PUBLISHED
-        - ARCHIVED
     ConversationRole:
       type: string
       description: Role in a conversation turn
@@ -2383,10 +2677,13 @@ components:
         currentPassword:
           type: string
           format: password
+          minLength: 1
+          maxLength: 128
         newPassword:
           type: string
           format: password
           minLength: 8
+          maxLength: 128
     UpdateRoleRequest:
       type: object
       required:
@@ -2414,7 +2711,7 @@ components:
           type: string
           minLength: 1
           maxLength: 100
-        catalogLabel:
+        displayLabel:
           type: string
           maxLength: 100
         accessMode:
@@ -2432,7 +2729,7 @@ components:
           $ref: '#/components/schemas/TenantStatus'
         accessMode:
           $ref: '#/components/schemas/AccessMode'
-        catalogLabel:
+        displayLabel:
           type: string
         createdAt:
           type: string
@@ -2491,7 +2788,7 @@ components:
           type: string
           minLength: 1
           maxLength: 100
-        catalogLabel:
+        displayLabel:
           type: string
           maxLength: 100
         accessMode:
@@ -2564,12 +2861,19 @@ components:
       properties:
         name:
           type: string
+          minLength: 1
+          maxLength: 200
         slug:
           type: string
+          minLength: 1
+          maxLength: 100
+          pattern: ^[a-z0-9-]+$
         description:
           type: string
+          maxLength: 500
         icon:
           type: string
+          maxLength: 100
         isDefault:
           type: boolean
           default: false
@@ -2640,8 +2944,11 @@ components:
       properties:
         name:
           type: string
+          minLength: 1
+          maxLength: 200
         description:
           type: string
+          maxLength: 500
         type:
           $ref: '#/components/schemas/DataSourceType'
         connection:
@@ -2766,95 +3073,6 @@ components:
         - EXTERNAL_SECRET_MANAGER
         - MONGODB_ENCRYPTED
         - OAUTH2
-    CatalogSchemaResponse:
-      type: object
-      properties:
-        id:
-          type: string
-        tenantId:
-          type: string
-        name:
-          type: string
-        fields:
-          type: array
-          items:
-            $ref: '#/components/schemas/SchemaFieldResponse'
-        schemaVersion:
-          type: integer
-        active:
-          type: boolean
-    SchemaFieldResponse:
-      type: object
-      properties:
-        fieldId:
-          type: string
-        label:
-          type: string
-        type:
-          type: string
-        required:
-          type: boolean
-        searchable:
-          type: boolean
-        displayable:
-          type: boolean
-        filterable:
-          type: boolean
-        displayOrder:
-          type: integer
-        enumValues:
-          type: array
-          items:
-            type: string
-    CreateCatalogItemRequest:
-      type: object
-      required:
-        - data
-      properties:
-        data:
-          type: object
-          additionalProperties: true
-        status:
-          $ref: '#/components/schemas/CatalogItemStatus'
-    CatalogItemResponse:
-      type: object
-      properties:
-        id:
-          type: string
-        tenantId:
-          type: string
-        status:
-          $ref: '#/components/schemas/CatalogItemStatus'
-        data:
-          type: object
-          additionalProperties: true
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-    CatalogItemListResponse:
-      type: object
-      properties:
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/CatalogItemResponse'
-        total:
-          type: integer
-          format: int64
-    CatalogImportResponse:
-      type: object
-      properties:
-        imported:
-          type: integer
-        skipped:
-          type: integer
-        errors:
-          type: array
-          items:
-            type: string
     ChatMessageRequest:
       type: object
       required:
@@ -2863,10 +3081,18 @@ components:
       properties:
         sessionId:
           type: string
+          minLength: 1
+          maxLength: 100
+          description: The session to post the message to
         message:
           type: string
+          minLength: 1
+          maxLength: 32000
+          description: The user's message (capped at 32K chars to prevent LLM cost spikes)
         modelOverride:
           type: string
+          maxLength: 100
+          description: Optional model override (e.g. gemini-2.5-flash)
     CreateSessionRequest:
       type: object
       properties:
@@ -3390,7 +3616,9 @@ components:
       properties:
         prompt:
           type: string
-          description: Natural language description of the desired workflow
+          minLength: 10
+          maxLength: 5000
+          description: Natural language description of the desired workflow (10-5000 chars)
     RegeneratePromptRequest:
       type: object
       description: Request body for AI-powered prompt regeneration
@@ -3640,6 +3868,54 @@ components:
             additionalProperties: true
         total:
           type: integer
+    NotificationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        tenantId:
+          type: string
+        type:
+          type: string
+          description: Event type key (e.g., workflow.completed, catalog.imported, llm.error)
+        title:
+          type: string
+          description: Human-readable notification title
+        message:
+          type: string
+          description: Human-readable notification message
+        icon:
+          type: string
+          description: Material icon name for UI rendering
+        payload:
+          type: object
+          additionalProperties: true
+          description: Raw event payload for deep-linking or contextual display
+        read:
+          type: boolean
+          description: Whether the notification has been read
+        createdAt:
+          type: string
+          format: date-time
+    NotificationListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationResponse'
+        hasMore:
+          type: boolean
+          description: Whether older notifications exist beyond this page
+    NotificationCountResponse:
+      type: object
+      properties:
+        unread:
+          type: integer
+          format: int64
+          description: Number of unread notifications for the user in the tenant
     HealthResponse:
       type: object
       properties:
@@ -3653,6 +3929,256 @@ components:
         timestamp:
           type: string
           format: date-time
+    ConnectorType:
+      type: string
+      description: Type of integration connector
+      enum:
+        - REST_API
+        - WEBHOOK
+        - DATABASE
+        - SLACK
+        - EMAIL
+        - MCP_SERVER
+        - MESSAGE_QUEUE
+        - FILE_STORAGE
+        - CUSTOM_YAML
+    RouteStatus:
+      type: string
+      description: Lifecycle status of an integration route
+      enum:
+        - PENDING
+        - ACTIVE
+        - ERROR
+        - DISABLED
+    IntegrationResponse:
+      type: object
+      description: Integration route configuration
+      properties:
+        routeConfigId:
+          type: string
+        tenantId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        connectorType:
+          $ref: '#/components/schemas/ConnectorType'
+        templateId:
+          type: string
+        parameters:
+          type: object
+          additionalProperties:
+            type: string
+        status:
+          $ref: '#/components/schemas/RouteStatus'
+        credentialRef:
+          type: string
+        camelRouteId:
+          type: string
+        lastTestedAt:
+          type: string
+          format: date-time
+        lastExecutedAt:
+          type: string
+          format: date-time
+        lastError:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CreateIntegrationRequest:
+      type: object
+      description: Request to create a new integration
+      required:
+        - name
+        - connectorType
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 1000
+        connectorType:
+          $ref: '#/components/schemas/ConnectorType'
+        templateId:
+          type: string
+          description: Built-in template ID to instantiate (e.g., "rest-api-poll", "slack-notify")
+        parameters:
+          type: object
+          additionalProperties:
+            type: string
+          description: Key-value parameters for the template or adapter
+        credentialRef:
+          type: string
+          description: Reference to credential/secret for authentication
+    ConnectionTestResponse:
+      type: object
+      description: Result of a connection test
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        durationMs:
+          type: integer
+          format: int64
+        testedAt:
+          type: string
+          format: date-time
+    TemplateDescriptorResponse:
+      type: object
+      description: Describes a built-in integration template available for tenant use
+      properties:
+        templateId:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        category:
+          type: string
+        connectorType:
+          $ref: '#/components/schemas/ConnectorType'
+        requiresCredential:
+          type: boolean
+        parameters:
+          type: array
+          items:
+            $ref: '#/components/schemas/TemplateParameterResponse'
+    TemplateParameterResponse:
+      type: object
+      description: Describes a single parameter for a template
+      properties:
+        name:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          description: 'Parameter type: string, number, boolean, secret, cron'
+        required:
+          type: boolean
+        defaultValue:
+          type: string
+        placeholder:
+          type: string
+    CreateRoleRequest:
+      type: object
+      required:
+        - slug
+        - displayName
+        - scopeSlugs
+      properties:
+        slug:
+          type: string
+          description: Unique role identifier, e.g. "custom:marketing-editor"
+          minLength: 3
+          maxLength: 100
+        displayName:
+          type: string
+          description: Human-readable name for admin UI
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          description: Role description for admin UI
+          maxLength: 500
+        scopeSlugs:
+          type: array
+          description: List of scope slugs this role grants
+          items:
+            type: string
+          minItems: 1
+    UpdateCustomRoleRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+          description: Updated display name
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          description: Updated description
+          maxLength: 500
+        scopeSlugs:
+          type: array
+          description: Updated scope slugs this role grants
+          items:
+            type: string
+          minItems: 1
+    RoleResponse:
+      type: object
+      required:
+        - id
+        - slug
+        - displayName
+        - systemRole
+        - roleType
+        - scopeSlugs
+      properties:
+        id:
+          type: string
+          description: Unique role ID
+        slug:
+          type: string
+          description: Stable role identifier
+        tenantId:
+          type: string
+          description: Owning tenant ID, null for global roles
+        displayName:
+          type: string
+          description: Human-readable role name
+        description:
+          type: string
+          description: Role description
+        systemRole:
+          type: boolean
+          description: Whether this role is system-managed (immutable)
+        roleType:
+          type: string
+          description: Role type, either global or tenant
+          enum:
+            - global
+            - tenant
+        scopeSlugs:
+          type: array
+          description: Scope slugs granted by this role
+          items:
+            type: string
+    ScopeResponse:
+      type: object
+      required:
+        - slug
+        - displayName
+        - resource
+        - action
+      properties:
+        slug:
+          type: string
+          description: Scope identifier, e.g. workflow:create
+        displayName:
+          type: string
+          description: Human-readable scope name
+        description:
+          type: string
+          description: Scope description
+        resource:
+          type: string
+          description: Resource category, e.g. workflow
+        action:
+          type: string
+          description: Action within the resource, e.g. create
     ItemSnapshotResponse:
       type: object
       description: Snapshot of a saved item at the time it was bookmarked

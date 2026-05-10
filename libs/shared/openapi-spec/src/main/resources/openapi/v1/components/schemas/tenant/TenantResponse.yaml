@@ -10,7 +10,7 @@ properties:
     $ref: '../common/enums/TenantStatus.yaml'
   accessMode:
     $ref: '../common/enums/AccessMode.yaml'
-  catalogLabel:
+  displayLabel:
     type: string
   createdAt:
     type: string
