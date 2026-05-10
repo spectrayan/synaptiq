@@ -21,7 +21,7 @@
     "@nx/eslint-plugin": "22.6.0",
     "@nx/jest": "^22.6.0",
     "@nx/js": "22.6.5",
-    "@nx/playwright": "^22.6.0",
+    "@nx/playwright": "^22.7.1",
     "@nx/web": "22.6.0",
 
     "@playwright/test": "^1.36.0",
