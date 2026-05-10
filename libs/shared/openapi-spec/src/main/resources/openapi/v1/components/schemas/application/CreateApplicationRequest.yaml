@@ -6,12 +6,19 @@ required:
 properties:
   name:
     type: string
+    minLength: 1
+    maxLength: 200
   slug:
     type: string
+    minLength: 1
+    maxLength: 100
+    pattern: '^[a-z0-9-]+$'
   description:
     type: string
+    maxLength: 500
   icon:
     type: string
+    maxLength: 100
   isDefault:
     type: boolean
     default: false

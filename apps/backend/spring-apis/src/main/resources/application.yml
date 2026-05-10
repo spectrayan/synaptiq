@@ -63,12 +63,72 @@ synaptiq:
     jwt-expiry-hours: 24
     firebase-project-id: ${FIREBASE_PROJECT_ID:}
     firebase-auth-emulator-host: ${FIREBASE_AUTH_EMULATOR_HOST:}
+  security:
+    jwt:
+      role-claim: ${JWT_ROLE_CLAIM:role}          # Keycloak: realm_access.roles[0]
+      tenant-claim: ${JWT_TENANT_CLAIM:tenantId}  # Auth0: https://app.example.com/tenantId
   llm:
     default-provider: ${LLM_DEFAULT_PROVIDER:vertexai}
     vertexai-project: ${VERTEX_AI_PROJECT:}
     vertexai-location: ${VERTEX_AI_LOCATION:us-central1}
     gemini-api-key: ${GEMINI_API_KEY:}
+spring:
+  ai:
+    mcp:
+      server:
+        name: synaptiq-mcp
+        version: 1.0.0
     gemini-model: ${GEMINI_MODEL:gemini-2.5-flash}
+  rate-limit:
+    enabled: ${RATE_LIMIT_ENABLED:false}
+    requests-per-second: ${RATE_LIMIT_RPS:100}
+    login-requests-per-minute: ${RATE_LIMIT_LOGIN_RPM:5}
+    timeout: 0
+  cache:
+    type: ${SYNAPTIQ_CACHE_TYPE:caffeine}   # caffeine (default) or redis
+
+# ── Resilience4j ───────────────────────────────────────────────────
+resilience4j:
+  retry:
+    instances:
+      llm-gemini:
+        max-attempts: 3
+        wait-duration: 1s
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - java.io.IOException
+          - java.net.SocketTimeoutException
+          - java.util.concurrent.TimeoutException
+
+# ── Spectrayan SSE Server Library ──────────────────────────────────
+spectrayan:
+  sse:
+    server:
+      enabled: true
+      base-path: /api/v1/sse
+      stream:
+        heartbeat-enabled: true
+        heartbeat-interval: 15s
+        connected-event-enabled: true
+        retry-enabled: true
+        retry: 3s
+      topics:
+        idle-ttl: 5m
+      metrics:
+        enabled: true
+        per-topic: true
+      emitter:
+        sink-type: REPLAY
+        replay-size: 5
+      cors:
+        enabled: true
+        allowed-origins:
+          - "http://localhost:4200"
+          - "http://localhost:8080"
+        allowed-methods:
+          - GET
+        allow-credentials: true
 
 # ── Server ──────────────────────────────────────────────────────────
 server:
@@ -87,7 +147,7 @@ management:
 # ── Logging ─────────────────────────────────────────────────────────
 logging:
   level:
-    com.synaptiq: DEBUG
+    com.spectrayan.synaptiq: DEBUG
     org.springframework.data.mongodb: WARN
     org.springframework.security: WARN
 

@@ -3,7 +3,15 @@ required: [sessionId, message]
 properties:
   sessionId:
     type: string
+    minLength: 1
+    maxLength: 100
+    description: The session to post the message to
   message:
     type: string
+    minLength: 1
+    maxLength: 32000
+    description: The user's message (capped at 32K chars to prevent LLM cost spikes)
   modelOverride:
     type: string
+    maxLength: 100
+    description: Optional model override (e.g. gemini-2.5-flash)

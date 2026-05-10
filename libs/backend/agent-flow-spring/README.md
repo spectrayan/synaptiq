@@ -45,7 +45,7 @@ This library is consumed by the `spring-apis` backend application as a Maven dep
 
 ```xml
 <dependency>
-    <groupId>com.synaptiq</groupId>
+    <groupId>com.spectrayan.synaptiq</groupId>
     <artifactId>agent-flow-spring</artifactId>
     <version>${project.version}</version>
 </dependency>

@@ -27,5 +27,5 @@ synaptiq:
 
 logging:
   level:
-    com.synaptiq: DEBUG
+    com.spectrayan.synaptiq: DEBUG
     org.springframework.data.mongodb.core.ReactiveMongoTemplate: DEBUG

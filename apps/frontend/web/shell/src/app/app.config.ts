@@ -17,6 +17,7 @@ import { environment } from '../environments/environment';
 import { GlobalErrorHandler } from './core/global-error-handler';
 import { ThemeService } from './core/theme.service';
 import { provideApi } from '@synaptiq/client';
+import { provideSseClient } from '@spectrayan/ng-sse-client';
 
 /** Load tenant branding during bootstrap (T10.6) */
 function initializeBranding(): () => Promise<void> {
@@ -60,5 +61,8 @@ export const appConfig: ApplicationConfig = {
 
     // Load tenant branding on startup (T10.6)
     { provide: APP_INITIALIZER, useFactory: initializeBranding, multi: true },
+
+    // SSE client for real-time notifications (bell icon push)
+    provideSseClient(),
   ],
 };

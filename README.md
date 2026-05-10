@@ -328,7 +328,7 @@ synaptiq/                              # Nx 22 monorepo root
 ├── apps/
 │   ├── frontend/web/shell/            # Angular 21 SSR — chat shell + DSL renderer
 │   └── backend/spring-apis/           # Spring Boot 4 (WebFlux + Modulith)
-│       └── src/main/java/com/synaptiq/
+│       └── src/main/java/com/spectrayan/synaptiq/
 │           ├── chat/                  #   SSE chat streaming + LLM orchestration
 │           ├── catalog/               #   Schema import, item CRUD, CSV
 │           ├── workflow/              #   Multi-agent workflow engine

@@ -4,4 +4,6 @@ required: [prompt]
 properties:
   prompt:
     type: string
-    description: Natural language description of the desired workflow
+    minLength: 10
+    maxLength: 5000
+    description: Natural language description of the desired workflow (10-5000 chars)

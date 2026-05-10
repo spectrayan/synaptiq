@@ -4,9 +4,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.synaptiq</groupId>
+    <parent>
+        <groupId>com.spectrayan.synaptiq</groupId>
+        <artifactId>synaptiq-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../../../pom.xml</relativePath>
+    </parent>
+
     <artifactId>synaptiq-openapi-spec</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>synaptiq-openapi-spec</name>
     <description>OpenAPI specification — generates Java API interfaces and DTOs from contract</description>
@@ -77,8 +82,8 @@
                                     <generatorName>spring</generatorName>
                                     <output>${apis.output}</output>
 
-                                    <apiPackage>com.synaptiq.infrastructure.in.web.api</apiPackage>
-                                    <modelPackage>com.synaptiq.infrastructure.in.web.dto</modelPackage>
+                                    <apiPackage>com.spectrayan.synaptiq.infrastructure.in.web.api</apiPackage>
+                                    <modelPackage>com.spectrayan.synaptiq.infrastructure.in.web.dto</modelPackage>
 
                                     <generateApiTests>false</generateApiTests>
                                     <generateModelTests>false</generateModelTests>

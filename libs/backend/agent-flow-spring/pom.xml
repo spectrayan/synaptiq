@@ -4,42 +4,16 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.synaptiq</groupId>
+    <parent>
+        <groupId>com.spectrayan.synaptiq</groupId>
+        <artifactId>synaptiq-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../../../pom.xml</relativePath>
+    </parent>
+
     <artifactId>agent-flow-spring</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
     <name>agent-flow-spring</name>
     <description>Java/Spring AI Agent Flow Engine using Google ADK</description>
-
-    <properties>
-        <java.version>21</java.version>
-        <maven.compiler.release>${java.version}</maven.compiler.release>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <spring-boot.version>4.0.0</spring-boot.version>
-        <spring-ai.version>2.0.0-M4</spring-ai.version>
-        <google-adk.version>1.0.0</google-adk.version>
-    </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <!-- Spring Boot BOM -->
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <!-- Spring AI BOM -->
-            <dependency>
-                <groupId>org.springframework.ai</groupId>
-                <artifactId>spring-ai-bom</artifactId>
-                <version>${spring-ai.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <!-- Spring Boot core -->
@@ -48,8 +22,6 @@
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
-
-        
         <!-- Reactor Core for Flux -->
         <dependency>
             <groupId>io.projectreactor</groupId>
@@ -60,12 +32,10 @@
         <dependency>
             <groupId>com.google.adk</groupId>
             <artifactId>google-adk</artifactId>
-            <version>${google-adk.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.adk</groupId>
             <artifactId>google-adk-spring-ai</artifactId>
-            <version>${google-adk.version}</version>
         </dependency>
 
         <!-- Jackson for JSON parsing -->
@@ -73,7 +43,7 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
-        
+
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -88,23 +58,11 @@
         </dependency>
     </dependencies>
 
-    <repositories>
-        <repository>
-            <id>spring-milestones</id>
-            <name>Spring Milestones</name>
-            <url>https://repo.spring.io/milestone</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
-    
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>
             </plugin>
         </plugins>
     </build>

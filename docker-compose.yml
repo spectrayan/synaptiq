@@ -6,7 +6,6 @@
 #   - redis       : Redis 7 for rate limiting and prompt caching
 #   - firebase-auth : Firebase Auth Emulator (no real credentials needed)
 #   - spring-apis : Spring Boot 4 backend (WebFlux + Modulith)
-#   - seed        : One-shot seeder for demo tenant + catalog data (Python utility)
 #
 # The Angular frontend runs outside Docker via `pnpm nx serve shell`
 
@@ -92,26 +91,6 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # ── One-shot seed runner ───────────────────────────────────────────────
-  # Populates demo tenant + catalog data on first start.
-  # Uses the Python seed scripts as a standalone utility.
-  seed:
-    image: python:3.12-slim
-    container_name: synaptiq-seed
-    working_dir: /app
-    entrypoint: ["sh", "-c"]
-    command:
-      - |
-        pip install --no-cache-dir pymongo &&
-        python seed-data/seed_all.py
-    environment:
-      - MONGODB_URI=mongodb://mongodb:27017
-    volumes:
-      - ./seed-data:/app/seed-data:ro
-    depends_on:
-      mongodb:
-        condition: service_healthy
-    restart: "no"
 
 volumes:
   mongo_data:

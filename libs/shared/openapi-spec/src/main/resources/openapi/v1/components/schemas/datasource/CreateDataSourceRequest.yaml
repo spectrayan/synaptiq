@@ -6,8 +6,11 @@ required:
 properties:
   name:
     type: string
+    minLength: 1
+    maxLength: 200
   description:
     type: string
+    maxLength: 500
   type:
     $ref: '../common/enums/DataSourceType.yaml'
   connection:
