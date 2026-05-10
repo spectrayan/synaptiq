@@ -13,6 +13,16 @@
   background: var(--sq-bg, #0f172a);
   border-radius: 12px;
   overflow: hidden;
+  display: flex;           /* ← flex container: canvas-main + detail-panel side by side */
+  flex-direction: row;
+}
+
+/* Canvas area — takes all remaining horizontal space */
+.canvas-main {
+  flex: 1 1 0%;
+  min-width: 0;            /* allow shrinking below content width */
+  position: relative;
+  overflow: hidden;
 }
 
 /* ── Toolbar ──────────────────────────────────────────────────────────── */
@@ -296,20 +306,93 @@
 /* ── Detail Panel ─────────────────────────────────────────────────────── */
 
 .detail-panel {
-  position: absolute;
-  top: 56px;
-  right: 0;
-  width: 280px;
-  max-height: calc(100% - 56px);
+  /* Flex child — sits beside .canvas-main, never overlaps */
+  flex: 0 0 auto;
+  width: 360px; /* default — overridden by [style.width.px] binding */
+  min-width: 280px;
+  max-width: 600px;
+  height: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
   background: var(--sq-surface, rgba(30, 41, 59, 0.98));
   backdrop-filter: blur(16px);
   border-left: 1px solid var(--sq-border, rgba(148, 163, 184, 0.15));
-  padding: 16px;
+  padding: 16px 16px 16px 24px; /* extra left padding for resize handle */
   display: flex;
   flex-direction: column;
   gap: 16px;
   animation: slideInRight 0.2s ease;
+  z-index: 20;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+  transition: box-shadow 0.2s ease;
+  position: relative;      /* for resize handle positioning */
+}
+
+/* ── Resize Handle (left edge) ──────────────────────────────────────── */
+
+.detail-resize-handle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+
+  &:hover,
+  &:active {
+    background: rgba(99, 102, 241, 0.12);
+  }
+}
+
+.detail-resize-grip {
+  width: 3px;
+  height: 40px;
+  border-radius: 2px;
+  background: rgba(148, 163, 184, 0.2);
+  transition: background 0.15s ease, height 0.15s ease;
+
+  .detail-resize-handle:hover &,
+  .detail-resize-handle:active & {
+    background: rgba(99, 102, 241, 0.5);
+    height: 56px;
+  }
+}
+
+/* ── Collapse Button (visible on smaller screens) ───────────────────── */
+
+.detail-collapse-btn {
+  display: none; /* hidden by default, shown via media query */
+  position: absolute;
+  top: 64px;
+  left: -16px;
+  z-index: 31;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--sq-border, rgba(148, 163, 184, 0.2));
+  background: var(--sq-surface, rgba(30, 41, 59, 0.98));
+  color: var(--sq-text-secondary, #94a3b8);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: all 0.15s ease;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    background: rgba(99, 102, 241, 0.15);
+    color: #818cf8;
+  }
 }
 
 @keyframes slideInRight {
@@ -378,6 +461,7 @@
   background: transparent;
   color: var(--sq-text-secondary, #94a3b8);
   cursor: pointer;
+  flex-shrink: 0;
 
   &:hover {
     background: var(--sq-surface-hover, rgba(148, 163, 184, 0.1));
@@ -624,6 +708,7 @@
   border-radius: 6px;
   background: rgba(0, 0, 0, 0.3);
   color: var(--sq-text-secondary, #94a3b8);
+  word-break: break-all;
 }
 
 /* ── Scrollbar ─────────────────────────────────────────────────────────── */
@@ -635,6 +720,198 @@
 .detail-panel::-webkit-scrollbar-thumb {
   background: rgba(148, 163, 184, 0.2);
   border-radius: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Responsive Breakpoints
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Tablet landscape ≤1200px — smaller toolbar, reveal collapse btn ── */
+@media (max-width: 1200px) {
+  .detail-collapse-btn {
+    display: flex;
+  }
+
+  .canvas-toolbar {
+    padding: 10px 12px;
+  }
+
+  .toolbar-left {
+    gap: 6px;
+  }
+
+  .workflow-name {
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* ── Tablet portrait ≤900px — compact toolbar, smaller nodes ─────── */
+@media (max-width: 900px) {
+  .canvas-toolbar {
+    padding: 8px 10px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .toolbar-left {
+    order: 1;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .toolbar-right {
+    order: 2;
+    flex-wrap: wrap;
+    gap: 2px;
+  }
+
+  .toolbar-sep {
+    display: none;
+  }
+
+  .workflow-name {
+    font-size: 13px;
+    max-width: 120px;
+  }
+
+  .workflow-badge {
+    font-size: 9px;
+    padding: 1px 6px;
+  }
+
+  .agent-count {
+    display: none;
+  }
+
+  .toolbar-btn {
+    width: 28px;
+    height: 28px;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  /* Detail panel becomes narrower on tablet */
+  .detail-panel {
+    max-width: 320px;
+    padding: 12px 12px 12px 20px;
+    gap: 12px;
+  }
+
+  .detail-title {
+    font-size: 14px;
+  }
+
+  .detail-icon {
+    width: 36px;
+    height: 36px;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+/* ── Mobile ≤640px — panel becomes bottom sheet ──────────────────── */
+@media (max-width: 640px) {
+  .workflow-canvas-wrapper {
+    flex-direction: column; /* stack canvas above panel */
+  }
+
+  .detail-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: unset;
+    height: auto;
+    max-height: 55vh;
+    border-left: none;
+    border-top: 1px solid var(--sq-border, rgba(148, 163, 184, 0.2));
+    border-radius: 16px 16px 0 0;
+    padding: 16px;
+    animation: slideUpSheet 0.25s ease;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.25);
+  }
+
+  .detail-resize-handle {
+    /* Become a top-center drag indicator for bottom sheet */
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 48px;
+    height: 20px;
+    cursor: grab;
+
+    &:active { cursor: grabbing; }
+  }
+
+  .detail-resize-grip {
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    margin-top: 8px;
+
+    .detail-resize-handle:hover &,
+    .detail-resize-handle:active & {
+      height: 4px;
+    }
+  }
+
+  .detail-collapse-btn {
+    display: none;
+  }
+
+  .canvas-toolbar {
+    padding: 6px 8px;
+  }
+
+  .toolbar-right {
+    gap: 1px;
+  }
+
+  .workflow-name {
+    font-size: 12px;
+    max-width: 90px;
+  }
+
+  .workflow-badge {
+    display: none;
+  }
+
+  .exec-status {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
+
+  .toolbar-btn {
+    width: 26px;
+    height: 26px;
+
+    mat-icon {
+      font-size: 15px;
+      width: 15px;
+      height: 15px;
+    }
+  }
+}
+
+@keyframes slideUpSheet {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ── Execution Status — Node States ───────────────────────────────────── */
@@ -1457,4 +1734,96 @@
   font-weight: 600;
   border: 2px solid var(--md-sys-color-surface-container);
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* ── Context Menu ────────────────────────────────────────────────────── */
+
+.context-menu {
+  position: fixed;
+  z-index: 10000;
+  min-width: 180px;
+  background: var(--sq-surface, rgba(30, 41, 59, 0.98));
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--sq-border, rgba(148, 163, 184, 0.2));
+  border-radius: 10px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  padding: 4px;
+  overflow: hidden;
+  animation: ctxFadeIn 0.12s ease;
+}
+
+@keyframes ctxFadeIn {
+  from { opacity: 0; transform: scale(0.95) translateY(-4px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.ctx-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--sq-text-primary, #f1f5f9);
+  font-size: 13px;
+  font-family: 'Inter', system-ui, sans-serif;
+  cursor: pointer;
+  transition: background 0.1s ease;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: var(--sq-text-secondary, #94a3b8);
+  }
+
+  &:hover {
+    background: rgba(99, 102, 241, 0.1);
+  }
+
+  &--danger {
+    color: #ef4444;
+
+    mat-icon { color: #ef4444; }
+
+    &:hover {
+      background: rgba(239, 68, 68, 0.1);
+    }
+  }
+}
+
+.ctx-divider {
+  height: 1px;
+  margin: 4px 8px;
+  background: var(--sq-border, rgba(148, 163, 184, 0.15));
+}
+
+/* ── LLM Config Grid ────────────────────────────────────────────────── */
+
+.llm-config-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.llm-config-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.llm-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--sq-text-secondary, #94a3b8);
+  min-width: 80px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.inspector-input--narrow {
+  width: 80px !important;
+  flex: none;
 }

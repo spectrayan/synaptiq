@@ -1,4 +1,6 @@
-<div class="workflow-canvas-wrapper">
+<div class="workflow-canvas-wrapper" [class.detail-open]="selectedNode() || selectedEdge()">
+  <!-- Canvas area (flex: 1, shrinks when panel opens) -->
+  <div class="canvas-main">
   <!-- Toolbar -->
   <div class="canvas-toolbar">
     <div class="toolbar-left">
@@ -179,6 +181,7 @@
     fDraggable
     (fFullRendered)="onFlowRendered()"
     (fCreateConnection)="onConnectionCreated($event)"
+    (contextmenu)="openContextMenu($event, 'canvas')"
     class="flow-host"
   >
     <f-canvas fZoom>
@@ -223,6 +226,7 @@
           [class.sq-node-error]="node.executionStatus === 'error'"
           [class.sq-node-skipped]="node.executionStatus === 'skipped'"
           (click)="selectNode(node.id)"
+          (contextmenu)="openContextMenu($event, 'node', node.id)"
           (keyup.enter)="selectNode(node.id)"
           (keyup.space)="selectNode(node.id)"
           (mouseenter)="hoveredNodeId.set(node.id)"
@@ -320,9 +324,75 @@
     </f-canvas>
   </f-flow>
 
-  <!-- Inspector Panel (slides in from right) -->
+  <!-- Remote Cursors Overlay -->
+  @for (cursor of remoteCursorsList(); track cursor.id) {
+    <div class="remote-cursor" [style.left.px]="cursor.x" [style.top.px]="cursor.y">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.04c.45 0 .67-.54.35-.85L5.85 3.21a.5.5 0 0 0-.85.35z" [attr.fill]="cursor.color"/>
+      </svg>
+      <span class="remote-cursor-name" [style.backgroundColor]="cursor.color">{{ cursor.name }}</span>
+    </div>
+  }
+
+  <!-- Context Menu Overlay -->
+  @if (contextMenu(); as cm) {
+    <div class="context-menu" [style.left.px]="cm.x" [style.top.px]="cm.y">
+      @if (cm.target === 'canvas') {
+        <button class="ctx-item" (click)="showAddNodeForm.set(true); contextMenu.set(null)">
+          <mat-icon>add_circle</mat-icon> Add Node
+        </button>
+        <button class="ctx-item" (click)="autoLayout(); contextMenu.set(null)">
+          <mat-icon>auto_fix_high</mat-icon> Auto-Layout
+        </button>
+        <button class="ctx-item" (click)="fitToScreen(); contextMenu.set(null)">
+          <mat-icon>fit_screen</mat-icon> Fit to Screen
+        </button>
+      }
+      @if (cm.target === 'node' && cm.nodeId) {
+        <button class="ctx-item" (click)="selectNode(cm.nodeId!); contextMenu.set(null)">
+          <mat-icon>edit</mat-icon> Edit
+        </button>
+        <button class="ctx-item" (click)="selectNode(cm.nodeId!); duplicateSelectedNode(); contextMenu.set(null)">
+          <mat-icon>content_copy</mat-icon> Duplicate
+        </button>
+        @if (spec()?.entrypoint !== cm.nodeId) {
+          <button class="ctx-item" (click)="setEntryPoint(cm.nodeId!); contextMenu.set(null)">
+            <mat-icon>login</mat-icon> Set as Entry Point
+          </button>
+        }
+        <button class="ctx-item" (click)="selectNode(cm.nodeId!); onRegeneratePrompt({ instruction: 'Improve the prompt' }); contextMenu.set(null)">
+          <mat-icon>auto_awesome</mat-icon> Regenerate Prompt
+        </button>
+        <div class="ctx-divider"></div>
+        <button class="ctx-item ctx-item--danger" (click)="deleteNode(cm.nodeId!); contextMenu.set(null)">
+          <mat-icon>delete</mat-icon> Delete
+        </button>
+      }
+      @if (cm.target === 'edge' && cm.edgeId) {
+        <button class="ctx-item ctx-item--danger" (click)="selectEdge(cm.edgeId!); deleteSelectedEdge(); contextMenu.set(null)">
+          <mat-icon>delete</mat-icon> Delete Edge
+        </button>
+      }
+    </div>
+  }
+
+  </div><!-- /.canvas-main -->
+
+  <!-- Inspector Panel (slides in from right — flex sibling to canvas-main) -->
   @if (selectedNode()) {
-    <aside class="detail-panel">
+    <aside class="detail-panel" [style.width.px]="panelWidth()">
+      <!-- Resize drag handle -->
+      <div class="detail-resize-handle"
+           (mousedown)="onResizeStart($event)"
+           (touchstart)="onResizeTouchStart($event)"
+           matTooltip="Drag to resize"
+           matTooltipPosition="left">
+        <div class="detail-resize-grip"></div>
+      </div>
+      <!-- Collapse toggle (mobile) -->
+      <button class="detail-collapse-btn" (click)="detailCollapsed.update(v => !v)" matTooltip="Collapse panel">
+        <mat-icon>{{ detailCollapsed() ? 'chevron_left' : 'chevron_right' }}</mat-icon>
+      </button>
       <div class="detail-header">
         <div class="detail-icon" [style.background]="selectedNode()!.color + '22'" [style.color]="selectedNode()!.color">
           <mat-icon>{{ selectedNode()!.icon }}</mat-icon>
@@ -389,6 +459,39 @@
             <option value="human_input">Human Input</option>
             <option value="condition">Condition</option>
           </select>
+        </div>
+
+        <!-- LLM Configuration -->
+        <div class="detail-section">
+          <span class="detail-label">LLM Configuration</span>
+          <div class="llm-config-grid">
+            <div class="llm-config-row">
+              <label class="llm-label">Provider</label>
+              <select class="inspector-select"
+                      [value]="selectedNode()!.llm?.provider || ''"
+                      (change)="onNodeLlmProviderChange($any($event.target).value)">
+                <option value="">Default</option>
+                <option value="VERTEXAI">Vertex AI</option>
+                <option value="OPENAI">OpenAI</option>
+                <option value="ANTHROPIC">Anthropic</option>
+              </select>
+            </div>
+            <div class="llm-config-row">
+              <label class="llm-label">Model</label>
+              <input class="inspector-input"
+                     [value]="selectedNode()!.llm?.model || ''"
+                     (input)="onNodeLlmModelChange($any($event.target).value)"
+                     placeholder="e.g. gemini-2.0-flash" />
+            </div>
+            <div class="llm-config-row">
+              <label class="llm-label">Temperature</label>
+              <input class="inspector-input inspector-input--narrow"
+                     type="number"
+                     min="0" max="2" step="0.1"
+                     [value]="selectedNode()!.llm?.temperature ?? 0"
+                     (input)="onNodeLlmTemperatureChange(+$any($event.target).value)" />
+            </div>
+          </div>
         </div>
 
         <!-- Editable System Prompt -->
@@ -496,7 +599,19 @@
       }
     </aside>
   } @else if (selectedEdge()) {
-    <aside class="detail-panel">
+    <aside class="detail-panel" [style.width.px]="panelWidth()">
+      <!-- Resize drag handle -->
+      <div class="detail-resize-handle"
+           (mousedown)="onResizeStart($event)"
+           (touchstart)="onResizeTouchStart($event)"
+           matTooltip="Drag to resize"
+           matTooltipPosition="left">
+        <div class="detail-resize-grip"></div>
+      </div>
+      <!-- Collapse toggle (mobile) -->
+      <button class="detail-collapse-btn" (click)="detailCollapsed.update(v => !v)" matTooltip="Collapse panel">
+        <mat-icon>{{ detailCollapsed() ? 'chevron_left' : 'chevron_right' }}</mat-icon>
+      </button>
       <div class="detail-header">
         <div class="detail-icon" style="background: rgba(244, 63, 94, 0.22); color: #f43f5e">
           <mat-icon>{{ selectedEdge()!.isConditional ? 'call_split' : 'timeline' }}</mat-icon>
@@ -536,15 +651,5 @@
         </button>
       </div>
     </aside>
-  }
-
-  <!-- Remote Cursors Overlay -->
-  @for (cursor of remoteCursorsList(); track cursor.id) {
-    <div class="remote-cursor" [style.left.px]="cursor.x" [style.top.px]="cursor.y">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M5.5 3.21V20.8c0 .45.54.67.85.35l4.86-4.86a.5.5 0 0 1 .35-.15h6.04c.45 0 .67-.54.35-.85L5.85 3.21a.5.5 0 0 0-.85.35z" [attr.fill]="cursor.color"/>
-      </svg>
-      <span class="remote-cursor-name" [style.backgroundColor]="cursor.color">{{ cursor.name }}</span>
-    </div>
   }
 </div>

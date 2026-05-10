@@ -37,7 +37,7 @@ import {
 } from '@foblex/flow';
 import type {
   WorkflowSpec, AgentNodeSpec, NodeExecutionStatus,
-  WorkflowRunSummary, WorkflowRunNodeDetail, ToolDefinition, ToolSpec,
+  WorkflowRunSummary, WorkflowRunNodeDetail, ToolDefinition, ToolSpec, LLMSpec,
 } from '../workflow.service';
 
 // ---------------------------------------------------------------------------
@@ -51,12 +51,22 @@ interface LayoutNode {
   description: string;
   systemPrompt: string;
   tools: (string | ToolSpec)[];
+  llm?: LLMSpec;
   x: number;
   y: number;
   color: string;
   icon: string;
   executionStatus: NodeExecutionStatus | 'idle';
   durationMs?: number;
+}
+
+/** Context menu model. */
+interface ContextMenu {
+  x: number;
+  y: number;
+  target: 'canvas' | 'node' | 'edge';
+  nodeId?: string;
+  edgeId?: string;
 }
 
 /** Edge model for Foblex connections (connector-to-connector). */
@@ -158,6 +168,101 @@ export class WorkflowCanvasComponent {
   readonly showToolbar3Dot = signal(false);
   
   readonly selectedEdgeId = signal<string | null>(null);
+
+  // ── Resizable Detail Panel ────────────────────────────────────────────
+  private static readonly MIN_PANEL_WIDTH = 280;
+  private static readonly MAX_PANEL_WIDTH = 600;
+  private static readonly DEFAULT_PANEL_WIDTH = 360;
+  private static readonly PANEL_WIDTH_KEY = 'synaptiq:workflow-panel-width';
+
+  readonly panelWidth = signal(this._loadPanelWidth());
+  readonly detailCollapsed = signal(false);
+
+  private _resizing = false;
+  private _resizeStartX = 0;
+  private _resizeStartWidth = 0;
+
+  private _loadPanelWidth(): number {
+    try {
+      const stored = localStorage.getItem(WorkflowCanvasComponent.PANEL_WIDTH_KEY);
+      if (stored) {
+        const val = parseInt(stored, 10);
+        if (!isNaN(val) && val >= WorkflowCanvasComponent.MIN_PANEL_WIDTH && val <= WorkflowCanvasComponent.MAX_PANEL_WIDTH) {
+          return val;
+        }
+      }
+    } catch { /* ignore */ }
+    return WorkflowCanvasComponent.DEFAULT_PANEL_WIDTH;
+  }
+
+  private _savePanelWidth(width: number): void {
+    try { localStorage.setItem(WorkflowCanvasComponent.PANEL_WIDTH_KEY, String(width)); } catch { /* ignore */ }
+  }
+
+  onResizeStart(event: MouseEvent): void {
+    event.preventDefault();
+    this._resizing = true;
+    this._resizeStartX = event.clientX;
+    this._resizeStartWidth = this.panelWidth();
+
+    const onMove = (e: MouseEvent) => {
+      if (!this._resizing) return;
+      const delta = this._resizeStartX - e.clientX; // Moving left = bigger panel
+      const newWidth = Math.min(
+        WorkflowCanvasComponent.MAX_PANEL_WIDTH,
+        Math.max(WorkflowCanvasComponent.MIN_PANEL_WIDTH, this._resizeStartWidth + delta),
+      );
+      this.panelWidth.set(newWidth);
+    };
+
+    const onUp = () => {
+      this._resizing = false;
+      this._savePanelWidth(this.panelWidth());
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }
+
+  onResizeTouchStart(event: TouchEvent): void {
+    if (!event.touches.length) return;
+    event.preventDefault();
+    this._resizing = true;
+    this._resizeStartX = event.touches[0].clientX;
+    this._resizeStartWidth = this.panelWidth();
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (!this._resizing || !e.touches.length) return;
+      const delta = this._resizeStartX - e.touches[0].clientX;
+      const newWidth = Math.min(
+        WorkflowCanvasComponent.MAX_PANEL_WIDTH,
+        Math.max(WorkflowCanvasComponent.MIN_PANEL_WIDTH, this._resizeStartWidth + delta),
+      );
+      this.panelWidth.set(newWidth);
+    };
+
+    const onTouchEnd = () => {
+      this._resizing = false;
+      this._savePanelWidth(this.panelWidth());
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('touchend', onTouchEnd);
+    };
+
+    document.addEventListener('touchmove', onTouchMove, { passive: false });
+    document.addEventListener('touchend', onTouchEnd);
+  }
+
+  /** Context menu state */
+  readonly contextMenu = signal<ContextMenu | null>(null);
+
+  /** Node positions persisted by user (overrides auto-layout). Keyed by node ID. */
+  private _userPositions = new Map<string, { x: number; y: number }>();
 
   /** Tool registry state */
   readonly showToolPicker = signal(false);
@@ -385,25 +490,62 @@ export class WorkflowCanvasComponent {
   @HostListener('document:keydown', ['$event'])
   onKeydown(event: KeyboardEvent): void {
     const ctrl = event.ctrlKey || event.metaKey;
+    const activeTag = document.activeElement?.tagName;
+    const inInput = activeTag === 'INPUT' || activeTag === 'TEXTAREA';
+
+    // Ctrl+Z — Undo
     if (ctrl && event.key === 'z' && !event.shiftKey) {
       event.preventDefault();
       this.undo();
-    } else if (ctrl && event.key === 'z' && event.shiftKey) {
+    }
+    // Ctrl+Shift+Z / Ctrl+Y — Redo
+    else if (ctrl && ((event.key === 'z' && event.shiftKey) || event.key === 'y')) {
       event.preventDefault();
       this.redo();
-    } else if (ctrl && event.key === 'y') {
+    }
+    // Ctrl+S — Save (emit specChange to trigger auto-save)
+    else if (ctrl && event.key === 's') {
       event.preventDefault();
-      this.redo();
-    } else if (event.key === 'Delete' || event.key === 'Backspace') {
-      const activeTag = document.activeElement?.tagName;
-      if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') return;
-      
+      const s = this.spec();
+      if (s) this.specChange.emit(s);
+    }
+    // Ctrl+D — Duplicate selected node
+    else if (ctrl && event.key === 'd' && !inInput) {
+      event.preventDefault();
+      this.duplicateSelectedNode();
+    }
+    // Ctrl+Enter — Run workflow
+    else if (ctrl && event.key === 'Enter') {
+      event.preventDefault();
+      if (this.executionStatus() !== 'running') {
+        this.runWorkflow.emit({});
+      }
+    }
+    // Escape — Deselect / close panels
+    else if (event.key === 'Escape') {
+      this.selectedNodeId.set(null);
+      this.selectedEdgeId.set(null);
+      this.showAddNodeForm.set(false);
+      this.showToolPicker.set(false);
+      this.contextMenu.set(null);
+      if (this.spec()?.id) {
+        this.collabService.sendMessage({ type: 'node_selected', node_id: undefined });
+      }
+    }
+    // Delete / Backspace — Delete selected node or edge
+    else if ((event.key === 'Delete' || event.key === 'Backspace') && !inInput) {
       if (this.selectedNodeId()) {
         this.showDeleteConfirm.set(true);
       } else if (this.selectedEdgeId()) {
         this.deleteSelectedEdge();
       }
     }
+  }
+
+  /** Close context menu on any click. */
+  @HostListener('document:click')
+  onDocClick(): void {
+    this.contextMenu.set(null);
   }
 
   // ── Execution API (called from parent) ─────────────────────────────────
@@ -624,6 +766,72 @@ export class WorkflowCanvasComponent {
     this._updateSelectedNode({ description: newType } as Partial<AgentNodeSpec>);
   }
 
+  /** Update a node's LLM provider. */
+  onNodeLlmProviderChange(provider: string): void {
+    const node = this.selectedNode();
+    if (!node) return;
+    const llm = { ...(node.llm ?? {}), provider } as any;
+    this._updateSelectedNode({ llm } as Partial<AgentNodeSpec>);
+  }
+
+  /** Update a node's LLM model. */
+  onNodeLlmModelChange(model: string): void {
+    const node = this.selectedNode();
+    if (!node) return;
+    const llm = { ...(node.llm ?? {}), model } as any;
+    this._updateSelectedNode({ llm } as Partial<AgentNodeSpec>);
+  }
+
+  /** Update a node's LLM temperature. */
+  onNodeLlmTemperatureChange(temp: number): void {
+    const node = this.selectedNode();
+    if (!node) return;
+    const llm = { ...(node.llm ?? {}), temperature: temp } as any;
+    this._updateSelectedNode({ llm } as Partial<AgentNodeSpec>);
+  }
+
+  /** Duplicate the selected node. */
+  duplicateSelectedNode(): void {
+    const node = this.selectedNode();
+    const s = this.spec();
+    if (!node || !s) return;
+    const suffix = '_copy';
+    const newId = node.id + suffix;
+    const newAgent: AgentNodeSpec = {
+      id: newId,
+      name: node.label + ' (Copy)',
+      description: node.description,
+      systemPrompt: node.systemPrompt,
+      tools: node.tools.filter((t): t is ToolSpec => typeof t !== 'string') as ToolSpec[],
+    };
+    this.emitSpecChange({
+      ...s,
+      agents: [...(s.agents ?? []), newAgent],
+    });
+  }
+
+  // ── Context Menu ───────────────────────────────────────────────────────
+
+  openContextMenu(event: MouseEvent, target: 'canvas' | 'node' | 'edge', id?: string): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.contextMenu.set({
+      x: event.clientX,
+      y: event.clientY,
+      target,
+      nodeId: target === 'node' ? id : undefined,
+      edgeId: target === 'edge' ? id : undefined,
+    });
+  }
+
+  /** Auto-reset all node positions to the computed layout. */
+  autoLayout(): void {
+    this._userPositions.clear();
+    // Force re-computation by emitting the same spec
+    const s = this.spec();
+    if (s) this.specChange.emit(s);
+  }
+
   /** Start inline name editing */
   startNameEdit(): void {
     this.editingName.set(this.spec()?.name ?? '');
@@ -690,12 +898,9 @@ export class WorkflowCanvasComponent {
     this.emitSpecChange(updated);
   }
 
-  /** Handle node position change after user drags a node. */
-  onNodePositionChanged(): void {
-    // Store position in our layout. Since Foblex manages the visual drag,
-    // we only emit a spec change if we're persisting positions.
-    // For now, positions are auto-computed from the layout algorithm,
-    // so we absorb this event silently.
+  /** Handle node position change after user drags a node — persist position. */
+  onNodePositionChanged(nodeId: string, x: number, y: number): void {
+    this._userPositions.set(nodeId, { x, y });
   }
 
   // ── Validation ───────────────────────────────────────────────────────────
@@ -1047,6 +1252,7 @@ export class WorkflowCanvasComponent {
 
         const type = 'agent';
         const execState = this.nodeExecState()[agent.id];
+        const userPos = this._userPositions.get(agent.id);
         layoutNodes.push({
           id: agent.id,
           label: agent.name || agent.id,
@@ -1054,8 +1260,9 @@ export class WorkflowCanvasComponent {
           description: agent.description || '',
           systemPrompt: agent.systemPrompt || '',
           tools: agent.tools || [],
-          x: PADDING + layer * LAYER_GAP_X,
-          y: startY + idx * (NODE_HEIGHT + NODE_GAP_Y),
+          llm: (agent as any).llm,
+          x: userPos?.x ?? (PADDING + layer * LAYER_GAP_X),
+          y: userPos?.y ?? (startY + idx * (NODE_HEIGHT + NODE_GAP_Y)),
           color: NODE_COLORS[type] || NODE_COLORS['default'],
           icon: NODE_ICONS[type] || NODE_ICONS['default'],
           executionStatus: execState?.status ?? 'idle',
