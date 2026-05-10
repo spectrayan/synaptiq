@@ -8,14 +8,14 @@ import lombok.Getter;
 @Getter
 public class SynaptiqException extends RuntimeException {
 
-    private final ErrorCode errorCode;
+    private final String errorCode;
 
-    public SynaptiqException(ErrorCode errorCode, String message) {
+    public SynaptiqException(String errorCode, String message) {
         super(message);
         this.errorCode = errorCode;
     }
 
-    public SynaptiqException(ErrorCode errorCode, String message, Throwable cause) {
+    public SynaptiqException(String errorCode, String message, Throwable cause) {
         super(message, cause);
         this.errorCode = errorCode;
     }

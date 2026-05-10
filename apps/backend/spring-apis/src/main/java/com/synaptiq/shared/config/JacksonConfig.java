@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Primary;
 
 /**
  * Jackson ObjectMapper configuration — snake_case naming to match the
- * Python API contract (Pydantic models use snake_case by default).
+ * OpenAPI contract and Angular SDK conventions.
  */
 @Configuration
 public class JacksonConfig {
@@ -20,9 +20,8 @@ public class JacksonConfig {
     @Primary
     public ObjectMapper objectMapper() {
         return new ObjectMapper()
-            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
-            .registerModule(new JavaTimeModule())
-            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+                .registerModule(new JavaTimeModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     }
 }

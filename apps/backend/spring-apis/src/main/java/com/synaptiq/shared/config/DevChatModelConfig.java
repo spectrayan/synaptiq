@@ -5,6 +5,7 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.Prompt;
+import reactor.core.publisher.Flux;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,6 +31,11 @@ public class DevChatModelConfig {
                         new AssistantMessage("⚠️ LLM not configured — running in dev mode without AI credentials.")
                     ))
                 );
+            }
+
+            @Override
+            public Flux<ChatResponse> stream(Prompt prompt) {
+                return Flux.just(call(prompt));
             }
         };
     }

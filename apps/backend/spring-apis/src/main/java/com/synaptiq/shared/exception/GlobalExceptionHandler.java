@@ -1,12 +1,16 @@
 package com.synaptiq.shared.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import com.synaptiq.infrastructure.in.web.dto.ProblemDetails;
+import com.synaptiq.infrastructure.in.web.dto.ValidationError;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.server.ServerWebInputException;
+
+import com.synaptiq.shared.util.ExceptionUtils;
 
 import java.net.URI;
 import java.time.Instant;
@@ -24,30 +28,30 @@ public class GlobalExceptionHandler {
     private static final String PROBLEM_TYPE_BASE = "https://api.synaptiq.com/problems/";
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ProblemDetail handleNotFound(ResourceNotFoundException ex) {
+    public ResponseEntity<ProblemDetails> handleNotFound(ResourceNotFoundException ex) {
         return buildProblemDetail(HttpStatus.NOT_FOUND, ex.getMessage(), ex.getErrorCode());
     }
 
     @ExceptionHandler(DuplicateResourceException.class)
-    public ProblemDetail handleDuplicate(DuplicateResourceException ex) {
+    public ResponseEntity<ProblemDetails> handleDuplicate(DuplicateResourceException ex) {
         return buildProblemDetail(HttpStatus.CONFLICT, ex.getMessage(), ex.getErrorCode());
     }
 
     @ExceptionHandler(SynaptiqException.class)
-    public ProblemDetail handleSynaptiq(SynaptiqException ex) {
+    public ResponseEntity<ProblemDetails> handleSynaptiq(SynaptiqException ex) {
         HttpStatus status = switch (ex.getErrorCode()) {
-            case AUTHENTICATION_FAILED -> HttpStatus.UNAUTHORIZED;
-            case INSUFFICIENT_ROLE -> HttpStatus.FORBIDDEN;
-            case RATE_LIMIT_EXCEEDED, TENANT_LIMIT_EXCEEDED -> HttpStatus.TOO_MANY_REQUESTS;
-            case VALIDATION_ERROR -> HttpStatus.UNPROCESSABLE_ENTITY;
-            case ACTION_DISABLED -> HttpStatus.FORBIDDEN;
+            case ErrorCode.AUTHENTICATION_FAILED -> HttpStatus.UNAUTHORIZED;
+            case ErrorCode.INSUFFICIENT_ROLE -> HttpStatus.FORBIDDEN;
+            case ErrorCode.RATE_LIMIT_EXCEEDED, ErrorCode.TENANT_LIMIT_EXCEEDED -> HttpStatus.TOO_MANY_REQUESTS;
+            case ErrorCode.VALIDATION_ERROR -> HttpStatus.UNPROCESSABLE_ENTITY;
+            case ErrorCode.ACTION_DISABLED -> HttpStatus.FORBIDDEN;
             default -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
         return buildProblemDetail(status, ex.getMessage(), ex.getErrorCode());
     }
 
     @ExceptionHandler(WebExchangeBindException.class)
-    public ProblemDetail handleValidation(WebExchangeBindException ex) {
+    public ResponseEntity<ProblemDetails> handleValidation(WebExchangeBindException ex) {
         var firstError = ex.getFieldErrors().stream()
             .map(fe -> fe.getField() + ": " + fe.getDefaultMessage())
             .findFirst()
@@ -56,23 +60,28 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ServerWebInputException.class)
-    public ProblemDetail handleInput(ServerWebInputException ex) {
+    public ResponseEntity<ProblemDetails> handleInput(ServerWebInputException ex) {
         return buildProblemDetail(HttpStatus.BAD_REQUEST, ex.getReason(), ErrorCode.VALIDATION_ERROR);
     }
 
     @ExceptionHandler(Exception.class)
-    public ProblemDetail handleGeneric(Exception ex) {
-        log.error("Unhandled exception", ex);
+    public ResponseEntity<ProblemDetails> handleGeneric(Exception ex) {
+        log.error("Unhandled exception: {}", ExceptionUtils.getRootCauseMessage(ex));
         return buildProblemDetail(HttpStatus.INTERNAL_SERVER_ERROR,
             "Internal server error", ErrorCode.INTERNAL_ERROR);
     }
 
-    private ProblemDetail buildProblemDetail(HttpStatus status, String detail, ErrorCode code) {
-        ProblemDetail problem = ProblemDetail.forStatusAndDetail(status, detail != null ? detail : "Unknown error");
-        problem.setType(URI.create(PROBLEM_TYPE_BASE + code.name().toLowerCase()));
-        problem.setTitle(status.getReasonPhrase());
-        problem.setProperty("errorCode", code.name());
-        problem.setProperty("timestamp", Instant.now().toString());
-        return problem;
+    private ResponseEntity<ProblemDetails> buildProblemDetail(HttpStatus status, String detail, String code) {
+        ProblemDetails problem = new ProblemDetails()
+            .type(URI.create(PROBLEM_TYPE_BASE + code.toLowerCase().replace("_", "-")))
+            .title(status.getReasonPhrase())
+            .status(status.value())
+            .detail(detail != null ? detail : "Unknown error")
+            .code(code)
+            .timestamp(Instant.now().atOffset(java.time.ZoneOffset.UTC));
+            
+        return ResponseEntity.status(status)
+            .header("Content-Type", "application/problem+json")
+            .body(problem);
     }
 }
