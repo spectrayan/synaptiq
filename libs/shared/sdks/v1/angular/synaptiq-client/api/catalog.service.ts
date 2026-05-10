@@ -26,6 +26,8 @@ import { CatalogItemResponse } from '../model/catalog-item-response.model';
 import { CatalogSchemaResponse } from '../model/catalog-schema-response.model';
 // @ts-ignore
 import { CreateCatalogItemRequest } from '../model/create-catalog-item-request.model';
+// @ts-ignore
+import { ProblemDetails } from '../model/problem-details.model';
 
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
@@ -61,10 +63,10 @@ export class CatalogService extends BaseService implements CatalogServiceInterfa
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public createCatalogItem(requestParameters: CreateCatalogItemRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<CatalogItemResponse>;
-    public createCatalogItem(requestParameters: CreateCatalogItemRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<CatalogItemResponse>>;
-    public createCatalogItem(requestParameters: CreateCatalogItemRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<CatalogItemResponse>>;
-    public createCatalogItem(requestParameters: CreateCatalogItemRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public createCatalogItem(requestParameters: CreateCatalogItemRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<CatalogItemResponse>;
+    public createCatalogItem(requestParameters: CreateCatalogItemRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<CatalogItemResponse>>;
+    public createCatalogItem(requestParameters: CreateCatalogItemRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<CatalogItemResponse>>;
+    public createCatalogItem(requestParameters: CreateCatalogItemRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const createCatalogItemRequest = requestParameters?.createCatalogItemRequest;
         if (createCatalogItemRequest === null || createCatalogItemRequest === undefined) {
             throw new Error('Required parameter createCatalogItemRequest was null or undefined when calling createCatalogItem.');
@@ -77,7 +79,8 @@ export class CatalogService extends BaseService implements CatalogServiceInterfa
         }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            'application/json'
+            'application/json',
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
@@ -132,10 +135,10 @@ export class CatalogService extends BaseService implements CatalogServiceInterfa
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public deleteCatalogItem(requestParameters: DeleteCatalogItemRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any>;
-    public deleteCatalogItem(requestParameters: DeleteCatalogItemRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
-    public deleteCatalogItem(requestParameters: DeleteCatalogItemRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public deleteCatalogItem(requestParameters: DeleteCatalogItemRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public deleteCatalogItem(requestParameters: DeleteCatalogItemRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
+    public deleteCatalogItem(requestParameters: DeleteCatalogItemRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
+    public deleteCatalogItem(requestParameters: DeleteCatalogItemRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
+    public deleteCatalogItem(requestParameters: DeleteCatalogItemRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const itemId = requestParameters?.itemId;
         if (itemId === null || itemId === undefined) {
             throw new Error('Required parameter itemId was null or undefined when calling deleteCatalogItem.');
@@ -148,6 +151,7 @@ export class CatalogService extends BaseService implements CatalogServiceInterfa
         }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
@@ -192,10 +196,10 @@ export class CatalogService extends BaseService implements CatalogServiceInterfa
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public getActiveSchema(requestParameters?: GetActiveSchemaRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<CatalogSchemaResponse>;
-    public getActiveSchema(requestParameters?: GetActiveSchemaRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<CatalogSchemaResponse>>;
-    public getActiveSchema(requestParameters?: GetActiveSchemaRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<CatalogSchemaResponse>>;
-    public getActiveSchema(requestParameters?: GetActiveSchemaRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getActiveSchema(requestParameters?: GetActiveSchemaRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<CatalogSchemaResponse>;
+    public getActiveSchema(requestParameters?: GetActiveSchemaRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<CatalogSchemaResponse>>;
+    public getActiveSchema(requestParameters?: GetActiveSchemaRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<CatalogSchemaResponse>>;
+    public getActiveSchema(requestParameters?: GetActiveSchemaRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
 
         let localVarHeaders = this.defaultHeaders;
@@ -204,7 +208,8 @@ export class CatalogService extends BaseService implements CatalogServiceInterfa
         }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            'application/json'
+            'application/json',
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
@@ -249,10 +254,10 @@ export class CatalogService extends BaseService implements CatalogServiceInterfa
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public getCatalogItem(requestParameters: GetCatalogItemRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<CatalogItemResponse>;
-    public getCatalogItem(requestParameters: GetCatalogItemRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<CatalogItemResponse>>;
-    public getCatalogItem(requestParameters: GetCatalogItemRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<CatalogItemResponse>>;
-    public getCatalogItem(requestParameters: GetCatalogItemRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getCatalogItem(requestParameters: GetCatalogItemRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<CatalogItemResponse>;
+    public getCatalogItem(requestParameters: GetCatalogItemRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<CatalogItemResponse>>;
+    public getCatalogItem(requestParameters: GetCatalogItemRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<CatalogItemResponse>>;
+    public getCatalogItem(requestParameters: GetCatalogItemRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const itemId = requestParameters?.itemId;
         if (itemId === null || itemId === undefined) {
             throw new Error('Required parameter itemId was null or undefined when calling getCatalogItem.');
@@ -265,7 +270,8 @@ export class CatalogService extends BaseService implements CatalogServiceInterfa
         }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            'application/json'
+            'application/json',
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
@@ -310,10 +316,10 @@ export class CatalogService extends BaseService implements CatalogServiceInterfa
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public importCatalogItems(requestParameters?: ImportCatalogItemsRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<CatalogImportResponse>;
-    public importCatalogItems(requestParameters?: ImportCatalogItemsRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<CatalogImportResponse>>;
-    public importCatalogItems(requestParameters?: ImportCatalogItemsRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<CatalogImportResponse>>;
-    public importCatalogItems(requestParameters?: ImportCatalogItemsRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public importCatalogItems(requestParameters?: ImportCatalogItemsRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<CatalogImportResponse>;
+    public importCatalogItems(requestParameters?: ImportCatalogItemsRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<CatalogImportResponse>>;
+    public importCatalogItems(requestParameters?: ImportCatalogItemsRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<CatalogImportResponse>>;
+    public importCatalogItems(requestParameters?: ImportCatalogItemsRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
         const file = requestParameters?.file;
 
@@ -323,7 +329,8 @@ export class CatalogService extends BaseService implements CatalogServiceInterfa
         }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            'application/json'
+            'application/json',
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
@@ -391,10 +398,10 @@ export class CatalogService extends BaseService implements CatalogServiceInterfa
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public listCatalogItems(requestParameters?: ListCatalogItemsRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<CatalogItemListResponse>;
-    public listCatalogItems(requestParameters?: ListCatalogItemsRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<CatalogItemListResponse>>;
-    public listCatalogItems(requestParameters?: ListCatalogItemsRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<CatalogItemListResponse>>;
-    public listCatalogItems(requestParameters?: ListCatalogItemsRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public listCatalogItems(requestParameters?: ListCatalogItemsRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<CatalogItemListResponse>;
+    public listCatalogItems(requestParameters?: ListCatalogItemsRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<CatalogItemListResponse>>;
+    public listCatalogItems(requestParameters?: ListCatalogItemsRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<CatalogItemListResponse>>;
+    public listCatalogItems(requestParameters?: ListCatalogItemsRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
         const statusFilter = requestParameters?.statusFilter;
         const skip = requestParameters?.skip;
@@ -435,7 +442,8 @@ export class CatalogService extends BaseService implements CatalogServiceInterfa
         }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            'application/json'
+            'application/json',
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
@@ -481,10 +489,10 @@ export class CatalogService extends BaseService implements CatalogServiceInterfa
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public updateCatalogItem(requestParameters: UpdateCatalogItemRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<CatalogItemResponse>;
-    public updateCatalogItem(requestParameters: UpdateCatalogItemRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<CatalogItemResponse>>;
-    public updateCatalogItem(requestParameters: UpdateCatalogItemRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<CatalogItemResponse>>;
-    public updateCatalogItem(requestParameters: UpdateCatalogItemRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public updateCatalogItem(requestParameters: UpdateCatalogItemRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<CatalogItemResponse>;
+    public updateCatalogItem(requestParameters: UpdateCatalogItemRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<CatalogItemResponse>>;
+    public updateCatalogItem(requestParameters: UpdateCatalogItemRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<CatalogItemResponse>>;
+    public updateCatalogItem(requestParameters: UpdateCatalogItemRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const itemId = requestParameters?.itemId;
         if (itemId === null || itemId === undefined) {
             throw new Error('Required parameter itemId was null or undefined when calling updateCatalogItem.');
@@ -501,7 +509,8 @@ export class CatalogService extends BaseService implements CatalogServiceInterfa
         }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            'application/json'
+            'application/json',
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);

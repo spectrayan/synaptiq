@@ -16,6 +16,7 @@ import { CatalogItemListResponse } from '../model/models';
 import { CatalogItemResponse } from '../model/models';
 import { CatalogSchemaResponse } from '../model/models';
 import { CreateCatalogItemRequest } from '../model/models';
+import { ProblemDetails } from '../model/models';
 
 
 import { Configuration }                                     from '../configuration';

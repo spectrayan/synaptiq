@@ -14,6 +14,7 @@ import { Observable }                                        from 'rxjs';
 import { CreateDataSourceRequest } from '../model/models';
 import { DataSourceResponse } from '../model/models';
 import { ListDataSources200Response } from '../model/models';
+import { ProblemDetails } from '../model/models';
 
 
 import { Configuration }                                     from '../configuration';

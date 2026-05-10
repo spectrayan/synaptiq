@@ -23,6 +23,8 @@ import { BillingResponse } from '../model/billing-response.model';
 // @ts-ignore
 import { PlatformRollupResponse } from '../model/platform-rollup-response.model';
 // @ts-ignore
+import { ProblemDetails } from '../model/problem-details.model';
+// @ts-ignore
 import { TokenUsageResponse } from '../model/token-usage-response.model';
 
 // @ts-ignore
@@ -56,10 +58,10 @@ export class AnalyticsService extends BaseService implements AnalyticsServiceInt
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public getAnalyticsSummary(requestParameters?: GetAnalyticsSummaryRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<AnalyticsSummaryResponse>;
-    public getAnalyticsSummary(requestParameters?: GetAnalyticsSummaryRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<AnalyticsSummaryResponse>>;
-    public getAnalyticsSummary(requestParameters?: GetAnalyticsSummaryRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<AnalyticsSummaryResponse>>;
-    public getAnalyticsSummary(requestParameters?: GetAnalyticsSummaryRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getAnalyticsSummary(requestParameters?: GetAnalyticsSummaryRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<AnalyticsSummaryResponse>;
+    public getAnalyticsSummary(requestParameters?: GetAnalyticsSummaryRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<AnalyticsSummaryResponse>>;
+    public getAnalyticsSummary(requestParameters?: GetAnalyticsSummaryRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<AnalyticsSummaryResponse>>;
+    public getAnalyticsSummary(requestParameters?: GetAnalyticsSummaryRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
         const from = requestParameters?.from;
         const to = requestParameters?.to;
@@ -90,7 +92,8 @@ export class AnalyticsService extends BaseService implements AnalyticsServiceInt
         }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            'application/json'
+            'application/json',
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
@@ -136,10 +139,10 @@ export class AnalyticsService extends BaseService implements AnalyticsServiceInt
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public getBilling(requestParameters?: GetBillingRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<BillingResponse>;
-    public getBilling(requestParameters?: GetBillingRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<BillingResponse>>;
-    public getBilling(requestParameters?: GetBillingRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<BillingResponse>>;
-    public getBilling(requestParameters?: GetBillingRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getBilling(requestParameters?: GetBillingRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<BillingResponse>;
+    public getBilling(requestParameters?: GetBillingRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<BillingResponse>>;
+    public getBilling(requestParameters?: GetBillingRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<BillingResponse>>;
+    public getBilling(requestParameters?: GetBillingRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
         const from = requestParameters?.from;
         const to = requestParameters?.to;
@@ -170,7 +173,8 @@ export class AnalyticsService extends BaseService implements AnalyticsServiceInt
         }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            'application/json'
+            'application/json',
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
@@ -216,10 +220,10 @@ export class AnalyticsService extends BaseService implements AnalyticsServiceInt
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public getPlatformRollup(requestParameters?: GetPlatformRollupRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<PlatformRollupResponse>;
-    public getPlatformRollup(requestParameters?: GetPlatformRollupRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<PlatformRollupResponse>>;
-    public getPlatformRollup(requestParameters?: GetPlatformRollupRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<PlatformRollupResponse>>;
-    public getPlatformRollup(requestParameters?: GetPlatformRollupRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getPlatformRollup(requestParameters?: GetPlatformRollupRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<PlatformRollupResponse>;
+    public getPlatformRollup(requestParameters?: GetPlatformRollupRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<PlatformRollupResponse>>;
+    public getPlatformRollup(requestParameters?: GetPlatformRollupRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<PlatformRollupResponse>>;
+    public getPlatformRollup(requestParameters?: GetPlatformRollupRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const from = requestParameters?.from;
         const to = requestParameters?.to;
 
@@ -246,7 +250,8 @@ export class AnalyticsService extends BaseService implements AnalyticsServiceInt
         let localVarHeaders = this.defaultHeaders;
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            'application/json'
+            'application/json',
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
@@ -292,10 +297,10 @@ export class AnalyticsService extends BaseService implements AnalyticsServiceInt
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public getTokenUsage(requestParameters?: GetTokenUsageRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<TokenUsageResponse>;
-    public getTokenUsage(requestParameters?: GetTokenUsageRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<TokenUsageResponse>>;
-    public getTokenUsage(requestParameters?: GetTokenUsageRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<TokenUsageResponse>>;
-    public getTokenUsage(requestParameters?: GetTokenUsageRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getTokenUsage(requestParameters?: GetTokenUsageRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<TokenUsageResponse>;
+    public getTokenUsage(requestParameters?: GetTokenUsageRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<TokenUsageResponse>>;
+    public getTokenUsage(requestParameters?: GetTokenUsageRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<TokenUsageResponse>>;
+    public getTokenUsage(requestParameters?: GetTokenUsageRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
         const from = requestParameters?.from;
         const to = requestParameters?.to;
@@ -326,7 +331,8 @@ export class AnalyticsService extends BaseService implements AnalyticsServiceInt
         }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            'application/json'
+            'application/json',
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);

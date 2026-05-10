@@ -16,6 +16,7 @@ import { AiPersonaResponse } from '../model/models';
 import { ComponentsToggleResponse } from '../model/models';
 import { GuardrailsResponse } from '../model/models';
 import { LlmProviderResponse } from '../model/models';
+import { ProblemDetails } from '../model/models';
 
 
 import { Configuration }                                     from '../configuration';

@@ -14,6 +14,7 @@ import { Observable }                                        from 'rxjs';
 import { ApplicationResponse } from '../model/models';
 import { CreateApplicationRequest } from '../model/models';
 import { ListApplications200Response } from '../model/models';
+import { ProblemDetails } from '../model/models';
 
 
 import { Configuration }                                     from '../configuration';

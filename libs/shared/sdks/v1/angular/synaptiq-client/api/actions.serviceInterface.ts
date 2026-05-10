@@ -13,6 +13,7 @@ import { Observable }                                        from 'rxjs';
 
 import { ActionResultResponse } from '../model/models';
 import { ExecuteActionRequest } from '../model/models';
+import { ProblemDetails } from '../model/models';
 import { SavedItemListResponse } from '../model/models';
 
 

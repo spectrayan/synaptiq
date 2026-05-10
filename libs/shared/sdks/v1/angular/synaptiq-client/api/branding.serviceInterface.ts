@@ -14,6 +14,7 @@ import { Observable }                                        from 'rxjs';
 import { BrandingResponse } from '../model/models';
 import { ContrastCheckResponse } from '../model/models';
 import { PersonalizationResponse } from '../model/models';
+import { ProblemDetails } from '../model/models';
 import { ThemeListResponse } from '../model/models';
 
 

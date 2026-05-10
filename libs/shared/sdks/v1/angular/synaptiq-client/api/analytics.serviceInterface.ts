@@ -14,6 +14,7 @@ import { Observable }                                        from 'rxjs';
 import { AnalyticsSummaryResponse } from '../model/models';
 import { BillingResponse } from '../model/models';
 import { PlatformRollupResponse } from '../model/models';
+import { ProblemDetails } from '../model/models';
 import { TokenUsageResponse } from '../model/models';
 
 

@@ -23,6 +23,8 @@ import { ContrastCheckResponse } from '../model/contrast-check-response.model';
 // @ts-ignore
 import { PersonalizationResponse } from '../model/personalization-response.model';
 // @ts-ignore
+import { ProblemDetails } from '../model/problem-details.model';
+// @ts-ignore
 import { ThemeListResponse } from '../model/theme-list-response.model';
 
 // @ts-ignore
@@ -59,10 +61,10 @@ export class BrandingService extends BaseService implements BrandingServiceInter
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public checkContrast(requestParameters: CheckContrastRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ContrastCheckResponse>;
-    public checkContrast(requestParameters: CheckContrastRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ContrastCheckResponse>>;
-    public checkContrast(requestParameters: CheckContrastRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ContrastCheckResponse>>;
-    public checkContrast(requestParameters: CheckContrastRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public checkContrast(requestParameters: CheckContrastRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<ContrastCheckResponse>;
+    public checkContrast(requestParameters: CheckContrastRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ContrastCheckResponse>>;
+    public checkContrast(requestParameters: CheckContrastRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ContrastCheckResponse>>;
+    public checkContrast(requestParameters: CheckContrastRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const fg = requestParameters?.fg;
         if (fg === null || fg === undefined) {
             throw new Error('Required parameter fg was null or undefined when calling checkContrast.');
@@ -95,7 +97,8 @@ export class BrandingService extends BaseService implements BrandingServiceInter
         let localVarHeaders = this.defaultHeaders;
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            'application/json'
+            'application/json',
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
@@ -141,10 +144,10 @@ export class BrandingService extends BaseService implements BrandingServiceInter
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public getBranding(requestParameters?: GetBrandingRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<BrandingResponse>;
-    public getBranding(requestParameters?: GetBrandingRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<BrandingResponse>>;
-    public getBranding(requestParameters?: GetBrandingRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<BrandingResponse>>;
-    public getBranding(requestParameters?: GetBrandingRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getBranding(requestParameters?: GetBrandingRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<BrandingResponse>;
+    public getBranding(requestParameters?: GetBrandingRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<BrandingResponse>>;
+    public getBranding(requestParameters?: GetBrandingRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<BrandingResponse>>;
+    public getBranding(requestParameters?: GetBrandingRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
 
         let localVarHeaders = this.defaultHeaders;
@@ -153,7 +156,8 @@ export class BrandingService extends BaseService implements BrandingServiceInter
         }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            'application/json'
+            'application/json',
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
@@ -198,10 +202,10 @@ export class BrandingService extends BaseService implements BrandingServiceInter
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public getPersonalization(requestParameters?: GetPersonalizationRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<PersonalizationResponse>;
-    public getPersonalization(requestParameters?: GetPersonalizationRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<PersonalizationResponse>>;
-    public getPersonalization(requestParameters?: GetPersonalizationRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<PersonalizationResponse>>;
-    public getPersonalization(requestParameters?: GetPersonalizationRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getPersonalization(requestParameters?: GetPersonalizationRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<PersonalizationResponse>;
+    public getPersonalization(requestParameters?: GetPersonalizationRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<PersonalizationResponse>>;
+    public getPersonalization(requestParameters?: GetPersonalizationRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<PersonalizationResponse>>;
+    public getPersonalization(requestParameters?: GetPersonalizationRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
 
         let localVarHeaders = this.defaultHeaders;
@@ -210,7 +214,8 @@ export class BrandingService extends BaseService implements BrandingServiceInter
         }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            'application/json'
+            'application/json',
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
@@ -256,10 +261,10 @@ export class BrandingService extends BaseService implements BrandingServiceInter
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public getPublicBranding(requestParameters: GetPublicBrandingRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<BrandingResponse>;
-    public getPublicBranding(requestParameters: GetPublicBrandingRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<BrandingResponse>>;
-    public getPublicBranding(requestParameters: GetPublicBrandingRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<BrandingResponse>>;
-    public getPublicBranding(requestParameters: GetPublicBrandingRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getPublicBranding(requestParameters: GetPublicBrandingRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<BrandingResponse>;
+    public getPublicBranding(requestParameters: GetPublicBrandingRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<BrandingResponse>>;
+    public getPublicBranding(requestParameters: GetPublicBrandingRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<BrandingResponse>>;
+    public getPublicBranding(requestParameters: GetPublicBrandingRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
         if (xTenantID === null || xTenantID === undefined) {
             throw new Error('Required parameter xTenantID was null or undefined when calling getPublicBranding.');
@@ -271,7 +276,8 @@ export class BrandingService extends BaseService implements BrandingServiceInter
         }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            'application/json'
+            'application/json',
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
@@ -316,10 +322,10 @@ export class BrandingService extends BaseService implements BrandingServiceInter
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public getThemes(requestParameters?: GetThemesRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ThemeListResponse>;
-    public getThemes(requestParameters?: GetThemesRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ThemeListResponse>>;
-    public getThemes(requestParameters?: GetThemesRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ThemeListResponse>>;
-    public getThemes(requestParameters?: GetThemesRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getThemes(requestParameters?: GetThemesRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<ThemeListResponse>;
+    public getThemes(requestParameters?: GetThemesRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ThemeListResponse>>;
+    public getThemes(requestParameters?: GetThemesRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ThemeListResponse>>;
+    public getThemes(requestParameters?: GetThemesRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
 
         let localVarHeaders = this.defaultHeaders;
@@ -328,7 +334,8 @@ export class BrandingService extends BaseService implements BrandingServiceInter
         }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            'application/json'
+            'application/json',
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
@@ -373,10 +380,10 @@ export class BrandingService extends BaseService implements BrandingServiceInter
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public updateBranding(requestParameters: UpdateBrandingRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<BrandingResponse>;
-    public updateBranding(requestParameters: UpdateBrandingRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<BrandingResponse>>;
-    public updateBranding(requestParameters: UpdateBrandingRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<BrandingResponse>>;
-    public updateBranding(requestParameters: UpdateBrandingRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public updateBranding(requestParameters: UpdateBrandingRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<BrandingResponse>;
+    public updateBranding(requestParameters: UpdateBrandingRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<BrandingResponse>>;
+    public updateBranding(requestParameters: UpdateBrandingRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<BrandingResponse>>;
+    public updateBranding(requestParameters: UpdateBrandingRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const brandingResponse = requestParameters?.brandingResponse;
         if (brandingResponse === null || brandingResponse === undefined) {
             throw new Error('Required parameter brandingResponse was null or undefined when calling updateBranding.');
@@ -389,7 +396,8 @@ export class BrandingService extends BaseService implements BrandingServiceInter
         }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            'application/json'
+            'application/json',
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
@@ -444,10 +452,10 @@ export class BrandingService extends BaseService implements BrandingServiceInter
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public updatePersonalization(requestParameters: UpdatePersonalizationRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<PersonalizationResponse>;
-    public updatePersonalization(requestParameters: UpdatePersonalizationRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<PersonalizationResponse>>;
-    public updatePersonalization(requestParameters: UpdatePersonalizationRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<PersonalizationResponse>>;
-    public updatePersonalization(requestParameters: UpdatePersonalizationRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public updatePersonalization(requestParameters: UpdatePersonalizationRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<PersonalizationResponse>;
+    public updatePersonalization(requestParameters: UpdatePersonalizationRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<PersonalizationResponse>>;
+    public updatePersonalization(requestParameters: UpdatePersonalizationRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<PersonalizationResponse>>;
+    public updatePersonalization(requestParameters: UpdatePersonalizationRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const personalizationResponse = requestParameters?.personalizationResponse;
         if (personalizationResponse === null || personalizationResponse === undefined) {
             throw new Error('Required parameter personalizationResponse was null or undefined when calling updatePersonalization.');
@@ -460,7 +468,8 @@ export class BrandingService extends BaseService implements BrandingServiceInter
         }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            'application/json'
+            'application/json',
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);

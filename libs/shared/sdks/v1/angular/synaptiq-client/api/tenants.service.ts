@@ -21,6 +21,8 @@ import { CreateTenantRequest } from '../model/create-tenant-request.model';
 // @ts-ignore
 import { InviteAdminRequest } from '../model/invite-admin-request.model';
 // @ts-ignore
+import { ProblemDetails } from '../model/problem-details.model';
+// @ts-ignore
 import { TenantAdminResponse } from '../model/tenant-admin-response.model';
 // @ts-ignore
 import { TenantResponse } from '../model/tenant-response.model';
@@ -59,10 +61,10 @@ export class TenantsService extends BaseService implements TenantsServiceInterfa
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public createTenant(requestParameters: CreateTenantRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<TenantResponse>;
-    public createTenant(requestParameters: CreateTenantRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<TenantResponse>>;
-    public createTenant(requestParameters: CreateTenantRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<TenantResponse>>;
-    public createTenant(requestParameters: CreateTenantRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public createTenant(requestParameters: CreateTenantRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<TenantResponse>;
+    public createTenant(requestParameters: CreateTenantRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<TenantResponse>>;
+    public createTenant(requestParameters: CreateTenantRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<TenantResponse>>;
+    public createTenant(requestParameters: CreateTenantRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const createTenantRequest = requestParameters?.createTenantRequest;
         if (createTenantRequest === null || createTenantRequest === undefined) {
             throw new Error('Required parameter createTenantRequest was null or undefined when calling createTenant.');
@@ -71,7 +73,8 @@ export class TenantsService extends BaseService implements TenantsServiceInterfa
         let localVarHeaders = this.defaultHeaders;
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            'application/json'
+            'application/json',
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
@@ -126,10 +129,10 @@ export class TenantsService extends BaseService implements TenantsServiceInterfa
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public getTenant(requestParameters: GetTenantRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<TenantResponse>;
-    public getTenant(requestParameters: GetTenantRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<TenantResponse>>;
-    public getTenant(requestParameters: GetTenantRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<TenantResponse>>;
-    public getTenant(requestParameters: GetTenantRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getTenant(requestParameters: GetTenantRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<TenantResponse>;
+    public getTenant(requestParameters: GetTenantRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<TenantResponse>>;
+    public getTenant(requestParameters: GetTenantRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<TenantResponse>>;
+    public getTenant(requestParameters: GetTenantRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const tenantId = requestParameters?.tenantId;
         if (tenantId === null || tenantId === undefined) {
             throw new Error('Required parameter tenantId was null or undefined when calling getTenant.');
@@ -138,7 +141,8 @@ export class TenantsService extends BaseService implements TenantsServiceInterfa
         let localVarHeaders = this.defaultHeaders;
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            'application/json'
+            'application/json',
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
@@ -183,10 +187,10 @@ export class TenantsService extends BaseService implements TenantsServiceInterfa
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public inviteAdmin(requestParameters: InviteAdminRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<TenantAdminResponse>;
-    public inviteAdmin(requestParameters: InviteAdminRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<TenantAdminResponse>>;
-    public inviteAdmin(requestParameters: InviteAdminRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<TenantAdminResponse>>;
-    public inviteAdmin(requestParameters: InviteAdminRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public inviteAdmin(requestParameters: InviteAdminRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<TenantAdminResponse>;
+    public inviteAdmin(requestParameters: InviteAdminRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<TenantAdminResponse>>;
+    public inviteAdmin(requestParameters: InviteAdminRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<TenantAdminResponse>>;
+    public inviteAdmin(requestParameters: InviteAdminRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const tenantId = requestParameters?.tenantId;
         if (tenantId === null || tenantId === undefined) {
             throw new Error('Required parameter tenantId was null or undefined when calling inviteAdmin.');
@@ -199,7 +203,8 @@ export class TenantsService extends BaseService implements TenantsServiceInterfa
         let localVarHeaders = this.defaultHeaders;
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            'application/json'
+            'application/json',
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
@@ -254,10 +259,10 @@ export class TenantsService extends BaseService implements TenantsServiceInterfa
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public listTenantAdmins(requestParameters: ListTenantAdminsRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<Array<TenantAdminResponse>>;
-    public listTenantAdmins(requestParameters: ListTenantAdminsRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Array<TenantAdminResponse>>>;
-    public listTenantAdmins(requestParameters: ListTenantAdminsRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Array<TenantAdminResponse>>>;
-    public listTenantAdmins(requestParameters: ListTenantAdminsRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public listTenantAdmins(requestParameters: ListTenantAdminsRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<Array<TenantAdminResponse>>;
+    public listTenantAdmins(requestParameters: ListTenantAdminsRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Array<TenantAdminResponse>>>;
+    public listTenantAdmins(requestParameters: ListTenantAdminsRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Array<TenantAdminResponse>>>;
+    public listTenantAdmins(requestParameters: ListTenantAdminsRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const tenantId = requestParameters?.tenantId;
         if (tenantId === null || tenantId === undefined) {
             throw new Error('Required parameter tenantId was null or undefined when calling listTenantAdmins.');
@@ -266,7 +271,8 @@ export class TenantsService extends BaseService implements TenantsServiceInterfa
         let localVarHeaders = this.defaultHeaders;
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            'application/json'
+            'application/json',
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
@@ -311,10 +317,10 @@ export class TenantsService extends BaseService implements TenantsServiceInterfa
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public updateTenant(requestParameters: UpdateTenantRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<TenantResponse>;
-    public updateTenant(requestParameters: UpdateTenantRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<TenantResponse>>;
-    public updateTenant(requestParameters: UpdateTenantRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<TenantResponse>>;
-    public updateTenant(requestParameters: UpdateTenantRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public updateTenant(requestParameters: UpdateTenantRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<TenantResponse>;
+    public updateTenant(requestParameters: UpdateTenantRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<TenantResponse>>;
+    public updateTenant(requestParameters: UpdateTenantRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<TenantResponse>>;
+    public updateTenant(requestParameters: UpdateTenantRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const tenantId = requestParameters?.tenantId;
         if (tenantId === null || tenantId === undefined) {
             throw new Error('Required parameter tenantId was null or undefined when calling updateTenant.');
@@ -327,7 +333,8 @@ export class TenantsService extends BaseService implements TenantsServiceInterfa
         let localVarHeaders = this.defaultHeaders;
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            'application/json'
+            'application/json',
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);

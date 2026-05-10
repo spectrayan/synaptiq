@@ -12,6 +12,7 @@ import { HttpHeaders }                                       from '@angular/comm
 import { Observable }                                        from 'rxjs';
 
 import { CollectionListResponse } from '../model/models';
+import { ProblemDetails } from '../model/models';
 import { QueryResultResponse } from '../model/models';
 
 

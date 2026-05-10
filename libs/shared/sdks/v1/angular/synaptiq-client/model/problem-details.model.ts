@@ -7,6 +7,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { ValidationError } from './validation-error.model';
 
 
 /**
@@ -16,15 +17,15 @@ export interface ProblemDetails {
     /**
      * URI reference identifying the problem type
      */
-    type?: string;
+    type: string;
     /**
      * Short human-readable summary
      */
-    title?: string;
+    title: string;
     /**
      * HTTP status code
      */
-    status?: number;
+    status: number;
     /**
      * Human-readable explanation
      */
@@ -33,5 +34,18 @@ export interface ProblemDetails {
      * URI reference identifying the specific occurrence
      */
     instance?: string;
+    /**
+     * Machine-readable error code for frontend translation
+     */
+    code?: string;
+    /**
+     * ISO 8601 timestamp of the error
+     */
+    timestamp?: string;
+    /**
+     * Unique identifier for request tracing
+     */
+    traceId?: string;
+    errors?: Array<ValidationError>;
 }
 

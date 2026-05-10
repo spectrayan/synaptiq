@@ -13,5 +13,6 @@ export interface ValidationError {
     field?: string;
     message?: string;
     rejectedValue?: string;
+    code?: string;
 }
 

@@ -13,6 +13,7 @@ import { Observable }                                        from 'rxjs';
 
 import { ExecuteWorkflowRequest } from '../model/models';
 import { GenerateWorkflowRequest } from '../model/models';
+import { ProblemDetails } from '../model/models';
 import { RegeneratePromptRequest } from '../model/models';
 import { RegeneratePromptResponse } from '../model/models';
 import { SaveWorkflowRequest } from '../model/models';

@@ -13,6 +13,7 @@ import { Observable }                                        from 'rxjs';
 
 import { CreateTenantRequest } from '../model/models';
 import { InviteAdminRequest } from '../model/models';
+import { ProblemDetails } from '../model/models';
 import { TenantAdminResponse } from '../model/models';
 import { TenantResponse } from '../model/models';
 import { UpdateTenantRequest } from '../model/models';

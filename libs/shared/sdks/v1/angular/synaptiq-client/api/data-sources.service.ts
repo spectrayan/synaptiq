@@ -22,6 +22,8 @@ import { CreateDataSourceRequest } from '../model/create-data-source-request.mod
 import { DataSourceResponse } from '../model/data-source-response.model';
 // @ts-ignore
 import { ListDataSources200Response } from '../model/list-data-sources200-response.model';
+// @ts-ignore
+import { ProblemDetails } from '../model/problem-details.model';
 
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
@@ -54,10 +56,10 @@ export class DataSourcesService extends BaseService implements DataSourcesServic
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public createDataSource(requestParameters: CreateDataSourceRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<DataSourceResponse>;
-    public createDataSource(requestParameters: CreateDataSourceRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<DataSourceResponse>>;
-    public createDataSource(requestParameters: CreateDataSourceRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<DataSourceResponse>>;
-    public createDataSource(requestParameters: CreateDataSourceRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public createDataSource(requestParameters: CreateDataSourceRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<DataSourceResponse>;
+    public createDataSource(requestParameters: CreateDataSourceRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<DataSourceResponse>>;
+    public createDataSource(requestParameters: CreateDataSourceRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<DataSourceResponse>>;
+    public createDataSource(requestParameters: CreateDataSourceRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const createDataSourceRequest = requestParameters?.createDataSourceRequest;
         if (createDataSourceRequest === null || createDataSourceRequest === undefined) {
             throw new Error('Required parameter createDataSourceRequest was null or undefined when calling createDataSource.');
@@ -70,7 +72,8 @@ export class DataSourcesService extends BaseService implements DataSourcesServic
         }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            'application/json'
+            'application/json',
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
@@ -125,10 +128,10 @@ export class DataSourcesService extends BaseService implements DataSourcesServic
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public deleteDataSource(requestParameters: DeleteDataSourceRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any>;
-    public deleteDataSource(requestParameters: DeleteDataSourceRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
-    public deleteDataSource(requestParameters: DeleteDataSourceRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public deleteDataSource(requestParameters: DeleteDataSourceRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: undefined, context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public deleteDataSource(requestParameters: DeleteDataSourceRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
+    public deleteDataSource(requestParameters: DeleteDataSourceRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
+    public deleteDataSource(requestParameters: DeleteDataSourceRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
+    public deleteDataSource(requestParameters: DeleteDataSourceRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const dataSourceId = requestParameters?.dataSourceId;
         if (dataSourceId === null || dataSourceId === undefined) {
             throw new Error('Required parameter dataSourceId was null or undefined when calling deleteDataSource.');
@@ -141,6 +144,7 @@ export class DataSourcesService extends BaseService implements DataSourcesServic
         }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
@@ -185,10 +189,10 @@ export class DataSourcesService extends BaseService implements DataSourcesServic
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public getDataSource(requestParameters: GetDataSourceRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<DataSourceResponse>;
-    public getDataSource(requestParameters: GetDataSourceRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<DataSourceResponse>>;
-    public getDataSource(requestParameters: GetDataSourceRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<DataSourceResponse>>;
-    public getDataSource(requestParameters: GetDataSourceRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getDataSource(requestParameters: GetDataSourceRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<DataSourceResponse>;
+    public getDataSource(requestParameters: GetDataSourceRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<DataSourceResponse>>;
+    public getDataSource(requestParameters: GetDataSourceRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<DataSourceResponse>>;
+    public getDataSource(requestParameters: GetDataSourceRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const dataSourceId = requestParameters?.dataSourceId;
         if (dataSourceId === null || dataSourceId === undefined) {
             throw new Error('Required parameter dataSourceId was null or undefined when calling getDataSource.');
@@ -201,7 +205,8 @@ export class DataSourcesService extends BaseService implements DataSourcesServic
         }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            'application/json'
+            'application/json',
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
@@ -246,10 +251,10 @@ export class DataSourcesService extends BaseService implements DataSourcesServic
      * @param reportProgress flag to report request and response progress.
      * @param options additional options
      */
-    public listDataSources(requestParameters?: ListDataSourcesRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ListDataSources200Response>;
-    public listDataSources(requestParameters?: ListDataSourcesRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ListDataSources200Response>>;
-    public listDataSources(requestParameters?: ListDataSourcesRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ListDataSources200Response>>;
-    public listDataSources(requestParameters?: ListDataSourcesRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public listDataSources(requestParameters?: ListDataSourcesRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<ListDataSources200Response>;
+    public listDataSources(requestParameters?: ListDataSourcesRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ListDataSources200Response>>;
+    public listDataSources(requestParameters?: ListDataSourcesRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ListDataSources200Response>>;
+    public listDataSources(requestParameters?: ListDataSourcesRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
 
         let localVarHeaders = this.defaultHeaders;
@@ -258,7 +263,8 @@ export class DataSourcesService extends BaseService implements DataSourcesServic
         }
 
         const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
-            'application/json'
+            'application/json',
+            'application/problem+json'
         ]);
         if (localVarHttpHeaderAcceptSelected !== undefined) {
             localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);

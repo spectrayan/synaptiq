@@ -13,6 +13,7 @@ import { Observable }                                        from 'rxjs';
 
 import { ChatMessageRequest } from '../model/models';
 import { CreateSessionRequest } from '../model/models';
+import { ProblemDetails } from '../model/models';
 import { SessionHistoryResponse } from '../model/models';
 import { SessionListResponse } from '../model/models';
 import { SessionResponse } from '../model/models';
