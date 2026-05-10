@@ -18,7 +18,7 @@ import jakarta.annotation.Generated;
  * ValidationError
  */
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-05T21:15:25.464614100-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-08T22:14:16.718368-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
 public class ValidationError {
 
   private @Nullable String field;
@@ -26,6 +26,8 @@ public class ValidationError {
   private @Nullable String message;
 
   private @Nullable String rejectedValue;
+
+  private @Nullable String code;
 
   public ValidationError field(@Nullable String field) {
     this.field = field;
@@ -90,6 +92,27 @@ public class ValidationError {
     this.rejectedValue = rejectedValue;
   }
 
+  public ValidationError code(@Nullable String code) {
+    this.code = code;
+    return this;
+  }
+
+  /**
+   * Get code
+   * @return code
+   */
+  
+  @Schema(name = "code", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+  @JsonProperty("code")
+  public @Nullable String getCode() {
+    return code;
+  }
+
+  @JsonProperty("code")
+  public void setCode(@Nullable String code) {
+    this.code = code;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -101,12 +124,13 @@ public class ValidationError {
     ValidationError validationError = (ValidationError) o;
     return Objects.equals(this.field, validationError.field) &&
         Objects.equals(this.message, validationError.message) &&
-        Objects.equals(this.rejectedValue, validationError.rejectedValue);
+        Objects.equals(this.rejectedValue, validationError.rejectedValue) &&
+        Objects.equals(this.code, validationError.code);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(field, message, rejectedValue);
+    return Objects.hash(field, message, rejectedValue, code);
   }
 
   @Override
@@ -116,6 +140,7 @@ public class ValidationError {
     sb.append("    field: ").append(toIndentedString(field)).append("\n");
     sb.append("    message: ").append(toIndentedString(message)).append("\n");
     sb.append("    rejectedValue: ").append(toIndentedString(rejectedValue)).append("\n");
+    sb.append("    code: ").append(toIndentedString(code)).append("\n");
     sb.append("}");
     return sb.toString();
   }

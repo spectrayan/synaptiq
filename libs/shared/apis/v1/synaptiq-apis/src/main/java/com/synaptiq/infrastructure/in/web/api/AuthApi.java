@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.Optional;
 import jakarta.annotation.Generated;
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-05T21:15:25.464614100-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-08T22:14:16.718368-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
 @Validated
 @Tag(name = "Auth", description = "Authentication — signup, login, token management")
 public interface AuthApi {
@@ -51,18 +51,35 @@ public interface AuthApi {
      *
      * @param changePasswordRequest  (required)
      * @return Password changed (status code 204)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "changePassword",
         summary = "Change password",
         tags = { "Auth" },
         responses = {
-            @ApiResponse(responseCode = "204", description = "Password changed")
+            @ApiResponse(responseCode = "204", description = "Password changed"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            })
         }
     )
     @RequestMapping(
         method = RequestMethod.POST,
         value = AuthApi.PATH_CHANGE_PASSWORD,
+        produces = { "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<Void>> changePassword(
@@ -76,6 +93,10 @@ public interface AuthApi {
      * GET /api/v1/auth/me : Get current user profile
      *
      * @return Current user (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "getCurrentUser",
@@ -83,14 +104,31 @@ public interface AuthApi {
         tags = { "Auth" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Current user", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = UserResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = AuthApi.PATH_GET_CURRENT_USER,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<UserResponse>> getCurrentUser(
         @Parameter(hidden = true) final ServerWebExchange exchange
@@ -103,7 +141,10 @@ public interface AuthApi {
      *
      * @param loginRequest  (required)
      * @return Authentication successful (status code 200)
+     *         or Bad Request (status code 400)
      *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "login",
@@ -111,17 +152,31 @@ public interface AuthApi {
         tags = { "Auth" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Authentication successful", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = AuthTokenResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = AuthTokenResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = AuthTokenResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             }),
             @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.POST,
         value = AuthApi.PATH_LOGIN,
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<AuthTokenResponse>> login(
@@ -135,6 +190,10 @@ public interface AuthApi {
      * POST /api/v1/auth/refresh : Refresh access token
      *
      * @return Token refreshed (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "refreshToken",
@@ -142,14 +201,31 @@ public interface AuthApi {
         tags = { "Auth" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Token refreshed", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = AuthTokenResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = AuthTokenResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = AuthTokenResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.POST,
         value = AuthApi.PATH_REFRESH_TOKEN,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<AuthTokenResponse>> refreshToken(
         @Parameter(hidden = true) final ServerWebExchange exchange
@@ -162,7 +238,11 @@ public interface AuthApi {
      *
      * @param signupRequest  (required)
      * @return User created (status code 201)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
      *         or Conflict (status code 409)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "signup",
@@ -170,17 +250,35 @@ public interface AuthApi {
         tags = { "Auth" },
         responses = {
             @ApiResponse(responseCode = "201", description = "User created", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = UserResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             }),
             @ApiResponse(responseCode = "409", description = "Conflict", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.POST,
         value = AuthApi.PATH_SIGNUP,
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<UserResponse>> signup(
@@ -195,6 +293,10 @@ public interface AuthApi {
      *
      * @param updateRoleRequest  (required)
      * @return Role updated (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "updateUserRole",
@@ -202,14 +304,31 @@ public interface AuthApi {
         tags = { "Auth" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Role updated", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = UserResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.PATCH,
         value = AuthApi.PATH_UPDATE_USER_ROLE,
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<UserResponse>> updateUserRole(

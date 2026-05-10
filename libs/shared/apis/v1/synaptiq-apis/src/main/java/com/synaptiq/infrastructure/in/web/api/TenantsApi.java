@@ -7,6 +7,7 @@ package com.synaptiq.infrastructure.in.web.api;
 
 import com.synaptiq.infrastructure.in.web.dto.CreateTenantRequest;
 import com.synaptiq.infrastructure.in.web.dto.InviteAdminRequest;
+import com.synaptiq.infrastructure.in.web.dto.ProblemDetails;
 import com.synaptiq.infrastructure.in.web.dto.TenantAdminResponse;
 import com.synaptiq.infrastructure.in.web.dto.TenantResponse;
 import com.synaptiq.infrastructure.in.web.dto.UpdateTenantRequest;
@@ -38,7 +39,7 @@ import java.util.Map;
 import java.util.Optional;
 import jakarta.annotation.Generated;
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-05T21:15:25.464614100-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-08T22:14:16.718368-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
 @Validated
 @Tag(name = "Tenants", description = "Tenant lifecycle — creation, configuration, admin management")
 public interface TenantsApi {
@@ -49,6 +50,10 @@ public interface TenantsApi {
      *
      * @param createTenantRequest  (required)
      * @return Tenant created (status code 201)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "createTenant",
@@ -56,14 +61,31 @@ public interface TenantsApi {
         tags = { "Tenants" },
         responses = {
             @ApiResponse(responseCode = "201", description = "Tenant created", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = TenantResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = TenantResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = TenantResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.POST,
         value = TenantsApi.PATH_CREATE_TENANT,
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<TenantResponse>> createTenant(
@@ -78,6 +100,11 @@ public interface TenantsApi {
      *
      * @param tenantId  (required)
      * @return Tenant details (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Not Found (status code 404)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "getTenant",
@@ -85,14 +112,35 @@ public interface TenantsApi {
         tags = { "Tenants" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Tenant details", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = TenantResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = TenantResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = TenantResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = TenantsApi.PATH_GET_TENANT,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<TenantResponse>> getTenant(
         @Parameter(name = "tenantId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("tenantId") String tenantId,
@@ -107,6 +155,10 @@ public interface TenantsApi {
      * @param tenantId  (required)
      * @param inviteAdminRequest  (required)
      * @return Admin invited (status code 201)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "inviteAdmin",
@@ -114,14 +166,31 @@ public interface TenantsApi {
         tags = { "Tenants" },
         responses = {
             @ApiResponse(responseCode = "201", description = "Admin invited", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = TenantAdminResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = TenantAdminResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = TenantAdminResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.POST,
         value = TenantsApi.PATH_INVITE_ADMIN,
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<TenantAdminResponse>> inviteAdmin(
@@ -137,6 +206,10 @@ public interface TenantsApi {
      *
      * @param tenantId  (required)
      * @return Admin list (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "listTenantAdmins",
@@ -144,14 +217,31 @@ public interface TenantsApi {
         tags = { "Tenants" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Admin list", content = {
-                @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = TenantAdminResponse.class)))
+                @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = TenantAdminResponse.class))),
+                @Content(mediaType = "application/problem+json", array = @ArraySchema(schema = @Schema(implementation = TenantAdminResponse.class)))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = TenantsApi.PATH_LIST_TENANT_ADMINS,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<Flux<TenantAdminResponse>>> listTenantAdmins(
         @Parameter(name = "tenantId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("tenantId") String tenantId,
@@ -166,6 +256,11 @@ public interface TenantsApi {
      * @param tenantId  (required)
      * @param updateTenantRequest  (required)
      * @return Tenant updated (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Not Found (status code 404)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "updateTenant",
@@ -173,14 +268,35 @@ public interface TenantsApi {
         tags = { "Tenants" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Tenant updated", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = TenantResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = TenantResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = TenantResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.PATCH,
         value = TenantsApi.PATH_UPDATE_TENANT,
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<TenantResponse>> updateTenant(

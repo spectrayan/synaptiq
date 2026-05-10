@@ -8,6 +8,7 @@ package com.synaptiq.infrastructure.in.web.api;
 import com.synaptiq.infrastructure.in.web.dto.CollectionListResponse;
 import java.util.Map;
 import org.springframework.lang.Nullable;
+import com.synaptiq.infrastructure.in.web.dto.ProblemDetails;
 import com.synaptiq.infrastructure.in.web.dto.QueryResultResponse;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,7 +38,7 @@ import java.util.Map;
 import java.util.Optional;
 import jakarta.annotation.Generated;
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-05T21:15:25.464614100-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-08T22:14:16.718368-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
 @Validated
 @Tag(name = "SchemaRegistry", description = "Schema Registry — collection inspection, dynamic queries")
 public interface SchemaRegistryApi {
@@ -49,6 +50,10 @@ public interface SchemaRegistryApi {
      * @param collection  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Inferred schema (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "inferSchema",
@@ -56,14 +61,31 @@ public interface SchemaRegistryApi {
         tags = { "SchemaRegistry" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Inferred schema", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = Map.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = Map.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = Map.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = SchemaRegistryApi.PATH_INFER_SCHEMA,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<Map<String, String>>> inferSchema(
         @Parameter(name = "collection", description = "", required = true, in = ParameterIn.PATH) @PathVariable("collection") String collection,
@@ -78,6 +100,10 @@ public interface SchemaRegistryApi {
      *
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Collections (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "listCollections",
@@ -85,14 +111,31 @@ public interface SchemaRegistryApi {
         tags = { "SchemaRegistry" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Collections", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = CollectionListResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = CollectionListResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = CollectionListResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = SchemaRegistryApi.PATH_LIST_COLLECTIONS,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<CollectionListResponse>> listCollections(
         @Size(min = 1, max = 100) @Parameter(name = "X-Tenant-ID", description = "The tenant identifier for multi-tenant isolation", in = ParameterIn.HEADER) @RequestHeader(value = "X-Tenant-ID", required = false) @Nullable String xTenantID,
@@ -109,6 +152,10 @@ public interface SchemaRegistryApi {
      * @param limit  (optional, default to 20)
      * @param requestBody  (optional)
      * @return Query results (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "queryCollection",
@@ -116,14 +163,31 @@ public interface SchemaRegistryApi {
         tags = { "SchemaRegistry" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Query results", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = QueryResultResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = QueryResultResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = QueryResultResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.POST,
         value = SchemaRegistryApi.PATH_QUERY_COLLECTION,
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<QueryResultResponse>> queryCollection(

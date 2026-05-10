@@ -11,6 +11,7 @@ import com.synaptiq.infrastructure.in.web.dto.ComponentsToggleResponse;
 import com.synaptiq.infrastructure.in.web.dto.GuardrailsResponse;
 import com.synaptiq.infrastructure.in.web.dto.LlmProviderResponse;
 import org.springframework.lang.Nullable;
+import com.synaptiq.infrastructure.in.web.dto.ProblemDetails;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -39,7 +40,7 @@ import java.util.Map;
 import java.util.Optional;
 import jakarta.annotation.Generated;
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-05T21:15:25.464614100-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-08T22:14:16.718368-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
 @Validated
 @Tag(name = "Config", description = "Tenant Configuration — AI persona, guardrails, LLM provider, components")
 public interface ConfigApi {
@@ -50,6 +51,10 @@ public interface ConfigApi {
      *
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Config data (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "getActionsConfig",
@@ -57,14 +62,31 @@ public interface ConfigApi {
         tags = { "Config" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Config data", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = ActionsConfigResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ActionsConfigResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ActionsConfigResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = ConfigApi.PATH_GET_ACTIONS_CONFIG,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<ActionsConfigResponse>> getActionsConfig(
         @Size(min = 1, max = 100) @Parameter(name = "X-Tenant-ID", description = "The tenant identifier for multi-tenant isolation", in = ParameterIn.HEADER) @RequestHeader(value = "X-Tenant-ID", required = false) @Nullable String xTenantID,
@@ -78,6 +100,10 @@ public interface ConfigApi {
      *
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Config data (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "getAiConfig",
@@ -85,14 +111,31 @@ public interface ConfigApi {
         tags = { "Config" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Config data", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = AiPersonaResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = AiPersonaResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = AiPersonaResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = ConfigApi.PATH_GET_AI_CONFIG,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<AiPersonaResponse>> getAiConfig(
         @Size(min = 1, max = 100) @Parameter(name = "X-Tenant-ID", description = "The tenant identifier for multi-tenant isolation", in = ParameterIn.HEADER) @RequestHeader(value = "X-Tenant-ID", required = false) @Nullable String xTenantID,
@@ -106,6 +149,10 @@ public interface ConfigApi {
      *
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Config data (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "getComponentsConfig",
@@ -113,14 +160,31 @@ public interface ConfigApi {
         tags = { "Config" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Config data", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = ComponentsToggleResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ComponentsToggleResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ComponentsToggleResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = ConfigApi.PATH_GET_COMPONENTS_CONFIG,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<ComponentsToggleResponse>> getComponentsConfig(
         @Size(min = 1, max = 100) @Parameter(name = "X-Tenant-ID", description = "The tenant identifier for multi-tenant isolation", in = ParameterIn.HEADER) @RequestHeader(value = "X-Tenant-ID", required = false) @Nullable String xTenantID,
@@ -134,6 +198,10 @@ public interface ConfigApi {
      *
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Config data (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "getGuardrailsConfig",
@@ -141,14 +209,31 @@ public interface ConfigApi {
         tags = { "Config" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Config data", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = GuardrailsResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = GuardrailsResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = GuardrailsResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = ConfigApi.PATH_GET_GUARDRAILS_CONFIG,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<GuardrailsResponse>> getGuardrailsConfig(
         @Size(min = 1, max = 100) @Parameter(name = "X-Tenant-ID", description = "The tenant identifier for multi-tenant isolation", in = ParameterIn.HEADER) @RequestHeader(value = "X-Tenant-ID", required = false) @Nullable String xTenantID,
@@ -162,6 +247,10 @@ public interface ConfigApi {
      *
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Config data (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "getLlmConfig",
@@ -169,14 +258,31 @@ public interface ConfigApi {
         tags = { "Config" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Config data", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = LlmProviderResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = LlmProviderResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = LlmProviderResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = ConfigApi.PATH_GET_LLM_CONFIG,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<LlmProviderResponse>> getLlmConfig(
         @Size(min = 1, max = 100) @Parameter(name = "X-Tenant-ID", description = "The tenant identifier for multi-tenant isolation", in = ParameterIn.HEADER) @RequestHeader(value = "X-Tenant-ID", required = false) @Nullable String xTenantID,
@@ -191,6 +297,10 @@ public interface ConfigApi {
      * @param actionsConfigResponse  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Config updated (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "updateActionsConfig",
@@ -198,14 +308,31 @@ public interface ConfigApi {
         tags = { "Config" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Config updated", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = ActionsConfigResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ActionsConfigResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ActionsConfigResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.PATCH,
         value = ConfigApi.PATH_UPDATE_ACTIONS_CONFIG,
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<ActionsConfigResponse>> updateActionsConfig(
@@ -222,6 +349,10 @@ public interface ConfigApi {
      * @param aiPersonaResponse  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Config updated (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "updateAiConfig",
@@ -229,14 +360,31 @@ public interface ConfigApi {
         tags = { "Config" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Config updated", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = AiPersonaResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = AiPersonaResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = AiPersonaResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.PATCH,
         value = ConfigApi.PATH_UPDATE_AI_CONFIG,
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<AiPersonaResponse>> updateAiConfig(
@@ -253,6 +401,10 @@ public interface ConfigApi {
      * @param componentsToggleResponse  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Config updated (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "updateComponentsConfig",
@@ -260,14 +412,31 @@ public interface ConfigApi {
         tags = { "Config" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Config updated", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = ComponentsToggleResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ComponentsToggleResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ComponentsToggleResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.PATCH,
         value = ConfigApi.PATH_UPDATE_COMPONENTS_CONFIG,
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<ComponentsToggleResponse>> updateComponentsConfig(
@@ -284,6 +453,10 @@ public interface ConfigApi {
      * @param guardrailsResponse  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Config updated (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "updateGuardrailsConfig",
@@ -291,14 +464,31 @@ public interface ConfigApi {
         tags = { "Config" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Config updated", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = GuardrailsResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = GuardrailsResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = GuardrailsResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.PATCH,
         value = ConfigApi.PATH_UPDATE_GUARDRAILS_CONFIG,
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<GuardrailsResponse>> updateGuardrailsConfig(
@@ -315,6 +505,10 @@ public interface ConfigApi {
      * @param llmProviderResponse  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Config updated (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "updateLlmConfig",
@@ -322,14 +516,31 @@ public interface ConfigApi {
         tags = { "Config" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Config updated", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = LlmProviderResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = LlmProviderResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = LlmProviderResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.PATCH,
         value = ConfigApi.PATH_UPDATE_LLM_CONFIG,
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<LlmProviderResponse>> updateLlmConfig(

@@ -11,6 +11,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDate;
 import org.springframework.lang.Nullable;
 import com.synaptiq.infrastructure.in.web.dto.PlatformRollupResponse;
+import com.synaptiq.infrastructure.in.web.dto.ProblemDetails;
 import com.synaptiq.infrastructure.in.web.dto.TokenUsageResponse;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,7 +41,7 @@ import java.util.Map;
 import java.util.Optional;
 import jakarta.annotation.Generated;
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-05T21:15:25.464614100-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-08T22:14:16.718368-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
 @Validated
 @Tag(name = "Analytics", description = "Analytics — usage metrics, token tracking, billing")
 public interface AnalyticsApi {
@@ -53,6 +54,10 @@ public interface AnalyticsApi {
      * @param from  (optional)
      * @param to  (optional)
      * @return Analytics summary (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "getAnalyticsSummary",
@@ -60,14 +65,31 @@ public interface AnalyticsApi {
         tags = { "Analytics" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Analytics summary", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = AnalyticsSummaryResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = AnalyticsSummaryResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = AnalyticsSummaryResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = AnalyticsApi.PATH_GET_ANALYTICS_SUMMARY,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<AnalyticsSummaryResponse>> getAnalyticsSummary(
         @Size(min = 1, max = 100) @Parameter(name = "X-Tenant-ID", description = "The tenant identifier for multi-tenant isolation", in = ParameterIn.HEADER) @RequestHeader(value = "X-Tenant-ID", required = false) @Nullable String xTenantID,
@@ -85,6 +107,10 @@ public interface AnalyticsApi {
      * @param from  (optional)
      * @param to  (optional)
      * @return Billing data (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "getBilling",
@@ -92,14 +118,31 @@ public interface AnalyticsApi {
         tags = { "Analytics" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Billing data", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = BillingResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = BillingResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = BillingResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = AnalyticsApi.PATH_GET_BILLING,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<BillingResponse>> getBilling(
         @Size(min = 1, max = 100) @Parameter(name = "X-Tenant-ID", description = "The tenant identifier for multi-tenant isolation", in = ParameterIn.HEADER) @RequestHeader(value = "X-Tenant-ID", required = false) @Nullable String xTenantID,
@@ -116,6 +159,10 @@ public interface AnalyticsApi {
      * @param from  (optional)
      * @param to  (optional)
      * @return Platform rollup (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "getPlatformRollup",
@@ -123,14 +170,31 @@ public interface AnalyticsApi {
         tags = { "Analytics" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Platform rollup", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = PlatformRollupResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = PlatformRollupResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = PlatformRollupResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = AnalyticsApi.PATH_GET_PLATFORM_ROLLUP,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<PlatformRollupResponse>> getPlatformRollup(
         @Parameter(name = "from", description = "", in = ParameterIn.QUERY) @Valid @RequestParam(value = "from", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @Nullable LocalDate from,
@@ -147,6 +211,10 @@ public interface AnalyticsApi {
      * @param from  (optional)
      * @param to  (optional)
      * @return Token usage (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "getTokenUsage",
@@ -154,14 +222,31 @@ public interface AnalyticsApi {
         tags = { "Analytics" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Token usage", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = TokenUsageResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = TokenUsageResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = TokenUsageResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = AnalyticsApi.PATH_GET_TOKEN_USAGE,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<TokenUsageResponse>> getTokenUsage(
         @Size(min = 1, max = 100) @Parameter(name = "X-Tenant-ID", description = "The tenant identifier for multi-tenant isolation", in = ParameterIn.HEADER) @RequestHeader(value = "X-Tenant-ID", required = false) @Nullable String xTenantID,

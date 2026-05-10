@@ -12,6 +12,7 @@ import com.synaptiq.infrastructure.in.web.dto.CatalogSchemaResponse;
 import com.synaptiq.infrastructure.in.web.dto.CreateCatalogItemRequest;
 import java.util.Map;
 import org.springframework.lang.Nullable;
+import com.synaptiq.infrastructure.in.web.dto.ProblemDetails;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -40,7 +41,7 @@ import java.util.Map;
 import java.util.Optional;
 import jakarta.annotation.Generated;
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-05T21:15:25.464614100-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-08T22:14:16.718368-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
 @Validated
 @Tag(name = "Catalog", description = "Catalog Registry — schema management, item CRUD, embedding")
 public interface CatalogApi {
@@ -52,6 +53,10 @@ public interface CatalogApi {
      * @param createCatalogItemRequest  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Item created (status code 201)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "createCatalogItem",
@@ -59,14 +64,31 @@ public interface CatalogApi {
         tags = { "Catalog" },
         responses = {
             @ApiResponse(responseCode = "201", description = "Item created", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = CatalogItemResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = CatalogItemResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = CatalogItemResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.POST,
         value = CatalogApi.PATH_CREATE_CATALOG_ITEM,
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<CatalogItemResponse>> createCatalogItem(
@@ -83,18 +105,39 @@ public interface CatalogApi {
      * @param itemId  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Item deleted (status code 204)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Not Found (status code 404)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "deleteCatalogItem",
         summary = "Delete a catalog item",
         tags = { "Catalog" },
         responses = {
-            @ApiResponse(responseCode = "204", description = "Item deleted")
+            @ApiResponse(responseCode = "204", description = "Item deleted"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            })
         }
     )
     @RequestMapping(
         method = RequestMethod.DELETE,
-        value = CatalogApi.PATH_DELETE_CATALOG_ITEM
+        value = CatalogApi.PATH_DELETE_CATALOG_ITEM,
+        produces = { "application/problem+json" }
     )
     Mono<ResponseEntity<Void>> deleteCatalogItem(
         @Parameter(name = "itemId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("itemId") String itemId,
@@ -109,6 +152,10 @@ public interface CatalogApi {
      *
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Active schema (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "getActiveSchema",
@@ -116,14 +163,31 @@ public interface CatalogApi {
         tags = { "Catalog" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Active schema", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = CatalogSchemaResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = CatalogSchemaResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = CatalogSchemaResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = CatalogApi.PATH_GET_ACTIVE_SCHEMA,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<CatalogSchemaResponse>> getActiveSchema(
         @Size(min = 1, max = 100) @Parameter(name = "X-Tenant-ID", description = "The tenant identifier for multi-tenant isolation", in = ParameterIn.HEADER) @RequestHeader(value = "X-Tenant-ID", required = false) @Nullable String xTenantID,
@@ -138,6 +202,11 @@ public interface CatalogApi {
      * @param itemId  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Item details (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Not Found (status code 404)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "getCatalogItem",
@@ -145,14 +214,35 @@ public interface CatalogApi {
         tags = { "Catalog" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Item details", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = CatalogItemResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = CatalogItemResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = CatalogItemResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = CatalogApi.PATH_GET_CATALOG_ITEM,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<CatalogItemResponse>> getCatalogItem(
         @Parameter(name = "itemId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("itemId") String itemId,
@@ -168,6 +258,10 @@ public interface CatalogApi {
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @param file  (optional)
      * @return Import results (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "importCatalogItems",
@@ -175,14 +269,31 @@ public interface CatalogApi {
         tags = { "Catalog" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Import results", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = CatalogImportResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = CatalogImportResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = CatalogImportResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.POST,
         value = CatalogApi.PATH_IMPORT_CATALOG_ITEMS,
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "multipart/form-data" }
     )
     Mono<ResponseEntity<CatalogImportResponse>> importCatalogItems(
@@ -201,6 +312,10 @@ public interface CatalogApi {
      * @param skip  (optional, default to 0)
      * @param limit  (optional, default to 20)
      * @return Item list (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "listCatalogItems",
@@ -208,14 +323,31 @@ public interface CatalogApi {
         tags = { "Catalog" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Item list", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = CatalogItemListResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = CatalogItemListResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = CatalogItemListResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = CatalogApi.PATH_LIST_CATALOG_ITEMS,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<CatalogItemListResponse>> listCatalogItems(
         @Size(min = 1, max = 100) @Parameter(name = "X-Tenant-ID", description = "The tenant identifier for multi-tenant isolation", in = ParameterIn.HEADER) @RequestHeader(value = "X-Tenant-ID", required = false) @Nullable String xTenantID,
@@ -234,6 +366,11 @@ public interface CatalogApi {
      * @param requestBody  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Item updated (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Not Found (status code 404)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "updateCatalogItem",
@@ -241,14 +378,35 @@ public interface CatalogApi {
         tags = { "Catalog" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Item updated", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = CatalogItemResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = CatalogItemResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = CatalogItemResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.PATCH,
         value = CatalogApi.PATH_UPDATE_CATALOG_ITEM,
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<CatalogItemResponse>> updateCatalogItem(

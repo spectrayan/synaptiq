@@ -8,6 +8,7 @@ package com.synaptiq.infrastructure.in.web.api;
 import com.synaptiq.infrastructure.in.web.dto.ChatMessageRequest;
 import com.synaptiq.infrastructure.in.web.dto.CreateSessionRequest;
 import org.springframework.lang.Nullable;
+import com.synaptiq.infrastructure.in.web.dto.ProblemDetails;
 import com.synaptiq.infrastructure.in.web.dto.SessionHistoryResponse;
 import com.synaptiq.infrastructure.in.web.dto.SessionListResponse;
 import com.synaptiq.infrastructure.in.web.dto.SessionResponse;
@@ -40,7 +41,7 @@ import java.util.Map;
 import java.util.Optional;
 import jakarta.annotation.Generated;
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-05T21:15:25.464614100-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-08T22:14:16.718368-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
 @Validated
 @Tag(name = "Chat", description = "Conversational AI — sessions, messages, context management")
 public interface ChatApi {
@@ -52,6 +53,10 @@ public interface ChatApi {
      * @param createSessionRequest  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Session created (status code 201)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "createSession",
@@ -59,14 +64,31 @@ public interface ChatApi {
         tags = { "Chat" },
         responses = {
             @ApiResponse(responseCode = "201", description = "Session created", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = SessionResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = SessionResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = SessionResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.POST,
         value = ChatApi.PATH_CREATE_SESSION,
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<SessionResponse>> createSession(
@@ -83,18 +105,39 @@ public interface ChatApi {
      * @param sessionId  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Session deleted (status code 204)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Not Found (status code 404)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "deleteSession",
         summary = "Delete session",
         tags = { "Chat" },
         responses = {
-            @ApiResponse(responseCode = "204", description = "Session deleted")
+            @ApiResponse(responseCode = "204", description = "Session deleted"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            })
         }
     )
     @RequestMapping(
         method = RequestMethod.DELETE,
-        value = ChatApi.PATH_DELETE_SESSION
+        value = ChatApi.PATH_DELETE_SESSION,
+        produces = { "application/problem+json" }
     )
     Mono<ResponseEntity<Void>> deleteSession(
         @Parameter(name = "sessionId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("sessionId") String sessionId,
@@ -110,6 +153,10 @@ public interface ChatApi {
      * @param sessionId  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Conversation history (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "getSessionHistory",
@@ -117,14 +164,31 @@ public interface ChatApi {
         tags = { "Chat" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Conversation history", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = SessionHistoryResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = SessionHistoryResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = SessionHistoryResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = ChatApi.PATH_GET_SESSION_HISTORY,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<SessionHistoryResponse>> getSessionHistory(
         @Parameter(name = "sessionId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("sessionId") String sessionId,
@@ -141,6 +205,10 @@ public interface ChatApi {
      * @param limit  (optional, default to 20)
      * @param offset  (optional, default to 0)
      * @return Session list (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "listSessions",
@@ -148,14 +216,31 @@ public interface ChatApi {
         tags = { "Chat" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Session list", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = SessionListResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = SessionListResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = SessionListResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = ChatApi.PATH_LIST_SESSIONS,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<SessionListResponse>> listSessions(
         @Size(min = 1, max = 100) @Parameter(name = "X-Tenant-ID", description = "The tenant identifier for multi-tenant isolation", in = ParameterIn.HEADER) @RequestHeader(value = "X-Tenant-ID", required = false) @Nullable String xTenantID,
@@ -172,6 +257,10 @@ public interface ChatApi {
      * @param chatMessageRequest  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return SSE stream of chat events (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "postChatMessage",
@@ -179,14 +268,31 @@ public interface ChatApi {
         tags = { "Chat" },
         responses = {
             @ApiResponse(responseCode = "200", description = "SSE stream of chat events", content = {
-                @Content(mediaType = "text/event-stream", schema = @Schema(implementation = String.class))
+                @Content(mediaType = "text/event-stream", schema = @Schema(implementation = String.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = String.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "text/event-stream", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "text/event-stream", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "text/event-stream", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "text/event-stream", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.POST,
         value = ChatApi.PATH_POST_CHAT_MESSAGE,
-        produces = { "text/event-stream" },
+        produces = { "text/event-stream", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<String>> postChatMessage(
@@ -203,18 +309,35 @@ public interface ChatApi {
      * @param sessionId  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Session reset (status code 204)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "resetSession",
         summary = "Reset session (clear turns)",
         tags = { "Chat" },
         responses = {
-            @ApiResponse(responseCode = "204", description = "Session reset")
+            @ApiResponse(responseCode = "204", description = "Session reset"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            })
         }
     )
     @RequestMapping(
         method = RequestMethod.POST,
-        value = ChatApi.PATH_RESET_SESSION
+        value = ChatApi.PATH_RESET_SESSION,
+        produces = { "application/problem+json" }
     )
     Mono<ResponseEntity<Void>> resetSession(
         @Parameter(name = "sessionId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("sessionId") String sessionId,
@@ -231,6 +354,11 @@ public interface ChatApi {
      * @param updateSessionRequest  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Session updated (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Not Found (status code 404)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "updateSession",
@@ -238,14 +366,35 @@ public interface ChatApi {
         tags = { "Chat" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Session updated", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = SessionResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = SessionResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = SessionResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.PATCH,
         value = ChatApi.PATH_UPDATE_SESSION,
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<SessionResponse>> updateSession(

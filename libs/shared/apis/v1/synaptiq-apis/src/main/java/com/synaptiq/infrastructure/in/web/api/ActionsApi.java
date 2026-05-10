@@ -8,6 +8,7 @@ package com.synaptiq.infrastructure.in.web.api;
 import com.synaptiq.infrastructure.in.web.dto.ActionResultResponse;
 import com.synaptiq.infrastructure.in.web.dto.ExecuteActionRequest;
 import org.springframework.lang.Nullable;
+import com.synaptiq.infrastructure.in.web.dto.ProblemDetails;
 import com.synaptiq.infrastructure.in.web.dto.SavedItemListResponse;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,7 +38,7 @@ import java.util.Map;
 import java.util.Optional;
 import jakarta.annotation.Generated;
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-05T21:15:25.464614100-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-08T22:14:16.718368-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
 @Validated
 @Tag(name = "Actions", description = "Actions — execution, saved items")
 public interface ActionsApi {
@@ -49,6 +50,10 @@ public interface ActionsApi {
      * @param executeActionRequest  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Action result (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "executeAction",
@@ -56,14 +61,31 @@ public interface ActionsApi {
         tags = { "Actions" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Action result", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = ActionResultResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ActionResultResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ActionResultResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.POST,
         value = ActionsApi.PATH_EXECUTE_ACTION,
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<ActionResultResponse>> executeAction(
@@ -80,6 +102,10 @@ public interface ActionsApi {
      * @param sessionId  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Saved items list (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "listSavedItems",
@@ -87,14 +113,31 @@ public interface ActionsApi {
         tags = { "Actions" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Saved items list", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = SavedItemListResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = SavedItemListResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = SavedItemListResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = ActionsApi.PATH_LIST_SAVED_ITEMS,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<SavedItemListResponse>> listSavedItems(
         @NotNull @Parameter(name = "sessionId", description = "", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "sessionId", required = true) String sessionId,
@@ -111,18 +154,39 @@ public interface ActionsApi {
      * @param sessionId  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Item removed (status code 204)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Not Found (status code 404)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "removeSavedItem",
         summary = "Remove a saved item",
         tags = { "Actions" },
         responses = {
-            @ApiResponse(responseCode = "204", description = "Item removed")
+            @ApiResponse(responseCode = "204", description = "Item removed"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            })
         }
     )
     @RequestMapping(
         method = RequestMethod.DELETE,
-        value = ActionsApi.PATH_REMOVE_SAVED_ITEM
+        value = ActionsApi.PATH_REMOVE_SAVED_ITEM,
+        produces = { "application/problem+json" }
     )
     Mono<ResponseEntity<Void>> removeSavedItem(
         @Parameter(name = "itemId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("itemId") String itemId,

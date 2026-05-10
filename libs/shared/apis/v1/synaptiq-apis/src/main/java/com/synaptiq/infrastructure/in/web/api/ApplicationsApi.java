@@ -9,6 +9,7 @@ import com.synaptiq.infrastructure.in.web.dto.ApplicationResponse;
 import com.synaptiq.infrastructure.in.web.dto.CreateApplicationRequest;
 import com.synaptiq.infrastructure.in.web.dto.ListApplications200Response;
 import org.springframework.lang.Nullable;
+import com.synaptiq.infrastructure.in.web.dto.ProblemDetails;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -37,7 +38,7 @@ import java.util.Map;
 import java.util.Optional;
 import jakarta.annotation.Generated;
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-05T21:15:25.464614100-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-08T22:14:16.718368-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
 @Validated
 @Tag(name = "Applications", description = "Application lifecycle — create, read, delete application configurations")
 public interface ApplicationsApi {
@@ -49,6 +50,10 @@ public interface ApplicationsApi {
      * @param createApplicationRequest  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Application created (status code 201)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "createApplication",
@@ -56,14 +61,31 @@ public interface ApplicationsApi {
         tags = { "Applications" },
         responses = {
             @ApiResponse(responseCode = "201", description = "Application created", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = ApplicationResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ApplicationResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ApplicationResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.POST,
         value = ApplicationsApi.PATH_CREATE_APPLICATION,
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<ApplicationResponse>> createApplication(
@@ -80,18 +102,39 @@ public interface ApplicationsApi {
      * @param appId  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Application deleted (status code 204)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Not Found (status code 404)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "deleteApplication",
         summary = "Delete an application",
         tags = { "Applications" },
         responses = {
-            @ApiResponse(responseCode = "204", description = "Application deleted")
+            @ApiResponse(responseCode = "204", description = "Application deleted"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            })
         }
     )
     @RequestMapping(
         method = RequestMethod.DELETE,
-        value = ApplicationsApi.PATH_DELETE_APPLICATION
+        value = ApplicationsApi.PATH_DELETE_APPLICATION,
+        produces = { "application/problem+json" }
     )
     Mono<ResponseEntity<Void>> deleteApplication(
         @Parameter(name = "appId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("appId") String appId,
@@ -107,6 +150,11 @@ public interface ApplicationsApi {
      * @param appId  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Application details (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Not Found (status code 404)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "getApplication",
@@ -114,14 +162,35 @@ public interface ApplicationsApi {
         tags = { "Applications" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Application details", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = ApplicationResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ApplicationResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ApplicationResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = ApplicationsApi.PATH_GET_APPLICATION,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<ApplicationResponse>> getApplication(
         @Parameter(name = "appId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("appId") String appId,
@@ -136,6 +205,10 @@ public interface ApplicationsApi {
      *
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Application list (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "listApplications",
@@ -143,14 +216,31 @@ public interface ApplicationsApi {
         tags = { "Applications" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Application list", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = ListApplications200Response.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ListApplications200Response.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ListApplications200Response.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = ApplicationsApi.PATH_LIST_APPLICATIONS,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<ListApplications200Response>> listApplications(
         @Size(min = 1, max = 100) @Parameter(name = "X-Tenant-ID", description = "The tenant identifier for multi-tenant isolation", in = ParameterIn.HEADER) @RequestHeader(value = "X-Tenant-ID", required = false) @Nullable String xTenantID,

@@ -6,6 +6,7 @@
 package com.synaptiq.infrastructure.in.web.api;
 
 import com.synaptiq.infrastructure.in.web.dto.HealthResponse;
+import com.synaptiq.infrastructure.in.web.dto.ProblemDetails;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -34,7 +35,7 @@ import java.util.Map;
 import java.util.Optional;
 import jakarta.annotation.Generated;
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-05T21:15:25.464614100-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-08T22:14:16.718368-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
 @Validated
 @Tag(name = "Health", description = "Health checks — liveness and readiness probes")
 public interface HealthApi {
@@ -44,6 +45,10 @@ public interface HealthApi {
      * GET /api/v1/health : Liveness probe
      *
      * @return Service is alive (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "healthCheck",
@@ -51,14 +56,31 @@ public interface HealthApi {
         tags = { "Health" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Service is alive", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = HealthResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = HealthResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = HealthResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = HealthApi.PATH_HEALTH_CHECK,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<HealthResponse>> healthCheck(
         @Parameter(hidden = true) final ServerWebExchange exchange
@@ -70,6 +92,10 @@ public interface HealthApi {
      * GET /api/v1/health/ready : Readiness probe
      *
      * @return Service is ready (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "readinessCheck",
@@ -77,14 +103,31 @@ public interface HealthApi {
         tags = { "Health" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Service is ready", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = HealthResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = HealthResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = HealthResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = HealthApi.PATH_READINESS_CHECK,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<HealthResponse>> readinessCheck(
         @Parameter(hidden = true) final ServerWebExchange exchange

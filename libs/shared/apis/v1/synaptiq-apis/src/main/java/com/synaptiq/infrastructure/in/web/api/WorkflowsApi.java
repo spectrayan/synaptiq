@@ -8,6 +8,7 @@ package com.synaptiq.infrastructure.in.web.api;
 import com.synaptiq.infrastructure.in.web.dto.ExecuteWorkflowRequest;
 import com.synaptiq.infrastructure.in.web.dto.GenerateWorkflowRequest;
 import org.springframework.lang.Nullable;
+import com.synaptiq.infrastructure.in.web.dto.ProblemDetails;
 import com.synaptiq.infrastructure.in.web.dto.RegeneratePromptRequest;
 import com.synaptiq.infrastructure.in.web.dto.RegeneratePromptResponse;
 import com.synaptiq.infrastructure.in.web.dto.SaveWorkflowRequest;
@@ -45,7 +46,7 @@ import java.util.Map;
 import java.util.Optional;
 import jakarta.annotation.Generated;
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-05T21:15:25.464614100-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-08T22:14:16.718368-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
 @Validated
 @Tag(name = "Workflows", description = "Workflow Engine — agent-flow generation, execution, sharing")
 public interface WorkflowsApi {
@@ -57,18 +58,39 @@ public interface WorkflowsApi {
      * @param workflowId  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Workflow deleted (status code 204)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Not Found (status code 404)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "deleteWorkflow",
         summary = "Delete a workflow",
         tags = { "Workflows" },
         responses = {
-            @ApiResponse(responseCode = "204", description = "Workflow deleted")
+            @ApiResponse(responseCode = "204", description = "Workflow deleted"),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            })
         }
     )
     @RequestMapping(
         method = RequestMethod.DELETE,
-        value = WorkflowsApi.PATH_DELETE_WORKFLOW
+        value = WorkflowsApi.PATH_DELETE_WORKFLOW,
+        produces = { "application/problem+json" }
     )
     Mono<ResponseEntity<Void>> deleteWorkflow(
         @Parameter(name = "workflowId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("workflowId") String workflowId,
@@ -84,6 +106,10 @@ public interface WorkflowsApi {
      * @param workflowId  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Workflow duplicated (status code 201)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "duplicateWorkflow",
@@ -91,14 +117,31 @@ public interface WorkflowsApi {
         tags = { "Workflows" },
         responses = {
             @ApiResponse(responseCode = "201", description = "Workflow duplicated", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = WorkflowResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = WorkflowResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = WorkflowResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.POST,
         value = WorkflowsApi.PATH_DUPLICATE_WORKFLOW,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<WorkflowResponse>> duplicateWorkflow(
         @Parameter(name = "workflowId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("workflowId") String workflowId,
@@ -114,6 +157,10 @@ public interface WorkflowsApi {
      * @param executeWorkflowRequest  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return SSE stream of execution events (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "executeWorkflow",
@@ -121,14 +168,31 @@ public interface WorkflowsApi {
         tags = { "Workflows" },
         responses = {
             @ApiResponse(responseCode = "200", description = "SSE stream of execution events", content = {
-                @Content(mediaType = "text/event-stream", schema = @Schema(implementation = String.class))
+                @Content(mediaType = "text/event-stream", schema = @Schema(implementation = String.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = String.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "text/event-stream", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "text/event-stream", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "text/event-stream", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "text/event-stream", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.POST,
         value = WorkflowsApi.PATH_EXECUTE_WORKFLOW,
-        produces = { "text/event-stream" },
+        produces = { "text/event-stream", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<String>> executeWorkflow(
@@ -145,6 +209,10 @@ public interface WorkflowsApi {
      * @param generateWorkflowRequest  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return SSE stream with workflow generation events (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "generateWorkflow",
@@ -152,14 +220,31 @@ public interface WorkflowsApi {
         tags = { "Workflows" },
         responses = {
             @ApiResponse(responseCode = "200", description = "SSE stream with workflow generation events", content = {
-                @Content(mediaType = "text/event-stream", schema = @Schema(implementation = String.class))
+                @Content(mediaType = "text/event-stream", schema = @Schema(implementation = String.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = String.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "text/event-stream", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "text/event-stream", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "text/event-stream", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "text/event-stream", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.POST,
         value = WorkflowsApi.PATH_GENERATE_WORKFLOW,
-        produces = { "text/event-stream" },
+        produces = { "text/event-stream", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<String>> generateWorkflow(
@@ -175,6 +260,10 @@ public interface WorkflowsApi {
      *
      * @param shareToken  (required)
      * @return Shared workflow (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "getSharedWorkflow",
@@ -182,14 +271,31 @@ public interface WorkflowsApi {
         tags = { "Workflows" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Shared workflow", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = WorkflowResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = WorkflowResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = WorkflowResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = WorkflowsApi.PATH_GET_SHARED_WORKFLOW,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<WorkflowResponse>> getSharedWorkflow(
         @Parameter(name = "shareToken", description = "", required = true, in = ParameterIn.PATH) @PathVariable("shareToken") String shareToken,
@@ -204,6 +310,11 @@ public interface WorkflowsApi {
      * @param workflowId  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Workflow details (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Not Found (status code 404)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "getWorkflow",
@@ -211,14 +322,35 @@ public interface WorkflowsApi {
         tags = { "Workflows" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Workflow details", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = WorkflowResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = WorkflowResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = WorkflowResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = WorkflowsApi.PATH_GET_WORKFLOW,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<WorkflowResponse>> getWorkflow(
         @Parameter(name = "workflowId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("workflowId") String workflowId,
@@ -234,7 +366,11 @@ public interface WorkflowsApi {
      * @param runId  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Full run detail with per-node results (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
      *         or Run not found (status code 404)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "getWorkflowRunDetail",
@@ -242,15 +378,32 @@ public interface WorkflowsApi {
         tags = { "Workflows" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Full run detail with per-node results", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = WorkflowRunDetail.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = WorkflowRunDetail.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = WorkflowRunDetail.class))
             }),
-            @ApiResponse(responseCode = "404", description = "Run not found")
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Run not found"),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = WorkflowsApi.PATH_GET_WORKFLOW_RUN_DETAIL,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<WorkflowRunDetail>> getWorkflowRunDetail(
         @Parameter(name = "runId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("runId") String runId,
@@ -267,6 +420,10 @@ public interface WorkflowsApi {
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @param limit  (optional, default to 20)
      * @return List of workflow run summaries (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "listWorkflowRuns",
@@ -274,14 +431,31 @@ public interface WorkflowsApi {
         tags = { "Workflows" },
         responses = {
             @ApiResponse(responseCode = "200", description = "List of workflow run summaries", content = {
-                @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = WorkflowRunSummary.class)))
+                @Content(mediaType = "application/json", array = @ArraySchema(schema = @Schema(implementation = WorkflowRunSummary.class))),
+                @Content(mediaType = "application/problem+json", array = @ArraySchema(schema = @Schema(implementation = WorkflowRunSummary.class)))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = WorkflowsApi.PATH_LIST_WORKFLOW_RUNS,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<Flux<WorkflowRunSummary>>> listWorkflowRuns(
         @Parameter(name = "workflowId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("workflowId") String workflowId,
@@ -296,6 +470,10 @@ public interface WorkflowsApi {
      * GET /api/v1/workflow/templates : List workflow templates
      *
      * @return Template list (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "listWorkflowTemplates",
@@ -303,14 +481,31 @@ public interface WorkflowsApi {
         tags = { "Workflows" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Template list", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = WorkflowListResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = WorkflowListResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = WorkflowListResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = WorkflowsApi.PATH_LIST_WORKFLOW_TEMPLATES,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<WorkflowListResponse>> listWorkflowTemplates(
         @Parameter(hidden = true) final ServerWebExchange exchange
@@ -322,6 +517,10 @@ public interface WorkflowsApi {
      * GET /api/v1/workflow/tools : List available workflow tools
      *
      * @return Tool catalog (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "listWorkflowTools",
@@ -329,14 +528,31 @@ public interface WorkflowsApi {
         tags = { "Workflows" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Tool catalog", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = ToolCatalogResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ToolCatalogResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ToolCatalogResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = WorkflowsApi.PATH_LIST_WORKFLOW_TOOLS,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<ToolCatalogResponse>> listWorkflowTools(
         @Parameter(hidden = true) final ServerWebExchange exchange
@@ -350,6 +566,10 @@ public interface WorkflowsApi {
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @param limit  (optional, default to 20)
      * @return Workflow list (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "listWorkflows",
@@ -357,14 +577,31 @@ public interface WorkflowsApi {
         tags = { "Workflows" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Workflow list", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = WorkflowListResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = WorkflowListResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = WorkflowListResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = WorkflowsApi.PATH_LIST_WORKFLOWS,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<WorkflowListResponse>> listWorkflows(
         @Size(min = 1, max = 100) @Parameter(name = "X-Tenant-ID", description = "The tenant identifier for multi-tenant isolation", in = ParameterIn.HEADER) @RequestHeader(value = "X-Tenant-ID", required = false) @Nullable String xTenantID,
@@ -380,6 +617,10 @@ public interface WorkflowsApi {
      * @param regeneratePromptRequest  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Regenerated prompt (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "regeneratePrompt",
@@ -387,14 +628,31 @@ public interface WorkflowsApi {
         tags = { "Workflows" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Regenerated prompt", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = RegeneratePromptResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = RegeneratePromptResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = RegeneratePromptResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.POST,
         value = WorkflowsApi.PATH_REGENERATE_PROMPT,
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<RegeneratePromptResponse>> regeneratePrompt(
@@ -411,6 +669,10 @@ public interface WorkflowsApi {
      * @param saveWorkflowRequest  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Workflow saved (status code 201)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "saveWorkflow",
@@ -418,14 +680,31 @@ public interface WorkflowsApi {
         tags = { "Workflows" },
         responses = {
             @ApiResponse(responseCode = "201", description = "Workflow saved", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = WorkflowResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = WorkflowResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = WorkflowResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.POST,
         value = WorkflowsApi.PATH_SAVE_WORKFLOW,
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<WorkflowResponse>> saveWorkflow(
@@ -442,6 +721,10 @@ public interface WorkflowsApi {
      * @param workflowId  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Share token generated (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "shareWorkflow",
@@ -449,14 +732,31 @@ public interface WorkflowsApi {
         tags = { "Workflows" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Share token generated", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = ShareWorkflowResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ShareWorkflowResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ShareWorkflowResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.POST,
         value = WorkflowsApi.PATH_SHARE_WORKFLOW,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<ShareWorkflowResponse>> shareWorkflow(
         @Parameter(name = "workflowId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("workflowId") String workflowId,
@@ -473,6 +773,11 @@ public interface WorkflowsApi {
      * @param saveWorkflowRequest  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Workflow updated (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Not Found (status code 404)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "updateWorkflow",
@@ -480,14 +785,35 @@ public interface WorkflowsApi {
         tags = { "Workflows" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Workflow updated", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = WorkflowResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = WorkflowResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = WorkflowResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.PATCH,
         value = WorkflowsApi.PATH_UPDATE_WORKFLOW,
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<WorkflowResponse>> updateWorkflow(

@@ -9,6 +9,7 @@ import com.synaptiq.infrastructure.in.web.dto.BrandingResponse;
 import com.synaptiq.infrastructure.in.web.dto.ContrastCheckResponse;
 import org.springframework.lang.Nullable;
 import com.synaptiq.infrastructure.in.web.dto.PersonalizationResponse;
+import com.synaptiq.infrastructure.in.web.dto.ProblemDetails;
 import com.synaptiq.infrastructure.in.web.dto.ThemeListResponse;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,7 +39,7 @@ import java.util.Map;
 import java.util.Optional;
 import jakarta.annotation.Generated;
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-05T21:15:25.464614100-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-08T22:14:16.718368-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
 @Validated
 @Tag(name = "Branding", description = "Branding — theming, personalization, visual identity")
 public interface BrandingApi {
@@ -50,6 +51,10 @@ public interface BrandingApi {
      * @param fg  (required)
      * @param bg  (required)
      * @return Contrast result (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "checkContrast",
@@ -57,14 +62,31 @@ public interface BrandingApi {
         tags = { "Branding" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Contrast result", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = ContrastCheckResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ContrastCheckResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ContrastCheckResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = BrandingApi.PATH_CHECK_CONTRAST,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<ContrastCheckResponse>> checkContrast(
         @NotNull @Parameter(name = "fg", description = "", required = true, in = ParameterIn.QUERY) @Valid @RequestParam(value = "fg", required = true) String fg,
@@ -79,6 +101,10 @@ public interface BrandingApi {
      *
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Branding config (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "getBranding",
@@ -86,14 +112,31 @@ public interface BrandingApi {
         tags = { "Branding" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Branding config", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = BrandingResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = BrandingResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = BrandingResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = BrandingApi.PATH_GET_BRANDING,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<BrandingResponse>> getBranding(
         @Size(min = 1, max = 100) @Parameter(name = "X-Tenant-ID", description = "The tenant identifier for multi-tenant isolation", in = ParameterIn.HEADER) @RequestHeader(value = "X-Tenant-ID", required = false) @Nullable String xTenantID,
@@ -107,6 +150,10 @@ public interface BrandingApi {
      *
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Personalization settings (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "getPersonalization",
@@ -114,14 +161,31 @@ public interface BrandingApi {
         tags = { "Branding" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Personalization settings", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = PersonalizationResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = PersonalizationResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = PersonalizationResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = BrandingApi.PATH_GET_PERSONALIZATION,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<PersonalizationResponse>> getPersonalization(
         @Size(min = 1, max = 100) @Parameter(name = "X-Tenant-ID", description = "The tenant identifier for multi-tenant isolation", in = ParameterIn.HEADER) @RequestHeader(value = "X-Tenant-ID", required = false) @Nullable String xTenantID,
@@ -136,6 +200,9 @@ public interface BrandingApi {
      *
      * @param xTenantID  (required)
      * @return Public branding configuration. (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
      *         or Tenant not found (status code 404)
      *         or Internal server error (status code 500)
      */
@@ -146,7 +213,20 @@ public interface BrandingApi {
         tags = { "Branding" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Public branding configuration.", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = BrandingResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = BrandingResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = BrandingResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             }),
             @ApiResponse(responseCode = "404", description = "Tenant not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
@@ -155,7 +235,7 @@ public interface BrandingApi {
     @RequestMapping(
         method = RequestMethod.GET,
         value = BrandingApi.PATH_GET_PUBLIC_BRANDING,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<BrandingResponse>> getPublicBranding(
         @NotNull @Parameter(name = "X-Tenant-ID", description = "", required = true, in = ParameterIn.HEADER) @RequestHeader(value = "X-Tenant-ID", required = true) String xTenantID,
@@ -169,6 +249,10 @@ public interface BrandingApi {
      *
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Theme presets (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "getThemes",
@@ -176,14 +260,31 @@ public interface BrandingApi {
         tags = { "Branding" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Theme presets", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = ThemeListResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ThemeListResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ThemeListResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.GET,
         value = BrandingApi.PATH_GET_THEMES,
-        produces = { "application/json" }
+        produces = { "application/json", "application/problem+json" }
     )
     Mono<ResponseEntity<ThemeListResponse>> getThemes(
         @Size(min = 1, max = 100) @Parameter(name = "X-Tenant-ID", description = "The tenant identifier for multi-tenant isolation", in = ParameterIn.HEADER) @RequestHeader(value = "X-Tenant-ID", required = false) @Nullable String xTenantID,
@@ -198,6 +299,10 @@ public interface BrandingApi {
      * @param brandingResponse  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Branding updated (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "updateBranding",
@@ -205,14 +310,31 @@ public interface BrandingApi {
         tags = { "Branding" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Branding updated", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = BrandingResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = BrandingResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = BrandingResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.PATCH,
         value = BrandingApi.PATH_UPDATE_BRANDING,
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<BrandingResponse>> updateBranding(
@@ -229,6 +351,10 @@ public interface BrandingApi {
      * @param personalizationResponse  (required)
      * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
      * @return Updated (status code 200)
+     *         or Bad Request (status code 400)
+     *         or Unauthorized (status code 401)
+     *         or Forbidden (status code 403)
+     *         or Internal Server Error (status code 500)
      */
     @Operation(
         operationId = "updatePersonalization",
@@ -236,14 +362,31 @@ public interface BrandingApi {
         tags = { "Branding" },
         responses = {
             @ApiResponse(responseCode = "200", description = "Updated", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = PersonalizationResponse.class))
+                @Content(mediaType = "application/json", schema = @Schema(implementation = PersonalizationResponse.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = PersonalizationResponse.class))
+            }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "403", description = "Forbidden", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
+            }),
+            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
+                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
+                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
             })
         }
     )
     @RequestMapping(
         method = RequestMethod.PATCH,
         value = BrandingApi.PATH_UPDATE_PERSONALIZATION,
-        produces = { "application/json" },
+        produces = { "application/json", "application/problem+json" },
         consumes = { "application/json" }
     )
     Mono<ResponseEntity<PersonalizationResponse>> updatePersonalization(
