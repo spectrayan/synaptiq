@@ -1,5 +1,5 @@
 # Architecture & Tech Stack
-## Spectrayan Platform — Product Catalog + Discovery MVP
+## Spectrayan Platform — AI-Native Data Application Platform
 
 > **Resolved Decisions:** Angular 21 + Angular Material 3 frontend (no Tailwind — M3 theming + custom utility layer), MongoDB Atlas, Nx monorepo, `*.spectrayan.com` subdomains, per-tenant embedding providers, Redis + MongoDB for conversation history, single Firebase project for all auth.
 
@@ -44,9 +44,9 @@
                         ┌──────────────▼──────────────┐
                         │   Spring Boot 4 Backend      │
                         │  (Cloud Run — containerized) │
-                        │  Modules: chat, catalog,     │
+                        │  Modules: chat, datasource,  │
                         │  tenant, actions, usage,     │
-                        │  search, analytics           │
+                        │  integration, analytics      │
                         └──┬───────────┬──────────────┘
                            │           │
                ┌────────────▼─┐   ┌─────▼────────────┐
@@ -94,16 +94,16 @@
 ### 3.3 Data
 | Layer | Technology | Purpose |
 |---|---|---|
-| Primary DB | **MongoDB Atlas** | All data: tenants, schema, catalog items, action logs, usage ledger — document model fits dynamic catalog fields perfectly |
+| Primary DB | **MongoDB Atlas** | All data: tenants, schema, data source records, action logs, usage ledger — document model fits dynamic data fields perfectly |
 | Vector Index | **MongoDB Atlas Vector Search** | Per-collection vector index on `embedding` field; tenant-scoped via `tenantId` filter |
 | Conversation History | **Redis** (TTL 2hr) + **MongoDB** (last 50 turns persisted) | Redis for active sessions; MongoDB fallback for longer context |
 | Cache | **Redis 7** | System prompt cache, rate limit counters, tenant config cache |
 | Object Storage | **Google Cloud Storage** | Logo uploads, CSV imports, exports |
 
 **Why MongoDB over PostgreSQL:**
-- Catalog items have dynamic fields defined by the schema builder — documents are the natural model; no `data_json` workarounds needed
+- Data source records have dynamic fields defined by the schema builder — documents are the natural model; no `data_json` workarounds needed
 - Atlas Vector Search is production-grade managed vector search — no pgvector extension to maintain
-- Schema changes (adding catalog fields) require zero DB migrations
+- Schema changes (adding data fields) require zero DB migrations
 - Multi-document ACID transactions available for billing ledger operations
 - Per-tenant embedding dimensions supported: store `embeddingModel` + `embeddingDim` on each document
 
@@ -166,9 +166,9 @@ Step 2 — Context Build
   ├── Load system prompt (cache-first, key: tenant:{id}:prompt:{schema_v})
   └── Load conversation history (last N turns from Redis session store)
 
-Step 3 — Vector Search (catalog retrieval)
+Step 3 — Vector Search (data retrieval)
   ├── Embed user message → Vertex AI text-embedding-004
-  ├── Query Atlas Vector Search: top-8 similar items WHERE tenant_id = X
+  ├── Query Atlas Vector Search: top-8 similar records WHERE tenant_id = X
   │     filter: status = 'active'
   │     strip: admin_only fields from results
   └── Retrieved items injected into LLM context
@@ -258,12 +258,12 @@ After parsing the spec, the backend resolves all `item_id` references:
 ```java
 @Service
 public class SpecHydrationService {
-    private final CatalogItemRepository catalogRepo;
+    private final DataSourceRecordRepository recordRepo;
     private final SchemaFieldService schemaService;
 
     public Mono<ComponentSpec> hydrate(ComponentSpec spec, String tenantId) {
         List<String> itemIds = extractItemIds(spec);
-        return catalogRepo.findByIdInAndTenantId(itemIds, tenantId)
+        return recordRepo.findByIdInAndTenantId(itemIds, tenantId)
             .map(items -> stripAdminOnlyFields(items, schemaService.getSchema(tenantId)))
             .map(items -> injectItemsIntoSpec(spec, items));
     }
@@ -337,16 +337,16 @@ Frontend handles each event type independently, rendering components inline as t
   createdAt: ISODate
 }
 
-// catalogItems collection  (dynamic fields from schema builder live in `fields`)
+// records collection  (dynamic fields from schema builder live in `fields`)
 {
   _id: ObjectId,
   tenantId: ObjectId,
+  dataSourceId: ObjectId,
   status: "active",
   fields: {                      // fully dynamic — matches tenant schema
-    name: "Sony WH-1000XM5",
-    price: 279.99,
-    category: "Electronics",
-    internalCost: 120.00,        // admin_only field — stripped from LLM context
+    name: "Example Record",
+    description: "Sample data entry",
+    category: "General",
     rating: 4.8
   },
   embedding: [0.021, -0.043, ...],  // Atlas Vector Search index
@@ -477,14 +477,14 @@ The system prompt is compiled once and cached per tenant. Structure:
 ```
 [ROLE]
 You are {assistant_name}, the AI assistant for {business_name}.
-Your knowledge is limited to the {catalog_name} catalog below.
+Your knowledge is limited to the data sources connected below.
 
 [SCHEMA]
-Catalog fields: {schema_fields} (public fields only — admin_only excluded)
+Data fields: {schema_fields} (public fields only — admin_only excluded)
 Field types and allowed values: {field_constraints}
 
 [COMPONENTS]
-You MUST respond using Component Specification JSON for all catalog data.
+You MUST respond using Component Specification JSON for all data responses.
 Available components: {enabled_components}
 Never invent item data. Only reference item IDs from Retrieved Items.
 
@@ -573,7 +573,8 @@ backend/
 ├── SynaptiqApplication.java       # Spring Boot main class
 ├── auth/                          # Firebase + JWT authentication module
 ├── tenant/                        # Tenant CRUD + lifecycle
-├── catalog/                       # Schema import, item CRUD, CSV
+├── datasource/                    # Data source connections, schema, records
+├── integration/                   # Camel-based dynamic connectors
 ├── chat/                          # SSE streaming chat + LLM orchestration
 ├── tenantconfig/                  # AI persona, guardrails, BYOK
 ├── branding/                      # Theme, logo, colors
@@ -668,7 +669,7 @@ readonly isMobile = toSignal(
 | Frontend framework | **Angular 21** (Nx) | Next.js: team expertise in Angular makes delivery faster; RxJS handles SSE natively |
 | Monorepo | **Nx** | Single repo — shared domain models, API clients, design tokens across frontend + future mobile |
 | Backend language | **Java 21 / Spring Boot 4** | Python: Spring offers stronger enterprise tooling, type safety, and Spring AI is now on par with LangChain |
-| Primary DB | **MongoDB Atlas** | PostgreSQL: catalog items are dynamic documents — SQL schema fights the schema builder |
+| Primary DB | **MongoDB Atlas** | PostgreSQL: data records are dynamic documents — SQL schema fights the schema builder |
 | Vector search | **Atlas Vector Search** | pgvector: Atlas VS is managed, no extension maintenance, supports per-tenant dimension variation |
 | Embedding provider | **Per-tenant** (Vertex or OpenAI) | Normalized: limits BYOK flexibility; `embeddingDim` stored per document handles mixed dimensions |
 | Conversation history | **Redis + MongoDB** | Redis only: 2hr TTL loses context; MongoDB: persists last 50 turns, 30-day TTL index |

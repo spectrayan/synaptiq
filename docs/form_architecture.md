@@ -12,11 +12,11 @@ Synaptiq uses a **hybrid form approach** — the same `FormInputComponent` serve
 
 | Context | Who fills it | What generates it |
 |---|---|---|
-| **End-user data entry** | Customer / buyer | AI reads tenant catalog schema → emits `FormInputSpec` |
+| **End-user data entry** | End user | AI reads tenant data source schema → emits `FormInputSpec` |
 | **Admin schema config** | Tenant admin | AI emits a meta-form to define field definitions |
 
 > [!IMPORTANT]
-> There is no separate admin panel for form configuration. The admin manages their entire catalog schema through the same conversational UI. This is Synaptiq's key differentiator.
+> There is no separate admin panel for form configuration. The admin manages their entire data schema through the same conversational UI. This is Synaptiq's key differentiator.
 
 ---
 
@@ -25,7 +25,7 @@ Synaptiq uses a **hybrid form approach** — the same `FormInputComponent` serve
 ```mermaid
 flowchart TD
     subgraph MongoDB
-        TS["TenantCatalogSchema\n• tenant_id\n• fields: FormFieldDef[]"]
+        TS["TenantDataSourceSchema\n• tenant_id\n• fields: FormFieldDef[]"]
     end
 
     subgraph AI Engine
@@ -177,7 +177,7 @@ AI: [emits ActionConfirm]
 ### Flow B: Admin Configuring Schema
 
 ```
-ADMIN: "Add a warranty field to my catalog"
+ADMIN: "Add a warranty field to my data schema"
 
 AI: [emits FormInputSpec — a meta-form]
   {
@@ -200,7 +200,7 @@ AI: [emits FormInputSpec — a meta-form]
     cancellable: true,
     suggestions: [
       { label: "Make it required", prompt: "Set required to true" },
-      { label: "See all fields", prompt: "Show me all catalog fields" }
+      { label: "See all fields", prompt: "Show me all data fields" }
     ]
   }
 ```
@@ -211,7 +211,7 @@ AI: [emits FormInputSpec — a meta-form]
 
 ```typescript
 // Stored per-tenant in MongoDB
-interface TenantCatalogSchema {
+interface TenantDataSourceSchema {
   _id: ObjectId;
   tenant_id: string;
   fields: FormFieldDef[];  // SAME type as DSL — no mapping needed
