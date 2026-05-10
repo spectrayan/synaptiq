@@ -14,7 +14,7 @@
  */
 export interface GenerateWorkflowRequest { 
     /**
-     * Natural language description of the desired workflow
+     * Natural language description of the desired workflow (10-5000 chars)
      */
     prompt: string;
 }

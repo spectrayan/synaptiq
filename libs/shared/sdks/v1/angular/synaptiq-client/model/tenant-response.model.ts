@@ -17,7 +17,7 @@ export interface TenantResponse {
     slug?: string;
     status?: TenantStatus;
     accessMode?: AccessMode;
-    catalogLabel?: string;
+    displayLabel?: string;
     createdAt?: string;
     updatedAt?: string;
 }

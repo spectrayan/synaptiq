@@ -17,7 +17,7 @@ import { AccessMode } from './access-mode.model';
 export interface UpdateTenantRequest { 
     name?: string;
     slug?: string;
-    catalogLabel?: string;
+    displayLabel?: string;
     accessMode?: AccessMode;
     planTier?: PlanTier;
     /**

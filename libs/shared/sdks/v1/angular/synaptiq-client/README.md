@@ -1,59 +1,185 @@
-# @synaptiq/client — Angular SDK
+# @synaptiq/client@1.0.0
 
-> Auto-generated Angular HTTP client for the Synaptiq REST API.
+AI-Native Application Platform — REST API  Synaptiq enables businesses to connect any data source and dynamically generate dashboards, workflows, reports, and UI experiences through natural language. This specification covers all bounded contexts: Authentication, Tenants, DataSources, Chat, Actions, Workflows, Analytics, Branding, Tenant Configuration, Integrations, and Schema Registry. 
 
-[![Part of Synaptiq](https://img.shields.io/badge/part%20of-Synaptiq-7C4DFF?style=flat-square)](../../../../../../README.md)
+The version of the OpenAPI document: 1.0.0
 
-## Overview
+## Building
 
-This package is the **generated** Angular TypeScript SDK produced by the OpenAPI Generator. It provides type-safe, injectable Angular services for every Synaptiq API endpoint.
+To install the required dependencies and to build the typescript sources run:
 
-## Services
-
-| Service | Description |
-|---------|-------------|
-| `CatalogService` | Catalog schema import, item CRUD, CSV upload |
-| `ChatService` | SSE streaming chat, session management |
-| `TenantsService` | Tenant CRUD, admin management |
-| `ConfigService` | AI persona, guardrails, LLM provider config |
-| `BrandingService` | Theme, colors, logo, personalization |
-| `AnalyticsService` | Usage metrics, billing, platform analytics |
-| `WorkflowsService` | Workflow CRUD, execution, templates |
-| `ActionsService` | Action execution (save items, enquiries) |
-| `AuthService` | Login, signup, token refresh |
-
-## Installation
-
-This package is consumed as a workspace dependency — no npm install needed:
-
-```typescript
-// In your Angular module or standalone component:
-import { CatalogService, ChatService } from '@synaptiq/client';
+```console
+npm install
+npm run build
 ```
 
-## Configuration
+## Publishing
+
+First build the package then run `npm publish dist` (don't forget to specify the `dist` folder!)
+
+## Consuming
+
+Navigate to the folder of your consuming project and run one of next commands.
+
+_published:_
+
+```console
+npm install @synaptiq/client@1.0.0 --save
+```
+
+_without publishing (not recommended):_
+
+```console
+npm install PATH_TO_GENERATED_PACKAGE/dist.tgz --save
+```
+
+_It's important to take the tgz file, otherwise you'll get trouble with links on windows_
+
+_using `npm link`:_
+
+In PATH_TO_GENERATED_PACKAGE/dist:
+
+```console
+npm link
+```
+
+In your project:
+
+```console
+npm link @synaptiq/client
+```
+
+__Note for Windows users:__ The Angular CLI has troubles to use linked npm packages.
+Please refer to this issue <https://github.com/angular/angular-cli/issues/8284> for a solution / workaround.
+Published packages are not effected by this issue.
+
+### General usage
+
+In your Angular project:
 
 ```typescript
-import { ApiModule, Configuration } from '@synaptiq/client';
 
-@NgModule({
-  imports: [
-    ApiModule.forRoot(() => new Configuration({
-      basePath: 'http://localhost:8080'
-    }))
-  ]
+import { ApplicationConfig } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideApi } from '@synaptiq/client';
+
+export const appConfig: ApplicationConfig = {
+    providers: [
+        // ...
+        provideHttpClient(),
+        provideApi()
+    ],
+};
+```
+
+**NOTE**
+If you're still using `AppModule` and haven't [migrated](https://angular.dev/reference/migrations/standalone) yet, you can still import an Angular module:
+```typescript
+import { ApiModule } from '@synaptiq/client';
+```
+
+If different from the generated base path, during app bootstrap, you can provide the base path to your service.
+
+```typescript
+import { ApplicationConfig } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideApi } from '@synaptiq/client';
+
+export const appConfig: ApplicationConfig = {
+    providers: [
+        // ...
+        provideHttpClient(),
+        provideApi('http://localhost:9999')
+    ],
+};
+```
+
+```typescript
+// with a custom configuration
+import { ApplicationConfig } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideApi } from '@synaptiq/client';
+
+export const appConfig: ApplicationConfig = {
+    providers: [
+        // ...
+        provideHttpClient(),
+        provideApi({
+            withCredentials: true,
+            username: 'user',
+            password: 'password'
+        })
+    ],
+};
+```
+
+```typescript
+// with factory building a custom configuration
+import { ApplicationConfig } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideApi, Configuration } from '@synaptiq/client';
+
+export const appConfig: ApplicationConfig = {
+    providers: [
+        // ...
+        provideHttpClient(),
+        {
+            provide: Configuration,
+            useFactory: (authService: AuthService) => new Configuration({
+                    basePath: 'http://localhost:9999',
+                    withCredentials: true,
+                    username: authService.getUsername(),
+                    password: authService.getPassword(),
+            }),
+            deps: [AuthService],
+            multi: false
+        }
+    ],
+};
+```
+
+### Using multiple OpenAPI files / APIs
+
+In order to use multiple APIs generated from different OpenAPI files,
+you can create an alias name when importing the modules
+in order to avoid naming conflicts:
+
+```typescript
+import { provideApi as provideUserApi } from 'my-user-api-path';
+import { provideApi as provideAdminApi } from 'my-admin-api-path';
+import { HttpClientModule } from '@angular/common/http';
+import { environment } from '../environments/environment';
+
+export const appConfig: ApplicationConfig = {
+    providers: [
+        // ...
+        provideHttpClient(),
+        provideUserApi(environment.basePath),
+        provideAdminApi(environment.basePath),
+    ],
+};
+```
+
+### Customizing path parameter encoding
+
+Without further customization, only [path-parameters][parameter-locations-url] of [style][style-values-url] 'simple'
+and Dates for format 'date-time' are encoded correctly.
+
+Other styles (e.g. "matrix") are not that easy to encode
+and thus are best delegated to other libraries (e.g.: [@honoluluhenk/http-param-expander]).
+
+To implement your own parameter encoding (or call another library),
+pass an arrow-function or method-reference to the `encodeParam` property of the Configuration-object
+(see [General Usage](#general-usage) above).
+
+Example value for use in your Configuration-Provider:
+
+```typescript
+new Configuration({
+    encodeParam: (param: Param) => myFancyParamEncoder(param),
 })
-export class AppModule {}
 ```
 
-## Regeneration
-
-```bash
-# From the monorepo root:
-mvn generate-sources -Popenapi-gen -f libs/shared/openapi-spec/pom.xml
-
-# Build the SDK:
-pnpm run build --filter @synaptiq/client
-```
-
-> ⚠️ **Do not edit generated files directly.** Modify the OpenAPI spec in `libs/shared/openapi-spec/` instead.
+[parameter-locations-url]: https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#parameter-locations
+[style-values-url]: https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#style-values
+[@honoluluhenk/http-param-expander]: https://www.npmjs.com/package/@honoluluhenk/http-param-expander

@@ -1,17 +1,18 @@
 package org.openapitools.configuration;
 
-import com.synaptiq.infrastructure.in.web.dto.AccessMode;
-import com.synaptiq.infrastructure.in.web.dto.ActionOutcome;
-import com.synaptiq.infrastructure.in.web.dto.AdminRole;
-import com.synaptiq.infrastructure.in.web.dto.ApplicationStatus;
-import com.synaptiq.infrastructure.in.web.dto.CatalogItemStatus;
-import com.synaptiq.infrastructure.in.web.dto.ConversationRole;
-import com.synaptiq.infrastructure.in.web.dto.CredentialType;
-import com.synaptiq.infrastructure.in.web.dto.DataSourceStatus;
-import com.synaptiq.infrastructure.in.web.dto.DataSourceType;
-import com.synaptiq.infrastructure.in.web.dto.NodeExecutionStatus;
-import com.synaptiq.infrastructure.in.web.dto.PlanTier;
-import com.synaptiq.infrastructure.in.web.dto.TenantStatus;
+import com.spectrayan.synaptiq.infrastructure.in.web.dto.AccessMode;
+import com.spectrayan.synaptiq.infrastructure.in.web.dto.ActionOutcome;
+import com.spectrayan.synaptiq.infrastructure.in.web.dto.AdminRole;
+import com.spectrayan.synaptiq.infrastructure.in.web.dto.ApplicationStatus;
+import com.spectrayan.synaptiq.infrastructure.in.web.dto.ConnectorType;
+import com.spectrayan.synaptiq.infrastructure.in.web.dto.ConversationRole;
+import com.spectrayan.synaptiq.infrastructure.in.web.dto.CredentialType;
+import com.spectrayan.synaptiq.infrastructure.in.web.dto.DataSourceStatus;
+import com.spectrayan.synaptiq.infrastructure.in.web.dto.DataSourceType;
+import com.spectrayan.synaptiq.infrastructure.in.web.dto.NodeExecutionStatus;
+import com.spectrayan.synaptiq.infrastructure.in.web.dto.PlanTier;
+import com.spectrayan.synaptiq.infrastructure.in.web.dto.RouteStatus;
+import com.spectrayan.synaptiq.infrastructure.in.web.dto.TenantStatus;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -63,12 +64,12 @@ public class EnumConverterConfiguration {
             }
         };
     }
-    @Bean(name = "org.openapitools.configuration.EnumConverterConfiguration.catalogItemStatusConverter")
-    Converter<String, CatalogItemStatus> catalogItemStatusConverter() {
-        return new Converter<String, CatalogItemStatus>() {
+    @Bean(name = "org.openapitools.configuration.EnumConverterConfiguration.connectorTypeConverter")
+    Converter<String, ConnectorType> connectorTypeConverter() {
+        return new Converter<String, ConnectorType>() {
             @Override
-            public CatalogItemStatus convert(String source) {
-                return CatalogItemStatus.fromValue(source);
+            public ConnectorType convert(String source) {
+                return ConnectorType.fromValue(source);
             }
         };
     }
@@ -123,6 +124,15 @@ public class EnumConverterConfiguration {
             @Override
             public PlanTier convert(String source) {
                 return PlanTier.fromValue(source);
+            }
+        };
+    }
+    @Bean(name = "org.openapitools.configuration.EnumConverterConfiguration.routeStatusConverter")
+    Converter<String, RouteStatus> routeStatusConverter() {
+        return new Converter<String, RouteStatus>() {
+            @Override
+            public RouteStatus convert(String source) {
+                return RouteStatus.fromValue(source);
             }
         };
     }

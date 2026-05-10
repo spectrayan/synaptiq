@@ -14,7 +14,7 @@ export interface CreateTenantRequest {
     tenantId: string;
     name: string;
     slug: string;
-    catalogLabel?: string;
+    displayLabel?: string;
     accessMode?: AccessMode;
 }
 export namespace CreateTenantRequest {

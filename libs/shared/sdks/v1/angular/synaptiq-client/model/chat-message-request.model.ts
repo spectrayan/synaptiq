@@ -10,8 +10,17 @@
 
 
 export interface ChatMessageRequest { 
+    /**
+     * The session to post the message to
+     */
     sessionId: string;
+    /**
+     * The user\'s message (capped at 32K chars to prevent LLM cost spikes)
+     */
     message: string;
+    /**
+     * Optional model override (e.g. gemini-2.5-flash)
+     */
     modelOverride?: string;
 }
 
