@@ -15,6 +15,7 @@ concurrency:
 permissions:
   actions: read
   contents: read
+  packages: read
 
 # ─── Frontend (Angular / Nx) ────────────────────────────────────────────────
 jobs:
@@ -39,7 +40,9 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci --prefer-offline
+        run: npm ci --legacy-peer-deps
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Format check
         run: npx nx format:check
@@ -70,7 +73,6 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: apps/backend/spring-apis
 
     steps:
       - uses: actions/checkout@v4
@@ -80,14 +82,20 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: 'maven'
+          server-id: spectrayan-github-server-sent-events
+          server-username: GITHUB_ACTOR
+          server-password: GITHUB_TOKEN
 
-      - name: Build (skip tests)
-        run: mvn clean package -DskipTests -B -q
+      - name: Build full reactor (skip tests)
+        run: mvn clean install -DskipTests -B -q
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Test
-        run: mvn test -B
+      - name: Test (spring-apis)
+        run: mvn test -B -pl apps/backend/spring-apis
         env:
           CI: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload JAR artifact
         if: github.ref == 'refs/heads/main'

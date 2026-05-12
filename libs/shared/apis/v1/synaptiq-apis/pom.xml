@@ -1,23 +1,20 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.openapitools</groupId>
-    <artifactId>openapi-spring</artifactId>
-    <packaging>jar</packaging>
-    <name>openapi-spring</name>
-    <version>1.0.0</version>
-    <properties>
-        <java.version>17</java.version>
-        <maven.compiler.release>${java.version}</maven.compiler.release>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <springdoc.version>2.6.0</springdoc.version>
-        <swagger-ui.version>5.17.14</swagger-ui.version>
-    </properties>
+
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.13</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <groupId>com.spectrayan.synaptiq</groupId>
+        <artifactId>synaptiq-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../../../../../pom.xml</relativePath>
     </parent>
+
+    <artifactId>synaptiq-apis</artifactId>
+    <packaging>jar</packaging>
+    <name>synaptiq-apis</name>
+    <description>Generated Spring API interfaces and DTOs from OpenAPI contract</description>
 
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
@@ -34,8 +31,13 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
         </plugins>
     </build>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -45,17 +47,15 @@
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-commons</artifactId>
         </dependency>
-          <!--SpringDoc dependencies -->
+        <!-- SpringDoc OpenAPI -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
-            <version>${springdoc.version}</version>
         </dependency>
         <!-- @Nullable annotation -->
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
-            <version>3.0.2</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>

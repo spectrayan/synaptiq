@@ -18,8 +18,8 @@
     <dependencies>
         <!-- ==================== Generated API (DTOs + Interfaces) ==================== -->
         <dependency>
-            <groupId>org.openapitools</groupId>
-            <artifactId>openapi-spring</artifactId>
+            <groupId>com.spectrayan.synaptiq</groupId>
+            <artifactId>synaptiq-apis</artifactId>
         </dependency>
 
         <!-- ==================== Spring Boot Starters ==================== -->

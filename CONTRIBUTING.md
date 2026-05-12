@@ -44,8 +44,15 @@ This project adheres to the [Contributor Covenant Code of Conduct](CODE_OF_CONDU
 git clone https://github.com/<your-username>/synaptiq.git
 cd synaptiq
 
+# Configure GitHub Packages auth (one-time)
+# Create a PAT at https://github.com/settings/tokens with read:packages scope
+npm config set //npm.pkg.github.com/:_authToken ghp_YOUR_PAT_HERE
+
 # Install frontend dependencies
-pnpm install
+npm install --legacy-peer-deps
+
+# Build backend (full Maven reactor from repo root)
+mvn clean install -DskipTests -B
 
 # Start infrastructure (MongoDB + Redis + Firebase Auth Emulator)
 docker compose up -d mongodb redis firebase-auth
@@ -59,7 +66,7 @@ python seed-data/seed_all.py
 cd apps/backend/spring-apis && mvn spring-boot:run -Dspring-boot.run.profiles=dev
 
 # Terminal 2: Frontend
-pnpm nx serve shell
+npx nx serve shell
 ```
 
 ### Running Individually

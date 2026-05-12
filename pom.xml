@@ -48,7 +48,7 @@
         <logstash-logback.version>8.0</logstash-logback.version>
         <resilience4j.version>2.3.0</resilience4j.version>
         <google-adk.version>1.0.0</google-adk.version>
-        <sse-server.version>1.3.0</sse-server.version>
+        <sse-server.version>2.0.0</sse-server.version>
         <camel.version>4.18.0</camel.version>
 
         <!-- Testing -->
@@ -212,9 +212,9 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.openapitools</groupId>
-                <artifactId>openapi-spring</artifactId>
-                <version>1.0.0</version>
+                <groupId>com.spectrayan.synaptiq</groupId>
+                <artifactId>synaptiq-apis</artifactId>
+                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -253,6 +253,17 @@
             <url>https://repo.spring.io/milestone</url>
             <snapshots>
                 <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>spectrayan-github-server-sent-events</id>
+            <name>Spectrayan GitHub Packages</name>
+            <url>https://maven.pkg.github.com/spectrayan/server-sent-events</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
             </snapshots>
         </repository>
     </repositories>
