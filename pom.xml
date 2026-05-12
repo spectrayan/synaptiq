@@ -47,7 +47,7 @@
         <commons-csv.version>1.10.0</commons-csv.version>
         <logstash-logback.version>8.0</logstash-logback.version>
         <resilience4j.version>2.3.0</resilience4j.version>
-        <google-adk.version>1.0.0</google-adk.version>
+        <google-adk.version>1.2.0</google-adk.version>
         <sse-server.version>2.0.0</sse-server.version>
         <camel.version>4.18.0</camel.version>
 
