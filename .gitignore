@@ -8,7 +8,7 @@ dist/
 build/
 .angular/
 .next/
-out/
+/out/
 
 # Python
 __pycache__/
