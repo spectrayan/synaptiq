@@ -59,7 +59,7 @@ export class DataSourcesService extends BaseService implements DataSourcesServic
     public createDataSource(requestParameters: CreateDataSourceRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<DataSourceResponse>;
     public createDataSource(requestParameters: CreateDataSourceRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<DataSourceResponse>>;
     public createDataSource(requestParameters: CreateDataSourceRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<DataSourceResponse>>;
-    public createDataSource(requestParameters: CreateDataSourceRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public createDataSource(requestParameters: CreateDataSourceRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const createDataSourceRequest = requestParameters?.createDataSourceRequest;
         if (createDataSourceRequest === null || createDataSourceRequest === undefined) {
             throw new Error('Required parameter createDataSourceRequest was null or undefined when calling createDataSource.');
@@ -104,7 +104,7 @@ export class DataSourcesService extends BaseService implements DataSourcesServic
             }
         }
 
-        let localVarPath = `/api/v1/datasources`;
+        const localVarPath = `/api/v1/datasources`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<DataSourceResponse>('post', `${basePath}${localVarPath}`,
             {
@@ -131,7 +131,7 @@ export class DataSourcesService extends BaseService implements DataSourcesServic
     public deleteDataSource(requestParameters: DeleteDataSourceRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
     public deleteDataSource(requestParameters: DeleteDataSourceRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
     public deleteDataSource(requestParameters: DeleteDataSourceRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public deleteDataSource(requestParameters: DeleteDataSourceRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public deleteDataSource(requestParameters: DeleteDataSourceRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const dataSourceId = requestParameters?.dataSourceId;
         if (dataSourceId === null || dataSourceId === undefined) {
             throw new Error('Required parameter dataSourceId was null or undefined when calling deleteDataSource.');
@@ -166,7 +166,7 @@ export class DataSourcesService extends BaseService implements DataSourcesServic
             }
         }
 
-        let localVarPath = `/api/v1/datasources/${this.configuration.encodeParam({name: "dataSourceId", value: dataSourceId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const localVarPath = `/api/v1/datasources/${this.configuration.encodeParam({name: "dataSourceId", value: dataSourceId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<any>('delete', `${basePath}${localVarPath}`,
             {
@@ -192,7 +192,7 @@ export class DataSourcesService extends BaseService implements DataSourcesServic
     public getDataSource(requestParameters: GetDataSourceRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<DataSourceResponse>;
     public getDataSource(requestParameters: GetDataSourceRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<DataSourceResponse>>;
     public getDataSource(requestParameters: GetDataSourceRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<DataSourceResponse>>;
-    public getDataSource(requestParameters: GetDataSourceRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getDataSource(requestParameters: GetDataSourceRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const dataSourceId = requestParameters?.dataSourceId;
         if (dataSourceId === null || dataSourceId === undefined) {
             throw new Error('Required parameter dataSourceId was null or undefined when calling getDataSource.');
@@ -228,7 +228,7 @@ export class DataSourcesService extends BaseService implements DataSourcesServic
             }
         }
 
-        let localVarPath = `/api/v1/datasources/${this.configuration.encodeParam({name: "dataSourceId", value: dataSourceId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const localVarPath = `/api/v1/datasources/${this.configuration.encodeParam({name: "dataSourceId", value: dataSourceId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<DataSourceResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -254,7 +254,7 @@ export class DataSourcesService extends BaseService implements DataSourcesServic
     public listDataSources(requestParameters?: ListDataSourcesRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<ListDataSources200Response>;
     public listDataSources(requestParameters?: ListDataSourcesRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ListDataSources200Response>>;
     public listDataSources(requestParameters?: ListDataSourcesRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ListDataSources200Response>>;
-    public listDataSources(requestParameters?: ListDataSourcesRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public listDataSources(requestParameters?: ListDataSourcesRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
 
         let localVarHeaders = this.defaultHeaders;
@@ -286,7 +286,7 @@ export class DataSourcesService extends BaseService implements DataSourcesServic
             }
         }
 
-        let localVarPath = `/api/v1/datasources`;
+        const localVarPath = `/api/v1/datasources`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<ListDataSources200Response>('get', `${basePath}${localVarPath}`,
             {

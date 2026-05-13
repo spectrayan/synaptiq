@@ -14,7 +14,7 @@
  *
  * All auth operations return Promises and automatically update signals.
  */
-import { computed, Injectable, signal, PLATFORM_ID, inject } from '@angular/core';
+import { computed, Injectable, signal, PLATFORM_ID, inject, OnDestroy } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -39,7 +39,7 @@ const STORAGE_KEY_TOKEN = 'synaptiq_auth_token';
 const STORAGE_KEY_USER = 'synaptiq_auth_user';
 
 @Injectable({ providedIn: 'root' })
-export class AuthService {
+export class AuthService implements OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly router = inject(Router);
   private readonly env = inject(ENVIRONMENT);

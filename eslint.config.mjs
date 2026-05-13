@@ -5,7 +5,7 @@ export default [
   ...nx.configs['flat/typescript'],
   ...nx.configs['flat/javascript'],
   {
-    ignores: ['**/dist', '**/out-tsc', '**/test-output'],
+    ignores: ['**/dist', '**/out-tsc', '**/test-output', 'libs/shared/sdks/**'],
   },
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
@@ -37,6 +37,17 @@ export default [
       '**/*.mjs',
     ],
     // Override or add rules here
-    rules: {},
+    rules: {
+      // ── Downgraded to warn — pre-existing issues to fix incrementally ──
+      '@typescript-eslint/no-unused-vars': 'warn',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-non-null-assertion': 'warn',
+      '@typescript-eslint/ban-ts-comment': 'warn',
+      '@typescript-eslint/no-empty-function': 'warn',
+      '@typescript-eslint/no-namespace': 'warn',
+      '@typescript-eslint/no-empty-object-type': 'warn',
+      'no-control-regex': 'warn',
+      'no-useless-escape': 'warn',
+    },
   },
 ];

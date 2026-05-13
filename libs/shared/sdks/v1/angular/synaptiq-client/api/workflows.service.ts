@@ -84,7 +84,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
     public deleteWorkflow(requestParameters: DeleteWorkflowRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
     public deleteWorkflow(requestParameters: DeleteWorkflowRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
     public deleteWorkflow(requestParameters: DeleteWorkflowRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public deleteWorkflow(requestParameters: DeleteWorkflowRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public deleteWorkflow(requestParameters: DeleteWorkflowRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const workflowId = requestParameters?.workflowId;
         if (workflowId === null || workflowId === undefined) {
             throw new Error('Required parameter workflowId was null or undefined when calling deleteWorkflow.');
@@ -119,7 +119,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
             }
         }
 
-        let localVarPath = `/api/v1/workflow/${this.configuration.encodeParam({name: "workflowId", value: workflowId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const localVarPath = `/api/v1/workflow/${this.configuration.encodeParam({name: "workflowId", value: workflowId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<any>('delete', `${basePath}${localVarPath}`,
             {
@@ -145,7 +145,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
     public duplicateWorkflow(requestParameters: DuplicateWorkflowRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<WorkflowResponse>;
     public duplicateWorkflow(requestParameters: DuplicateWorkflowRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<WorkflowResponse>>;
     public duplicateWorkflow(requestParameters: DuplicateWorkflowRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<WorkflowResponse>>;
-    public duplicateWorkflow(requestParameters: DuplicateWorkflowRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public duplicateWorkflow(requestParameters: DuplicateWorkflowRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const workflowId = requestParameters?.workflowId;
         if (workflowId === null || workflowId === undefined) {
             throw new Error('Required parameter workflowId was null or undefined when calling duplicateWorkflow.');
@@ -181,7 +181,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
             }
         }
 
-        let localVarPath = `/api/v1/workflow/${this.configuration.encodeParam({name: "workflowId", value: workflowId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/duplicate`;
+        const localVarPath = `/api/v1/workflow/${this.configuration.encodeParam({name: "workflowId", value: workflowId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/duplicate`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<WorkflowResponse>('post', `${basePath}${localVarPath}`,
             {
@@ -207,7 +207,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
     public executeWorkflow(requestParameters: ExecuteWorkflowRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/event-stream' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<string>;
     public executeWorkflow(requestParameters: ExecuteWorkflowRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/event-stream' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<string>>;
     public executeWorkflow(requestParameters: ExecuteWorkflowRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/event-stream' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<string>>;
-    public executeWorkflow(requestParameters: ExecuteWorkflowRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'text/event-stream' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public executeWorkflow(requestParameters: ExecuteWorkflowRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'text/event-stream' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const executeWorkflowRequest = requestParameters?.executeWorkflowRequest;
         if (executeWorkflowRequest === null || executeWorkflowRequest === undefined) {
             throw new Error('Required parameter executeWorkflowRequest was null or undefined when calling executeWorkflow.');
@@ -252,7 +252,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
             }
         }
 
-        let localVarPath = `/api/v1/workflow/execute`;
+        const localVarPath = `/api/v1/workflow/execute`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<string>('post', `${basePath}${localVarPath}`,
             {
@@ -279,7 +279,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
     public generateWorkflow(requestParameters: GenerateWorkflowRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/event-stream' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<string>;
     public generateWorkflow(requestParameters: GenerateWorkflowRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/event-stream' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<string>>;
     public generateWorkflow(requestParameters: GenerateWorkflowRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/event-stream' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<string>>;
-    public generateWorkflow(requestParameters: GenerateWorkflowRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'text/event-stream' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public generateWorkflow(requestParameters: GenerateWorkflowRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'text/event-stream' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const generateWorkflowRequest = requestParameters?.generateWorkflowRequest;
         if (generateWorkflowRequest === null || generateWorkflowRequest === undefined) {
             throw new Error('Required parameter generateWorkflowRequest was null or undefined when calling generateWorkflow.');
@@ -324,7 +324,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
             }
         }
 
-        let localVarPath = `/api/v1/workflow/generate`;
+        const localVarPath = `/api/v1/workflow/generate`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<string>('post', `${basePath}${localVarPath}`,
             {
@@ -351,7 +351,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
     public getSharedWorkflow(requestParameters: GetSharedWorkflowRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<WorkflowResponse>;
     public getSharedWorkflow(requestParameters: GetSharedWorkflowRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<WorkflowResponse>>;
     public getSharedWorkflow(requestParameters: GetSharedWorkflowRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<WorkflowResponse>>;
-    public getSharedWorkflow(requestParameters: GetSharedWorkflowRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getSharedWorkflow(requestParameters: GetSharedWorkflowRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const shareToken = requestParameters?.shareToken;
         if (shareToken === null || shareToken === undefined) {
             throw new Error('Required parameter shareToken was null or undefined when calling getSharedWorkflow.');
@@ -383,7 +383,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
             }
         }
 
-        let localVarPath = `/api/v1/workflow/shared/${this.configuration.encodeParam({name: "shareToken", value: shareToken, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const localVarPath = `/api/v1/workflow/shared/${this.configuration.encodeParam({name: "shareToken", value: shareToken, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<WorkflowResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -409,7 +409,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
     public getWorkflow(requestParameters: GetWorkflowRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<WorkflowResponse>;
     public getWorkflow(requestParameters: GetWorkflowRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<WorkflowResponse>>;
     public getWorkflow(requestParameters: GetWorkflowRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<WorkflowResponse>>;
-    public getWorkflow(requestParameters: GetWorkflowRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getWorkflow(requestParameters: GetWorkflowRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const workflowId = requestParameters?.workflowId;
         if (workflowId === null || workflowId === undefined) {
             throw new Error('Required parameter workflowId was null or undefined when calling getWorkflow.');
@@ -445,7 +445,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
             }
         }
 
-        let localVarPath = `/api/v1/workflow/${this.configuration.encodeParam({name: "workflowId", value: workflowId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const localVarPath = `/api/v1/workflow/${this.configuration.encodeParam({name: "workflowId", value: workflowId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<WorkflowResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -471,7 +471,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
     public getWorkflowRunDetail(requestParameters: GetWorkflowRunDetailRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<WorkflowRunDetail>;
     public getWorkflowRunDetail(requestParameters: GetWorkflowRunDetailRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<WorkflowRunDetail>>;
     public getWorkflowRunDetail(requestParameters: GetWorkflowRunDetailRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<WorkflowRunDetail>>;
-    public getWorkflowRunDetail(requestParameters: GetWorkflowRunDetailRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getWorkflowRunDetail(requestParameters: GetWorkflowRunDetailRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const runId = requestParameters?.runId;
         if (runId === null || runId === undefined) {
             throw new Error('Required parameter runId was null or undefined when calling getWorkflowRunDetail.');
@@ -507,7 +507,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
             }
         }
 
-        let localVarPath = `/api/v1/workflow/runs/${this.configuration.encodeParam({name: "runId", value: runId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const localVarPath = `/api/v1/workflow/runs/${this.configuration.encodeParam({name: "runId", value: runId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<WorkflowRunDetail>('get', `${basePath}${localVarPath}`,
             {
@@ -533,7 +533,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
     public listWorkflowRuns(requestParameters: ListWorkflowRunsRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<Array<WorkflowRunSummary>>;
     public listWorkflowRuns(requestParameters: ListWorkflowRunsRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Array<WorkflowRunSummary>>>;
     public listWorkflowRuns(requestParameters: ListWorkflowRunsRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Array<WorkflowRunSummary>>>;
-    public listWorkflowRuns(requestParameters: ListWorkflowRunsRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public listWorkflowRuns(requestParameters: ListWorkflowRunsRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const workflowId = requestParameters?.workflowId;
         if (workflowId === null || workflowId === undefined) {
             throw new Error('Required parameter workflowId was null or undefined when calling listWorkflowRuns.');
@@ -581,7 +581,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
             }
         }
 
-        let localVarPath = `/api/v1/workflow/${this.configuration.encodeParam({name: "workflowId", value: workflowId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/runs`;
+        const localVarPath = `/api/v1/workflow/${this.configuration.encodeParam({name: "workflowId", value: workflowId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/runs`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<Array<WorkflowRunSummary>>('get', `${basePath}${localVarPath}`,
             {
@@ -607,7 +607,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
     public listWorkflowTemplates(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<WorkflowListResponse>;
     public listWorkflowTemplates(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<WorkflowListResponse>>;
     public listWorkflowTemplates(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<WorkflowListResponse>>;
-    public listWorkflowTemplates(observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public listWorkflowTemplates(observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
 
         let localVarHeaders = this.defaultHeaders;
 
@@ -635,7 +635,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
             }
         }
 
-        let localVarPath = `/api/v1/workflow/templates`;
+        const localVarPath = `/api/v1/workflow/templates`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<WorkflowListResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -660,7 +660,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
     public listWorkflowTools(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<ToolCatalogResponse>;
     public listWorkflowTools(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ToolCatalogResponse>>;
     public listWorkflowTools(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ToolCatalogResponse>>;
-    public listWorkflowTools(observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public listWorkflowTools(observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
 
         let localVarHeaders = this.defaultHeaders;
 
@@ -688,7 +688,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
             }
         }
 
-        let localVarPath = `/api/v1/workflow/tools`;
+        const localVarPath = `/api/v1/workflow/tools`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<ToolCatalogResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -714,7 +714,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
     public listWorkflows(requestParameters?: ListWorkflowsRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<WorkflowListResponse>;
     public listWorkflows(requestParameters?: ListWorkflowsRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<WorkflowListResponse>>;
     public listWorkflows(requestParameters?: ListWorkflowsRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<WorkflowListResponse>>;
-    public listWorkflows(requestParameters?: ListWorkflowsRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public listWorkflows(requestParameters?: ListWorkflowsRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
         const limit = requestParameters?.limit;
 
@@ -758,7 +758,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
             }
         }
 
-        let localVarPath = `/api/v1/workflow/list`;
+        const localVarPath = `/api/v1/workflow/list`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<WorkflowListResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -785,7 +785,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
     public regeneratePrompt(requestParameters: RegeneratePromptRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<RegeneratePromptResponse>;
     public regeneratePrompt(requestParameters: RegeneratePromptRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<RegeneratePromptResponse>>;
     public regeneratePrompt(requestParameters: RegeneratePromptRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<RegeneratePromptResponse>>;
-    public regeneratePrompt(requestParameters: RegeneratePromptRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public regeneratePrompt(requestParameters: RegeneratePromptRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const regeneratePromptRequest = requestParameters?.regeneratePromptRequest;
         if (regeneratePromptRequest === null || regeneratePromptRequest === undefined) {
             throw new Error('Required parameter regeneratePromptRequest was null or undefined when calling regeneratePrompt.');
@@ -830,7 +830,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
             }
         }
 
-        let localVarPath = `/api/v1/workflow/regenerate-prompt`;
+        const localVarPath = `/api/v1/workflow/regenerate-prompt`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<RegeneratePromptResponse>('post', `${basePath}${localVarPath}`,
             {
@@ -857,7 +857,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
     public saveWorkflow(requestParameters: SaveWorkflowRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<WorkflowResponse>;
     public saveWorkflow(requestParameters: SaveWorkflowRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<WorkflowResponse>>;
     public saveWorkflow(requestParameters: SaveWorkflowRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<WorkflowResponse>>;
-    public saveWorkflow(requestParameters: SaveWorkflowRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public saveWorkflow(requestParameters: SaveWorkflowRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const saveWorkflowRequest = requestParameters?.saveWorkflowRequest;
         if (saveWorkflowRequest === null || saveWorkflowRequest === undefined) {
             throw new Error('Required parameter saveWorkflowRequest was null or undefined when calling saveWorkflow.');
@@ -902,7 +902,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
             }
         }
 
-        let localVarPath = `/api/v1/workflow/save`;
+        const localVarPath = `/api/v1/workflow/save`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<WorkflowResponse>('post', `${basePath}${localVarPath}`,
             {
@@ -929,7 +929,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
     public shareWorkflow(requestParameters: ShareWorkflowRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<ShareWorkflowResponse>;
     public shareWorkflow(requestParameters: ShareWorkflowRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ShareWorkflowResponse>>;
     public shareWorkflow(requestParameters: ShareWorkflowRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ShareWorkflowResponse>>;
-    public shareWorkflow(requestParameters: ShareWorkflowRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public shareWorkflow(requestParameters: ShareWorkflowRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const workflowId = requestParameters?.workflowId;
         if (workflowId === null || workflowId === undefined) {
             throw new Error('Required parameter workflowId was null or undefined when calling shareWorkflow.');
@@ -965,7 +965,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
             }
         }
 
-        let localVarPath = `/api/v1/workflow/${this.configuration.encodeParam({name: "workflowId", value: workflowId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/share`;
+        const localVarPath = `/api/v1/workflow/${this.configuration.encodeParam({name: "workflowId", value: workflowId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/share`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<ShareWorkflowResponse>('post', `${basePath}${localVarPath}`,
             {
@@ -991,7 +991,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
     public updateWorkflow(requestParameters: UpdateWorkflowRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<WorkflowResponse>;
     public updateWorkflow(requestParameters: UpdateWorkflowRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<WorkflowResponse>>;
     public updateWorkflow(requestParameters: UpdateWorkflowRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<WorkflowResponse>>;
-    public updateWorkflow(requestParameters: UpdateWorkflowRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public updateWorkflow(requestParameters: UpdateWorkflowRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const workflowId = requestParameters?.workflowId;
         if (workflowId === null || workflowId === undefined) {
             throw new Error('Required parameter workflowId was null or undefined when calling updateWorkflow.');
@@ -1040,7 +1040,7 @@ export class WorkflowsService extends BaseService implements WorkflowsServiceInt
             }
         }
 
-        let localVarPath = `/api/v1/workflow/${this.configuration.encodeParam({name: "workflowId", value: workflowId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const localVarPath = `/api/v1/workflow/${this.configuration.encodeParam({name: "workflowId", value: workflowId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<WorkflowResponse>('patch', `${basePath}${localVarPath}`,
             {

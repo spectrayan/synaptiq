@@ -65,7 +65,7 @@ export class AuthService extends BaseService implements AuthServiceInterface {
     public changePassword(requestParameters: ChangePasswordRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
     public changePassword(requestParameters: ChangePasswordRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
     public changePassword(requestParameters: ChangePasswordRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public changePassword(requestParameters: ChangePasswordRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public changePassword(requestParameters: ChangePasswordRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const changePasswordRequest = requestParameters?.changePasswordRequest;
         if (changePasswordRequest === null || changePasswordRequest === undefined) {
             throw new Error('Required parameter changePasswordRequest was null or undefined when calling changePassword.');
@@ -105,7 +105,7 @@ export class AuthService extends BaseService implements AuthServiceInterface {
             }
         }
 
-        let localVarPath = `/api/v1/auth/change-password`;
+        const localVarPath = `/api/v1/auth/change-password`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<any>('post', `${basePath}${localVarPath}`,
             {
@@ -131,7 +131,7 @@ export class AuthService extends BaseService implements AuthServiceInterface {
     public getCurrentUser(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<UserResponse>;
     public getCurrentUser(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<UserResponse>>;
     public getCurrentUser(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<UserResponse>>;
-    public getCurrentUser(observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getCurrentUser(observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
 
         let localVarHeaders = this.defaultHeaders;
 
@@ -159,7 +159,7 @@ export class AuthService extends BaseService implements AuthServiceInterface {
             }
         }
 
-        let localVarPath = `/api/v1/auth/me`;
+        const localVarPath = `/api/v1/auth/me`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<UserResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -185,7 +185,7 @@ export class AuthService extends BaseService implements AuthServiceInterface {
     public login(requestParameters: LoginRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<AuthTokenResponse>;
     public login(requestParameters: LoginRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<AuthTokenResponse>>;
     public login(requestParameters: LoginRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<AuthTokenResponse>>;
-    public login(requestParameters: LoginRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public login(requestParameters: LoginRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const loginRequest = requestParameters?.loginRequest;
         if (loginRequest === null || loginRequest === undefined) {
             throw new Error('Required parameter loginRequest was null or undefined when calling login.');
@@ -226,7 +226,7 @@ export class AuthService extends BaseService implements AuthServiceInterface {
             }
         }
 
-        let localVarPath = `/api/v1/auth/login`;
+        const localVarPath = `/api/v1/auth/login`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<AuthTokenResponse>('post', `${basePath}${localVarPath}`,
             {
@@ -252,7 +252,7 @@ export class AuthService extends BaseService implements AuthServiceInterface {
     public refreshToken(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<AuthTokenResponse>;
     public refreshToken(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<AuthTokenResponse>>;
     public refreshToken(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<AuthTokenResponse>>;
-    public refreshToken(observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public refreshToken(observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
 
         let localVarHeaders = this.defaultHeaders;
 
@@ -280,7 +280,7 @@ export class AuthService extends BaseService implements AuthServiceInterface {
             }
         }
 
-        let localVarPath = `/api/v1/auth/refresh`;
+        const localVarPath = `/api/v1/auth/refresh`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<AuthTokenResponse>('post', `${basePath}${localVarPath}`,
             {
@@ -306,7 +306,7 @@ export class AuthService extends BaseService implements AuthServiceInterface {
     public signup(requestParameters: SignupRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<UserResponse>;
     public signup(requestParameters: SignupRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<UserResponse>>;
     public signup(requestParameters: SignupRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<UserResponse>>;
-    public signup(requestParameters: SignupRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public signup(requestParameters: SignupRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const signupRequest = requestParameters?.signupRequest;
         if (signupRequest === null || signupRequest === undefined) {
             throw new Error('Required parameter signupRequest was null or undefined when calling signup.');
@@ -347,7 +347,7 @@ export class AuthService extends BaseService implements AuthServiceInterface {
             }
         }
 
-        let localVarPath = `/api/v1/auth/signup`;
+        const localVarPath = `/api/v1/auth/signup`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<UserResponse>('post', `${basePath}${localVarPath}`,
             {
@@ -374,7 +374,7 @@ export class AuthService extends BaseService implements AuthServiceInterface {
     public updateUserRole(requestParameters: UpdateUserRoleRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<UserResponse>;
     public updateUserRole(requestParameters: UpdateUserRoleRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<UserResponse>>;
     public updateUserRole(requestParameters: UpdateUserRoleRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<UserResponse>>;
-    public updateUserRole(requestParameters: UpdateUserRoleRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public updateUserRole(requestParameters: UpdateUserRoleRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const updateRoleRequest = requestParameters?.updateRoleRequest;
         if (updateRoleRequest === null || updateRoleRequest === undefined) {
             throw new Error('Required parameter updateRoleRequest was null or undefined when calling updateUserRole.');
@@ -415,7 +415,7 @@ export class AuthService extends BaseService implements AuthServiceInterface {
             }
         }
 
-        let localVarPath = `/api/v1/auth/me/role`;
+        const localVarPath = `/api/v1/auth/me/role`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<UserResponse>('patch', `${basePath}${localVarPath}`,
             {

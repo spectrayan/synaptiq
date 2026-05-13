@@ -125,7 +125,7 @@ export class OpenApiHttpParams {
     toHttpParams(): HttpParams {
         const records = this.toRecord();
 
-        let httpParams = new HttpParams({encoder: new IdentityHttpParameterCodec()});
+        const httpParams = new HttpParams({encoder: new IdentityHttpParameterCodec()});
 
         return httpParams.appendAll(records);
     }
@@ -134,7 +134,7 @@ export class OpenApiHttpParams {
 export function concatHttpParamsObject(httpParams: OpenApiHttpParams, key: string, item: {
     [index: string]: any
 }, delimiter: Delimiter): OpenApiHttpParams {
-    let keyAndValues: string[] = [];
+    const keyAndValues: string[] = [];
 
     for (const k in item) {
         keyAndValues.push(k);

@@ -67,7 +67,7 @@ export class IntegrationsService extends BaseService implements IntegrationsServ
     public activateIntegration(requestParameters: ActivateIntegrationRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<IntegrationResponse>;
     public activateIntegration(requestParameters: ActivateIntegrationRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<IntegrationResponse>>;
     public activateIntegration(requestParameters: ActivateIntegrationRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<IntegrationResponse>>;
-    public activateIntegration(requestParameters: ActivateIntegrationRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public activateIntegration(requestParameters: ActivateIntegrationRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const routeConfigId = requestParameters?.routeConfigId;
         if (routeConfigId === null || routeConfigId === undefined) {
             throw new Error('Required parameter routeConfigId was null or undefined when calling activateIntegration.');
@@ -103,7 +103,7 @@ export class IntegrationsService extends BaseService implements IntegrationsServ
             }
         }
 
-        let localVarPath = `/api/v1/integrations/${this.configuration.encodeParam({name: "routeConfigId", value: routeConfigId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/activate`;
+        const localVarPath = `/api/v1/integrations/${this.configuration.encodeParam({name: "routeConfigId", value: routeConfigId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/activate`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<IntegrationResponse>('post', `${basePath}${localVarPath}`,
             {
@@ -129,7 +129,7 @@ export class IntegrationsService extends BaseService implements IntegrationsServ
     public createIntegration(requestParameters: CreateIntegrationRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<IntegrationResponse>;
     public createIntegration(requestParameters: CreateIntegrationRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<IntegrationResponse>>;
     public createIntegration(requestParameters: CreateIntegrationRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<IntegrationResponse>>;
-    public createIntegration(requestParameters: CreateIntegrationRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public createIntegration(requestParameters: CreateIntegrationRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const createIntegrationRequest = requestParameters?.createIntegrationRequest;
         if (createIntegrationRequest === null || createIntegrationRequest === undefined) {
             throw new Error('Required parameter createIntegrationRequest was null or undefined when calling createIntegration.');
@@ -174,7 +174,7 @@ export class IntegrationsService extends BaseService implements IntegrationsServ
             }
         }
 
-        let localVarPath = `/api/v1/integrations`;
+        const localVarPath = `/api/v1/integrations`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<IntegrationResponse>('post', `${basePath}${localVarPath}`,
             {
@@ -202,7 +202,7 @@ export class IntegrationsService extends BaseService implements IntegrationsServ
     public deactivateIntegration(requestParameters: DeactivateIntegrationRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<IntegrationResponse>;
     public deactivateIntegration(requestParameters: DeactivateIntegrationRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<IntegrationResponse>>;
     public deactivateIntegration(requestParameters: DeactivateIntegrationRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<IntegrationResponse>>;
-    public deactivateIntegration(requestParameters: DeactivateIntegrationRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public deactivateIntegration(requestParameters: DeactivateIntegrationRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const routeConfigId = requestParameters?.routeConfigId;
         if (routeConfigId === null || routeConfigId === undefined) {
             throw new Error('Required parameter routeConfigId was null or undefined when calling deactivateIntegration.');
@@ -238,7 +238,7 @@ export class IntegrationsService extends BaseService implements IntegrationsServ
             }
         }
 
-        let localVarPath = `/api/v1/integrations/${this.configuration.encodeParam({name: "routeConfigId", value: routeConfigId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/deactivate`;
+        const localVarPath = `/api/v1/integrations/${this.configuration.encodeParam({name: "routeConfigId", value: routeConfigId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/deactivate`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<IntegrationResponse>('post', `${basePath}${localVarPath}`,
             {
@@ -264,7 +264,7 @@ export class IntegrationsService extends BaseService implements IntegrationsServ
     public deleteIntegration(requestParameters: DeleteIntegrationRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
     public deleteIntegration(requestParameters: DeleteIntegrationRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
     public deleteIntegration(requestParameters: DeleteIntegrationRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public deleteIntegration(requestParameters: DeleteIntegrationRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public deleteIntegration(requestParameters: DeleteIntegrationRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const routeConfigId = requestParameters?.routeConfigId;
         if (routeConfigId === null || routeConfigId === undefined) {
             throw new Error('Required parameter routeConfigId was null or undefined when calling deleteIntegration.');
@@ -299,7 +299,7 @@ export class IntegrationsService extends BaseService implements IntegrationsServ
             }
         }
 
-        let localVarPath = `/api/v1/integrations/${this.configuration.encodeParam({name: "routeConfigId", value: routeConfigId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const localVarPath = `/api/v1/integrations/${this.configuration.encodeParam({name: "routeConfigId", value: routeConfigId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<any>('delete', `${basePath}${localVarPath}`,
             {
@@ -325,7 +325,7 @@ export class IntegrationsService extends BaseService implements IntegrationsServ
     public getIntegration(requestParameters: GetIntegrationRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<IntegrationResponse>;
     public getIntegration(requestParameters: GetIntegrationRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<IntegrationResponse>>;
     public getIntegration(requestParameters: GetIntegrationRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<IntegrationResponse>>;
-    public getIntegration(requestParameters: GetIntegrationRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getIntegration(requestParameters: GetIntegrationRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const routeConfigId = requestParameters?.routeConfigId;
         if (routeConfigId === null || routeConfigId === undefined) {
             throw new Error('Required parameter routeConfigId was null or undefined when calling getIntegration.');
@@ -361,7 +361,7 @@ export class IntegrationsService extends BaseService implements IntegrationsServ
             }
         }
 
-        let localVarPath = `/api/v1/integrations/${this.configuration.encodeParam({name: "routeConfigId", value: routeConfigId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const localVarPath = `/api/v1/integrations/${this.configuration.encodeParam({name: "routeConfigId", value: routeConfigId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<IntegrationResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -387,7 +387,7 @@ export class IntegrationsService extends BaseService implements IntegrationsServ
     public listIntegrationTemplates(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<ListIntegrationTemplates200Response>;
     public listIntegrationTemplates(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ListIntegrationTemplates200Response>>;
     public listIntegrationTemplates(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ListIntegrationTemplates200Response>>;
-    public listIntegrationTemplates(observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public listIntegrationTemplates(observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
 
         let localVarHeaders = this.defaultHeaders;
 
@@ -415,7 +415,7 @@ export class IntegrationsService extends BaseService implements IntegrationsServ
             }
         }
 
-        let localVarPath = `/api/v1/integrations/templates`;
+        const localVarPath = `/api/v1/integrations/templates`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<ListIntegrationTemplates200Response>('get', `${basePath}${localVarPath}`,
             {
@@ -441,7 +441,7 @@ export class IntegrationsService extends BaseService implements IntegrationsServ
     public listIntegrations(requestParameters?: ListIntegrationsRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<ListIntegrations200Response>;
     public listIntegrations(requestParameters?: ListIntegrationsRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ListIntegrations200Response>>;
     public listIntegrations(requestParameters?: ListIntegrationsRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ListIntegrations200Response>>;
-    public listIntegrations(requestParameters?: ListIntegrationsRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public listIntegrations(requestParameters?: ListIntegrationsRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
 
         let localVarHeaders = this.defaultHeaders;
@@ -473,7 +473,7 @@ export class IntegrationsService extends BaseService implements IntegrationsServ
             }
         }
 
-        let localVarPath = `/api/v1/integrations`;
+        const localVarPath = `/api/v1/integrations`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<ListIntegrations200Response>('get', `${basePath}${localVarPath}`,
             {
@@ -500,7 +500,7 @@ export class IntegrationsService extends BaseService implements IntegrationsServ
     public testIntegrationConnection(requestParameters: TestIntegrationConnectionRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<ConnectionTestResponse>;
     public testIntegrationConnection(requestParameters: TestIntegrationConnectionRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ConnectionTestResponse>>;
     public testIntegrationConnection(requestParameters: TestIntegrationConnectionRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ConnectionTestResponse>>;
-    public testIntegrationConnection(requestParameters: TestIntegrationConnectionRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public testIntegrationConnection(requestParameters: TestIntegrationConnectionRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const routeConfigId = requestParameters?.routeConfigId;
         if (routeConfigId === null || routeConfigId === undefined) {
             throw new Error('Required parameter routeConfigId was null or undefined when calling testIntegrationConnection.');
@@ -536,7 +536,7 @@ export class IntegrationsService extends BaseService implements IntegrationsServ
             }
         }
 
-        let localVarPath = `/api/v1/integrations/${this.configuration.encodeParam({name: "routeConfigId", value: routeConfigId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/test`;
+        const localVarPath = `/api/v1/integrations/${this.configuration.encodeParam({name: "routeConfigId", value: routeConfigId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/test`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<ConnectionTestResponse>('post', `${basePath}${localVarPath}`,
             {

@@ -44,6 +44,10 @@ spring:
           location: ${VERTEX_AI_LOCATION:us-central1}
           options:
             model: text-embedding-004
+    mcp:
+      server:
+        name: synaptiq-mcp
+        version: 1.0.0
 
 # ── Synaptiq Custom Properties ─────────────────────────────────────
 synaptiq:
@@ -72,12 +76,6 @@ synaptiq:
     vertexai-project: ${VERTEX_AI_PROJECT:}
     vertexai-location: ${VERTEX_AI_LOCATION:us-central1}
     gemini-api-key: ${GEMINI_API_KEY:}
-spring:
-  ai:
-    mcp:
-      server:
-        name: synaptiq-mcp
-        version: 1.0.0
     gemini-model: ${GEMINI_MODEL:gemini-2.5-flash}
   rate-limit:
     enabled: ${RATE_LIMIT_ENABLED:false}

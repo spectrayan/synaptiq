@@ -60,7 +60,7 @@ export class NotificationsService extends BaseService implements NotificationsSe
     public clearAllNotifications(requestParameters?: ClearAllNotificationsRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
     public clearAllNotifications(requestParameters?: ClearAllNotificationsRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
     public clearAllNotifications(requestParameters?: ClearAllNotificationsRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public clearAllNotifications(requestParameters?: ClearAllNotificationsRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public clearAllNotifications(requestParameters?: ClearAllNotificationsRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
 
         let localVarHeaders = this.defaultHeaders;
@@ -91,7 +91,7 @@ export class NotificationsService extends BaseService implements NotificationsSe
             }
         }
 
-        let localVarPath = `/api/v1/notifications`;
+        const localVarPath = `/api/v1/notifications`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<any>('delete', `${basePath}${localVarPath}`,
             {
@@ -118,7 +118,7 @@ export class NotificationsService extends BaseService implements NotificationsSe
     public dismissNotification(requestParameters: DismissNotificationRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
     public dismissNotification(requestParameters: DismissNotificationRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
     public dismissNotification(requestParameters: DismissNotificationRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public dismissNotification(requestParameters: DismissNotificationRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public dismissNotification(requestParameters: DismissNotificationRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const id = requestParameters?.id;
         if (id === null || id === undefined) {
             throw new Error('Required parameter id was null or undefined when calling dismissNotification.');
@@ -149,7 +149,7 @@ export class NotificationsService extends BaseService implements NotificationsSe
             }
         }
 
-        let localVarPath = `/api/v1/notifications/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const localVarPath = `/api/v1/notifications/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<any>('delete', `${basePath}${localVarPath}`,
             {
@@ -176,7 +176,7 @@ export class NotificationsService extends BaseService implements NotificationsSe
     public getUnreadNotificationCount(requestParameters?: GetUnreadNotificationCountRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<NotificationCountResponse>;
     public getUnreadNotificationCount(requestParameters?: GetUnreadNotificationCountRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<NotificationCountResponse>>;
     public getUnreadNotificationCount(requestParameters?: GetUnreadNotificationCountRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<NotificationCountResponse>>;
-    public getUnreadNotificationCount(requestParameters?: GetUnreadNotificationCountRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getUnreadNotificationCount(requestParameters?: GetUnreadNotificationCountRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
 
         let localVarHeaders = this.defaultHeaders;
@@ -208,7 +208,7 @@ export class NotificationsService extends BaseService implements NotificationsSe
             }
         }
 
-        let localVarPath = `/api/v1/notifications/unread-count`;
+        const localVarPath = `/api/v1/notifications/unread-count`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<NotificationCountResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -235,7 +235,7 @@ export class NotificationsService extends BaseService implements NotificationsSe
     public listNotifications(requestParameters?: ListNotificationsRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<NotificationListResponse>;
     public listNotifications(requestParameters?: ListNotificationsRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<NotificationListResponse>>;
     public listNotifications(requestParameters?: ListNotificationsRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<NotificationListResponse>>;
-    public listNotifications(requestParameters?: ListNotificationsRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public listNotifications(requestParameters?: ListNotificationsRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
         const unreadOnly = requestParameters?.unreadOnly;
         const before = requestParameters?.before;
@@ -299,7 +299,7 @@ export class NotificationsService extends BaseService implements NotificationsSe
             }
         }
 
-        let localVarPath = `/api/v1/notifications`;
+        const localVarPath = `/api/v1/notifications`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<NotificationListResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -327,7 +327,7 @@ export class NotificationsService extends BaseService implements NotificationsSe
     public markAllNotificationsRead(requestParameters?: MarkAllNotificationsReadRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
     public markAllNotificationsRead(requestParameters?: MarkAllNotificationsReadRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
     public markAllNotificationsRead(requestParameters?: MarkAllNotificationsReadRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public markAllNotificationsRead(requestParameters?: MarkAllNotificationsReadRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public markAllNotificationsRead(requestParameters?: MarkAllNotificationsReadRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
 
         let localVarHeaders = this.defaultHeaders;
@@ -358,7 +358,7 @@ export class NotificationsService extends BaseService implements NotificationsSe
             }
         }
 
-        let localVarPath = `/api/v1/notifications/read-all`;
+        const localVarPath = `/api/v1/notifications/read-all`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<any>('post', `${basePath}${localVarPath}`,
             {
@@ -385,7 +385,7 @@ export class NotificationsService extends BaseService implements NotificationsSe
     public markNotificationAsRead(requestParameters: MarkNotificationAsReadRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
     public markNotificationAsRead(requestParameters: MarkNotificationAsReadRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
     public markNotificationAsRead(requestParameters: MarkNotificationAsReadRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public markNotificationAsRead(requestParameters: MarkNotificationAsReadRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public markNotificationAsRead(requestParameters: MarkNotificationAsReadRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const id = requestParameters?.id;
         if (id === null || id === undefined) {
             throw new Error('Required parameter id was null or undefined when calling markNotificationAsRead.');
@@ -416,7 +416,7 @@ export class NotificationsService extends BaseService implements NotificationsSe
             }
         }
 
-        let localVarPath = `/api/v1/notifications/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const localVarPath = `/api/v1/notifications/${this.configuration.encodeParam({name: "id", value: id, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<any>('patch', `${basePath}${localVarPath}`,
             {

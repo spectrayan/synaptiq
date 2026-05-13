@@ -64,7 +64,7 @@ export class TenantsService extends BaseService implements TenantsServiceInterfa
     public createTenant(requestParameters: CreateTenantRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<TenantResponse>;
     public createTenant(requestParameters: CreateTenantRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<TenantResponse>>;
     public createTenant(requestParameters: CreateTenantRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<TenantResponse>>;
-    public createTenant(requestParameters: CreateTenantRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public createTenant(requestParameters: CreateTenantRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const createTenantRequest = requestParameters?.createTenantRequest;
         if (createTenantRequest === null || createTenantRequest === undefined) {
             throw new Error('Required parameter createTenantRequest was null or undefined when calling createTenant.');
@@ -105,7 +105,7 @@ export class TenantsService extends BaseService implements TenantsServiceInterfa
             }
         }
 
-        let localVarPath = `/api/v1/tenants`;
+        const localVarPath = `/api/v1/tenants`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<TenantResponse>('post', `${basePath}${localVarPath}`,
             {
@@ -132,7 +132,7 @@ export class TenantsService extends BaseService implements TenantsServiceInterfa
     public getTenant(requestParameters: GetTenantRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<TenantResponse>;
     public getTenant(requestParameters: GetTenantRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<TenantResponse>>;
     public getTenant(requestParameters: GetTenantRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<TenantResponse>>;
-    public getTenant(requestParameters: GetTenantRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getTenant(requestParameters: GetTenantRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const tenantId = requestParameters?.tenantId;
         if (tenantId === null || tenantId === undefined) {
             throw new Error('Required parameter tenantId was null or undefined when calling getTenant.');
@@ -164,7 +164,7 @@ export class TenantsService extends BaseService implements TenantsServiceInterfa
             }
         }
 
-        let localVarPath = `/api/v1/tenants/${this.configuration.encodeParam({name: "tenantId", value: tenantId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const localVarPath = `/api/v1/tenants/${this.configuration.encodeParam({name: "tenantId", value: tenantId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<TenantResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -190,7 +190,7 @@ export class TenantsService extends BaseService implements TenantsServiceInterfa
     public inviteAdmin(requestParameters: InviteAdminRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<TenantAdminResponse>;
     public inviteAdmin(requestParameters: InviteAdminRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<TenantAdminResponse>>;
     public inviteAdmin(requestParameters: InviteAdminRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<TenantAdminResponse>>;
-    public inviteAdmin(requestParameters: InviteAdminRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public inviteAdmin(requestParameters: InviteAdminRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const tenantId = requestParameters?.tenantId;
         if (tenantId === null || tenantId === undefined) {
             throw new Error('Required parameter tenantId was null or undefined when calling inviteAdmin.');
@@ -235,7 +235,7 @@ export class TenantsService extends BaseService implements TenantsServiceInterfa
             }
         }
 
-        let localVarPath = `/api/v1/tenants/${this.configuration.encodeParam({name: "tenantId", value: tenantId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/admins`;
+        const localVarPath = `/api/v1/tenants/${this.configuration.encodeParam({name: "tenantId", value: tenantId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/admins`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<TenantAdminResponse>('post', `${basePath}${localVarPath}`,
             {
@@ -262,7 +262,7 @@ export class TenantsService extends BaseService implements TenantsServiceInterfa
     public listTenantAdmins(requestParameters: ListTenantAdminsRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<Array<TenantAdminResponse>>;
     public listTenantAdmins(requestParameters: ListTenantAdminsRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<Array<TenantAdminResponse>>>;
     public listTenantAdmins(requestParameters: ListTenantAdminsRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<Array<TenantAdminResponse>>>;
-    public listTenantAdmins(requestParameters: ListTenantAdminsRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public listTenantAdmins(requestParameters: ListTenantAdminsRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const tenantId = requestParameters?.tenantId;
         if (tenantId === null || tenantId === undefined) {
             throw new Error('Required parameter tenantId was null or undefined when calling listTenantAdmins.');
@@ -294,7 +294,7 @@ export class TenantsService extends BaseService implements TenantsServiceInterfa
             }
         }
 
-        let localVarPath = `/api/v1/tenants/${this.configuration.encodeParam({name: "tenantId", value: tenantId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/admins`;
+        const localVarPath = `/api/v1/tenants/${this.configuration.encodeParam({name: "tenantId", value: tenantId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/admins`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<Array<TenantAdminResponse>>('get', `${basePath}${localVarPath}`,
             {
@@ -320,7 +320,7 @@ export class TenantsService extends BaseService implements TenantsServiceInterfa
     public updateTenant(requestParameters: UpdateTenantRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<TenantResponse>;
     public updateTenant(requestParameters: UpdateTenantRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<TenantResponse>>;
     public updateTenant(requestParameters: UpdateTenantRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<TenantResponse>>;
-    public updateTenant(requestParameters: UpdateTenantRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public updateTenant(requestParameters: UpdateTenantRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const tenantId = requestParameters?.tenantId;
         if (tenantId === null || tenantId === undefined) {
             throw new Error('Required parameter tenantId was null or undefined when calling updateTenant.');
@@ -365,7 +365,7 @@ export class TenantsService extends BaseService implements TenantsServiceInterfa
             }
         }
 
-        let localVarPath = `/api/v1/tenants/${this.configuration.encodeParam({name: "tenantId", value: tenantId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const localVarPath = `/api/v1/tenants/${this.configuration.encodeParam({name: "tenantId", value: tenantId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<TenantResponse>('patch', `${basePath}${localVarPath}`,
             {

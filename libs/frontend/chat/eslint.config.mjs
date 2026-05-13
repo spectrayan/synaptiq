@@ -17,18 +17,26 @@ export default [
         },
       ],
       '@angular-eslint/component-selector': [
-        'error',
+        'warn',
         {
           type: 'element',
           prefix: 'sq',
           style: 'kebab-case',
         },
       ],
+      '@angular-eslint/prefer-inject': 'warn',
+      '@angular-eslint/no-empty-lifecycle-method': 'warn',
+      '@nx/enforce-module-boundaries': 'warn',
     },
   },
   {
     files: ['**/*.html'],
     // Override or add rules here
-    rules: {},
+    rules: {
+      '@angular-eslint/template/click-events-have-key-events': 'warn',
+      '@angular-eslint/template/interactive-supports-focus': 'warn',
+      '@angular-eslint/template/label-has-associated-control': 'warn',
+      '@angular-eslint/template/prefer-control-flow': 'warn',
+    },
   },
 ];

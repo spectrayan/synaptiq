@@ -59,7 +59,7 @@ export class ApplicationsService extends BaseService implements ApplicationsServ
     public createApplication(requestParameters: CreateApplicationRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<ApplicationResponse>;
     public createApplication(requestParameters: CreateApplicationRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ApplicationResponse>>;
     public createApplication(requestParameters: CreateApplicationRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ApplicationResponse>>;
-    public createApplication(requestParameters: CreateApplicationRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public createApplication(requestParameters: CreateApplicationRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const createApplicationRequest = requestParameters?.createApplicationRequest;
         if (createApplicationRequest === null || createApplicationRequest === undefined) {
             throw new Error('Required parameter createApplicationRequest was null or undefined when calling createApplication.');
@@ -104,7 +104,7 @@ export class ApplicationsService extends BaseService implements ApplicationsServ
             }
         }
 
-        let localVarPath = `/api/v1/applications`;
+        const localVarPath = `/api/v1/applications`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<ApplicationResponse>('post', `${basePath}${localVarPath}`,
             {
@@ -131,7 +131,7 @@ export class ApplicationsService extends BaseService implements ApplicationsServ
     public deleteApplication(requestParameters: DeleteApplicationRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
     public deleteApplication(requestParameters: DeleteApplicationRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
     public deleteApplication(requestParameters: DeleteApplicationRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public deleteApplication(requestParameters: DeleteApplicationRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public deleteApplication(requestParameters: DeleteApplicationRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const appId = requestParameters?.appId;
         if (appId === null || appId === undefined) {
             throw new Error('Required parameter appId was null or undefined when calling deleteApplication.');
@@ -166,7 +166,7 @@ export class ApplicationsService extends BaseService implements ApplicationsServ
             }
         }
 
-        let localVarPath = `/api/v1/applications/${this.configuration.encodeParam({name: "appId", value: appId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const localVarPath = `/api/v1/applications/${this.configuration.encodeParam({name: "appId", value: appId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<any>('delete', `${basePath}${localVarPath}`,
             {
@@ -192,7 +192,7 @@ export class ApplicationsService extends BaseService implements ApplicationsServ
     public getApplication(requestParameters: GetApplicationRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<ApplicationResponse>;
     public getApplication(requestParameters: GetApplicationRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ApplicationResponse>>;
     public getApplication(requestParameters: GetApplicationRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ApplicationResponse>>;
-    public getApplication(requestParameters: GetApplicationRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getApplication(requestParameters: GetApplicationRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const appId = requestParameters?.appId;
         if (appId === null || appId === undefined) {
             throw new Error('Required parameter appId was null or undefined when calling getApplication.');
@@ -228,7 +228,7 @@ export class ApplicationsService extends BaseService implements ApplicationsServ
             }
         }
 
-        let localVarPath = `/api/v1/applications/${this.configuration.encodeParam({name: "appId", value: appId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        const localVarPath = `/api/v1/applications/${this.configuration.encodeParam({name: "appId", value: appId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<ApplicationResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -254,7 +254,7 @@ export class ApplicationsService extends BaseService implements ApplicationsServ
     public listApplications(requestParameters?: ListApplicationsRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<ListApplications200Response>;
     public listApplications(requestParameters?: ListApplicationsRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ListApplications200Response>>;
     public listApplications(requestParameters?: ListApplicationsRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ListApplications200Response>>;
-    public listApplications(requestParameters?: ListApplicationsRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public listApplications(requestParameters?: ListApplicationsRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
 
         let localVarHeaders = this.defaultHeaders;
@@ -286,7 +286,7 @@ export class ApplicationsService extends BaseService implements ApplicationsServ
             }
         }
 
-        let localVarPath = `/api/v1/applications`;
+        const localVarPath = `/api/v1/applications`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<ListApplications200Response>('get', `${basePath}${localVarPath}`,
             {
