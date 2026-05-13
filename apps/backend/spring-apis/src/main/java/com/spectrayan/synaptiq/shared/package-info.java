@@ -1,4 +1,5 @@
 @org.springframework.modulith.ApplicationModule(
-    allowedDependencies = {}
+    type = org.springframework.modulith.ApplicationModule.Type.OPEN,
+    allowedDependencies = {"infrastructure", "application", "auth"}
 )
 package com.spectrayan.synaptiq.shared;

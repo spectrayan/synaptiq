@@ -1,4 +1,4 @@
 @org.springframework.modulith.ApplicationModule(
-    allowedDependencies = {"shared", "shared::config", "shared::domain", "shared::event", "tenantconfig"}
+    allowedDependencies = {"shared", "shared::config", "shared::domain", "shared::event", "tenantconfig", "infrastructure"}
 )
 package com.spectrayan.synaptiq.integration;

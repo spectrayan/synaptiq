@@ -9,6 +9,15 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ""
+  ai:
+    vertex:
+      ai:
+        gemini:
+          project-id: test-project
+          location: us-central1
+        embedding:
+          project-id: test-project
+          location: us-central1
 
 synaptiq:
   debug: true

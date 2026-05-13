@@ -4,3 +4,6 @@
 /.nx/cache
 /.nx/workspace-data
 .angular
+
+# Generated SDKs (OpenAPI)
+libs/shared/sdks/
