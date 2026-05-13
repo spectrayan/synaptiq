@@ -48,15 +48,15 @@ jobs:
         run: npx nx format:check
 
       - name: Lint (affected)
-        run: npx nx affected -t lint --parallel=3
+        run: npx nx affected -t lint --parallel=3 --exclude='spring-apis,agent-flow-spring,camel-integration,openapi-spec,synaptiq-apis'
 
       - name: Test (affected)
-        run: npx nx affected -t test --parallel=3 --configuration=ci
+        run: npx nx affected -t test --parallel=3 --configuration=ci --exclude='spring-apis,agent-flow-spring,camel-integration,openapi-spec,synaptiq-apis'
         env:
           CI: true
 
       - name: Build (affected)
-        run: npx nx affected -t build --parallel=3
+        run: npx nx affected -t build --parallel=3 --exclude='spring-apis,agent-flow-spring,camel-integration,openapi-spec,synaptiq-apis'
 
       - name: Upload build artifacts
         if: github.ref == 'refs/heads/main'
@@ -84,18 +84,18 @@ jobs:
           cache: 'maven'
           server-id: spectrayan-github-server-sent-events
           server-username: GITHUB_ACTOR
-          server-password: GITHUB_TOKEN
+          server-password: GH_PKG_TOKEN
 
       - name: Build full reactor (skip tests)
         run: mvn clean install -DskipTests -B -q
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_PKG_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Test (spring-apis)
         run: mvn test -B -pl apps/backend/spring-apis
         env:
           CI: true
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_PKG_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Upload JAR artifact
         if: github.ref == 'refs/heads/main'
