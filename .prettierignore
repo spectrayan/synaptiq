@@ -7,3 +7,7 @@
 
 # Generated SDKs (OpenAPI)
 libs/shared/sdks/
+
+# Backend (Spring Boot) — uses its own formatting conventions
+apps/backend/
+libs/backend/
