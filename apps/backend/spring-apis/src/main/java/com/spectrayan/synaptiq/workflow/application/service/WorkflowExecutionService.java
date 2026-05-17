@@ -1,6 +1,7 @@
 package com.spectrayan.synaptiq.workflow.application.service;
 
 import com.spectrayan.synaptiq.agentflow.executor.FlowExecutor;
+import com.spectrayan.synaptiq.agentflow.spi.FlowExecutionEvent;
 import com.spectrayan.synaptiq.workflow.application.port.in.WorkflowQueryUseCase;
 import com.spectrayan.synaptiq.workflow.application.port.in.WorkflowExecutionUseCase;
 import com.spectrayan.synaptiq.workflow.domain.model.FlowEvent;
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 import java.time.Instant;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -24,36 +24,48 @@ public class WorkflowExecutionService implements WorkflowExecutionUseCase {
             return Flux.concat(
                 Flux.just(new FlowEvent.Started(runId, Instant.now())),
                 flowExecutor.streamRun(runId)
-                    .map(event -> mapToFlowEvent(runId, event))
+                    .map(event -> mapExecutionEvent(runId, event))
             );
         });
     }
 
-    @SuppressWarnings("unchecked")
-    private FlowEvent mapToFlowEvent(String runId, Map<String, Object> raw) {
-        String type = (String) raw.getOrDefault("type", "step_completed");
-        return switch (type) {
-            case "completed" -> new FlowEvent.Completed(
-                runId, raw, 0, Instant.now()
-            );
-            case "error" -> new FlowEvent.Failed(
+    /**
+     * Map normalized {@link FlowExecutionEvent} to domain {@link FlowEvent}.
+     */
+    private FlowEvent mapExecutionEvent(String runId, FlowExecutionEvent event) {
+        return switch (event.type()) {
+            case STEP_COMPLETED -> new FlowEvent.StepCompleted(
                 runId,
-                (String) raw.getOrDefault("error", "Unknown error"),
-                (String) raw.get("stepId"),
-                Instant.now()
+                event.stepId(),
+                event.stepName(),
+                "completed",
+                event.metadata(),
+                event.timestamp()
             );
-            case "token_delta" -> new FlowEvent.TokenDelta(
+            case TOKEN_DELTA -> new FlowEvent.TokenDelta(
                 runId,
-                (String) raw.get("stepId"),
-                (String) raw.getOrDefault("delta", "")
+                event.stepId(),
+                event.content()
             );
-            default -> new FlowEvent.StepCompleted(
+            case FLOW_COMPLETED -> new FlowEvent.Completed(
                 runId,
-                (String) raw.get("stepId"),
-                (String) raw.get("stepName"),
-                (String) raw.getOrDefault("status", "completed"),
-                raw,
-                Instant.now()
+                event.metadata(),
+                0L,
+                event.timestamp()
+            );
+            case ERROR -> new FlowEvent.Failed(
+                runId,
+                event.content(),
+                event.stepId(),
+                event.timestamp()
+            );
+            case STEP_STARTED, TOOL_CALL, TOOL_RESULT -> new FlowEvent.StepCompleted(
+                runId,
+                event.stepId(),
+                event.stepName(),
+                event.type().name().toLowerCase(),
+                event.metadata(),
+                event.timestamp()
             );
         };
     }
