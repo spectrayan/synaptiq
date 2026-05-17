@@ -6,9 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Data
 @Builder
@@ -34,8 +32,17 @@ public class FlowSettings {
     
     @Builder.Default
     private FlowType flowType = FlowType.STATIC;
-    
+
+    /** Context caching configuration for reducing LLM token costs. */
+    @Builder.Default
+    private CacheConfig cacheConfig = new CacheConfig();
+
+    /** Session storage backend configuration. */
+    @Builder.Default
+    private SessionConfig sessionConfig = new SessionConfig();
+
     public enum FlowType {
         STATIC, DYNAMIC, HYBRID
     }
 }
+

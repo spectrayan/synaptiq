@@ -23,8 +23,13 @@ public class ToolSettings {
     
     @Builder.Default
     private Map<String, Object> params = new HashMap<>();
-    
+
+    /** Whether this tool can be executed in parallel with other tools. */
+    @Builder.Default
+    private boolean parallelizable = false;
+
     public enum ToolType {
         PYTHON, JAVA, MCP, LANGCHAIN, SPRING_BEAN
     }
 }
+

@@ -18,4 +18,9 @@ public class ExecutionPolicy {
     
     @Builder.Default
     private ResourceLimits resources = new ResourceLimits();
+
+    /** Parallel execution configuration (virtual threads, max concurrency). */
+    @Builder.Default
+    private ParallelConfig parallel = new ParallelConfig();
 }
+
