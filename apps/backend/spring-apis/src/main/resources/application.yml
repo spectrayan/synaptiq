@@ -31,19 +31,13 @@ spring:
 
   # ── Spring AI ─────────────────────────────────────────────────────
   ai:
-    vertex:
-      ai:
-        gemini:
-          project-id: ${VERTEX_AI_PROJECT:}
-          location: ${VERTEX_AI_LOCATION:us-central1}
-          chat:
-            options:
-              model: gemini-1.5-pro-002
-        embedding:
-          project-id: ${VERTEX_AI_PROJECT:}
-          location: ${VERTEX_AI_LOCATION:us-central1}
+    google:
+      genai:
+        api-key: ${GEMINI_API_KEY:}
+        chat:
           options:
-            model: text-embedding-004
+            model: ${GEMINI_MODEL:gemini-2.5-flash}
+            temperature: 0.7
     mcp:
       server:
         name: synaptiq-mcp
