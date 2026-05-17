@@ -1,36 +1,35 @@
 package com.spectrayan.synaptiq.agentflow;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spectrayan.synaptiq.agentflow.builder.FlowBuilder;
 import com.spectrayan.synaptiq.agentflow.builder.models.settings.FlowSettings;
 import com.spectrayan.synaptiq.agentflow.executor.FlowExecutor;
+import com.spectrayan.synaptiq.agentflow.spi.FlowExecutionEvent;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 
 import java.util.Map;
 
+/**
+ * High-level entry point for the agent-flow engine.
+ * <p>
+ * Parses workflow specs and delegates execution to the {@link FlowExecutor}.
+ */
 @Slf4j
+@RequiredArgsConstructor
 public class AgentEngineApp {
 
     private final FlowExecutor flowExecutor;
     private final ObjectMapper objectMapper;
 
-    public AgentEngineApp() {
-        this.flowExecutor = new FlowExecutor();
-        this.objectMapper = new ObjectMapper();
-    }
-
-    public AgentEngineApp(FlowExecutor flowExecutor, ObjectMapper objectMapper) {
-        this.flowExecutor = flowExecutor;
-        this.objectMapper = objectMapper;
-    }
-
     /**
      * Streams the query results by dynamically parsing the flow spec and delegating to FlowExecutor.
      * 
      * @param input Contains "workflow_spec" (the JSON spec) and "query" or other input parameters.
-     * @return A Flux of event maps mimicking the Python stream yielding.
+     * @return A Flux of typed execution events.
      */
-    public Flux<Map<String, Object>> streamQuery(Map<String, Object> input) {
+    public Flux<FlowExecutionEvent> streamQuery(Map<String, Object> input) {
         if (!input.containsKey("workflow_spec")) {
             return Flux.error(new IllegalArgumentException("Missing 'workflow_spec' in input"));
         }

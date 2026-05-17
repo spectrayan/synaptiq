@@ -1,15 +1,21 @@
 package com.spectrayan.synaptiq.agentflow.executor;
 
 import com.spectrayan.synaptiq.agentflow.builder.models.settings.FlowSettings;
+import com.spectrayan.synaptiq.agentflow.spi.CompiledFlow;
 import lombok.Data;
+
 import java.time.Instant;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Tracks the state of a single flow execution run.
+ */
 @Data
 public class RunState {
+
     private final FlowSettings spec;
-    private final Object graph; // Replace with ADK Agent type once we define graph builder
+    private final CompiledFlow compiledFlow;
     private final Instant createdAt = Instant.now();
     
     private final CountDownLatch cancelEvent = new CountDownLatch(1);
@@ -18,12 +24,12 @@ public class RunState {
     private Object result;
     private Throwable error;
     
-    // Original input state/messages
+    /** Original input state/messages. */
     private Object input;
     
-    public RunState(FlowSettings spec, Object graph) {
+    public RunState(FlowSettings spec, CompiledFlow compiledFlow) {
         this.spec = spec;
-        this.graph = graph;
+        this.compiledFlow = compiledFlow;
     }
     
     public void cancel() {
