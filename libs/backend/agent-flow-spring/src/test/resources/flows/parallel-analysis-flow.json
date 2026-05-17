@@ -1,0 +1,55 @@
+{
+  "id": "parallel-analysis-flow",
+  "name": "Parallel Analysis",
+  "flowType": "STATIC",
+  "agents": [
+    {
+      "id": "technical-analyst",
+      "name": "TechnicalAnalyst",
+      "systemPrompt": "You are a technical analyst. Focus on architecture, implementation, and technical feasibility.",
+      "instructions": "Analyze the given topic from a technical perspective. Provide 3 key technical observations.",
+      "llm": {
+        "provider": "GOOGLE_AI",
+        "model": "gemini-2.0-flash",
+        "temperature": 0.3,
+        "maxTokens": 256
+      },
+      "parallelizable": true
+    },
+    {
+      "id": "business-analyst",
+      "name": "BusinessAnalyst",
+      "systemPrompt": "You are a business analyst. Focus on market impact, ROI, and business value.",
+      "instructions": "Analyze the given topic from a business perspective. Provide 3 key business observations.",
+      "llm": {
+        "provider": "GOOGLE_AI",
+        "model": "gemini-2.0-flash",
+        "temperature": 0.3,
+        "maxTokens": 256
+      },
+      "parallelizable": true
+    },
+    {
+      "id": "risk-analyst",
+      "name": "RiskAnalyst",
+      "systemPrompt": "You are a risk analyst. Focus on potential risks, challenges, and mitigation strategies.",
+      "instructions": "Analyze the given topic from a risk perspective. Provide 3 key risks and mitigations.",
+      "llm": {
+        "provider": "GOOGLE_AI",
+        "model": "gemini-2.0-flash",
+        "temperature": 0.2,
+        "maxTokens": 256
+      },
+      "parallelizable": true
+    }
+  ],
+  "policy": {
+    "parallel": {
+      "virtualThreads": true,
+      "maxConcurrency": 3
+    }
+  },
+  "sessionConfig": {
+    "type": "IN_MEMORY"
+  }
+}

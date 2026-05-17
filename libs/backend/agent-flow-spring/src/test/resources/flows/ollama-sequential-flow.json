@@ -1,0 +1,54 @@
+{
+  "id": "ollama-sequential-flow",
+  "name": "Ollama Sequential Pipeline",
+  "flowType": "STATIC",
+  "agents": [
+    {
+      "id": "researcher",
+      "name": "Researcher",
+      "systemPrompt": "You are a research assistant. Be extremely brief.",
+      "instructions": "List exactly 3 key facts about the topic. Use bullet points. Keep each under 15 words.",
+      "llm": {
+        "provider": "OLLAMA",
+        "model": "llama3.1",
+        "temperature": 0.2,
+        "maxTokens": 150,
+        "params": {
+          "base_url": "http://localhost:11434"
+        }
+      },
+      "parallelizable": false
+    },
+    {
+      "id": "summarizer",
+      "name": "Summarizer",
+      "systemPrompt": "You are a concise summarizer.",
+      "instructions": "Take the research points and write a single summary sentence under 30 words.",
+      "llm": {
+        "provider": "OLLAMA",
+        "model": "llama3.1",
+        "temperature": 0.1,
+        "maxTokens": 100,
+        "params": {
+          "base_url": "http://localhost:11434"
+        }
+      },
+      "parallelizable": false
+    }
+  ],
+  "edges": [
+    {
+      "source": "researcher",
+      "target": "summarizer",
+      "condition": "ALWAYS"
+    }
+  ],
+  "policy": {
+    "resources": {
+      "totalTimeoutMs": 600000
+    }
+  },
+  "sessionConfig": {
+    "type": "IN_MEMORY"
+  }
+}

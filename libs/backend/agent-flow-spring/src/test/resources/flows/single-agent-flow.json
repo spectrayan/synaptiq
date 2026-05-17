@@ -1,0 +1,39 @@
+{
+  "id": "single-agent-flow",
+  "name": "Single Agent Flow",
+  "entrypoint": "researcher",
+  "flowType": "STATIC",
+  "agents": [
+    {
+      "id": "researcher",
+      "name": "Researcher",
+      "systemPrompt": "You are a research assistant. Answer questions concisely with factual information.",
+      "instructions": "When asked a question, provide a brief, accurate answer in 2-3 sentences.",
+      "llm": {
+        "provider": "GOOGLE_AI",
+        "model": "gemini-2.0-flash",
+        "temperature": 0.1,
+        "maxTokens": 256,
+        "streaming": true
+      }
+    }
+  ],
+  "policy": {
+    "deterministic": true,
+    "seed": 42,
+    "resources": {
+      "totalTimeoutMs": 30000,
+      "maxTokens": 1024
+    },
+    "parallel": {
+      "virtualThreads": true,
+      "maxConcurrency": 5
+    }
+  },
+  "sessionConfig": {
+    "type": "IN_MEMORY"
+  },
+  "cacheConfig": {
+    "enabled": false
+  }
+}

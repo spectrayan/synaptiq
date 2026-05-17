@@ -1,0 +1,33 @@
+{
+  "id": "ollama-e2e-flow",
+  "name": "Ollama E2E Test",
+  "entrypoint": "assistant",
+  "flowType": "STATIC",
+  "agents": [
+    {
+      "id": "assistant",
+      "name": "Assistant",
+      "systemPrompt": "You are a helpful AI assistant. Keep responses very short, under 50 words.",
+      "instructions": "Answer the user's question concisely. Be direct and brief.",
+      "llm": {
+        "provider": "OLLAMA",
+        "model": "llama3.1",
+        "temperature": 0.1,
+        "maxTokens": 100,
+        "streaming": false,
+        "params": {
+          "base_url": "http://localhost:11434"
+        }
+      }
+    }
+  ],
+  "policy": {
+    "resources": {
+      "totalTimeoutMs": 300000,
+      "maxTokens": 256
+    }
+  },
+  "sessionConfig": {
+    "type": "IN_MEMORY"
+  }
+}

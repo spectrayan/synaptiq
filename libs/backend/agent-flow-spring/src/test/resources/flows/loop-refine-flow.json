@@ -1,0 +1,45 @@
+{
+  "id": "loop-refine-flow",
+  "name": "Loop Refine Flow",
+  "flowType": "HYBRID",
+  "agents": [
+    {
+      "id": "generator",
+      "name": "Generator",
+      "systemPrompt": "You are a creative content generator.",
+      "instructions": "Generate a short creative paragraph on the given topic. Be imaginative but concise.",
+      "llm": {
+        "provider": "GOOGLE_AI",
+        "model": "gemini-2.0-flash",
+        "temperature": 0.8,
+        "maxTokens": 256
+      }
+    },
+    {
+      "id": "critic",
+      "name": "Critic",
+      "systemPrompt": "You are a strict content critic and editor.",
+      "instructions": "Review the generated content. If it is good enough, respond with exactly 'APPROVED'. Otherwise provide specific feedback for improvement.",
+      "llm": {
+        "provider": "GOOGLE_AI",
+        "model": "gemini-2.0-flash",
+        "temperature": 0.1,
+        "maxTokens": 256
+      }
+    }
+  ],
+  "policy": {
+    "resources": {
+      "totalTimeoutMs": 120000
+    }
+  },
+  "sessionConfig": {
+    "type": "IN_MEMORY"
+  },
+  "cacheConfig": {
+    "enabled": true,
+    "cacheIntervals": 3,
+    "ttlMinutes": 5,
+    "minTokens": 1024
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "id": "dynamic-orchestrator-flow",
+  "name": "Dynamic Orchestrator",
+  "entrypoint": "Orchestrator",
+  "flowType": "DYNAMIC",
+  "agents": [
+    {
+      "id": "orchestrator",
+      "name": "Orchestrator",
+      "systemPrompt": "You are an orchestrator agent. Based on the user query, decide which specialist sub-agent to delegate to.",
+      "instructions": "Analyze the query intent. If it's about code, transfer to CodeExpert. If it's about data, transfer to DataExpert. Answer general queries yourself.",
+      "llm": {
+        "provider": "GOOGLE_AI",
+        "model": "gemini-2.0-flash",
+        "temperature": 0.1
+      }
+    },
+    {
+      "id": "code-expert",
+      "name": "CodeExpert",
+      "systemPrompt": "You are an expert software engineer.",
+      "instructions": "Provide concise code-related advice. Use code snippets when helpful.",
+      "llm": {
+        "provider": "GOOGLE_AI",
+        "model": "gemini-2.0-flash",
+        "temperature": 0.2,
+        "maxTokens": 512
+      }
+    },
+    {
+      "id": "data-expert",
+      "name": "DataExpert",
+      "systemPrompt": "You are a data engineering expert.",
+      "instructions": "Provide data architecture and pipeline advice. Focus on scalability and best practices.",
+      "llm": {
+        "provider": "GOOGLE_AI",
+        "model": "gemini-2.0-flash",
+        "temperature": 0.2,
+        "maxTokens": 512
+      }
+    }
+  ],
+  "policy": {
+    "resources": {
+      "totalTimeoutMs": 60000
+    }
+  },
+  "sessionConfig": {
+    "type": "IN_MEMORY"
+  }
+}

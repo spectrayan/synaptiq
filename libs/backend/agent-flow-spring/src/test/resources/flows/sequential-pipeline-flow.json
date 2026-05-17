@@ -1,0 +1,51 @@
+{
+  "id": "sequential-pipeline-flow",
+  "name": "Sequential Pipeline",
+  "entrypoint": "researcher",
+  "flowType": "STATIC",
+  "agents": [
+    {
+      "id": "researcher",
+      "name": "Researcher",
+      "systemPrompt": "You are a research assistant. Gather key facts about the given topic.",
+      "instructions": "Research the topic and provide 3-5 bullet points of key facts. Output ONLY the bullet points.",
+      "llm": {
+        "provider": "GOOGLE_AI",
+        "model": "gemini-2.0-flash",
+        "temperature": 0.2,
+        "maxTokens": 512
+      },
+      "parallelizable": false
+    },
+    {
+      "id": "writer",
+      "name": "Writer",
+      "systemPrompt": "You are a professional technical writer.",
+      "instructions": "Take the research bullet points from the previous step and write a concise paragraph summarizing the findings. Use clear, professional language.",
+      "llm": {
+        "provider": "GOOGLE_AI",
+        "model": "gemini-2.0-flash",
+        "temperature": 0.5,
+        "maxTokens": 512
+      },
+      "parallelizable": false
+    }
+  ],
+  "edges": [
+    {
+      "source": "researcher",
+      "target": "writer",
+      "condition": "ALWAYS"
+    }
+  ],
+  "policy": {
+    "deterministic": false,
+    "resources": {
+      "totalTimeoutMs": 60000,
+      "maxTokens": 2048
+    }
+  },
+  "sessionConfig": {
+    "type": "IN_MEMORY"
+  }
+}

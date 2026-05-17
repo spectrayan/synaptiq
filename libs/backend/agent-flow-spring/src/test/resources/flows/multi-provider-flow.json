@@ -1,0 +1,60 @@
+{
+  "id": "multi-provider-flow",
+  "name": "Multi Provider Flow",
+  "flowType": "STATIC",
+  "agents": [
+    {
+      "id": "gemini-agent",
+      "name": "GeminiAgent",
+      "systemPrompt": "You are a Gemini-powered assistant.",
+      "instructions": "Respond briefly to the query.",
+      "llm": {
+        "provider": "GOOGLE_AI",
+        "model": "gemini-2.0-flash",
+        "temperature": 0.3,
+        "maxTokens": 256
+      },
+      "parallelizable": false
+    },
+    {
+      "id": "ollama-agent",
+      "name": "OllamaAgent",
+      "systemPrompt": "You are a locally-hosted Ollama model.",
+      "instructions": "Respond briefly to the query using your local knowledge.",
+      "llm": {
+        "provider": "OLLAMA",
+        "model": "llama3.2",
+        "temperature": 0.5,
+        "maxTokens": 256,
+        "params": {
+          "base_url": "http://localhost:11434"
+        }
+      },
+      "parallelizable": false
+    },
+    {
+      "id": "groq-agent",
+      "name": "GroqAgent",
+      "systemPrompt": "You are a Groq-accelerated assistant.",
+      "instructions": "Respond with ultra-fast inference. Be brief and precise.",
+      "llm": {
+        "provider": "GROQ",
+        "model": "llama-3.3-70b-versatile",
+        "temperature": 0.2,
+        "maxTokens": 256,
+        "params": {
+          "api_key_env": "GROQ_API_KEY"
+        }
+      },
+      "parallelizable": false
+    }
+  ],
+  "policy": {
+    "resources": {
+      "totalTimeoutMs": 60000
+    }
+  },
+  "sessionConfig": {
+    "type": "IN_MEMORY"
+  }
+}
