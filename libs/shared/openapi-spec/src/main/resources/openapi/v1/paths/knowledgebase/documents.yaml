@@ -1,0 +1,59 @@
+post:
+  operationId: uploadKnowledgeDocument
+  summary: Upload a new knowledge document
+  tags: [KnowledgeBase]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: tags
+      in: query
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          properties:
+            file:
+              type: string
+              format: binary
+            categoryId:
+              type: string
+  responses:
+    '200':
+      description: Document uploaded and ingestion started
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/knowledgebase/KnowledgeDocumentResponse.yaml'
+    '400':
+      $ref: '../../components/responses/BadRequest.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'
+get:
+  operationId: listKnowledgeDocuments
+  summary: List all knowledge documents
+  tags: [KnowledgeBase]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: categoryId
+      in: query
+      schema:
+        type: string
+    - name: tags
+      in: query
+      schema:
+        type: array
+        items:
+          type: string
+  responses:
+    '200':
+      description: List of documents
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/knowledgebase/DocumentListResponse.yaml'

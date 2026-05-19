@@ -323,6 +323,148 @@
   }
 }
 
+// ─── Knowledge Base Panel ───────────────────────────────────────────────────
+.kb-create-form {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: var(--sq-space-2) var(--sq-space-3);
+  margin-bottom: var(--sq-space-1);
+}
+
+.kb-create-input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 12px;
+  background: var(--mat-sys-surface-container-highest);
+  color: var(--sq-on-surface);
+  border: 1px solid var(--sq-outline-variant);
+  border-radius: var(--sq-radius-sm);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s ease;
+
+  &::placeholder { color: var(--sq-on-surface-variant); opacity: 0.5; }
+  &:focus { border-color: var(--sq-primary); }
+}
+
+.kb-category-item {
+  margin: 0 var(--sq-space-1);
+}
+
+.kb-category-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px var(--sq-space-3);
+  border-radius: var(--sq-radius-sm);
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--sq-on-surface-variant);
+  transition: background 0.15s ease, color 0.15s ease;
+
+  .kb-cat-icon {
+    font-size: 16px; width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7;
+  }
+
+  .kb-cat-name {
+    flex: 1; min-width: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-weight: 500;
+  }
+
+  .kb-action-btn {
+    width: 24px !important; height: 24px !important;
+    opacity: 0;
+    transition: opacity 0.15s;
+    mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  }
+
+  &:hover {
+    background: var(--mat-sys-surface-container-highest);
+    color: var(--sq-on-surface);
+    .kb-action-btn { opacity: 0.7; }
+    .kb-action-btn:hover { opacity: 1; }
+  }
+
+  &.active {
+    background: rgba(179, 157, 219, 0.1);
+    color: var(--sq-on-surface);
+    .kb-cat-icon { opacity: 1; }
+    .kb-action-btn { opacity: 0.5; }
+  }
+
+  &.attached {
+    .kb-cat-icon { color: var(--sq-primary); opacity: 1; }
+    .kb-cat-name { color: var(--sq-primary); }
+  }
+}
+
+.kb-doc-list {
+  padding: 0 0 var(--sq-space-2) var(--sq-space-6);
+}
+
+.kb-doc-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: var(--sq-radius-sm);
+  font-size: 12px;
+  color: var(--sq-on-surface-variant);
+  transition: background 0.15s;
+
+  .kb-doc-icon {
+    font-size: 14px; width: 14px; height: 14px; opacity: 0.5; flex-shrink: 0;
+  }
+
+  .kb-doc-name {
+    flex: 1; min-width: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+
+  .kb-doc-status {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    flex-shrink: 0;
+
+    &.status-ready { background: rgba(76, 175, 80, 0.15); color: #66bb6a; }
+    &.status-processing { background: rgba(255, 183, 77, 0.15); color: #ffb74d; }
+    &.status-pending { background: rgba(158, 158, 158, 0.15); color: #9e9e9e; }
+    &.status-failed { background: rgba(239, 83, 80, 0.15); color: #ef5350; }
+  }
+
+  .kb-doc-delete {
+    width: 20px !important; height: 20px !important;
+    opacity: 0; transition: opacity 0.15s;
+    mat-icon { font-size: 14px; width: 14px; height: 14px; }
+  }
+
+  &:hover {
+    background: var(--mat-sys-surface-container-highest);
+    .kb-doc-delete { opacity: 0.7; }
+    .kb-doc-delete:hover { opacity: 1; color: var(--sq-error, #ef5350); }
+  }
+}
+
+.kb-doc-empty {
+  padding: var(--sq-space-3) var(--sq-space-2);
+  font-size: 11px;
+  color: var(--sq-on-surface-variant);
+  opacity: 0.5;
+  font-style: italic;
+}
+
+.spin {
+  animation: spin 1.2s linear infinite;
+}
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
 // ─── Light Theme ────────────────────────────────────────────────────────────
 :host-context([data-theme="light"]) {
   .sidebar {
@@ -357,6 +499,18 @@
     background: var(--sq-primary-container);
     color: var(--sq-on-primary-cont);
   }
-}
 
+  .kb-create-input {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.12);
+  }
+
+  .kb-category-header.active {
+    background: rgba(124, 77, 255, 0.06);
+  }
+
+  .kb-category-header:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+}
 

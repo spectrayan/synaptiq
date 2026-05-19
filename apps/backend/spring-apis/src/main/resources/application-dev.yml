@@ -4,9 +4,26 @@
 # ═══════════════════════════════════════════════════════════════════
 
 spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.ai.model.google.genai.autoconfigure.chat.GoogleGenAiChatAutoConfiguration
+      - org.springframework.ai.model.google.genai.autoconfigure.embedding.GoogleGenAiEmbeddingAutoConfiguration
+  ai:
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      embedding:
+        options:
+          model: ${OLLAMA_EMBEDDING_MODEL:qwen3-embedding}
+      chat:
+        options:
+          model: ${OLLAMA_CHAT_MODEL:llama3.2}
+    vectorstore:
+      mongodb:
+        initialize-schema: false
   data:
     mongodb:
       uri: mongodb://localhost:27017/synaptiq
+      database: synaptiq
     redis:
       url: redis://localhost:6379
 

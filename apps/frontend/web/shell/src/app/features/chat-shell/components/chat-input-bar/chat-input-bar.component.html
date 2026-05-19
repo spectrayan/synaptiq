@@ -1,4 +1,17 @@
 <div class="input-bar sq-glass" role="form" aria-label="Message input">
+  <!-- KB badges (attached knowledge bases) -->
+  @if (attachedKbs().length) {
+    <div class="kb-badges">
+      @for (kb of attachedKbs(); track kb.id) {
+        <span class="kb-badge" [matTooltip]="kb.description || kb.name">
+          <mat-icon class="kb-badge-icon">menu_book</mat-icon>
+          {{ kb.name }}
+          <button class="kb-badge-close" (click)="detachKb.emit(kb.id)" aria-label="Detach knowledge base">×</button>
+        </span>
+      }
+    </div>
+  }
+
   <textarea
     class="chat-input"
     [placeholder]="isAdminMode() ? 'Manage your workspace, data, or view analytics…' : 'Ask me anything…'"

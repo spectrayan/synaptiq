@@ -15,3 +15,8 @@ properties:
     type: string
     maxLength: 100
     description: Optional model override (e.g. gemini-2.5-flash)
+  knowledgeBaseIds:
+    type: array
+    items:
+      type: string
+    description: Optional list of Knowledge Base category IDs to scope RAG context

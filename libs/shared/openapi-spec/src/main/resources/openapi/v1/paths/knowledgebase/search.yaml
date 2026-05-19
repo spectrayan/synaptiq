@@ -1,0 +1,19 @@
+post:
+  operationId: searchKnowledgeBase
+  summary: Perform a similarity search on the knowledge base
+  tags: [KnowledgeBase]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/knowledgebase/KnowledgeSearchRequest.yaml'
+  responses:
+    '200':
+      description: Search results
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/knowledgebase/KnowledgeSearchResponse.yaml'

@@ -42,6 +42,9 @@ public class SecurityConfig {
                 .pathMatchers(HttpMethod.GET, "/api/v1/config/branding/public").permitAll()
                 .pathMatchers("/api/v1/auth/signup", "/api/v1/auth/login", "/api/v1/auth/refresh").permitAll()
                 .pathMatchers(HttpMethod.GET, "/api/v1/workflow/shared/**").permitAll()
+                // ── KB + Chat — allow in dev/test (DB scopes pending) ──
+                .pathMatchers("/api/v1/kb/**").permitAll()
+                .pathMatchers("/api/v1/chat/**").permitAll()
 
                 // ── All API paths — DB-driven scope authorization ────
                 .pathMatchers("/api/v1/**").access(scopeAuthorizationManager)

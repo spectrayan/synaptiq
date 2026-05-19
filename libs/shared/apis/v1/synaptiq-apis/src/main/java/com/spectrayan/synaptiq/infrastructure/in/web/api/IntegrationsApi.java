@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.Optional;
 import jakarta.annotation.Generated;
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-10T17:15:52.297398600-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-18T21:07:32.055501800-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
 @Validated
 @Tag(name = "Integrations", description = "Integration Engine — dynamic connectors, templates, route lifecycle")
 public interface IntegrationsApi {
@@ -145,59 +145,6 @@ public interface IntegrationsApi {
     )
     Mono<ResponseEntity<IntegrationResponse>> createIntegration(
         @Parameter(name = "CreateIntegrationRequest", description = "", required = true) @Valid @RequestBody Mono<CreateIntegrationRequest> createIntegrationRequest,
-        @Size(min = 1, max = 100) @Parameter(name = "X-Tenant-ID", description = "The tenant identifier for multi-tenant isolation", in = ParameterIn.HEADER) @RequestHeader(value = "X-Tenant-ID", required = false) @Nullable String xTenantID,
-        @Parameter(hidden = true) final ServerWebExchange exchange
-    );
-
-
-    String PATH_DEACTIVATE_INTEGRATION = "/api/v1/integrations/{routeConfigId}/deactivate";
-    /**
-     * POST /api/v1/integrations/{routeConfigId}/deactivate : Deactivate an integration route
-     * Stops and removes the integration route from the Camel engine
-     *
-     * @param routeConfigId  (required)
-     * @param xTenantID The tenant identifier for multi-tenant isolation (optional)
-     * @return Integration deactivated (status code 200)
-     *         or Bad Request (status code 400)
-     *         or Unauthorized (status code 401)
-     *         or Not Found (status code 404)
-     *         or Internal Server Error (status code 500)
-     */
-    @Operation(
-        operationId = "deactivateIntegration",
-        summary = "Deactivate an integration route",
-        description = "Stops and removes the integration route from the Camel engine",
-        tags = { "Integrations" },
-        responses = {
-            @ApiResponse(responseCode = "200", description = "Integration deactivated", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = IntegrationResponse.class)),
-                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = IntegrationResponse.class))
-            }),
-            @ApiResponse(responseCode = "400", description = "Bad Request", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
-                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
-            }),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
-                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
-            }),
-            @ApiResponse(responseCode = "404", description = "Not Found", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
-                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
-            }),
-            @ApiResponse(responseCode = "500", description = "Internal Server Error", content = {
-                @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetails.class)),
-                @Content(mediaType = "application/problem+json", schema = @Schema(implementation = ProblemDetails.class))
-            })
-        }
-    )
-    @RequestMapping(
-        method = RequestMethod.POST,
-        value = IntegrationsApi.PATH_DEACTIVATE_INTEGRATION,
-        produces = { "application/json", "application/problem+json" }
-    )
-    Mono<ResponseEntity<IntegrationResponse>> deactivateIntegration(
-        @Parameter(name = "routeConfigId", description = "", required = true, in = ParameterIn.PATH) @PathVariable("routeConfigId") String routeConfigId,
         @Size(min = 1, max = 100) @Parameter(name = "X-Tenant-ID", description = "The tenant identifier for multi-tenant isolation", in = ParameterIn.HEADER) @RequestHeader(value = "X-Tenant-ID", required = false) @Nullable String xTenantID,
         @Parameter(hidden = true) final ServerWebExchange exchange
     );

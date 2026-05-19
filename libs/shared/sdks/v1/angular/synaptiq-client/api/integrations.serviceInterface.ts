@@ -32,11 +32,6 @@ export interface CreateIntegrationRequestParams {
     xTenantID?: string;
 }
 
-export interface DeactivateIntegrationRequestParams {
-    routeConfigId: string;
-    xTenantID?: string;
-}
-
 export interface DeleteIntegrationRequestParams {
     routeConfigId: string;
     xTenantID?: string;
@@ -76,14 +71,6 @@ export interface IntegrationsServiceInterface {
 * @param requestParameters
      */
     createIntegration(requestParameters: CreateIntegrationRequestParams, extraHttpRequestParams?: any): Observable<IntegrationResponse>;
-
-    /**
-     * Deactivate an integration route
-     * Stops and removes the integration route from the Camel engine
-     * @endpoint post /api/v1/integrations/{routeConfigId}/deactivate
-* @param requestParameters
-     */
-    deactivateIntegration(requestParameters: DeactivateIntegrationRequestParams, extraHttpRequestParams?: any): Observable<IntegrationResponse>;
 
     /**
      * Delete an integration

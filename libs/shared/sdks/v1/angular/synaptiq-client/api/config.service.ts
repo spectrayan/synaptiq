@@ -69,7 +69,7 @@ export class ConfigService extends BaseService implements ConfigServiceInterface
     public getActionsConfig(requestParameters?: GetActionsConfigRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<ActionsConfigResponse>;
     public getActionsConfig(requestParameters?: GetActionsConfigRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ActionsConfigResponse>>;
     public getActionsConfig(requestParameters?: GetActionsConfigRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ActionsConfigResponse>>;
-    public getActionsConfig(requestParameters?: GetActionsConfigRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getActionsConfig(requestParameters?: GetActionsConfigRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
 
         let localVarHeaders = this.defaultHeaders;
@@ -101,7 +101,7 @@ export class ConfigService extends BaseService implements ConfigServiceInterface
             }
         }
 
-        const localVarPath = `/api/v1/config/actions`;
+        let localVarPath = `/api/v1/config/actions`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<ActionsConfigResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -127,7 +127,7 @@ export class ConfigService extends BaseService implements ConfigServiceInterface
     public getAiConfig(requestParameters?: GetAiConfigRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<AiPersonaResponse>;
     public getAiConfig(requestParameters?: GetAiConfigRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<AiPersonaResponse>>;
     public getAiConfig(requestParameters?: GetAiConfigRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<AiPersonaResponse>>;
-    public getAiConfig(requestParameters?: GetAiConfigRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getAiConfig(requestParameters?: GetAiConfigRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
 
         let localVarHeaders = this.defaultHeaders;
@@ -159,7 +159,7 @@ export class ConfigService extends BaseService implements ConfigServiceInterface
             }
         }
 
-        const localVarPath = `/api/v1/config/ai`;
+        let localVarPath = `/api/v1/config/ai`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<AiPersonaResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -185,7 +185,7 @@ export class ConfigService extends BaseService implements ConfigServiceInterface
     public getComponentsConfig(requestParameters?: GetComponentsConfigRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<ComponentsToggleResponse>;
     public getComponentsConfig(requestParameters?: GetComponentsConfigRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ComponentsToggleResponse>>;
     public getComponentsConfig(requestParameters?: GetComponentsConfigRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ComponentsToggleResponse>>;
-    public getComponentsConfig(requestParameters?: GetComponentsConfigRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getComponentsConfig(requestParameters?: GetComponentsConfigRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
 
         let localVarHeaders = this.defaultHeaders;
@@ -217,7 +217,7 @@ export class ConfigService extends BaseService implements ConfigServiceInterface
             }
         }
 
-        const localVarPath = `/api/v1/config/components`;
+        let localVarPath = `/api/v1/config/components`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<ComponentsToggleResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -243,7 +243,7 @@ export class ConfigService extends BaseService implements ConfigServiceInterface
     public getGuardrailsConfig(requestParameters?: GetGuardrailsConfigRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<GuardrailsResponse>;
     public getGuardrailsConfig(requestParameters?: GetGuardrailsConfigRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<GuardrailsResponse>>;
     public getGuardrailsConfig(requestParameters?: GetGuardrailsConfigRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<GuardrailsResponse>>;
-    public getGuardrailsConfig(requestParameters?: GetGuardrailsConfigRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getGuardrailsConfig(requestParameters?: GetGuardrailsConfigRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
 
         let localVarHeaders = this.defaultHeaders;
@@ -275,7 +275,7 @@ export class ConfigService extends BaseService implements ConfigServiceInterface
             }
         }
 
-        const localVarPath = `/api/v1/config/guardrails`;
+        let localVarPath = `/api/v1/config/guardrails`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<GuardrailsResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -301,7 +301,7 @@ export class ConfigService extends BaseService implements ConfigServiceInterface
     public getLlmConfig(requestParameters?: GetLlmConfigRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<LlmProviderResponse>;
     public getLlmConfig(requestParameters?: GetLlmConfigRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<LlmProviderResponse>>;
     public getLlmConfig(requestParameters?: GetLlmConfigRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<LlmProviderResponse>>;
-    public getLlmConfig(requestParameters?: GetLlmConfigRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getLlmConfig(requestParameters?: GetLlmConfigRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
 
         let localVarHeaders = this.defaultHeaders;
@@ -333,7 +333,7 @@ export class ConfigService extends BaseService implements ConfigServiceInterface
             }
         }
 
-        const localVarPath = `/api/v1/config/llm`;
+        let localVarPath = `/api/v1/config/llm`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<LlmProviderResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -359,7 +359,7 @@ export class ConfigService extends BaseService implements ConfigServiceInterface
     public updateActionsConfig(requestParameters: UpdateActionsConfigRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<ActionsConfigResponse>;
     public updateActionsConfig(requestParameters: UpdateActionsConfigRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ActionsConfigResponse>>;
     public updateActionsConfig(requestParameters: UpdateActionsConfigRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ActionsConfigResponse>>;
-    public updateActionsConfig(requestParameters: UpdateActionsConfigRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public updateActionsConfig(requestParameters: UpdateActionsConfigRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const actionsConfigResponse = requestParameters?.actionsConfigResponse;
         if (actionsConfigResponse === null || actionsConfigResponse === undefined) {
             throw new Error('Required parameter actionsConfigResponse was null or undefined when calling updateActionsConfig.');
@@ -404,7 +404,7 @@ export class ConfigService extends BaseService implements ConfigServiceInterface
             }
         }
 
-        const localVarPath = `/api/v1/config/actions`;
+        let localVarPath = `/api/v1/config/actions`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<ActionsConfigResponse>('patch', `${basePath}${localVarPath}`,
             {
@@ -431,7 +431,7 @@ export class ConfigService extends BaseService implements ConfigServiceInterface
     public updateAiConfig(requestParameters: UpdateAiConfigRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<AiPersonaResponse>;
     public updateAiConfig(requestParameters: UpdateAiConfigRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<AiPersonaResponse>>;
     public updateAiConfig(requestParameters: UpdateAiConfigRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<AiPersonaResponse>>;
-    public updateAiConfig(requestParameters: UpdateAiConfigRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public updateAiConfig(requestParameters: UpdateAiConfigRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const aiPersonaResponse = requestParameters?.aiPersonaResponse;
         if (aiPersonaResponse === null || aiPersonaResponse === undefined) {
             throw new Error('Required parameter aiPersonaResponse was null or undefined when calling updateAiConfig.');
@@ -476,7 +476,7 @@ export class ConfigService extends BaseService implements ConfigServiceInterface
             }
         }
 
-        const localVarPath = `/api/v1/config/ai`;
+        let localVarPath = `/api/v1/config/ai`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<AiPersonaResponse>('patch', `${basePath}${localVarPath}`,
             {
@@ -503,7 +503,7 @@ export class ConfigService extends BaseService implements ConfigServiceInterface
     public updateComponentsConfig(requestParameters: UpdateComponentsConfigRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<ComponentsToggleResponse>;
     public updateComponentsConfig(requestParameters: UpdateComponentsConfigRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ComponentsToggleResponse>>;
     public updateComponentsConfig(requestParameters: UpdateComponentsConfigRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ComponentsToggleResponse>>;
-    public updateComponentsConfig(requestParameters: UpdateComponentsConfigRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public updateComponentsConfig(requestParameters: UpdateComponentsConfigRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const componentsToggleResponse = requestParameters?.componentsToggleResponse;
         if (componentsToggleResponse === null || componentsToggleResponse === undefined) {
             throw new Error('Required parameter componentsToggleResponse was null or undefined when calling updateComponentsConfig.');
@@ -548,7 +548,7 @@ export class ConfigService extends BaseService implements ConfigServiceInterface
             }
         }
 
-        const localVarPath = `/api/v1/config/components`;
+        let localVarPath = `/api/v1/config/components`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<ComponentsToggleResponse>('patch', `${basePath}${localVarPath}`,
             {
@@ -575,7 +575,7 @@ export class ConfigService extends BaseService implements ConfigServiceInterface
     public updateGuardrailsConfig(requestParameters: UpdateGuardrailsConfigRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<GuardrailsResponse>;
     public updateGuardrailsConfig(requestParameters: UpdateGuardrailsConfigRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<GuardrailsResponse>>;
     public updateGuardrailsConfig(requestParameters: UpdateGuardrailsConfigRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<GuardrailsResponse>>;
-    public updateGuardrailsConfig(requestParameters: UpdateGuardrailsConfigRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public updateGuardrailsConfig(requestParameters: UpdateGuardrailsConfigRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const guardrailsResponse = requestParameters?.guardrailsResponse;
         if (guardrailsResponse === null || guardrailsResponse === undefined) {
             throw new Error('Required parameter guardrailsResponse was null or undefined when calling updateGuardrailsConfig.');
@@ -620,7 +620,7 @@ export class ConfigService extends BaseService implements ConfigServiceInterface
             }
         }
 
-        const localVarPath = `/api/v1/config/guardrails`;
+        let localVarPath = `/api/v1/config/guardrails`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<GuardrailsResponse>('patch', `${basePath}${localVarPath}`,
             {
@@ -647,7 +647,7 @@ export class ConfigService extends BaseService implements ConfigServiceInterface
     public updateLlmConfig(requestParameters: UpdateLlmConfigRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<LlmProviderResponse>;
     public updateLlmConfig(requestParameters: UpdateLlmConfigRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<LlmProviderResponse>>;
     public updateLlmConfig(requestParameters: UpdateLlmConfigRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<LlmProviderResponse>>;
-    public updateLlmConfig(requestParameters: UpdateLlmConfigRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public updateLlmConfig(requestParameters: UpdateLlmConfigRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const llmProviderResponse = requestParameters?.llmProviderResponse;
         if (llmProviderResponse === null || llmProviderResponse === undefined) {
             throw new Error('Required parameter llmProviderResponse was null or undefined when calling updateLlmConfig.');
@@ -692,7 +692,7 @@ export class ConfigService extends BaseService implements ConfigServiceInterface
             }
         }
 
-        const localVarPath = `/api/v1/config/llm`;
+        let localVarPath = `/api/v1/config/llm`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<LlmProviderResponse>('patch', `${basePath}${localVarPath}`,
             {

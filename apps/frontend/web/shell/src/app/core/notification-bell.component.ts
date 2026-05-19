@@ -6,7 +6,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { DatePipe } from '@angular/common';
-import { NotificationService, Notification } from '../../core/notification.service';
+import { NotificationService, Notification } from './notification.service';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -16,6 +16,7 @@ import {
   SessionListItem,
   WorkflowService,
   WorkflowCanvasComponent,
+  KnowledgeBaseStateService,
   type WorkflowSpec,
   type WorkflowRunSummary,
   type ToolDefinition,
@@ -86,6 +87,7 @@ export class ChatShellComponent implements OnDestroy {
   private readonly analyticsOrchestrator = inject(ChatAnalyticsOrchestrator);
   private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
+  readonly kbState = inject(KnowledgeBaseStateService);
 
   /** Exposed for settings panel template */
   readonly apiBaseUrl = this.env.apiBaseUrl;
@@ -119,8 +121,8 @@ export class ChatShellComponent implements OnDestroy {
   /** Session history for the sidebar */
   sessionHistory = signal<SessionListItem[]>([]);
   activeSessionId = signal<string>('');
-  /** Sidebar tab: 'recent' (session list) or 'pinned' (pinned views) or 'workflows' */
-  readonly sidebarTab = signal<'recent' | 'pinned' | 'workflows'>('recent');
+  /** Sidebar tab: 'recent' (session list), 'pinned' (pinned views), 'workflows', or 'knowledge' */
+  readonly sidebarTab = signal<'recent' | 'pinned' | 'workflows' | 'knowledge'>('recent');
 
   /** Main content tab: chat or workflow canvas */
   readonly mainTab = signal<'chat' | 'workflow'>('chat');
@@ -242,6 +244,7 @@ export class ChatShellComponent implements OnDestroy {
             this.loadSessionHistory();
             this.loadSavedWorkflows();
             this.loadCommunityTemplates();
+            this.kbState.loadCategories();
           });
         }
       }
@@ -348,6 +351,8 @@ export class ChatShellComponent implements OnDestroy {
     // P0-B: Clear pinned views for the new conversation
     this.pinnedViews.set([]);
     this.activePinnedView.set('');
+    // Clear KB attachments for the new conversation
+    this.kbState.clearAttachments();
   }
 
   // ── Conversational Auth (inline in chat stream) ─────────────────────
@@ -722,6 +727,7 @@ export class ChatShellComponent implements OnDestroy {
       this.sessionId,
       typingId,
       callbacks,
+      this.kbState.selectedKbIds(),
     );
   }
 
@@ -1413,6 +1419,78 @@ export class ChatShellComponent implements OnDestroy {
         },
       ]);
     }
+  }
+
+  // ── Knowledge Base ──────────────────────────────────────────────────
+
+  /** Handle selecting/expanding a category in the sidebar. */
+  async onSelectKnowledgeCategory(categoryId: string): Promise<void> {
+    if (this.kbState.activeCategory() === categoryId) {
+      this.kbState.activeCategory.set(null);
+      return;
+    }
+    await this.kbState.loadDocuments(categoryId);
+  }
+
+  /** Handle creating a new knowledge base category. */
+  async onCreateCategory(data: { name: string; description?: string }): Promise<void> {
+    if (!data.name.trim()) return;
+    const created = await this.kbState.createCategory(data.name.trim(), data.description);
+    if (created) {
+      this.messages.update((msgs) => [
+        ...msgs,
+        {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: `📚 Knowledge base **"${created.name}"** created successfully.`,
+          timestamp: new Date(),
+        },
+      ]);
+    }
+  }
+
+  /** Handle document upload from the sidebar. */
+  async onUploadDocument(data: { categoryId: string; files: FileList }): Promise<void> {
+    for (const file of Array.from(data.files)) {
+      const doc = await this.kbState.uploadDocument(file, data.categoryId);
+      if (doc) {
+        this.messages.update((msgs) => [
+          ...msgs,
+          {
+            id: crypto.randomUUID(),
+            role: 'assistant',
+            content: `📄 **"${file.name}"** uploaded to knowledge base. Status: **${doc.status}**`,
+            timestamp: new Date(),
+          },
+        ]);
+      }
+    }
+  }
+
+  /** Handle document deletion. */
+  async onDeleteDocument(docId: string): Promise<void> {
+    const success = await this.kbState.deleteDocument(docId);
+    if (success) {
+      this.messages.update((msgs) => [
+        ...msgs,
+        {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: `🗑️ Document removed from knowledge base.`,
+          timestamp: new Date(),
+        },
+      ]);
+    }
+  }
+
+  /** Toggle KB attachment for RAG-grounded chat. */
+  onToggleKbAttachment(categoryId: string): void {
+    this.kbState.toggleKbAttachment(categoryId);
+  }
+
+  /** Detach a KB from the input bar. */
+  onDetachKb(categoryId: string): void {
+    this.kbState.detachKb(categoryId);
   }
 
   ngOnDestroy(): void {

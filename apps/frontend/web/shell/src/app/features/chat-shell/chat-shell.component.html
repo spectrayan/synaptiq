@@ -12,6 +12,11 @@
     [currentWorkflowId]="currentWorkflow()?.id ?? null"
     [isAuthenticated]="auth.isAuthenticated()"
     [userEmail]="auth.currentUser()?.email ?? null"
+    [knowledgeCategories]="kbState.categories()"
+    [knowledgeDocuments]="kbState.documents()"
+    [activeKnowledgeCategory]="kbState.activeCategory()"
+    [selectedKbIds]="kbState.selectedKbIds()"
+    [kbLoading]="kbState.isLoading()"
     (toggleSidebar)="toggleSidebar()"
     (newConversation)="newConversation()"
     (loadSession)="loadSession($event)"
@@ -22,6 +27,11 @@
     (loadWorkflowTemplate)="loadWorkflowTemplate($event)"
     (openAuth)="openAuthForm($event)"
     (signOut)="signOutFromChat()"
+    (selectKnowledgeCategory)="onSelectKnowledgeCategory($event)"
+    (createCategory)="onCreateCategory($event)"
+    (uploadDocument)="onUploadDocument($event)"
+    (deleteDocument)="onDeleteDocument($event)"
+    (toggleKbAttachment)="onToggleKbAttachment($event)"
   />
 
   <!-- ── Main content ──────────────────────────────────────────────────── -->
@@ -85,7 +95,9 @@
     <sq-chat-input-bar
       [isLoading]="isLoading()"
       [isAdminMode]="isAdminMode()"
+      [attachedKbs]="kbState.attachedKbs()"
       (sendMessage)="sendMessage($event)"
+      (detachKb)="onDetachKb($event)"
     />
     } <!-- end @if mainTab chat -->
 

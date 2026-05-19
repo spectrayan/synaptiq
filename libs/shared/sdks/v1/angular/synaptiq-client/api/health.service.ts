@@ -50,7 +50,7 @@ export class HealthService extends BaseService implements HealthServiceInterface
     public healthCheck(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HealthResponse>;
     public healthCheck(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<HealthResponse>>;
     public healthCheck(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<HealthResponse>>;
-    public healthCheck(observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public healthCheck(observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
 
         let localVarHeaders = this.defaultHeaders;
 
@@ -78,7 +78,7 @@ export class HealthService extends BaseService implements HealthServiceInterface
             }
         }
 
-        const localVarPath = `/api/v1/health`;
+        let localVarPath = `/api/v1/health`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<HealthResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -103,7 +103,7 @@ export class HealthService extends BaseService implements HealthServiceInterface
     public readinessCheck(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HealthResponse>;
     public readinessCheck(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<HealthResponse>>;
     public readinessCheck(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<HealthResponse>>;
-    public readinessCheck(observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public readinessCheck(observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
 
         let localVarHeaders = this.defaultHeaders;
 
@@ -131,7 +131,7 @@ export class HealthService extends BaseService implements HealthServiceInterface
             }
         }
 
-        const localVarPath = `/api/v1/health/ready`;
+        let localVarPath = `/api/v1/health/ready`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<HealthResponse>('get', `${basePath}${localVarPath}`,
             {

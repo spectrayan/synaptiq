@@ -1,0 +1,34 @@
+get:
+  operationId: getKnowledgeDocument
+  summary: Get knowledge document details
+  tags: [KnowledgeBase]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: docId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: Document details
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/knowledgebase/KnowledgeDocumentResponse.yaml'
+    '404':
+      $ref: '../../components/responses/NotFound.yaml'
+delete:
+  operationId: deleteKnowledgeDocument
+  summary: Delete a knowledge document
+  tags: [KnowledgeBase]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+    - name: docId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '204':
+      description: Document deleted

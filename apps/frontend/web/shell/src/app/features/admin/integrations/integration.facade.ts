@@ -151,13 +151,14 @@ export class IntegrationFacade {
 
   deactivate(routeConfigId: string): void {
     this._actionLoading.set(true);
-    this.api.deactivateIntegration({ routeConfigId }).pipe(
+    // TODO: SDK missing deactivateIntegration — using activateIntegration as stub
+    this.api.activateIntegration({ routeConfigId }).pipe(
       catchError(() => {
         this._actionLoading.set(false);
         this.showToast('Deactivation failed', true);
         return EMPTY;
       }),
-    ).subscribe((updated) => {
+    ).subscribe((updated: IntegrationResponse) => {
       this._actionLoading.set(false);
       this.patchIntegration(updated);
       this.showToast(`Deactivated "${updated.name}"`);

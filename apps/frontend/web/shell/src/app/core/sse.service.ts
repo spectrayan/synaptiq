@@ -3,7 +3,7 @@ import { SseClient, StreamOptions } from '@spectrayan/ng-sse-client';
 import { SseClientHooks } from '@spectrayan/ng-sse-client';
 import { Observable, Subject, EMPTY, merge } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
+import { ENVIRONMENT } from '@synaptiq/utils';
 
 /**
  * Synaptiq SSE service — thin wrapper over the Spectrayan SSE client library.
@@ -15,6 +15,7 @@ import { environment } from '../../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class SseService implements OnDestroy {
   private readonly sseClient = inject(SseClient);
+  private readonly env = inject(ENVIRONMENT);
   private readonly destroy$ = new Subject<void>();
 
   /**
@@ -28,7 +29,7 @@ export class SseService implements OnDestroy {
     if (!topic) return EMPTY;
 
     const token = localStorage.getItem('synaptiq_access_token');
-    const baseUrl = `${environment.apiBaseUrl}/api/v1/sse/${topic}`;
+    const baseUrl = `${this.env.apiBaseUrl}/api/v1/sse/${topic}`;
     const url = token ? `${baseUrl}?token=${encodeURIComponent(token)}` : baseUrl;
 
     const hooks: SseClientHooks = {

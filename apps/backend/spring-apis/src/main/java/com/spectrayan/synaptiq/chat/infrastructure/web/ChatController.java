@@ -29,7 +29,7 @@ public class ChatController implements ChatApi {
         exchange.getResponse().getHeaders().setContentType(org.springframework.http.MediaType.TEXT_EVENT_STREAM);
         return req.flatMap(r -> 
             exchange.getResponse().writeWith(
-                messageUseCase.streamMessage(xTenantID, r.getSessionId(), r.getMessage(), r.getModelOverride())
+                messageUseCase.streamMessage(xTenantID, r.getSessionId(), r.getMessage(), r.getModelOverride(), r.getKnowledgeBaseIds())
                     .map(content -> {
                         String jsonChunk = toJson(Map.of("content", content));
                         String event = "data: " + jsonChunk + "\n\n";

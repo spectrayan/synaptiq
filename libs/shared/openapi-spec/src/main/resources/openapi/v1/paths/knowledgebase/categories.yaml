@@ -1,0 +1,23 @@
+post:
+  operationId: createKnowledgeCategory
+  summary: Create a new knowledge category
+  tags: [KnowledgeBase]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas/knowledgebase/CreateCategoryRequest.yaml'
+  responses:
+    '200':
+      description: Category created successfully
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/knowledgebase/KnowledgeCategoryResponse.yaml'
+    '400':
+      $ref: '../../components/responses/BadRequest.yaml'
+    '401':
+      $ref: '../../components/responses/Unauthorized.yaml'

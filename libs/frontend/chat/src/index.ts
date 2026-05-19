@@ -5,6 +5,7 @@ export * from './lib/application.service';
 export * from './lib/chat.service';
 export * from './lib/config.service';
 export * from './lib/datasource.service';
+export * from './lib/knowledge-base.service';
 export * from './lib/session.service';
 export * from './lib/workflow.service';
 export * from './lib/workflow/workflow-canvas.component';

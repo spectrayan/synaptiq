@@ -64,7 +64,7 @@ export class RolesService extends BaseService implements RolesServiceInterface {
     public createRole(requestParameters: CreateRoleRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<RoleResponse>;
     public createRole(requestParameters: CreateRoleRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<RoleResponse>>;
     public createRole(requestParameters: CreateRoleRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<RoleResponse>>;
-    public createRole(requestParameters: CreateRoleRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public createRole(requestParameters: CreateRoleRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const createRoleRequest = requestParameters?.createRoleRequest;
         if (createRoleRequest === null || createRoleRequest === undefined) {
             throw new Error('Required parameter createRoleRequest was null or undefined when calling createRole.');
@@ -109,7 +109,7 @@ export class RolesService extends BaseService implements RolesServiceInterface {
             }
         }
 
-        const localVarPath = `/api/v1/roles`;
+        let localVarPath = `/api/v1/roles`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<RoleResponse>('post', `${basePath}${localVarPath}`,
             {
@@ -136,7 +136,7 @@ export class RolesService extends BaseService implements RolesServiceInterface {
     public deleteRole(requestParameters: DeleteRoleRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
     public deleteRole(requestParameters: DeleteRoleRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
     public deleteRole(requestParameters: DeleteRoleRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public deleteRole(requestParameters: DeleteRoleRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public deleteRole(requestParameters: DeleteRoleRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const roleSlug = requestParameters?.roleSlug;
         if (roleSlug === null || roleSlug === undefined) {
             throw new Error('Required parameter roleSlug was null or undefined when calling deleteRole.');
@@ -167,7 +167,7 @@ export class RolesService extends BaseService implements RolesServiceInterface {
             }
         }
 
-        const localVarPath = `/api/v1/roles/${this.configuration.encodeParam({name: "roleSlug", value: roleSlug, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        let localVarPath = `/api/v1/roles/${this.configuration.encodeParam({name: "roleSlug", value: roleSlug, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<any>('delete', `${basePath}${localVarPath}`,
             {
@@ -193,7 +193,7 @@ export class RolesService extends BaseService implements RolesServiceInterface {
     public getRole(requestParameters: GetRoleRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<RoleResponse>;
     public getRole(requestParameters: GetRoleRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<RoleResponse>>;
     public getRole(requestParameters: GetRoleRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<RoleResponse>>;
-    public getRole(requestParameters: GetRoleRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getRole(requestParameters: GetRoleRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const roleSlug = requestParameters?.roleSlug;
         if (roleSlug === null || roleSlug === undefined) {
             throw new Error('Required parameter roleSlug was null or undefined when calling getRole.');
@@ -225,7 +225,7 @@ export class RolesService extends BaseService implements RolesServiceInterface {
             }
         }
 
-        const localVarPath = `/api/v1/roles/${this.configuration.encodeParam({name: "roleSlug", value: roleSlug, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        let localVarPath = `/api/v1/roles/${this.configuration.encodeParam({name: "roleSlug", value: roleSlug, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<RoleResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -251,7 +251,7 @@ export class RolesService extends BaseService implements RolesServiceInterface {
     public listRoles(requestParameters?: ListRolesRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<ListRoles200Response>;
     public listRoles(requestParameters?: ListRolesRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ListRoles200Response>>;
     public listRoles(requestParameters?: ListRolesRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ListRoles200Response>>;
-    public listRoles(requestParameters?: ListRolesRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public listRoles(requestParameters?: ListRolesRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
 
         let localVarHeaders = this.defaultHeaders;
@@ -283,7 +283,7 @@ export class RolesService extends BaseService implements RolesServiceInterface {
             }
         }
 
-        const localVarPath = `/api/v1/roles`;
+        let localVarPath = `/api/v1/roles`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<ListRoles200Response>('get', `${basePath}${localVarPath}`,
             {
@@ -308,7 +308,7 @@ export class RolesService extends BaseService implements RolesServiceInterface {
     public listScopes(observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<ListScopes200Response>;
     public listScopes(observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ListScopes200Response>>;
     public listScopes(observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ListScopes200Response>>;
-    public listScopes(observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public listScopes(observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
 
         let localVarHeaders = this.defaultHeaders;
 
@@ -336,7 +336,7 @@ export class RolesService extends BaseService implements RolesServiceInterface {
             }
         }
 
-        const localVarPath = `/api/v1/scopes`;
+        let localVarPath = `/api/v1/scopes`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<ListScopes200Response>('get', `${basePath}${localVarPath}`,
             {
@@ -362,7 +362,7 @@ export class RolesService extends BaseService implements RolesServiceInterface {
     public updateRole(requestParameters: UpdateRoleRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<RoleResponse>;
     public updateRole(requestParameters: UpdateRoleRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<RoleResponse>>;
     public updateRole(requestParameters: UpdateRoleRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<RoleResponse>>;
-    public updateRole(requestParameters: UpdateRoleRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public updateRole(requestParameters: UpdateRoleRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const roleSlug = requestParameters?.roleSlug;
         if (roleSlug === null || roleSlug === undefined) {
             throw new Error('Required parameter roleSlug was null or undefined when calling updateRole.');
@@ -407,7 +407,7 @@ export class RolesService extends BaseService implements RolesServiceInterface {
             }
         }
 
-        const localVarPath = `/api/v1/roles/${this.configuration.encodeParam({name: "roleSlug", value: roleSlug, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        let localVarPath = `/api/v1/roles/${this.configuration.encodeParam({name: "roleSlug", value: roleSlug, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<RoleResponse>('put', `${basePath}${localVarPath}`,
             {

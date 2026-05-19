@@ -81,7 +81,45 @@ public class IntegrationRouteTemplates extends RouteBuilder {
                 .to("jdbc:dataSource")
                 .log("DB query for tenant {{tenantId}} returned ${body.size()} rows");
 
+        // ── Knowledge Base — Google Drive Ingestion ─────────────────
+        routeTemplate("kb-google-drive-ingest")
+                .templateParameter("tenantId")
+                .templateParameter("routeId")
+                .templateParameter("folderId")
+                .templateParameter("categoryId", "")
+                .templateParameter("tags", "")
+                .templateParameter("pollIntervalMs", "600000")
+                .from("timer:{{routeId}}?period={{pollIntervalMs}}")
+                .routeId("{{routeId}}")
+                .setHeader("tenantId", simple("{{tenantId}}"))
+                .setHeader("categoryId", simple("{{categoryId}}"))
+                .setHeader("tags", simple("{{tags}}"))
+                .setHeader("sourceType", constant("GOOGLE_DRIVE"))
+                .setHeader("folderId", simple("{{folderId}}"))
+                .to("direct:kb-ingest")
+                .log("KB Google Drive poll completed for tenant {{tenantId}}, folder {{folderId}}");
+
+        // ── Knowledge Base — OneDrive Ingestion ──────────────────────
+        routeTemplate("kb-onedrive-ingest")
+                .templateParameter("tenantId")
+                .templateParameter("routeId")
+                .templateParameter("driveId")
+                .templateParameter("folderPath", "/")
+                .templateParameter("categoryId", "")
+                .templateParameter("tags", "")
+                .templateParameter("pollIntervalMs", "600000")
+                .from("timer:{{routeId}}?period={{pollIntervalMs}}")
+                .routeId("{{routeId}}")
+                .setHeader("tenantId", simple("{{tenantId}}"))
+                .setHeader("categoryId", simple("{{categoryId}}"))
+                .setHeader("tags", simple("{{tags}}"))
+                .setHeader("sourceType", constant("ONEDRIVE"))
+                .setHeader("driveId", simple("{{driveId}}"))
+                .setHeader("folderPath", simple("{{folderPath}}"))
+                .to("direct:kb-ingest")
+                .log("KB OneDrive poll completed for tenant {{tenantId}}, drive {{driveId}}");
+
         log.info("Registered {} integration route templates",
-                5);
+                7);
     }
 }

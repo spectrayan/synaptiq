@@ -1,0 +1,29 @@
+type: object
+required:
+  - id
+  - fileName
+  - status
+  - sourceType
+properties:
+  id:
+    type: string
+  fileName:
+    type: string
+  categoryId:
+    type: string
+  tags:
+    type: array
+    items:
+      type: string
+  status:
+    type: string
+    enum: [PENDING, PROCESSING, READY, FAILED]
+  sourceType:
+    type: string
+    enum: [FILE_UPLOAD, GOOGLE_DRIVE, ONEDRIVE]
+  sizeBytes:
+    type: integer
+    format: int64
+  createdAt:
+    type: string
+    format: date-time

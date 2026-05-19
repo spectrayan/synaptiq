@@ -61,7 +61,7 @@ export class AnalyticsService extends BaseService implements AnalyticsServiceInt
     public getAnalyticsSummary(requestParameters?: GetAnalyticsSummaryRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<AnalyticsSummaryResponse>;
     public getAnalyticsSummary(requestParameters?: GetAnalyticsSummaryRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<AnalyticsSummaryResponse>>;
     public getAnalyticsSummary(requestParameters?: GetAnalyticsSummaryRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<AnalyticsSummaryResponse>>;
-    public getAnalyticsSummary(requestParameters?: GetAnalyticsSummaryRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getAnalyticsSummary(requestParameters?: GetAnalyticsSummaryRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
         const from = requestParameters?.from;
         const to = requestParameters?.to;
@@ -115,7 +115,7 @@ export class AnalyticsService extends BaseService implements AnalyticsServiceInt
             }
         }
 
-        const localVarPath = `/api/v1/analytics/summary`;
+        let localVarPath = `/api/v1/analytics/summary`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<AnalyticsSummaryResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -142,7 +142,7 @@ export class AnalyticsService extends BaseService implements AnalyticsServiceInt
     public getBilling(requestParameters?: GetBillingRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<BillingResponse>;
     public getBilling(requestParameters?: GetBillingRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<BillingResponse>>;
     public getBilling(requestParameters?: GetBillingRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<BillingResponse>>;
-    public getBilling(requestParameters?: GetBillingRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getBilling(requestParameters?: GetBillingRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
         const from = requestParameters?.from;
         const to = requestParameters?.to;
@@ -196,7 +196,7 @@ export class AnalyticsService extends BaseService implements AnalyticsServiceInt
             }
         }
 
-        const localVarPath = `/api/v1/analytics/billing`;
+        let localVarPath = `/api/v1/analytics/billing`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<BillingResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -223,7 +223,7 @@ export class AnalyticsService extends BaseService implements AnalyticsServiceInt
     public getPlatformRollup(requestParameters?: GetPlatformRollupRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<PlatformRollupResponse>;
     public getPlatformRollup(requestParameters?: GetPlatformRollupRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<PlatformRollupResponse>>;
     public getPlatformRollup(requestParameters?: GetPlatformRollupRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<PlatformRollupResponse>>;
-    public getPlatformRollup(requestParameters?: GetPlatformRollupRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getPlatformRollup(requestParameters?: GetPlatformRollupRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const from = requestParameters?.from;
         const to = requestParameters?.to;
 
@@ -273,7 +273,7 @@ export class AnalyticsService extends BaseService implements AnalyticsServiceInt
             }
         }
 
-        const localVarPath = `/api/v1/analytics/platform`;
+        let localVarPath = `/api/v1/analytics/platform`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<PlatformRollupResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -300,7 +300,7 @@ export class AnalyticsService extends BaseService implements AnalyticsServiceInt
     public getTokenUsage(requestParameters?: GetTokenUsageRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<TokenUsageResponse>;
     public getTokenUsage(requestParameters?: GetTokenUsageRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<TokenUsageResponse>>;
     public getTokenUsage(requestParameters?: GetTokenUsageRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<TokenUsageResponse>>;
-    public getTokenUsage(requestParameters?: GetTokenUsageRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getTokenUsage(requestParameters?: GetTokenUsageRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
         const from = requestParameters?.from;
         const to = requestParameters?.to;
@@ -354,7 +354,7 @@ export class AnalyticsService extends BaseService implements AnalyticsServiceInt
             }
         }
 
-        const localVarPath = `/api/v1/analytics/tokens`;
+        let localVarPath = `/api/v1/analytics/tokens`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<TokenUsageResponse>('get', `${basePath}${localVarPath}`,
             {

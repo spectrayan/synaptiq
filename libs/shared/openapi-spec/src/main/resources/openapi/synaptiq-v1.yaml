@@ -268,6 +268,24 @@ components:
     ScopeResponse:
       $ref: 'v1/components/schemas/rbac/ScopeResponse.yaml'
 
+    # ── Knowledge Base ──
+    KnowledgeCategoryResponse:
+      $ref: 'v1/components/schemas/knowledgebase/KnowledgeCategoryResponse.yaml'
+    CreateCategoryRequest:
+      $ref: 'v1/components/schemas/knowledgebase/CreateCategoryRequest.yaml'
+    KnowledgeDocumentResponse:
+      $ref: 'v1/components/schemas/knowledgebase/KnowledgeDocumentResponse.yaml'
+    DocumentListResponse:
+      $ref: 'v1/components/schemas/knowledgebase/DocumentListResponse.yaml'
+    KnowledgeSearchRequest:
+      $ref: 'v1/components/schemas/knowledgebase/KnowledgeSearchRequest.yaml'
+    KnowledgeSearchResponse:
+      $ref: 'v1/components/schemas/knowledgebase/KnowledgeSearchResponse.yaml'
+    DocumentChunkResponse:
+      $ref: 'v1/components/schemas/knowledgebase/DocumentChunkResponse.yaml'
+    KnowledgeBaseStatusResponse:
+      $ref: 'v1/components/schemas/knowledgebase/KnowledgeBaseStatusResponse.yaml'
+
   responses:
     BadRequest:
       $ref: 'v1/components/responses/BadRequest.yaml'
@@ -314,6 +332,8 @@ tags:
     description: Role management — RBAC roles and scopes
   - name: Integrations
     description: Integration Engine — dynamic connectors, templates, route lifecycle
+  - name: KnowledgeBase
+    description: RAG & Knowledge Base — categorize, ingest, and search documents
 
 paths:
   # ── Health ──
@@ -475,7 +495,17 @@ paths:
     $ref: 'v1/paths/integration/integrations_by_id.yaml'
   /api/v1/integrations/{routeConfigId}/activate:
     $ref: 'v1/paths/integration/integrations_activate.yaml'
-  /api/v1/integrations/{routeConfigId}/deactivate:
-    $ref: 'v1/paths/integration/integrations_deactivate.yaml'
   /api/v1/integrations/{routeConfigId}/test:
     $ref: 'v1/paths/integration/integrations_test.yaml'
+
+  # ── Knowledge Base ──
+  /api/v1/kb/categories:
+    $ref: 'v1/paths/knowledgebase/categories.yaml'
+  /api/v1/kb/documents:
+    $ref: 'v1/paths/knowledgebase/documents.yaml'
+  /api/v1/kb/documents/{docId}:
+    $ref: 'v1/paths/knowledgebase/documents_by_id.yaml'
+  /api/v1/kb/search:
+    $ref: 'v1/paths/knowledgebase/search.yaml'
+  /api/v1/kb/status:
+    $ref: 'v1/paths/knowledgebase/status.yaml'

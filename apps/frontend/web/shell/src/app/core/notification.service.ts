@@ -2,7 +2,6 @@ import { Injectable, inject, signal, OnDestroy } from '@angular/core';
 import { Subject, takeUntil, mergeMap, EMPTY, catchError } from 'rxjs';
 import { NotificationsService as NotificationsApiService } from '@synaptiq/client';
 import { SseService } from './sse.service';
-import { environment } from '../../../environments/environment';
 
 /** Notification item (frontend model) */
 export interface Notification {

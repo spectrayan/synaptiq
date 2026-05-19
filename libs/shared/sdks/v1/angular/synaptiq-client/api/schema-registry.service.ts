@@ -56,7 +56,7 @@ export class SchemaRegistryService extends BaseService implements SchemaRegistry
     public inferSchema(requestParameters: InferSchemaRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<{ [key: string]: string; }>;
     public inferSchema(requestParameters: InferSchemaRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<{ [key: string]: string; }>>;
     public inferSchema(requestParameters: InferSchemaRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<{ [key: string]: string; }>>;
-    public inferSchema(requestParameters: InferSchemaRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public inferSchema(requestParameters: InferSchemaRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const collection = requestParameters?.collection;
         if (collection === null || collection === undefined) {
             throw new Error('Required parameter collection was null or undefined when calling inferSchema.');
@@ -92,7 +92,7 @@ export class SchemaRegistryService extends BaseService implements SchemaRegistry
             }
         }
 
-        const localVarPath = `/api/v1/schema-registry/infer/${this.configuration.encodeParam({name: "collection", value: collection, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        let localVarPath = `/api/v1/schema-registry/infer/${this.configuration.encodeParam({name: "collection", value: collection, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<{ [key: string]: string; }>('get', `${basePath}${localVarPath}`,
             {
@@ -118,7 +118,7 @@ export class SchemaRegistryService extends BaseService implements SchemaRegistry
     public listCollections(requestParameters?: ListCollectionsRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<CollectionListResponse>;
     public listCollections(requestParameters?: ListCollectionsRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<CollectionListResponse>>;
     public listCollections(requestParameters?: ListCollectionsRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<CollectionListResponse>>;
-    public listCollections(requestParameters?: ListCollectionsRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public listCollections(requestParameters?: ListCollectionsRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
 
         let localVarHeaders = this.defaultHeaders;
@@ -150,7 +150,7 @@ export class SchemaRegistryService extends BaseService implements SchemaRegistry
             }
         }
 
-        const localVarPath = `/api/v1/schema-registry/collections`;
+        let localVarPath = `/api/v1/schema-registry/collections`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<CollectionListResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -176,7 +176,7 @@ export class SchemaRegistryService extends BaseService implements SchemaRegistry
     public queryCollection(requestParameters: QueryCollectionRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<QueryResultResponse>;
     public queryCollection(requestParameters: QueryCollectionRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<QueryResultResponse>>;
     public queryCollection(requestParameters: QueryCollectionRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<QueryResultResponse>>;
-    public queryCollection(requestParameters: QueryCollectionRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public queryCollection(requestParameters: QueryCollectionRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const collection = requestParameters?.collection;
         if (collection === null || collection === undefined) {
             throw new Error('Required parameter collection was null or undefined when calling queryCollection.');
@@ -234,7 +234,7 @@ export class SchemaRegistryService extends BaseService implements SchemaRegistry
             }
         }
 
-        const localVarPath = `/api/v1/schema-registry/query/${this.configuration.encodeParam({name: "collection", value: collection, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        let localVarPath = `/api/v1/schema-registry/query/${this.configuration.encodeParam({name: "collection", value: collection, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<QueryResultResponse>('post', `${basePath}${localVarPath}`,
             {

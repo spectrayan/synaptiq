@@ -58,7 +58,7 @@ export class ActionsService extends BaseService implements ActionsServiceInterfa
     public executeAction(requestParameters: ExecuteActionRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<ActionResultResponse>;
     public executeAction(requestParameters: ExecuteActionRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ActionResultResponse>>;
     public executeAction(requestParameters: ExecuteActionRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ActionResultResponse>>;
-    public executeAction(requestParameters: ExecuteActionRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public executeAction(requestParameters: ExecuteActionRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const executeActionRequest = requestParameters?.executeActionRequest;
         if (executeActionRequest === null || executeActionRequest === undefined) {
             throw new Error('Required parameter executeActionRequest was null or undefined when calling executeAction.');
@@ -103,7 +103,7 @@ export class ActionsService extends BaseService implements ActionsServiceInterfa
             }
         }
 
-        const localVarPath = `/api/v1/actions/execute`;
+        let localVarPath = `/api/v1/actions/execute`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<ActionResultResponse>('post', `${basePath}${localVarPath}`,
             {
@@ -130,7 +130,7 @@ export class ActionsService extends BaseService implements ActionsServiceInterfa
     public listSavedItems(requestParameters: ListSavedItemsRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<SavedItemListResponse>;
     public listSavedItems(requestParameters: ListSavedItemsRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<SavedItemListResponse>>;
     public listSavedItems(requestParameters: ListSavedItemsRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<SavedItemListResponse>>;
-    public listSavedItems(requestParameters: ListSavedItemsRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public listSavedItems(requestParameters: ListSavedItemsRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const sessionId = requestParameters?.sessionId;
         if (sessionId === null || sessionId === undefined) {
             throw new Error('Required parameter sessionId was null or undefined when calling listSavedItems.');
@@ -177,7 +177,7 @@ export class ActionsService extends BaseService implements ActionsServiceInterfa
             }
         }
 
-        const localVarPath = `/api/v1/actions/saved-items`;
+        let localVarPath = `/api/v1/actions/saved-items`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<SavedItemListResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -204,7 +204,7 @@ export class ActionsService extends BaseService implements ActionsServiceInterfa
     public removeSavedItem(requestParameters: RemoveSavedItemRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
     public removeSavedItem(requestParameters: RemoveSavedItemRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
     public removeSavedItem(requestParameters: RemoveSavedItemRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public removeSavedItem(requestParameters: RemoveSavedItemRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public removeSavedItem(requestParameters: RemoveSavedItemRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const itemId = requestParameters?.itemId;
         if (itemId === null || itemId === undefined) {
             throw new Error('Required parameter itemId was null or undefined when calling removeSavedItem.');
@@ -254,7 +254,7 @@ export class ActionsService extends BaseService implements ActionsServiceInterfa
             }
         }
 
-        const localVarPath = `/api/v1/actions/saved-items/${this.configuration.encodeParam({name: "itemId", value: itemId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        let localVarPath = `/api/v1/actions/saved-items/${this.configuration.encodeParam({name: "itemId", value: itemId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<any>('delete', `${basePath}${localVarPath}`,
             {

@@ -125,6 +125,59 @@ public final class BuiltInTemplates {
             ))
             .build();
 
+    public static final TemplateDescriptor KB_GOOGLE_DRIVE_INGEST = TemplateDescriptor.builder()
+            .templateId("kb-google-drive-ingest")
+            .displayName("Knowledge Base — Google Drive Ingestion")
+            .description("Ingest documents from Google Drive into the Knowledge Base for RAG")
+            .icon("google-drive")
+            .category("KnowledgeBase")
+            .connectorType("GOOGLE_DRIVE")
+            .builtIn(true)
+            .requiresCredential(true)
+            .parameters(List.of(
+                    ParameterDefinition.builder()
+                            .name("folderId").displayName("Google Drive Folder ID").type("string")
+                            .required(true).placeholder("1A2B3C4D5E...").build(),
+                    ParameterDefinition.builder()
+                            .name("categoryId").displayName("Knowledge Category ID").type("string")
+                            .required(false).placeholder("Optional category for ingested docs").build(),
+                    ParameterDefinition.builder()
+                            .name("tags").displayName("Tags (comma-separated)").type("string")
+                            .required(false).placeholder("hr,policy,onboarding").build(),
+                    ParameterDefinition.builder()
+                            .name("pollIntervalMs").displayName("Poll Interval (ms)").type("number")
+                            .required(false).defaultValue("600000").build()
+            ))
+            .build();
+
+    public static final TemplateDescriptor KB_ONEDRIVE_INGEST = TemplateDescriptor.builder()
+            .templateId("kb-onedrive-ingest")
+            .displayName("Knowledge Base — OneDrive Ingestion")
+            .description("Ingest documents from OneDrive into the Knowledge Base for RAG")
+            .icon("onedrive")
+            .category("KnowledgeBase")
+            .connectorType("ONEDRIVE")
+            .builtIn(true)
+            .requiresCredential(true)
+            .parameters(List.of(
+                    ParameterDefinition.builder()
+                            .name("driveId").displayName("OneDrive Drive ID").type("string")
+                            .required(true).placeholder("drive-id-xxx").build(),
+                    ParameterDefinition.builder()
+                            .name("folderPath").displayName("Folder Path").type("string")
+                            .required(false).defaultValue("/").placeholder("/Documents/KB").build(),
+                    ParameterDefinition.builder()
+                            .name("categoryId").displayName("Knowledge Category ID").type("string")
+                            .required(false).placeholder("Optional category for ingested docs").build(),
+                    ParameterDefinition.builder()
+                            .name("tags").displayName("Tags (comma-separated)").type("string")
+                            .required(false).placeholder("engineering,specs").build(),
+                    ParameterDefinition.builder()
+                            .name("pollIntervalMs").displayName("Poll Interval (ms)").type("number")
+                            .required(false).defaultValue("600000").build()
+            ))
+            .build();
+
     /**
      * All built-in templates.
      */
@@ -134,7 +187,9 @@ public final class BuiltInTemplates {
                 WEBHOOK_RECEIVER,
                 SLACK_NOTIFY,
                 EMAIL_NOTIFY,
-                DATABASE_QUERY
+                DATABASE_QUERY,
+                KB_GOOGLE_DRIVE_INGEST,
+                KB_ONEDRIVE_INGEST
         );
     }
 }

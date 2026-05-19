@@ -43,6 +43,11 @@ async def main():
     from seed_schema_registry import seed_schema_registry
     await seed_schema_registry()
 
+    # 4. Knowledge Base documents (uploads via API → triggers ingestion pipeline)
+    logger.info("\n📚 Phase 4: Knowledge Base documents...")
+    from seed_knowledge_base import seed as seed_kb
+    await seed_kb()
+
     logger.info("\n" + "=" * 60)
     logger.info("🎉 All seeds complete!")
     logger.info("=" * 60)

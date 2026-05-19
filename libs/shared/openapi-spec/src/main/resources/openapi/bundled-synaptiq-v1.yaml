@@ -52,6 +52,8 @@ tags:
     description: Role management — RBAC roles and scopes
   - name: Integrations
     description: Integration Engine — dynamic connectors, templates, route lifecycle
+  - name: KnowledgeBase
+    description: RAG & Knowledge Base — categorize, ingest, and search documents
 paths:
   /api/v1/health:
     get:
@@ -2448,35 +2450,6 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
-  /api/v1/integrations/{routeConfigId}/deactivate:
-    post:
-      operationId: deactivateIntegration
-      summary: Deactivate an integration route
-      description: Stops and removes the integration route from the Camel engine
-      tags:
-        - Integrations
-      parameters:
-        - $ref: '#/components/parameters/TenantIdHeader'
-        - name: routeConfigId
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Integration deactivated
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/IntegrationResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
   /api/v1/integrations/{routeConfigId}/test:
     post:
       operationId: testIntegrationConnection
@@ -2506,6 +2479,166 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /api/v1/kb/categories:
+    post:
+      operationId: createKnowledgeCategory
+      summary: Create a new knowledge category
+      tags:
+        - KnowledgeBase
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCategoryRequest'
+      responses:
+        '200':
+          description: Category created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeCategoryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/v1/kb/documents:
+    post:
+      operationId: uploadKnowledgeDocument
+      summary: Upload a new knowledge document
+      tags:
+        - KnowledgeBase
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: tags
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                categoryId:
+                  type: string
+      responses:
+        '200':
+          description: Document uploaded and ingestion started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeDocumentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    get:
+      operationId: listKnowledgeDocuments
+      summary: List all knowledge documents
+      tags:
+        - KnowledgeBase
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: categoryId
+          in: query
+          schema:
+            type: string
+        - name: tags
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: List of documents
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentListResponse'
+  /api/v1/kb/documents/{docId}:
+    get:
+      operationId: getKnowledgeDocument
+      summary: Get knowledge document details
+      tags:
+        - KnowledgeBase
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: docId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Document details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeDocumentResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      operationId: deleteKnowledgeDocument
+      summary: Delete a knowledge document
+      tags:
+        - KnowledgeBase
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+        - name: docId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Document deleted
+  /api/v1/kb/search:
+    post:
+      operationId: searchKnowledgeBase
+      summary: Perform a similarity search on the knowledge base
+      tags:
+        - KnowledgeBase
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KnowledgeSearchRequest'
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeSearchResponse'
+  /api/v1/kb/status:
+    get:
+      operationId: getKnowledgeBaseStatus
+      summary: Get knowledge base status and stats
+      tags:
+        - KnowledgeBase
+      parameters:
+        - $ref: '#/components/parameters/TenantIdHeader'
+      responses:
+        '200':
+          description: Status info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseStatusResponse'
 components:
   securitySchemes:
     BearerAuth:
@@ -3093,6 +3226,11 @@ components:
           type: string
           maxLength: 100
           description: Optional model override (e.g. gemini-2.5-flash)
+        knowledgeBaseIds:
+          type: array
+          items:
+            type: string
+          description: Optional list of Knowledge Base category IDs to scope RAG context
     CreateSessionRequest:
       type: object
       properties:
@@ -4179,6 +4317,130 @@ components:
         action:
           type: string
           description: Action within the resource, e.g. create
+    KnowledgeCategoryResponse:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the category
+        name:
+          type: string
+          description: Name of the category (e.g. HR, Engineering)
+        description:
+          type: string
+          description: Optional description of the category
+    CreateCategoryRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Name of the category
+        description:
+          type: string
+          description: Optional description of the category
+    KnowledgeDocumentResponse:
+      type: object
+      required:
+        - id
+        - fileName
+        - status
+        - sourceType
+      properties:
+        id:
+          type: string
+        fileName:
+          type: string
+        categoryId:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum:
+            - PENDING
+            - PROCESSING
+            - READY
+            - FAILED
+        sourceType:
+          type: string
+          enum:
+            - FILE_UPLOAD
+            - GOOGLE_DRIVE
+            - ONEDRIVE
+        sizeBytes:
+          type: integer
+          format: int64
+        createdAt:
+          type: string
+          format: date-time
+    DocumentListResponse:
+      type: object
+      properties:
+        documents:
+          type: array
+          items:
+            $ref: '#/components/schemas/KnowledgeDocumentResponse'
+    KnowledgeSearchRequest:
+      type: object
+      required:
+        - query
+      properties:
+        query:
+          type: string
+          description: The search query string
+        categoryId:
+          type: string
+          description: Optional category to narrow down search
+        tags:
+          type: array
+          items:
+            type: string
+          description: Optional tags to filter by
+        topK:
+          type: integer
+          default: 5
+    KnowledgeSearchResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DocumentChunkResponse'
+    DocumentChunkResponse:
+      type: object
+      required:
+        - documentId
+        - content
+        - similarityScore
+      properties:
+        documentId:
+          type: string
+        content:
+          type: string
+        similarityScore:
+          type: number
+          format: double
+    KnowledgeBaseStatusResponse:
+      type: object
+      properties:
+        totalDocuments:
+          type: integer
+        totalCategories:
+          type: integer
+        totalStorageBytes:
+          type: integer
+          format: int64
+        categories:
+          type: array
+          items:
+            $ref: '#/components/schemas/KnowledgeCategoryResponse'
     ItemSnapshotResponse:
       type: object
       description: Snapshot of a saved item at the time it was bookmarked

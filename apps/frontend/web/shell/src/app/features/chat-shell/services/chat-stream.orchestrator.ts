@@ -43,6 +43,7 @@ export class ChatStreamOrchestrator {
     sessionId: string,
     typingId: string | undefined,
     callbacks: StreamCallbacks,
+    knowledgeBaseIds?: string[],
   ): Promise<void> {
     const assistantMsgId = crypto.randomUUID();
     let typingCleared = false;
@@ -67,7 +68,11 @@ export class ChatStreamOrchestrator {
     };
 
     await this.chatService.streamMessage(
-      { sessionId: sessionId, message: msg },
+      {
+        sessionId: sessionId,
+        message: msg,
+        ...(knowledgeBaseIds?.length ? { knowledgeBaseIds } : {}),
+      },
       {
         onToken: (token) => {
           ensureAssistantMessage();

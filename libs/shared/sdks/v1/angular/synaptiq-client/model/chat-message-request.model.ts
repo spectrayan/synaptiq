@@ -22,5 +22,9 @@ export interface ChatMessageRequest {
      * Optional model override (e.g. gemini-2.5-flash)
      */
     modelOverride?: string;
+    /**
+     * Optional list of Knowledge Base category IDs to scope RAG context
+     */
+    knowledgeBaseIds?: Array<string>;
 }
 

@@ -4,6 +4,9 @@ import java.net.URI;
 import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.springframework.lang.Nullable;
 import java.time.OffsetDateTime;
 import jakarta.validation.Valid;
@@ -18,7 +21,7 @@ import jakarta.annotation.Generated;
  * ChatMessageRequest
  */
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-10T17:15:52.297398600-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-05-18T21:07:32.055501800-05:00[America/Chicago]", comments = "Generator version: 7.21.0")
 public class ChatMessageRequest {
 
   private String sessionId;
@@ -26,6 +29,9 @@ public class ChatMessageRequest {
   private String message;
 
   private @Nullable String modelOverride;
+
+  @Valid
+  private List<String> knowledgeBaseIds = new ArrayList<>();
 
   public ChatMessageRequest() {
     super();
@@ -102,6 +108,35 @@ public class ChatMessageRequest {
     this.modelOverride = modelOverride;
   }
 
+  public ChatMessageRequest knowledgeBaseIds(List<String> knowledgeBaseIds) {
+    this.knowledgeBaseIds = knowledgeBaseIds;
+    return this;
+  }
+
+  public ChatMessageRequest addKnowledgeBaseIdsItem(String knowledgeBaseIdsItem) {
+    if (this.knowledgeBaseIds == null) {
+      this.knowledgeBaseIds = new ArrayList<>();
+    }
+    this.knowledgeBaseIds.add(knowledgeBaseIdsItem);
+    return this;
+  }
+
+  /**
+   * Optional list of Knowledge Base category IDs to scope RAG context
+   * @return knowledgeBaseIds
+   */
+  
+  @Schema(name = "knowledgeBaseIds", description = "Optional list of Knowledge Base category IDs to scope RAG context", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+  @JsonProperty("knowledgeBaseIds")
+  public List<String> getKnowledgeBaseIds() {
+    return knowledgeBaseIds;
+  }
+
+  @JsonProperty("knowledgeBaseIds")
+  public void setKnowledgeBaseIds(List<String> knowledgeBaseIds) {
+    this.knowledgeBaseIds = knowledgeBaseIds;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -113,12 +148,13 @@ public class ChatMessageRequest {
     ChatMessageRequest chatMessageRequest = (ChatMessageRequest) o;
     return Objects.equals(this.sessionId, chatMessageRequest.sessionId) &&
         Objects.equals(this.message, chatMessageRequest.message) &&
-        Objects.equals(this.modelOverride, chatMessageRequest.modelOverride);
+        Objects.equals(this.modelOverride, chatMessageRequest.modelOverride) &&
+        Objects.equals(this.knowledgeBaseIds, chatMessageRequest.knowledgeBaseIds);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(sessionId, message, modelOverride);
+    return Objects.hash(sessionId, message, modelOverride, knowledgeBaseIds);
   }
 
   @Override
@@ -128,6 +164,7 @@ public class ChatMessageRequest {
     sb.append("    sessionId: ").append(toIndentedString(sessionId)).append("\n");
     sb.append("    message: ").append(toIndentedString(message)).append("\n");
     sb.append("    modelOverride: ").append(toIndentedString(modelOverride)).append("\n");
+    sb.append("    knowledgeBaseIds: ").append(toIndentedString(knowledgeBaseIds)).append("\n");
     sb.append("}");
     return sb.toString();
   }

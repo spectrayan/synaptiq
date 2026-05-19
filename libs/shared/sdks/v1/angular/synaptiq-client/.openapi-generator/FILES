@@ -23,6 +23,8 @@ api/health.service.ts
 api/health.serviceInterface.ts
 api/integrations.service.ts
 api/integrations.serviceInterface.ts
+api/knowledge-base.service.ts
+api/knowledge-base.serviceInterface.ts
 api/notifications.service.ts
 api/notifications.serviceInterface.ts
 api/roles.service.ts
@@ -66,6 +68,7 @@ model/contrast-check-response.model.ts
 model/conversation-role.model.ts
 model/conversation-turn-response.model.ts
 model/create-application-request.model.ts
+model/create-category-request.model.ts
 model/create-data-source-request.model.ts
 model/create-integration-request.model.ts
 model/create-role-request.model.ts
@@ -78,6 +81,8 @@ model/data-source-schema-response-fields-inner.model.ts
 model/data-source-schema-response.model.ts
 model/data-source-status.model.ts
 model/data-source-type.model.ts
+model/document-chunk-response.model.ts
+model/document-list-response.model.ts
 model/edge-spec.model.ts
 model/execute-action-request.model.ts
 model/execute-workflow-request.model.ts
@@ -89,6 +94,11 @@ model/health-response.model.ts
 model/integration-response.model.ts
 model/invite-admin-request.model.ts
 model/item-snapshot-response.model.ts
+model/knowledge-base-status-response.model.ts
+model/knowledge-category-response.model.ts
+model/knowledge-document-response.model.ts
+model/knowledge-search-request.model.ts
+model/knowledge-search-response.model.ts
 model/list-applications200-response.model.ts
 model/list-data-sources200-response.model.ts
 model/list-integration-templates200-response.model.ts

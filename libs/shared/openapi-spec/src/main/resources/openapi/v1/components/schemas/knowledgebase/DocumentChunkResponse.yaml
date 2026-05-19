@@ -1,0 +1,13 @@
+type: object
+required:
+  - documentId
+  - content
+  - similarityScore
+properties:
+  documentId:
+    type: string
+  content:
+    type: string
+  similarityScore:
+    type: number
+    format: double

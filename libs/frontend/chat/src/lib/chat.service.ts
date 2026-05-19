@@ -95,6 +95,8 @@ export interface ChatRequest {
   readonly message: string;
   readonly modelOverride?: string;
   readonly background?: boolean;
+  /** Optional KB category IDs for RAG-scoped search. */
+  readonly knowledgeBaseIds?: string[];
 }
 
 // ---------------------------------------------------------------------------
@@ -161,6 +163,7 @@ export class ChatService {
           message: request.message,
           ...(request.modelOverride ? { modelOverride: request.modelOverride } : {}),
           ...(request.background ? { background: true } : {}),
+          ...(request.knowledgeBaseIds?.length ? { knowledgeBaseIds: request.knowledgeBaseIds } : {}),
         }),
         signal: controller.signal,
       });

@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SessionListItem, type WorkflowSpec } from '@synaptiq/chat';
 import { type ViewSpec } from '@synaptiq/constants';
+import { type KnowledgeCategoryResponse, type KnowledgeDocumentResponse } from '@synaptiq/client';
 
 @Component({
   selector: 'sq-chat-sidebar',
@@ -15,7 +16,7 @@ import { type ViewSpec } from '@synaptiq/constants';
 })
 export class ChatSidebarComponent {
   // ── Inputs ───────────────────────────────────────────────────────────
-  readonly sidebarTab = model<'recent' | 'pinned' | 'workflows'>('recent');
+  readonly sidebarTab = model<'recent' | 'pinned' | 'workflows' | 'knowledge'>('recent');
   readonly sessionHistory = input<SessionListItem[]>([]);
   readonly activeSessionId = input('');
   readonly pinnedViews = input<ViewSpec[]>([]);
@@ -25,6 +26,13 @@ export class ChatSidebarComponent {
   readonly currentWorkflowId = input<string | null>(null);
   readonly isAuthenticated = input(false);
   readonly userEmail = input<string | null>(null);
+
+  // ── Knowledge Base Inputs ───────────────────────────────────────────
+  readonly knowledgeCategories = input<KnowledgeCategoryResponse[]>([]);
+  readonly knowledgeDocuments = input<KnowledgeDocumentResponse[]>([]);
+  readonly activeKnowledgeCategory = input<string | null>(null);
+  readonly selectedKbIds = input<string[]>([]);
+  readonly kbLoading = input(false);
 
   // ── Outputs ──────────────────────────────────────────────────────────
   readonly toggleSidebar = output<void>();
@@ -37,4 +45,11 @@ export class ChatSidebarComponent {
   readonly loadWorkflowTemplate = output<WorkflowSpec>();
   readonly openAuth = output<'signin' | 'signup'>();
   readonly signOut = output<void>();
+
+  // ── Knowledge Base Outputs ──────────────────────────────────────────
+  readonly selectKnowledgeCategory = output<string>();
+  readonly createCategory = output<{ name: string; description?: string }>();
+  readonly uploadDocument = output<{ categoryId: string; files: FileList }>();
+  readonly deleteDocument = output<string>();
+  readonly toggleKbAttachment = output<string>();
 }

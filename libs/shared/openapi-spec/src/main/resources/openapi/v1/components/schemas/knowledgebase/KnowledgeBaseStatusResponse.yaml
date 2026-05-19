@@ -1,0 +1,13 @@
+type: object
+properties:
+  totalDocuments:
+    type: integer
+  totalCategories:
+    type: integer
+  totalStorageBytes:
+    type: integer
+    format: int64
+  categories:
+    type: array
+    items:
+      $ref: '../knowledgebase/KnowledgeCategoryResponse.yaml'

@@ -1,0 +1,13 @@
+get:
+  operationId: getKnowledgeBaseStatus
+  summary: Get knowledge base status and stats
+  tags: [KnowledgeBase]
+  parameters:
+    - $ref: '../../components/parameters/TenantIdHeader.yaml'
+  responses:
+    '200':
+      description: Status info
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/knowledgebase/KnowledgeBaseStatusResponse.yaml'

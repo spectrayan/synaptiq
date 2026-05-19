@@ -68,7 +68,7 @@ export class ChatService extends BaseService implements ChatServiceInterface {
     public createSession(requestParameters: CreateSessionRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<SessionResponse>;
     public createSession(requestParameters: CreateSessionRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<SessionResponse>>;
     public createSession(requestParameters: CreateSessionRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<SessionResponse>>;
-    public createSession(requestParameters: CreateSessionRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public createSession(requestParameters: CreateSessionRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const createSessionRequest = requestParameters?.createSessionRequest;
         if (createSessionRequest === null || createSessionRequest === undefined) {
             throw new Error('Required parameter createSessionRequest was null or undefined when calling createSession.');
@@ -113,7 +113,7 @@ export class ChatService extends BaseService implements ChatServiceInterface {
             }
         }
 
-        const localVarPath = `/api/v1/chat/sessions`;
+        let localVarPath = `/api/v1/chat/sessions`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<SessionResponse>('post', `${basePath}${localVarPath}`,
             {
@@ -140,7 +140,7 @@ export class ChatService extends BaseService implements ChatServiceInterface {
     public deleteSession(requestParameters: DeleteSessionRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
     public deleteSession(requestParameters: DeleteSessionRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
     public deleteSession(requestParameters: DeleteSessionRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public deleteSession(requestParameters: DeleteSessionRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public deleteSession(requestParameters: DeleteSessionRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const sessionId = requestParameters?.sessionId;
         if (sessionId === null || sessionId === undefined) {
             throw new Error('Required parameter sessionId was null or undefined when calling deleteSession.');
@@ -175,7 +175,7 @@ export class ChatService extends BaseService implements ChatServiceInterface {
             }
         }
 
-        const localVarPath = `/api/v1/chat/sessions/${this.configuration.encodeParam({name: "sessionId", value: sessionId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        let localVarPath = `/api/v1/chat/sessions/${this.configuration.encodeParam({name: "sessionId", value: sessionId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<any>('delete', `${basePath}${localVarPath}`,
             {
@@ -201,7 +201,7 @@ export class ChatService extends BaseService implements ChatServiceInterface {
     public getSessionHistory(requestParameters: GetSessionHistoryRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<SessionHistoryResponse>;
     public getSessionHistory(requestParameters: GetSessionHistoryRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<SessionHistoryResponse>>;
     public getSessionHistory(requestParameters: GetSessionHistoryRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<SessionHistoryResponse>>;
-    public getSessionHistory(requestParameters: GetSessionHistoryRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getSessionHistory(requestParameters: GetSessionHistoryRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const sessionId = requestParameters?.sessionId;
         if (sessionId === null || sessionId === undefined) {
             throw new Error('Required parameter sessionId was null or undefined when calling getSessionHistory.');
@@ -237,7 +237,7 @@ export class ChatService extends BaseService implements ChatServiceInterface {
             }
         }
 
-        const localVarPath = `/api/v1/chat/sessions/${this.configuration.encodeParam({name: "sessionId", value: sessionId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/history`;
+        let localVarPath = `/api/v1/chat/sessions/${this.configuration.encodeParam({name: "sessionId", value: sessionId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/history`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<SessionHistoryResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -263,7 +263,7 @@ export class ChatService extends BaseService implements ChatServiceInterface {
     public listSessions(requestParameters?: ListSessionsRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<SessionListResponse>;
     public listSessions(requestParameters?: ListSessionsRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<SessionListResponse>>;
     public listSessions(requestParameters?: ListSessionsRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<SessionListResponse>>;
-    public listSessions(requestParameters?: ListSessionsRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public listSessions(requestParameters?: ListSessionsRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const xTenantID = requestParameters?.xTenantID;
         const limit = requestParameters?.limit;
         const offset = requestParameters?.offset;
@@ -317,7 +317,7 @@ export class ChatService extends BaseService implements ChatServiceInterface {
             }
         }
 
-        const localVarPath = `/api/v1/chat/sessions`;
+        let localVarPath = `/api/v1/chat/sessions`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<SessionListResponse>('get', `${basePath}${localVarPath}`,
             {
@@ -344,7 +344,7 @@ export class ChatService extends BaseService implements ChatServiceInterface {
     public postChatMessage(requestParameters: PostChatMessageRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/event-stream' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<string>;
     public postChatMessage(requestParameters: PostChatMessageRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/event-stream' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<string>>;
     public postChatMessage(requestParameters: PostChatMessageRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'text/event-stream' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<string>>;
-    public postChatMessage(requestParameters: PostChatMessageRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'text/event-stream' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public postChatMessage(requestParameters: PostChatMessageRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'text/event-stream' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const chatMessageRequest = requestParameters?.chatMessageRequest;
         if (chatMessageRequest === null || chatMessageRequest === undefined) {
             throw new Error('Required parameter chatMessageRequest was null or undefined when calling postChatMessage.');
@@ -389,7 +389,7 @@ export class ChatService extends BaseService implements ChatServiceInterface {
             }
         }
 
-        const localVarPath = `/api/v1/chat/message`;
+        let localVarPath = `/api/v1/chat/message`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<string>('post', `${basePath}${localVarPath}`,
             {
@@ -416,7 +416,7 @@ export class ChatService extends BaseService implements ChatServiceInterface {
     public resetSession(requestParameters: ResetSessionRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any>;
     public resetSession(requestParameters: ResetSessionRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<any>>;
     public resetSession(requestParameters: ResetSessionRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<any>>;
-    public resetSession(requestParameters: ResetSessionRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public resetSession(requestParameters: ResetSessionRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const sessionId = requestParameters?.sessionId;
         if (sessionId === null || sessionId === undefined) {
             throw new Error('Required parameter sessionId was null or undefined when calling resetSession.');
@@ -451,7 +451,7 @@ export class ChatService extends BaseService implements ChatServiceInterface {
             }
         }
 
-        const localVarPath = `/api/v1/chat/sessions/${this.configuration.encodeParam({name: "sessionId", value: sessionId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/reset`;
+        let localVarPath = `/api/v1/chat/sessions/${this.configuration.encodeParam({name: "sessionId", value: sessionId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}/reset`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<any>('post', `${basePath}${localVarPath}`,
             {
@@ -477,7 +477,7 @@ export class ChatService extends BaseService implements ChatServiceInterface {
     public updateSession(requestParameters: UpdateSessionRequestParams, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<SessionResponse>;
     public updateSession(requestParameters: UpdateSessionRequestParams, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<SessionResponse>>;
     public updateSession(requestParameters: UpdateSessionRequestParams, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<SessionResponse>>;
-    public updateSession(requestParameters: UpdateSessionRequestParams, observe: any = 'body', reportProgress = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public updateSession(requestParameters: UpdateSessionRequestParams, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json' | 'application/problem+json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         const sessionId = requestParameters?.sessionId;
         if (sessionId === null || sessionId === undefined) {
             throw new Error('Required parameter sessionId was null or undefined when calling updateSession.');
@@ -526,7 +526,7 @@ export class ChatService extends BaseService implements ChatServiceInterface {
             }
         }
 
-        const localVarPath = `/api/v1/chat/sessions/${this.configuration.encodeParam({name: "sessionId", value: sessionId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
+        let localVarPath = `/api/v1/chat/sessions/${this.configuration.encodeParam({name: "sessionId", value: sessionId, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: undefined})}`;
         const { basePath, withCredentials } = this.configuration;
         return this.httpClient.request<SessionResponse>('patch', `${basePath}${localVarPath}`,
             {

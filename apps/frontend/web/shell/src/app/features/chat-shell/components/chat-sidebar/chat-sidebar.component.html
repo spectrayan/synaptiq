@@ -14,7 +14,7 @@
     New conversation
   </button>
 
-  <!-- Sidebar Tabs: Recent / Pinned / Workflows -->
+  <!-- Sidebar Tabs: Recent / Pinned / Workflows / Knowledge -->
   <div class="sidebar-tabs">
     <button class="sidebar-tab" [class.active]="sidebarTab() === 'recent'" (click)="sidebarTab.set('recent')">
       <mat-icon>chat_bubble_outline</mat-icon> Recent
@@ -29,6 +29,12 @@
       <mat-icon>account_tree</mat-icon> Flows
       @if (savedWorkflows().length) {
         <span class="sidebar-tab-badge">{{ savedWorkflows().length }}</span>
+      }
+    </button>
+    <button class="sidebar-tab" [class.active]="sidebarTab() === 'knowledge'" (click)="sidebarTab.set('knowledge')">
+      <mat-icon>menu_book</mat-icon> KB
+      @if (knowledgeCategories().length) {
+        <span class="sidebar-tab-badge">{{ knowledgeCategories().length }}</span>
       }
     </button>
   </div>
@@ -91,7 +97,7 @@
         </div>
       }
     </div>
-  } @else {
+  } @else if (sidebarTab() === 'workflows') {
     <!-- Saved Workflows List -->
     <div class="history-list">
       <div class="sidebar-section-title" style="padding: 12px 16px 4px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.7; font-weight: 600;">My Workflows</div>
@@ -131,6 +137,113 @@
         <div class="history-empty">
           <mat-icon>public</mat-icon>
           <span>No templates available</span>
+        </div>
+      }
+    </div>
+  } @else {
+    <!-- Knowledge Base Panel -->
+    <div class="history-list">
+      <!-- Create Category Form -->
+      <div class="kb-create-form">
+        <input
+          class="kb-create-input"
+          placeholder="New knowledge base…"
+          #catNameInput
+          (keydown.enter)="createCategory.emit({ name: catNameInput.value }); catNameInput.value = ''"
+        />
+        <button
+          mat-icon-button
+          matTooltip="Create knowledge base"
+          [disabled]="!catNameInput.value.trim()"
+          (click)="createCategory.emit({ name: catNameInput.value }); catNameInput.value = ''"
+        >
+          <mat-icon>add_circle</mat-icon>
+        </button>
+      </div>
+
+      @if (kbLoading()) {
+        <div class="history-empty">
+          <mat-icon class="spin">sync</mat-icon>
+          <span>Loading…</span>
+        </div>
+      }
+
+      <!-- Category List -->
+      @for (cat of knowledgeCategories(); track cat.id) {
+        <div class="kb-category-item">
+          <div
+            class="kb-category-header"
+            [class.active]="activeKnowledgeCategory() === cat.id"
+            [class.attached]="selectedKbIds().includes(cat.id)"
+            (click)="selectKnowledgeCategory.emit(cat.id)"
+          >
+            <mat-icon class="kb-cat-icon">{{ selectedKbIds().includes(cat.id) ? 'menu_book' : 'folder' }}</mat-icon>
+            <span class="kb-cat-name">{{ cat.name }}</span>
+
+            <!-- Attach/Detach toggle -->
+            <button
+              mat-icon-button
+              class="kb-action-btn"
+              [matTooltip]="selectedKbIds().includes(cat.id) ? 'Detach from chat' : 'Attach to chat'"
+              (click)="$event.stopPropagation(); toggleKbAttachment.emit(cat.id)"
+            >
+              <mat-icon>{{ selectedKbIds().includes(cat.id) ? 'link_off' : 'link' }}</mat-icon>
+            </button>
+
+            <!-- Upload trigger -->
+            <button
+              mat-icon-button
+              class="kb-action-btn"
+              matTooltip="Upload document"
+              (click)="$event.stopPropagation(); fileInput.click()"
+            >
+              <mat-icon>upload_file</mat-icon>
+            </button>
+            <input
+              hidden
+              type="file"
+              #fileInput
+              multiple
+              accept=".pdf,.txt,.md,.docx,.doc,.csv,.json"
+              (change)="uploadDocument.emit({ categoryId: cat.id, files: $any($event.target).files }); fileInput.value = ''"
+            />
+          </div>
+
+          <!-- Documents list (expanded when category is active) -->
+          @if (activeKnowledgeCategory() === cat.id) {
+            <div class="kb-doc-list">
+              @for (doc of knowledgeDocuments(); track doc.id) {
+                <div class="kb-doc-item">
+                  <mat-icon class="kb-doc-icon">description</mat-icon>
+                  <span class="kb-doc-name" [matTooltip]="doc.fileName">{{ doc.fileName }}</span>
+                  <span class="kb-doc-status" [class]="'status-' + doc.status.toLowerCase()">
+                    {{ doc.status }}
+                  </span>
+                  <button
+                    mat-icon-button
+                    class="kb-doc-delete"
+                    matTooltip="Delete document"
+                    (click)="$event.stopPropagation(); deleteDocument.emit(doc.id)"
+                  >
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+              }
+              @if (!knowledgeDocuments().length) {
+                <div class="kb-doc-empty">
+                  <span>No documents yet — upload one above</span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      @if (!knowledgeCategories().length && !kbLoading()) {
+        <div class="history-empty">
+          <mat-icon>menu_book</mat-icon>
+          <span>No knowledge bases yet</span>
+          <span style="font-size: 11px; opacity: 0.6;">Create one above to get started</span>
         </div>
       }
     </div>
