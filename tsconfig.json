@@ -4,10 +4,22 @@
   "files": [],
   "references": [
     {
+      "path": "./apps/frontend/web/synaptiq"
+    },
+    {
       "path": "./apps/frontend/web/shell-e2e"
     },
     {
-      "path": "./libs/shared/types"
+      "path": "./libs/frontend/auth"
+    },
+    {
+      "path": "./libs/frontend/chat"
+    },
+    {
+      "path": "./libs/frontend/dsl-renderer"
+    },
+    {
+      "path": "./libs/frontend/theme"
     },
     {
       "path": "./libs/shared/utils"

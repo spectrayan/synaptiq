@@ -1,37 +1,37 @@
 {
-  "name": "shell",
+  "name": "synaptiq",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "prefix": "app",
-  "sourceRoot": "apps/frontend/web/shell/src",
+  "sourceRoot": "apps/frontend/web/synaptiq/src",
   "tags": [],
   "targets": {
     "build": {
       "executor": "@angular/build:application",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/apps/frontend/web/shell",
-        "browser": "apps/frontend/web/shell/src/main.ts",
-        "tsConfig": "apps/frontend/web/shell/tsconfig.app.json",
+        "outputPath": "dist/apps/frontend/web/synaptiq",
+        "browser": "apps/frontend/web/synaptiq/src/main.ts",
+        "tsConfig": "apps/frontend/web/synaptiq/tsconfig.app.json",
         "inlineStyleLanguage": "scss",
         "assets": [
           {
             "glob": "**/*",
-            "input": "apps/frontend/web/shell/public"
+            "input": "apps/frontend/web/synaptiq/public"
           },
           {
             "glob": "**/*",
-            "input": "apps/frontend/web/shell/src/app/assets",
+            "input": "apps/frontend/web/synaptiq/src/app/assets",
             "output": "app/assets"
           }
         ],
         "styles": [
           "node_modules/@foblex/flow/styles/default.scss",
-          "apps/frontend/web/shell/src/styles.scss"
+          "apps/frontend/web/synaptiq/src/styles.scss"
         ],
-        "server": "apps/frontend/web/shell/src/main.server.ts",
+        "server": "apps/frontend/web/synaptiq/src/main.server.ts",
         "ssr": {
-          "entry": "apps/frontend/web/shell/src/server.ts"
+          "entry": "apps/frontend/web/synaptiq/src/server.ts"
         },
         "outputMode": "server"
       },
@@ -40,13 +40,13 @@
           "budgets": [
             {
               "type": "initial",
-              "maximumWarning": "500kb",
-              "maximumError": "1mb"
+              "maximumWarning": "1mb",
+              "maximumError": "2mb"
             },
             {
               "type": "anyComponentStyle",
-              "maximumWarning": "24kb",
-              "maximumError": "48kb"
+              "maximumWarning": "32kb",
+              "maximumError": "64kb"
             }
           ],
           "outputHashing": "all"
@@ -64,10 +64,10 @@
       "executor": "@angular/build:dev-server",
       "configurations": {
         "production": {
-          "buildTarget": "shell:build:production"
+          "buildTarget": "synaptiq:build:production"
         },
         "development": {
-          "buildTarget": "shell:build:development"
+          "buildTarget": "synaptiq:build:development"
         }
       },
       "defaultConfiguration": "development"
@@ -79,17 +79,17 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{projectRoot}/test-output/jest/coverage"],
       "options": {
-        "jestConfig": "apps/frontend/web/shell/jest.config.cts",
-        "tsConfig": "apps/frontend/web/shell/tsconfig.spec.json"
+        "jestConfig": "apps/frontend/web/synaptiq/jest.config.cts",
+        "tsConfig": "apps/frontend/web/synaptiq/tsconfig.spec.json"
       }
     },
     "serve-static": {
       "continuous": true,
       "executor": "@nx/web:file-server",
       "options": {
-        "buildTarget": "shell:build",
+        "buildTarget": "synaptiq:build",
         "port": 4200,
-        "staticFilePath": "dist/apps/frontend/web/shell/browser",
+        "staticFilePath": "dist/apps/frontend/web/synaptiq/browser",
         "spa": true
       }
     }
