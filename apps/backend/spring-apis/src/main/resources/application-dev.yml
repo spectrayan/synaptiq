@@ -1,22 +1,32 @@
 # ═══════════════════════════════════════════════════════════════════
 # Dev profile — local development overrides
 # Activated via: mvn spring-boot:run -Dspring-boot.run.profiles=dev
+#
+# LLM: Uses Google GenAI (Gemini) by default. Set GOOGLE_API_KEY env var.
+#       For Ollama, use the 'dev-ollama' profile instead.
 # ═══════════════════════════════════════════════════════════════════
 
 spring:
   autoconfigure:
     exclude:
-      - org.springframework.ai.model.google.genai.autoconfigure.chat.GoogleGenAiChatAutoConfiguration
-      - org.springframework.ai.model.google.genai.autoconfigure.embedding.GoogleGenAiEmbeddingAutoConfiguration
+      # Only exclude Ollama chat — Gemini is used for chat.
+      # Ollama embedding stays active to provide EmbeddingModel for MongoDB VectorStore.
+      - org.springframework.ai.model.ollama.autoconfigure.OllamaChatAutoConfiguration
   ai:
+    google:
+      genai:
+        api-key: ${GOOGLE_API_KEY:}
+        chat:
+          options:
+            model: ${GEMINI_CHAT_MODEL:gemini-2.5-flash}
+            temperature: 0.7
+    # Ollama provides EmbeddingModel for MongoDB VectorStore.
+    # The bean is created eagerly; calls fail gracefully if Ollama isn't running.
     ollama:
       base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
       embedding:
         options:
-          model: ${OLLAMA_EMBEDDING_MODEL:qwen3-embedding}
-      chat:
-        options:
-          model: ${OLLAMA_CHAT_MODEL:llama3.2}
+          model: ${OLLAMA_EMBEDDING_MODEL:nomic-embed-text}
     vectorstore:
       mongodb:
         initialize-schema: false

@@ -39,19 +39,8 @@ public class ChatMessageService implements ChatMessageUseCase {
     public Flux<String> streamMessage(String tenantId, String sessionId, String message,
                                        String modelOverride, List<String> knowledgeBaseIds) {
 
-        // Build filter expression with tenant isolation + optional KB category scoping
-        String filterExpression = buildFilterExpression(tenantId, knowledgeBaseIds);
-
-        SearchRequest searchRequest = SearchRequest.builder()
-                .filterExpression(filterExpression)
-                .topK(5)
-                .build();
-                
-        // Manual LLM Grounding (equivalent to RetrievalAugmentationAdvisor which is missing in this version)
-        String context = vectorStore.similaritySearch(searchRequest)
-                .stream()
-                .map(doc -> doc.getText())
-                .collect(java.util.stream.Collectors.joining("\n\n---\n\n"));
+        // RAG context — skip when VectorStore is not available (e.g. local dev without Atlas)
+        final String ragContext = retrieveRagContext(tenantId, knowledgeBaseIds);
                 
         String systemPrompt = """
                 You are a helpful assistant. Use the following contextual information to answer the user's questions.
@@ -62,7 +51,7 @@ public class ChatMessageService implements ChatMessageUseCase {
                 """;
 
         return chatClient.prompt()
-                .system(sys -> sys.text(systemPrompt).param("context", context))
+                .system(sys -> sys.text(systemPrompt).param("context", ragContext))
                 .user(message)
                 .tools(rbacAdminTools)
                 .stream()
@@ -88,6 +77,27 @@ public class ChatMessageService implements ChatMessageUseCase {
                     return "";
                 })
                 .filter(content -> !content.isEmpty());
+    }
+
+    /**
+     * Retrieve RAG context from vector store. Returns empty string if VectorStore
+     * is not configured (e.g. local dev without Atlas Vector Search) or if the
+     * search fails for any reason.
+     */
+    private String retrieveRagContext(String tenantId, List<String> knowledgeBaseIds) {
+        try {
+            String filterExpression = buildFilterExpression(tenantId, knowledgeBaseIds);
+            SearchRequest searchRequest = SearchRequest.builder()
+                    .filterExpression(filterExpression)
+                    .topK(5)
+                    .build();
+            return vectorStore.similaritySearch(searchRequest)
+                    .stream()
+                    .map(doc -> doc.getText())
+                    .collect(java.util.stream.Collectors.joining("\n\n---\n\n"));
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     /**
