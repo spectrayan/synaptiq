@@ -19,9 +19,9 @@
   <a href="#-quick-start">Quick Start</a> ·
   <a href="#-what-synaptiq-does">What It Does</a> ·
   <a href="#-architecture">Architecture</a> ·
-  <a href="#-api-reference">API Reference</a> ·
-  <a href="CONTRIBUTING.md">Contributing</a> ·
-  <a href="https://github.com/spectrayan/synaptiq/discussions">Community</a>
+  <a href="#-use-cases">Use Cases</a> ·
+  <a href="https://spectrayan.github.io/synaptiq/">Documentation</a> ·
+  <a href="CONTRIBUTING.md">Contributing</a>
 </p>
 
 ---
@@ -41,9 +41,8 @@ Synaptiq is a **chat‑native, data‑driven application platform** where busine
 | Users drown in static dashboards | **Dynamic UI generation** — ask in natural language, get the exact interface you need |
 | Building internal tools takes weeks | **AI-generated applications** — describe what you want, Synaptiq assembles it in seconds |
 | Data is scattered across systems | **Semantic data layer** — define entities, metrics, and relationships; AI reasons over them |
-| Workflows are rigid and coded | **Conversational orchestration** — create multi-step workflows through natural language |
-| Every user gets the same experience | **Personalized, context‑aware UX** — the UI adapts to the user, not the other way around |
-| Employees waste time navigating software | **Chat *is* the operating system** — just ask, and Synaptiq assembles what you need |
+| Workflows are rigid and coded | **Multi-agent orchestration** — create workflows through natural language |
+| Every user gets the same experience | **Personalized, context‑aware UX** — the UI adapts to the user |
 
 ---
 
@@ -54,15 +53,15 @@ Synaptiq is a **chat‑native, data‑driven application platform** where busine
 Users interact with their business through natural language:
 
 - *"Show me a sales dashboard for Q1."*
-- *"Drill into the Northeast region."*
-- *"Create a workflow that alerts me when churn spikes."*
-- *"Generate a report comparing last quarter to this one."*
+- *"Generate therapy goals for this client profile."*
+- *"Create a compliance report for the Henderson portfolio."*
+- *"Find summer dresses under $50 with good reviews."*
 
 Synaptiq interprets intent, reasons over the data model, and generates the appropriate UI or action.
 
 ### 2. Dynamic UI Generation (Component DSL)
 
-Synaptiq doesn't rely on prebuilt screens. Instead, it generates UI **at runtime** using a strict, declarative Component DSL — 20+ rich component types rendered inline in the conversation:
+Synaptiq generates UI **at runtime** using a declarative Component DSL — 20+ rich component types rendered inline in the conversation:
 
 | Category | Components |
 |----------|------------|
@@ -70,20 +69,27 @@ Synaptiq doesn't rely on prebuilt screens. Instead, it generates UI **at runtime
 | **Catalog & Lists** | Item cards, item grids, comparison tables, data tables, filter summaries |
 | **Workflows & Actions** | Kanban boards, timelines, progress trackers, action confirmations |
 | **Forms & Input** | Dynamic forms with validation, conditional visibility, file upload |
-| **Layout** | Composable views with tabs, sidebars, columns, grids — dashboard-grade layouts assembled by AI |
-| **Navigation** | Launchpad — personalized home surface with saved views and suggestion chips |
+| **Layout** | Composable views with tabs, sidebars, columns, grids |
+| **Navigation** | Launchpad — personalized home surface with suggestion chips |
 
-### 3. Semantic Data Understanding
+### 3. Multi-Agent Workflow Orchestration
 
-Businesses define their entities, metrics, dimensions, relationships, permissions, and vocabulary. Synaptiq uses this semantic layer to ensure accuracy, governance, and safe reasoning — the AI knows exactly what data exists and how to query it.
+Complex business processes are handled by multiple specialized AI agents:
 
-### 4. Multi-Agent Workflow Orchestration
+| Flow Type | Pattern | Example |
+|-----------|---------|---------|
+| **Sequential** | Agent A → B → C | Research → Analyze → Report |
+| **Parallel** | Agents A, B, C simultaneously | Multi-analyst market assessment |
+| **Supervisor** | Coordinator manages specialists | ABA therapy goal generation |
+| **Dynamic** | Runtime routing based on results | Customer support triage |
 
-Synaptiq can generate and execute complex workflows through natural language:
-- Sequential, parallel, and supervisor agent flows
-- Visual workflow designer with drag-and-drop node editor
-- CRUD operations, alerts, approvals, and external integrations
-- Community templates for common patterns
+### 4. Semantic Data Understanding
+
+Organizations define entities, metrics, dimensions, relationships, and vocabulary. The AI uses this semantic layer for accurate, governed reasoning — it knows exactly what data exists and how to query it.
+
+### 5. Knowledge Base & RAG
+
+Documents are ingested, chunked, embedded, and stored in MongoDB Atlas Vector Search. Chat responses are automatically grounded in your organization's actual documents with source citations.
 
 ---
 
@@ -91,57 +97,53 @@ Synaptiq can generate and execute complex workflows through natural language:
 
 | Module | Description | Status |
 |--------|-------------|--------|
-| **Dynamic UI Engine** | 20+ component types rendered at runtime from AI-generated declarative JSON specs | ✅ Stable |
-| **Semantic Schema Registry** | Auto-inference from document sampling, field-level type/cardinality analysis, per-tenant registration | ✅ Stable |
-| **AI Chat Engine** | Streaming SSE responses, Gemini & OpenAI adapters, BYOK support, circuit breaker + keyword fallback | ✅ Stable |
-| **Vector Search** | MongoDB Atlas Vector Search with Gemini embeddings, automatic re-embedding on schema changes | ✅ Stable |
-| **Agent Workflow Engine** | Multi-agent orchestration (sequential, parallel, supervisor) with visual flow designer | ✅ Stable |
-| **Multi-Tenant Architecture** | Subdomain-based isolation, RBAC (platform admin → viewer), per-tenant rate limiting | ✅ Stable |
-| **Admin via Chat** | Configure AI persona, guardrails, branding, analytics — all through the chat interface itself | ✅ Stable |
-| **Per-Tenant Branding** | Logos, color palettes, fonts, named theme presets (max 5), WCAG AA contrast validation | ✅ Stable |
-| **Analytics** | Conversation metrics, token usage vs plan limits, billing reports, platform-wide rollups | ✅ Stable |
-| **Actions Engine** | Save items, contact enquiries, CRUD operations — audit-logged with retry + backoff | ✅ Stable |
+| **Dynamic UI Engine** | 20+ component types rendered at runtime from AI-generated JSON specs | ✅ Stable |
+| **Semantic Schema Registry** | Auto-inference from document sampling, field-level analysis | ✅ Stable |
+| **Per-Tenant Branding** | Logos, colors, fonts, named theme presets, WCAG AA validation | ✅ Stable |
+| **AI Chat Engine** | Streaming SSE responses, Gemini & OpenAI adapters, BYOK support | 🔶 Beta |
+| **Vector Search & RAG** | MongoDB Atlas Vector Search with embedding models | 🔶 Beta |
+| **Agent Workflow Engine** | Multi-agent orchestration (sequential, parallel, supervisor, dynamic) | 🔶 Beta |
+| **Knowledge Base** | Document ingestion, vector embeddings, contextual RAG | 🔶 Beta |
+| **Multi-Tenant Architecture** | Tenant isolation, per-tenant config, RBAC | 🔶 Beta |
+| **Auth & RBAC** | Built-in JWT + Firebase Auth, scope-based authorization (46 scopes) | 🔶 Beta |
+| **Actions Engine** | Save items, CRUD operations, audit-logged with retry | 🔶 Beta |
 
 ---
 
 ## 🏗️ Architecture
 
-Synaptiq is built as a **modular monolith** using Spring Modulith with a reactive API layer, event-driven module communication, and a declarative Component DSL that bridges the AI backend to a rich Angular rendering engine.
-
 ```mermaid
 graph TB
     subgraph Frontend["Angular 21 — Dynamic UI Renderer"]
-        UI["Chat Shell<br/>Signals · SSR"]
-        DSL["Component DSL Renderer<br/>20+ component types"]
-        WFD["Workflow Designer<br/>Visual flow editor"]
+        UI["Chat Shell · Signals · SSR"]
+        DSL["Component DSL Renderer · 20+ types"]
+        WFD["Workflow Designer"]
     end
 
     subgraph Backend["Spring Boot 4.0 — Java 21, WebFlux"]
-        API["REST API Layer<br/>OpenAPI Contract-First"]
-        Auth["Spring Security<br/>Firebase Auth · JWT"]
+        API["REST API · OpenAPI Contract-First"]
+        Auth["Spring Security · JWT · RBAC"]
 
         subgraph Modules["Spring Modulith Modules"]
-            SR["Schema Registry<br/>Semantic data model"]
-            CH["Chat Engine<br/>LLM → Component DSL"]
-            WF["Workflow Engine<br/>Multi-agent orchestration"]
-            TC["Tenant Config<br/>Persona · Guardrails"]
-            BR["Branding<br/>Themes · Colors"]
-            AN["Analytics<br/>Metrics · Billing"]
-            CT["Catalog<br/>Items · CSV import"]
-            AC["Actions<br/>CRUD · Enquiries"]
+            CH["Chat Engine"]
+            WF["Workflow Engine"]
+            KB["Knowledge Base"]
+            SR["Schema Registry"]
+            TC["Tenant Config"]
+            BR["Branding"]
         end
 
-        SpringAI["Spring AI<br/>Prompt assembly · Tool calling"]
+        SpringAI["Spring AI · Tool Calling"]
     end
 
     subgraph Data["Data Layer"]
-        Mongo[("MongoDB Atlas<br/>+ Vector Search")]
-        Redis[("Redis 7<br/>Cache · Rate Limiting")]
+        Mongo[("MongoDB Atlas + Vector Search")]
     end
 
     subgraph LLMs["LLM Providers"]
         Gemini["Google Gemini"]
-        OpenAI["OpenAI (BYOK)"]
+        OpenAI["OpenAI"]
+        Ollama["Ollama"]
     end
 
     UI --> API
@@ -151,27 +153,6 @@ graph TB
     CH & WF --> SpringAI
     SpringAI --> LLMs
     Modules --> Mongo
-    Modules --> Redis
-```
-
-### How Dynamic UI Generation Works
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant Chat as Chat Shell
-    participant LLM as LLM (Gemini/OpenAI)
-    participant Backend as Spring Boot
-    participant DB as MongoDB
-
-    User->>Chat: "Show me a sales dashboard for Q1"
-    Chat->>Backend: SSE stream request
-    Backend->>LLM: System prompt + schema context + user query
-    LLM->>Backend: Component DSL JSON (kpi_card, chart, data_table)
-    Backend->>DB: Hydrate item IDs → real data
-    Backend->>Chat: Stream hydrated Component DSL via SSE
-    Chat->>Chat: Render components (Angular Material 3)
-    Chat->>User: Interactive dashboard with suggestion chips
 ```
 
 ### Design Principles
@@ -179,12 +160,11 @@ sequenceDiagram
 | Principle | Implementation |
 |-----------|---------------|
 | **AI generates the UI** | LLM emits declarative Component DSL JSON; frontend renders natively |
-| **Secure by design** | Backend hydration — LLM never sees sensitive data; no executable code in UI specs |
-| **API-First** | OpenAPI spec → generated Java interfaces + Angular SDK |
+| **Secure by design** | Backend hydration — LLM never sees sensitive data |
+| **API-First** | OpenAPI spec → generated Java + Angular + Kotlin + Swift SDKs |
 | **Hexagonal Architecture** | Domain core is pure POJOs — no framework annotations |
-| **Event-Driven** | Modules communicate via `@ApplicationModuleListener` events only |
+| **Event-Driven** | Modules communicate via `@ApplicationModuleListener` events |
 | **Reactive End-to-End** | WebFlux + Reactive MongoDB for non-blocking I/O |
-| **RFC 9457 Errors** | Standardized `application/problem+json` responses across all APIs |
 
 ---
 
@@ -195,12 +175,11 @@ sequenceDiagram
 | **Frontend** | Angular 21 · TypeScript 5.9 · Angular Material 3 · Signals · SSR |
 | **Component DSL** | 20+ declarative component types · ECharts · dynamic form engine |
 | **Backend** | Java 21 · Spring Boot 4 · Spring Framework 7 · WebFlux |
-| **AI / LLM** | Spring AI (Vertex AI Gemini · OpenAI BYOK) · tool calling · prompt assembly |
+| **AI / LLM** | Spring AI (Google Gemini · OpenAI BYOK · Ollama) · tool calling |
 | **Modularity** | Spring Modulith (module boundaries, event-driven, hexagonal) |
 | **Database** | MongoDB Atlas + Vector Search (reactive driver) |
-| **Cache** | Redis 7 (reactive, rate limiting, prompt cache) |
-| **Auth** | Firebase Auth (multi-tenant, custom claims) + built-in JWT |
-| **API Spec** | OpenAPI 3.0 · openapi-generator for Java + TypeScript codegen |
+| **Auth** | Built-in JWT + Firebase Auth (multi-tenant) |
+| **API Spec** | OpenAPI 3.0 · codegen for Java + TypeScript + Kotlin + Swift |
 | **Build** | Nx 22 monorepo · Maven (backend) · pnpm (frontend) |
 
 ---
@@ -227,44 +206,30 @@ pnpm install
 
 ### 2. Start Infrastructure
 
-<details>
-<summary><strong>Option A: Docker Compose (recommended)</strong></summary>
-
 ```bash
-# MongoDB Atlas Local (vector search) + Redis + Firebase Auth Emulator
 docker compose up -d
 ```
 
-</details>
-
-<details>
-<summary><strong>Option B: Local services (no Docker)</strong></summary>
+### 3. Configure Environment
 
 ```bash
-# Requires MongoDB and Redis running locally
-# Uses built-in JWT auth (no Firebase dependency)
-scripts\start-local.bat     # Windows
-scripts/start-local.sh      # macOS / Linux
-```
+# Required
+export GOOGLE_API_KEY="your-gemini-api-key"
+export AUTH_PROVIDER="builtin"
 
-</details>
-
-### 3. Seed Demo Data (optional)
-
-```bash
-scripts\seed-data.bat       # Windows
-# or
-pip install pymongo && python seed-data/seed_all.py
+# Optional: Ollama for embeddings (RAG)
+# ollama serve && ollama pull nomic-embed-text
 ```
 
 ### 4. Run the Platform
 
 ```bash
-# Start both backend and frontend
-scripts\start-local.bat
+# Backend (Spring Boot on :8080)
+GOOGLE_API_KEY="$GOOGLE_API_KEY" AUTH_PROVIDER="builtin" \
+  mvn spring-boot:run -f apps/backend/spring-apis/pom.xml \
+  -Dspring-boot.run.profiles=dev -Dmaven.test.skip=true
 
-# Or run individually:
-cd apps/backend/spring-apis && mvn spring-boot:run -Dspring-boot.run.profiles=dev
+# Frontend (Angular on :4200)
 pnpm nx serve shell
 ```
 
@@ -275,49 +240,31 @@ pnpm nx serve shell
 | **Frontend** | [http://localhost:4200](http://localhost:4200) |
 | **Backend API** | [http://localhost:8080](http://localhost:8080) |
 | **Swagger UI** | [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) |
-| **Default Login** | `admin@synaptiq.local` / `admin` |
+| **Default Login** | `admin@synaptiq.dev` / `admin123` |
+
+> **Full setup guide:** [Quick Start Documentation](https://spectrayan.github.io/synaptiq/getting-started/quickstart/)
 
 ---
 
-## 📡 API Reference
+## 🏥 Use Cases
 
-Full interactive docs are available at **`/swagger-ui.html`** when the backend is running.
+### Healthcare — ABA Therapy Goal Generation
 
-### Chat & AI
+A supervisor agent coordinates four specialist agents (ABA, Speech Therapy, OT, CBT) to generate a consolidated 12-month therapy plan with quarterly milestones — reducing the process from **2-3 weeks to minutes**.
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/v1/chat/message` | SSE streaming chat — returns Component DSL specs |
-| `POST/DELETE` | `/api/v1/sessions` | Session lifecycle |
-| `GET` | `/api/v1/sessions/{id}/history` | Conversation history |
+### Financial Services — Portfolio Advisory
 
-### Schema & Catalog
+Relationship managers ask natural language questions (*"Show me risk exposure for the Henderson account"*) and receive dynamically generated KPI cards, allocation charts, and compliance-ready reports.
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/v1/catalog/schema/import` | Import schema (OpenAPI / JSON / YAML) |
-| `GET/PATCH` | `/api/v1/catalog/schema` | View / annotate catalog schema |
-| `POST` | `/api/v1/catalog/items` | Create catalog item |
-| `GET` | `/api/v1/catalog/items` | List items (paginated, filtered) |
-| `POST` | `/api/v1/catalog/import/csv` | Bulk CSV import |
+### E-Retail — Intelligent Catalog
 
-### Workflows
+Conversational product discovery (*"Find summer dresses under $50 with good reviews"*) generates item grids, comparison tables, and personalized recommendations in real-time.
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/v1/workflows` | Create workflow definition |
-| `POST` | `/api/v1/workflows/{id}/execute` | Execute multi-agent workflow |
-| `POST` | `/api/v1/workflows/generate` | AI-generate workflow from description |
-| `GET` | `/api/v1/workflows/templates` | Community workflow templates |
+### Enterprise — Internal Tool Automation
 
-### Admin & Config
+Replace custom-built internal tools (HR onboarding, IT support, executive dashboards) with AI-generated interfaces powered by your organization's knowledge base.
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/v1/tenants` | Create tenant (platform admin) |
-| `GET/PATCH` | `/api/v1/config/ai` | AI persona, guardrails config |
-| `GET/PATCH` | `/api/v1/config/branding` | Theme, colors, logo |
-| `GET` | `/api/v1/analytics/summary` | Usage metrics & billing |
+> **Full use case documentation:** [Use Cases](https://spectrayan.github.io/synaptiq/about/use-cases/)
 
 ---
 
@@ -326,58 +273,68 @@ Full interactive docs are available at **`/swagger-ui.html`** when the backend i
 ```
 synaptiq/                              # Nx 22 monorepo root
 ├── apps/
-│   ├── frontend/web/shell/            # Angular 21 SSR — chat shell + DSL renderer
+│   ├── frontend/web/shell/            # Angular 21 — chat shell + DSL renderer
 │   └── backend/spring-apis/           # Spring Boot 4 (WebFlux + Modulith)
-│       └── src/main/java/com/spectrayan/synaptiq/
-│           ├── chat/                  #   SSE chat streaming + LLM orchestration
-│           ├── catalog/               #   Schema import, item CRUD, CSV
+│       └── src/main/java/.../synaptiq/
+│           ├── chat/                  #   Chat engine + LLM orchestration
 │           ├── workflow/              #   Multi-agent workflow engine
-│           ├── tenantconfig/          #   AI persona, guardrails, BYOK
+│           ├── knowledgebase/         #   Knowledge base + RAG pipeline
+│           ├── schemaregistry/        #   Semantic data model
+│           ├── tenantconfig/          #   AI persona, guardrails
 │           ├── branding/              #   Theme, logo, colors
-│           ├── analytics/             #   Metrics, billing, usage
-│           ├── schemaregistry/        #   Schema registry + semantic data model
-│           └── shared/                #   Cross-cutting config, security, events
+│           ├── auth/                  #   Authentication + RBAC
+│           └── shared/                #   Cross-cutting config, security
 ├── libs/
 │   ├── frontend/
-│   │   ├── dsl-renderer/             # 20+ DSL component renderers (the dynamic UI engine)
-│   │   ├── auth/                     # AuthService, AuthGuard, login page
-│   │   ├── chat/                     # Chat UI — message list, input, streaming
-│   │   └── theme/                    # M3 theme service + CSS var injection
+│   │   ├── dsl-renderer/             # 20+ DSL component renderers
+│   │   ├── auth/                     # Auth service, guards, login
+│   │   ├── chat/                     # Chat UI — messages, input, streaming
+│   │   └── theme/                    # M3 theme service + CSS vars
 │   ├── backend/
-│   │   └── agent-flow-spring/        # Spring-based multi-agent workflow engine
+│   │   └── agent-flow-spring/        # Multi-agent workflow engine library
 │   └── shared/
 │       ├── openapi-spec/             # OpenAPI 3.0 contract (source of truth)
-│       ├── sdks/                     # Generated Angular SDK
-│       ├── apis/                     # Generated Spring server stubs
-│       └── constants/                # Component DSL type definitions
+│       ├── sdks/                     # Generated SDKs (Angular, Kotlin, Swift)
+│       └── apis/                     # Generated Spring server stubs
 ├── docs/
-│   ├── vision.md                     # Platform vision & strategy
-│   ├── research/                     # Market research & gap analysis
-│   └── architecture.md              # System architecture
+│   ├── site-docs/                    # MkDocs documentation site
+│   ├── architecture.md               # System architecture
+│   └── vision.md                     # Platform vision
 ├── seed-data/                        # Database seeding scripts
-├── scripts/                          # Start/stop/seed batch scripts
-└── docker-compose.yml                # MongoDB + Redis + Firebase Auth Emulator
+└── docker-compose.yml                # MongoDB infrastructure
 ```
 
 ---
 
 ## 🗺️ Roadmap
 
-Synaptiq's current implementation provides strong semantic data modeling, dynamic UI generation, and business rule encoding. The roadmap targets deeper enterprise connectivity:
-
 | Phase | Capability | Status |
 |-------|-----------|--------|
 | ✅ | Semantic Data Model + Schema Registry | Complete |
 | ✅ | Dynamic Component DSL (20+ types) | Complete |
-| ✅ | Multi-agent Workflow Engine | Complete |
+| ✅ | Multi-agent Workflow Engine (4 flow types) | Complete |
 | ✅ | Per-tenant Branding & Theming | Complete |
-| 🔶 | General-purpose RAG Pipeline | In Progress |
+| ✅ | Knowledge Base & RAG Pipeline | Complete |
+| 🔶 | End-to-End Workflow Stability | In Progress |
 | ⬜ | MCP Server (expose Synaptiq as tools) | Planned |
 | ⬜ | MCP Client + External Connector Registry | Planned |
 | ⬜ | A2A Protocol for Agent Federation | Planned |
 | ⬜ | Unstructured Data Ingestion (PDF, email) | Planned |
 
-> See [docs/research/](docs/research/) for full market analysis and gap assessments.
+---
+
+## 📚 Documentation
+
+Full documentation is available at **[spectrayan.github.io/synaptiq](https://spectrayan.github.io/synaptiq/)**
+
+| Section | Content |
+|---------|---------|
+| **[About](https://spectrayan.github.io/synaptiq/about/why-synaptiq/)** | Why Synaptiq, key concepts, use cases, comparison, FAQ |
+| **[Getting Started](https://spectrayan.github.io/synaptiq/getting-started/quickstart/)** | Quick start, platform overview |
+| **[User Guide](https://spectrayan.github.io/synaptiq/user-guide/chat/)** | Chat, workflows, knowledge base, admin |
+| **[Architecture](https://spectrayan.github.io/synaptiq/architecture/overview/)** | System overview, Component DSL, multi-agent, ADRs |
+| **[Deep Dives](https://spectrayan.github.io/synaptiq/deep-dives/chat-engine/)** | Chat engine, workflow engine, semantic data, auth, branding |
+| **[Operations](https://spectrayan.github.io/synaptiq/operations/deployment/)** | Deployment, contributing, security, changelog |
 
 ---
 
@@ -386,10 +343,8 @@ Synaptiq's current implementation provides strong semantic data modeling, dynami
 We welcome contributions of all kinds! Please see our **[Contributing Guide](CONTRIBUTING.md)** for full details.
 
 ```bash
-# Quick start for contributors
 git clone https://github.com/<your-username>/synaptiq.git
-cd synaptiq
-pnpm install
+cd synaptiq && pnpm install
 docker compose up -d
 pnpm nx serve shell
 ```
@@ -403,17 +358,6 @@ pnpm nx serve shell
 - 💬 [Discussions](https://github.com/spectrayan/synaptiq/discussions)
 - 📧 [developer@spectrayan.com](mailto:developer@spectrayan.com)
 - 🔒 [Security Policy](SECURITY.md)
-
----
-
-## 📚 Documentation
-
-- [Vision](./docs/vision.md) — Platform vision & strategy
-- [Architecture](./docs/architecture.md) — System architecture & data flow
-- [Market Research](./docs/research/AI-Native%20App%20Platform%20Market%20Research.md) — Full market feasibility analysis
-- [A2UI Comparison](./docs/research/a2ui_vs_synaptiq_analysis.md) — Google A2UI vs Synaptiq Component DSL
-- [Gap Analysis](./docs/research/core_mechanics_gap_analysis.md) — Core mechanics roadmap
-- [Contributing](./CONTRIBUTING.md) — How to contribute
 
 ---
 

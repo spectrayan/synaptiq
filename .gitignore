@@ -158,3 +158,9 @@ build/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# MkDocs build output
+docs/site-docs/site/
+
+# Seed data test results
+seed-data/results/
