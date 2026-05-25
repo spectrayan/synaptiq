@@ -44,15 +44,15 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build (affected)
-        run: npx nx affected -t build --parallel=3 --exclude='spring-apis,agent-flow-spring,camel-integration,openapi-spec,synaptiq-apis'
+      - name: Build synaptiq app
+        run: npx nx build synaptiq
 
       - name: Upload build artifacts
         if: github.ref == 'refs/heads/main'
         uses: actions/upload-artifact@v4
         with:
-          name: shell-dist
-          path: dist/apps/frontend/web/shell
+          name: synaptiq-dist
+          path: dist/apps/frontend/web/synaptiq
           retention-days: 7
 
   # ─── Backend (Java / Spring Boot) ────────────────────────────────────────
