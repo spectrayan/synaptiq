@@ -1,0 +1,126 @@
+site_name: Synaptiq Documentation
+site_description: The AI‑native application platform where conversation becomes computation — and data becomes UI
+site_url: https://spectrayan.github.io/synaptiq/
+repo_url: https://github.com/spectrayan/synaptiq
+repo_name: spectrayan/synaptiq
+
+theme:
+  name: material
+  icon:
+    logo: material/brain
+  palette:
+    - scheme: default
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.indexes
+    - navigation.footer
+    - navigation.path
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - content.tooltips
+    - toc.follow
+
+plugins:
+  - search
+  - callouts
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+  - pymdownx.inlinehilite
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - def_list
+  - footnotes
+  - abbr
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+
+nav:
+  - Home: index.md
+  - About:
+      - Why Synaptiq: about/why-synaptiq.md
+      - Key Concepts: about/key-concepts.md
+      - Use Cases: about/use-cases.md
+      - Comparison: about/comparison.md
+      - FAQ: about/faq.md
+  - Getting Started:
+      - Quick Start: getting-started/quickstart.md
+      - Platform Overview: getting-started/platform-overview.md
+  - User Guide:
+      - Chat & AI: user-guide/chat.md
+      - Workflow Designer: user-guide/workflows.md
+      - Knowledge Base: user-guide/knowledge-base.md
+      - Administration: user-guide/admin.md
+  - Architecture:
+      - Overview: architecture/overview.md
+      - Component DSL: architecture/component-dsl.md
+      - Multi-Agent Orchestration: architecture/multi-agent.md
+      - ADRs:
+          - "001: Hexagonal Architecture": architecture/adrs/001-hexagonal.md
+          - "002: Contract-First API": architecture/adrs/002-contract-first.md
+          - "003: Spring Modulith": architecture/adrs/003-modulith.md
+          - "004: Component DSL": architecture/adrs/004-component-dsl.md
+          - "005: Multi-Agent": architecture/adrs/005-multi-agent.md
+          - "006: Reactive Persistence": architecture/adrs/006-reactive.md
+          - "007: Multi-Tenant": architecture/adrs/007-multi-tenant.md
+  - Deep Dives:
+      - Chat Engine: deep-dives/chat-engine.md
+      - Workflow Engine: deep-dives/workflow-engine.md
+      - Semantic Data Model: deep-dives/semantic-data.md
+      - Dynamic UI Renderer: deep-dives/dynamic-ui.md
+      - Auth & RBAC: deep-dives/auth-rbac.md
+      - Branding & Theming: deep-dives/branding.md
+  - Operations:
+      - Deployment: operations/deployment.md
+      - Contributing: operations/contributing.md
+      - Security: operations/security.md
+      - Changelog: operations/changelog.md
+
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/mermaid-dark.js

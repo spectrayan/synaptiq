@@ -1,0 +1,113 @@
+/* ─── Synaptiq Documentation — Custom Styles ─────────────────────────── */
+
+/* Center mermaid diagrams */
+.mermaid {
+  text-align: center;
+}
+
+.mermaid svg {
+  margin: 0 auto;
+  display: block;
+}
+
+/* ─── Hero section styling ──────────────────────────────────────────── */
+.hero-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.hero-card {
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.hero-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.hero-card h3 {
+  margin-top: 0;
+}
+
+/* ─── Dark-mode Mermaid fix ─────────────────────────────────────────────
+   MkDocs Material uses [data-md-color-scheme="slate"] for dark mode.
+   Without these overrides, Mermaid renders with a "default" (light) theme
+   where dark text on dark backgrounds becomes invisible.
+   ────────────────────────────────────────────────────────────────────── */
+
+[data-md-color-scheme="slate"] .mermaid {
+  --md-mermaid-font-family: var(--md-text-font-family, "Roboto");
+}
+
+/* Default node text in dark mode */
+[data-md-color-scheme="slate"] .mermaid .nodeLabel {
+  color: #e0e0e0 !important;
+}
+
+/* Default edge labels in dark mode */
+[data-md-color-scheme="slate"] .mermaid .edgeLabel {
+  background-color: #2d2d2d !important;
+  color: #e0e0e0 !important;
+}
+
+/* Subgraph titles in dark mode */
+[data-md-color-scheme="slate"] .mermaid .cluster-label {
+  color: #e0e0e0 !important;
+}
+
+/* State diagram labels */
+[data-md-color-scheme="slate"] .mermaid .stateLabel .nodeLabel {
+  color: #e0e0e0 !important;
+}
+
+/* Sequence diagram text */
+[data-md-color-scheme="slate"] .mermaid .messageText,
+[data-md-color-scheme="slate"] .mermaid .loopText,
+[data-md-color-scheme="slate"] .mermaid .noteText {
+  fill: #e0e0e0 !important;
+}
+
+[data-md-color-scheme="slate"] .mermaid .actor {
+  fill: #37474f !important;
+  stroke: #78909c !important;
+}
+
+[data-md-color-scheme="slate"] .mermaid text.actor > tspan {
+  fill: #e0e0e0 !important;
+}
+
+/* Flowchart default node background in dark mode */
+[data-md-color-scheme="slate"] .mermaid .node rect,
+[data-md-color-scheme="slate"] .mermaid .node circle,
+[data-md-color-scheme="slate"] .mermaid .node ellipse,
+[data-md-color-scheme="slate"] .mermaid .node polygon,
+[data-md-color-scheme="slate"] .mermaid .node path {
+  fill: #37474f !important;
+  stroke: #78909c !important;
+}
+
+/* Edge / arrow lines in dark mode */
+[data-md-color-scheme="slate"] .mermaid .edgePath .path {
+  stroke: #90a4ae !important;
+}
+
+[data-md-color-scheme="slate"] .mermaid marker path {
+  fill: #90a4ae !important;
+  stroke: #90a4ae !important;
+}
+
+/* Subgraph (cluster) background in dark mode */
+[data-md-color-scheme="slate"] .mermaid .cluster rect {
+  fill: #263238 !important;
+  stroke: #546e7a !important;
+}
+
+/* ─── Admonition accent overrides for Synaptiq teal ─────────────────── */
+:root {
+  --md-admonition-icon--example: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 5H21V7H7V5M7 13V11H21V13H7M4 4.5A1.5 1.5 0 0 1 5.5 6A1.5 1.5 0 0 1 4 7.5A1.5 1.5 0 0 1 2.5 6A1.5 1.5 0 0 1 4 4.5M4 10.5A1.5 1.5 0 0 1 5.5 12A1.5 1.5 0 0 1 4 13.5A1.5 1.5 0 0 1 2.5 12A1.5 1.5 0 0 1 4 10.5M7 19V17H21V19H7M4 16.5A1.5 1.5 0 0 1 5.5 18A1.5 1.5 0 0 1 4 19.5A1.5 1.5 0 0 1 2.5 18A1.5 1.5 0 0 1 4 16.5Z"/></svg>');
+}
