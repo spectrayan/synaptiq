@@ -35,6 +35,8 @@ public interface WorkflowDtoMapper {
     default FlowSettingsSpec flowSettingsToDto(FlowSettings spec) {
         if (spec == null) return null;
         ObjectMapper om = new ObjectMapper();
+        // Domain models may have extra fields not present in API DTOs
+        om.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         var dto = new FlowSettingsSpec();
         dto.setId(spec.getId());
         dto.setName(spec.getName());

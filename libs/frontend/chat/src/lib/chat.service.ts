@@ -146,8 +146,17 @@ export class ChatService {
         'Content-Type': 'application/json',
         'Accept': 'text/event-stream',
       };
-      if (this.env.tenantId) {
-        headers['X-Tenant-ID'] = this.env.tenantId;
+      // Use JWT-derived tenant first, fall back to env config
+      let tenantId = this.env.tenantId;
+      try {
+        const storedUser = localStorage.getItem('synaptiq_auth_user');
+        if (storedUser) {
+          const user = JSON.parse(storedUser);
+          if (user.tenantId) tenantId = user.tenantId;
+        }
+      } catch { /* ignore parse errors */ }
+      if (tenantId) {
+        headers['X-Tenant-ID'] = tenantId;
       }
       // Auto-retrieve token from localStorage if not explicitly passed
       const token = authToken ?? localStorage.getItem('synaptiq_auth_token');

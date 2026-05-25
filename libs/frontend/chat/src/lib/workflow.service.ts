@@ -175,7 +175,16 @@ export class WorkflowService {
   private buildHeaders(contentType?: string): Record<string, string> {
     const headers: Record<string, string> = {};
     if (contentType) headers['Content-Type'] = contentType;
-    if (this.env.tenantId) headers['X-Tenant-ID'] = this.env.tenantId;
+    // Use JWT-derived tenant first, fall back to env config
+    let tenantId = this.env.tenantId;
+    try {
+      const storedUser = localStorage.getItem('synaptiq_auth_user');
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        if (user.tenantId) tenantId = user.tenantId;
+      }
+    } catch { /* ignore parse errors */ }
+    if (tenantId) headers['X-Tenant-ID'] = tenantId;
     const token = localStorage.getItem('synaptiq_auth_token');
     if (token) headers['Authorization'] = `Bearer ${token}`;
     return headers;

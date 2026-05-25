@@ -30,10 +30,30 @@ public class LLMSpec {
    */
   public enum ProviderEnum {
     VERTEXAI("VERTEXAI"),
-    
+
+    GOOGLE_AI("GOOGLE_AI"),
+
     OPENAI("OPENAI"),
-    
-    ANTHROPIC("ANTHROPIC");
+
+    ANTHROPIC("ANTHROPIC"),
+
+    OLLAMA("OLLAMA"),
+
+    GROQ("GROQ"),
+
+    MISTRAL("MISTRAL"),
+
+    COHERE("COHERE"),
+
+    TOGETHER("TOGETHER"),
+
+    BEDROCK("BEDROCK"),
+
+    AZURE_OPENAI("AZURE_OPENAI"),
+
+    HUGGINGFACE("HUGGINGFACE"),
+
+    LITELLM("LITELLM");
 
     private final String value;
 

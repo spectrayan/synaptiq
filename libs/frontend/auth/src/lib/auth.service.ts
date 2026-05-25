@@ -417,7 +417,7 @@ export class AuthService implements OnDestroy {
       photoURL: null,
       emailVerified: true,
       role: (payload.role as UserRole) || null,
-      tenantId: payload.tenant_id || this.env.tenantId || null,
+      tenantId: payload.tenantId || payload.tenant_id || this.env.tenantId || null,
       isAnonymous: false,
       mustChangePassword: false,
     };
