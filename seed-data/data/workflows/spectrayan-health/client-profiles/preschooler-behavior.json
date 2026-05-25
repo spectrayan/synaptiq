@@ -1,0 +1,70 @@
+{
+  "clientId": "preschooler-004",
+  "profileName": "Preschooler — Behavior Reduction Focus",
+  "demographics": {
+    "age": "4 years, 3 months",
+    "diagnosis": "Autism Spectrum Disorder, Level 2, ADHD",
+    "gender": "Male"
+  },
+  "assessments": {
+    "ados2": { "module": 2, "severityScore": "7/10" },
+    "vineland": {
+      "communication": { "score": 68 },
+      "dailyLivingSkills": { "score": 72 },
+      "socialization": { "score": 65 }
+    },
+    "vbMapp": {
+      "mand": { "level": 2 },
+      "tact": { "level": 1 },
+      "listenerResponding": { "level": 2 }
+    },
+    "fba": {
+      "targetBehaviors": [
+        {
+          "behavior": "Aggression (hitting, kicking, biting)",
+          "frequency": "8-12 instances per day",
+          "function": "Escape from demands, access to tangibles",
+          "antecedents": ["Transitions", "denied access to iPad", "difficult tasks"],
+          "consequences": ["Task removed", "given iPad to calm down"]
+        },
+        {
+          "behavior": "Elopement",
+          "frequency": "3-5 instances per day",
+          "function": "Access to sensory input (running), escape from demands",
+          "antecedents": ["Unstructured time", "outdoor activities"],
+          "consequences": ["Adult chases", "brought back to activity"]
+        }
+      ]
+    }
+  },
+  "currentSkills": {
+    "communication": "Uses 2-3 word phrases, can request with prompts, limited spontaneous language",
+    "social": "Prefers adult interaction, limited peer play",
+    "adaptive": "Feeds self with utensils, partially toilet trained (daytime only), needs help with dressing",
+    "academic": "Knows colors, can count to 10, identifies some letters"
+  },
+  "priorityAreas": [
+    "Reduce aggressive behaviors — safety concern",
+    "Teach appropriate communication to replace aggression",
+    "Increase compliance with adult instructions",
+    "Reduce elopement behaviors"
+  ],
+  "learningProfile": {
+    "reinforcers": ["iPad", "playground time", "bubbles", "tickles", "praise"],
+    "strengths": ["Responds well to visual supports", "motivated by preferred activities"],
+    "challenges": ["Low frustration tolerance", "difficulty waiting", "impulsive"]
+  },
+  "familyContext": {
+    "primaryLanguage": "English",
+    "parentNotes": "Behaviors are worse at home than at preschool",
+    "siblings": "Younger twin siblings (age 2) in the home — challenging for parents to manage",
+    "therapyHours": "25 hours/week of ABA therapy (intensive early intervention)"
+  },
+  "goalGenerationRequest": {
+    "numberOfGoals": 5,
+    "timeframeMonths": 12,
+    "includeQuarterlyMilestones": true,
+    "perspective": "parent",
+    "emphasis": "behavior reduction and replacement behaviors"
+  }
+}

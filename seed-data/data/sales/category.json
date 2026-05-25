@@ -1,0 +1,8 @@
+[
+  {"category": "Electronics", "revenue": 78600, "units_sold": 1243, "pct_total": 37.8, "avg_price": 63.23, "top_product": "Smart Speaker Pro"},
+  {"category": "Audio", "revenue": 44850, "units_sold": 612, "pct_total": 21.6, "avg_price": 73.28, "top_product": "Premium Headphones"},
+  {"category": "Clothing", "revenue": 35420, "units_sold": 1417, "pct_total": 17.1, "avg_price": 25.00, "top_product": "Organic Cotton Tee"},
+  {"category": "Accessories", "revenue": 24800, "units_sold": 992, "pct_total": 11.9, "avg_price": 25.00, "top_product": "USB-C Hub Ultra"},
+  {"category": "Fitness", "revenue": 16476, "units_sold": 412, "pct_total": 7.9, "avg_price": 39.99, "top_product": "Yoga Mat Premium"},
+  {"category": "Home", "revenue": 7654, "units_sold": 170, "pct_total": 3.7, "avg_price": 45.02, "top_product": "LED Desk Lamp"}
+]

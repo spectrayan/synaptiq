@@ -1,0 +1,52 @@
+{
+  "clientId": "young-adult-005",
+  "profileName": "Young Adult — Vocational Skills Focus",
+  "demographics": {
+    "age": "19 years, 6 months",
+    "diagnosis": "Autism Spectrum Disorder, Level 1",
+    "gender": "Female",
+    "education": "High school graduate, attending community college part-time"
+  },
+  "assessments": {
+    "vineland": {
+      "communication": { "score": 82 },
+      "dailyLivingSkills": { "score": 88 },
+      "socialization": { "score": 75 }
+    },
+    "amps": "Within functional range for most ADLs",
+    "vocational": {
+      "strengths": ["Computer skills", "data entry", "organizing"],
+      "challenges": ["Social communication in workplace"]
+    }
+  },
+  "currentSkills": {
+    "communication": "Fluent speech, difficulty with workplace social communication (small talk, asking for help, understanding sarcasm)",
+    "social": "Has 1-2 close friends, difficulty initiating conversations, prefers structured social situations",
+    "adaptive": "Fully independent with self-care, can use public transportation with visual supports, manages basic finances with support",
+    "vocational": "Completed job shadowing, needs support with job interview skills, workplace social skills, and problem-solving"
+  },
+  "priorityAreas": [
+    "Competitive employment skills",
+    "Workplace social communication",
+    "Independent problem-solving in work situations",
+    "Self-advocacy skills"
+  ],
+  "learningProfile": {
+    "reinforcers": ["Earning money", "independence", "positive feedback", "achieving goals"],
+    "strengths": ["Reliable", "punctual", "detail-oriented", "follows rules", "computer proficient"],
+    "challenges": ["Anxiety in new situations", "difficulty with unwritten social rules", "needs explicit instruction"]
+  },
+  "familyContext": {
+    "primaryLanguage": "English",
+    "livingArrangement": "Lives at home with parents, goal is to move to supported apartment within 2 years",
+    "parentGoals": "Want her to be more independent",
+    "therapyHours": "8 hours/week of ABA therapy focused on vocational and independent living skills"
+  },
+  "goalGenerationRequest": {
+    "numberOfGoals": 5,
+    "timeframeMonths": 12,
+    "includeQuarterlyMilestones": true,
+    "perspective": "professional",
+    "emphasis": "vocational readiness and adult independence"
+  }
+}

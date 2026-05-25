@@ -27,11 +27,11 @@ def _hash_pw(plain: str) -> str:
 DEFAULT_USERS = [
     {
         "email": "admin@synaptiq.dev",
-        "password": "admin",
+        "password": "admin123",
         "display_name": "Admin",
-        "role": "platform_admin",
+        "role": "tenant:admin",
         "tenant_id": "demo-tenant",
-        "must_change_password": True,
+        "must_change_password": False,
         "email_verified": True,
         "disabled": False,
     },

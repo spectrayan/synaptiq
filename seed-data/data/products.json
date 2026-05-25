@@ -1,0 +1,90 @@
+[
+  {
+    "name": "Smart Speaker Pro",
+    "category": "Electronics",
+    "price": 79.99,
+    "stock": 5,
+    "rating": 4.7,
+    "units_sold": 342,
+    "revenue": 27356,
+    "margin": 34,
+    "description": "AI-powered smart speaker with premium audio"
+  },
+  {
+    "name": "Wireless Charger X",
+    "category": "Electronics",
+    "price": 34.99,
+    "stock": 120,
+    "rating": 4.3,
+    "units_sold": 287,
+    "revenue": 10032,
+    "margin": 42,
+    "description": "Fast wireless charging pad with LED indicator"
+  },
+  {
+    "name": "Premium Headphones",
+    "category": "Audio",
+    "price": 149.99,
+    "stock": 45,
+    "rating": 4.8,
+    "units_sold": 198,
+    "revenue": 29700,
+    "margin": 38,
+    "description": "Over-ear noise cancelling headphones"
+  },
+  {
+    "name": "USB-C Hub Ultra",
+    "category": "Accessories",
+    "price": 24.99,
+    "stock": 200,
+    "rating": 4.5,
+    "units_sold": 456,
+    "revenue": 11400,
+    "margin": 52,
+    "description": "7-in-1 USB-C hub with HDMI and ethernet"
+  },
+  {
+    "name": "Organic Cotton Tee",
+    "category": "Clothing",
+    "price": 24.99,
+    "stock": 350,
+    "rating": 4.6,
+    "units_sold": 823,
+    "revenue": 20575,
+    "margin": 61,
+    "description": "Sustainably sourced organic cotton t-shirt"
+  },
+  {
+    "name": "Bluetooth Keyboard",
+    "category": "Electronics",
+    "price": 59.99,
+    "stock": 78,
+    "rating": 4.4,
+    "units_sold": 156,
+    "revenue": 9358,
+    "margin": 45,
+    "description": "Slim wireless mechanical keyboard"
+  },
+  {
+    "name": "Yoga Mat Premium",
+    "category": "Fitness",
+    "price": 39.99,
+    "stock": 95,
+    "rating": 4.9,
+    "units_sold": 412,
+    "revenue": 16476,
+    "margin": 55,
+    "description": "Non-slip eco-friendly yoga mat"
+  },
+  {
+    "name": "LED Desk Lamp",
+    "category": "Home",
+    "price": 44.99,
+    "stock": 67,
+    "rating": 4.2,
+    "units_sold": 234,
+    "revenue": 10528,
+    "margin": 48,
+    "description": "Adjustable LED lamp with 5 color temperatures"
+  }
+]

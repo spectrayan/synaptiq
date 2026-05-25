@@ -1,0 +1,56 @@
+[
+  {
+    "event_type": "order_placed",
+    "title": "Order placed",
+    "description": "Customer placed order for 3 items totaling $142.97",
+    "actor": "Customer",
+    "entity_type": "order",
+    "entity_id": "ORD-2847",
+    "hours_ago": 8
+  },
+  {
+    "event_type": "payment_confirmed",
+    "title": "Payment confirmed",
+    "description": "Visa ending in 4242 — authorized and captured",
+    "actor": "Payment Gateway",
+    "entity_type": "order",
+    "entity_id": "ORD-2847",
+    "hours_ago": 7.98
+  },
+  {
+    "event_type": "inventory_reserved",
+    "title": "Inventory reserved",
+    "description": "All 3 items reserved from warehouse A",
+    "actor": "System",
+    "entity_type": "order",
+    "entity_id": "ORD-2847",
+    "hours_ago": 7.25
+  },
+  {
+    "event_type": "shipped",
+    "title": "Shipped via FedEx",
+    "description": "Tracking: FX-7829341 — Est. delivery Apr 24",
+    "actor": "Warehouse Team",
+    "entity_type": "order",
+    "entity_id": "ORD-2847",
+    "hours_ago": 5.33
+  },
+  {
+    "event_type": "low_stock_alert",
+    "title": "Low stock alert",
+    "description": "Smart Speaker Pro down to 5 units — reorder triggered",
+    "actor": "Inventory System",
+    "entity_type": "product",
+    "entity_id": "smart-speaker-pro",
+    "hours_ago": 3.83
+  },
+  {
+    "event_type": "support_note",
+    "title": "Customer note",
+    "description": "Customer requested gift wrapping via support chat",
+    "actor": "Support Agent",
+    "entity_type": "order",
+    "entity_id": "ORD-2847",
+    "hours_ago": 2.25
+  }
+]

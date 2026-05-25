@@ -48,6 +48,11 @@ async def main():
     from seed_knowledge_base import seed as seed_kb
     await seed_kb()
 
+    # 5. Workflows (ABA goal generation and other workflow specs)
+    logger.info("\n🔄 Phase 5: Workflows...")
+    from seed_workflows import seed_workflows
+    await seed_workflows()
+
     logger.info("\n" + "=" * 60)
     logger.info("🎉 All seeds complete!")
     logger.info("=" * 60)

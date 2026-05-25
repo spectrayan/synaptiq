@@ -1,0 +1,69 @@
+[
+  {
+    "collection_name": "api_metrics",
+    "display_name": "API Metrics",
+    "description": "5-minute interval API endpoint metrics: request counts, error rates, latency percentiles (P50/P95/P99), status code distribution, and bandwidth. Covers 7 days. Filter by endpoint and method.",
+    "fields": {
+      "timestamp": "date", "endpoint": "string", "method": "string",
+      "requests": "number", "errors": "number", "error_rate": "number",
+      "p50_latency_ms": "number", "p95_latency_ms": "number", "p99_latency_ms": "number",
+      "avg_latency_ms": "number", "status_2xx": "number", "status_4xx": "number",
+      "status_5xx": "number", "bytes_in": "number", "bytes_out": "number"
+    }
+  },
+  {
+    "collection_name": "infra_metrics",
+    "display_name": "Infrastructure Metrics",
+    "description": "1-minute interval infrastructure metrics per service: CPU%, memory, disk I/O, network I/O, connections, GC pauses, thread counts. Services: api-server, mongodb, redis, llm-proxy. Covers 24 hours.",
+    "fields": {
+      "timestamp": "date", "service": "string",
+      "cpu_percent": "number", "memory_mb": "number", "memory_percent": "number",
+      "disk_read_mb": "number", "disk_write_mb": "number",
+      "network_in_mb": "number", "network_out_mb": "number",
+      "active_connections": "number", "gc_pause_ms": "number", "thread_count": "number"
+    }
+  },
+  {
+    "collection_name": "llm_metrics",
+    "display_name": "LLM Metrics",
+    "description": "5-minute interval LLM usage: requests, token counts (in/out), time-to-first-token, generation latency, cache hit rates, tool calls, errors, and cost in USD. Covers 7 days.",
+    "fields": {
+      "timestamp": "date", "provider": "string", "model": "string",
+      "requests": "number", "tokens_in": "number", "tokens_out": "number",
+      "avg_ttft_ms": "number", "avg_generation_ms": "number",
+      "cache_hits": "number", "cache_misses": "number",
+      "tool_calls": "number", "errors": "number", "cost_usd": "number"
+    }
+  },
+  {
+    "collection_name": "error_logs",
+    "display_name": "Error Logs",
+    "description": "Application error and warning logs with error type, service, endpoint, resolution status.",
+    "fields": {
+      "timestamp": "date", "level": "string", "service": "string",
+      "error_type": "string", "message": "string", "endpoint": "string",
+      "session_id": "string", "resolved": "boolean", "count": "number"
+    }
+  },
+  {
+    "collection_name": "slo_metrics",
+    "display_name": "SLO Metrics",
+    "description": "Daily SLO compliance tracking: target vs actual, error budget remaining, violation counts.",
+    "fields": {
+      "date": "string", "slo_name": "string", "target": "number",
+      "actual": "number", "budget_remaining_pct": "number",
+      "error_budget_minutes": "number", "violations": "number"
+    }
+  },
+  {
+    "collection_name": "user_analytics",
+    "display_name": "User Analytics",
+    "description": "Hourly user engagement: active sessions, new sessions, messages sent, components rendered, actions triggered, session duration, bounce rate, and top intents. Covers 7 days.",
+    "fields": {
+      "timestamp": "date", "active_sessions": "number", "new_sessions": "number",
+      "messages_sent": "number", "components_rendered": "number",
+      "actions_triggered": "number", "avg_session_duration_min": "number",
+      "bounce_rate": "number", "top_intents": "array"
+    }
+  }
+]

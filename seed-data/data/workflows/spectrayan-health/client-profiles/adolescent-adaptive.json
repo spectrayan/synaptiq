@@ -1,0 +1,53 @@
+{
+  "clientId": "adolescent-003",
+  "profileName": "Adolescent — Adaptive Skills & Transition Focus",
+  "demographics": {
+    "age": "14 years, 8 months",
+    "diagnosis": "Autism Spectrum Disorder, Level 2 (requiring substantial support), Intellectual Disability (Mild)",
+    "gender": "Male",
+    "grade": "9th grade, special education classroom"
+  },
+  "assessments": {
+    "vineland": {
+      "communication": { "score": 65, "percentile": "1st" },
+      "dailyLivingSkills": { "score": 58, "percentile": "0.3" },
+      "socialization": { "score": 62, "percentile": "1st" }
+    },
+    "afls": {
+      "basicLivingSkills": "45% independent",
+      "homeSkills": "30% independent",
+      "communityParticipation": "25% independent"
+    }
+  },
+  "currentSkills": {
+    "communication": "Speaks in 3-5 word sentences, can express basic needs, difficulty with abstract concepts",
+    "social": "Interacts with familiar adults, limited peer interaction, prefers adult company",
+    "adaptive": "Needs prompting for hygiene (showering, teeth brushing), cannot prepare meals independently, not toilet trained at night",
+    "academic": "Reading at 2nd grade level, basic math skills (addition/subtraction)",
+    "behavior": "Generally compliant, occasional refusal behaviors when asked to do non-preferred tasks"
+  },
+  "priorityAreas": [
+    "Independent self-care skills (hygiene, grooming)",
+    "Basic meal preparation skills",
+    "Community safety skills (crossing streets, stranger danger)",
+    "Vocational readiness skills"
+  ],
+  "learningProfile": {
+    "reinforcers": ["Music", "video games", "time with preferred staff", "snacks"],
+    "strengths": ["Follows visual schedules well", "good with routines", "eager to please"],
+    "challenges": ["Slow processing speed", "needs multiple repetitions", "difficulty generalizing skills"]
+  },
+  "familyContext": {
+    "primaryLanguage": "Spanish at home, English at school (bilingual)",
+    "parentAvailability": "Parents work full-time, grandmother provides after-school care",
+    "familyGoals": "Preparing him for supported living and employment",
+    "therapyHours": "15 hours/week of ABA therapy"
+  },
+  "goalGenerationRequest": {
+    "numberOfGoals": 5,
+    "timeframeMonths": 12,
+    "includeQuarterlyMilestones": true,
+    "perspective": "professional",
+    "additionalNotes": "Consider transition planning needs"
+  }
+}

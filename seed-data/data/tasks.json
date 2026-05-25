@@ -1,0 +1,76 @@
+[
+  {
+    "title": "Define pricing tiers",
+    "description": "Research competitor pricing",
+    "status": "backlog",
+    "priority": "medium",
+    "assignee": "Sarah L.",
+    "tags": ["pricing", "strategy"],
+    "created_days_ago": 14
+  },
+  {
+    "title": "Create product photos",
+    "description": "Schedule studio shoot for all 12 SKUs",
+    "status": "backlog",
+    "priority": "low",
+    "assignee": "Mike R.",
+    "tags": ["marketing"],
+    "created_days_ago": 12
+  },
+  {
+    "title": "Build landing page",
+    "description": "Responsive landing page with hero, features, and pricing",
+    "status": "in_progress",
+    "priority": "high",
+    "assignee": "Alex K.",
+    "tags": ["frontend", "urgent"],
+    "due_days_from_now": 4,
+    "created_days_ago": 7
+  },
+  {
+    "title": "API integration",
+    "description": "Connect payment gateway and inventory sync",
+    "status": "in_progress",
+    "priority": "urgent",
+    "assignee": "Jordan M.",
+    "tags": ["backend"],
+    "due_days_from_now": 2,
+    "created_days_ago": 10
+  },
+  {
+    "title": "Write product descriptions",
+    "description": "SEO-optimized descriptions for all products",
+    "status": "review",
+    "priority": "medium",
+    "assignee": "Emily W.",
+    "tags": ["content"],
+    "created_days_ago": 5
+  },
+  {
+    "title": "Set up analytics tracking",
+    "description": "GA4 + custom events",
+    "status": "done",
+    "priority": "high",
+    "assignee": "Alex K.",
+    "tags": ["analytics"],
+    "created_days_ago": 20
+  },
+  {
+    "title": "Domain + SSL configured",
+    "description": "DNS, SSL cert, CDN setup",
+    "status": "done",
+    "priority": "high",
+    "assignee": "Jordan M.",
+    "tags": ["devops"],
+    "created_days_ago": 25
+  },
+  {
+    "title": "Email templates",
+    "description": "Order confirmation, shipping, welcome emails",
+    "status": "in_progress",
+    "priority": "medium",
+    "assignee": "Emily W.",
+    "tags": ["email", "marketing"],
+    "created_days_ago": 3
+  }
+]

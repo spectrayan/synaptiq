@@ -4,15 +4,19 @@ Synaptiq E2E Seed Script
 Populates MongoDB with realistic test data for end-to-end testing of all
 platform components (charts, dashboards, kanban, timeline, etc.).
 
+All static data is loaded from JSON files under seed-data/data/.
+
 Usage:
     python -m synaptiq_api.scripts.seed_e2e_data
 
 Requires: MongoDB running at the configured URI (default: mongodb://localhost:27017)
 """
 import asyncio
+import json
 import logging
 import os
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from motor.motor_asyncio import AsyncIOMotorClient
 
 logging.basicConfig(level=logging.INFO)
@@ -22,6 +26,16 @@ MONGODB_URI = os.environ.get("MONGODB_URI", "mongodb://localhost:27017/?directCo
 DB_NAME = "synaptiq"
 TENANT_ID = "demo-tenant"
 
+# Resolve data directory relative to this file
+DATA_DIR = Path(__file__).parent / "data"
+
+
+def load_json(relative_path: str):
+    """Load a JSON file from the data directory."""
+    filepath = DATA_DIR / relative_path
+    with open(filepath, "r", encoding="utf-8") as f:
+        return json.load(f)
+
 
 async def seed():
     client = AsyncIOMotorClient(MONGODB_URI)
@@ -29,65 +43,35 @@ async def seed():
 
     logger.info("🌱 Seeding E2E test data for tenant '%s'...", TENANT_ID)
 
+    now = datetime.now(timezone.utc)
+
     # ─── 0. Ensure tenant has AI persona config ────────────────────────
+    tenant_config = load_json("tenant.json")
     await db["tenants"].update_one(
         {"tenant_id": TENANT_ID},
         {"$set": {
-            "ai_persona": {
-                "display_name": "Aria",
-                "tone": "friendly",
-                "custom_instruction": "You are an AI-powered catalog and analytics assistant. Help users explore products, view sales metrics, and manage their data.",
-                "welcome_message": "Hi! 👋 I'm **Aria**, your AI-powered assistant. I can search your catalog, show analytics dashboards, and help you manage everything — all through this chat.",
-                "starter_prompts": [
-                    "Show me sales metrics",
-                    "Search electronics",
-                    "Compare the latest products",
-                    "Show open support tickets",
-                ],
-            },
+            "ai_persona": tenant_config["ai_persona"],
         }},
         upsert=False,
     )
     logger.info("  ✅ Updated tenant ai_persona config")
 
     # ─── 1. Products Collection ─────────────────────────────────────────
+    products_data = load_json("products.json")
     products = db["products"]
     await products.delete_many({"tenant_id": TENANT_ID})
     product_docs = [
-        {"tenant_id": TENANT_ID, "name": "Smart Speaker Pro", "category": "Electronics", "price": 79.99,
-         "stock": 5, "rating": 4.7, "units_sold": 342, "revenue": 27356, "margin": 34,
-         "description": "AI-powered smart speaker with premium audio", "created_at": datetime.now(timezone.utc)},
-        {"tenant_id": TENANT_ID, "name": "Wireless Charger X", "category": "Electronics", "price": 34.99,
-         "stock": 120, "rating": 4.3, "units_sold": 287, "revenue": 10032, "margin": 42,
-         "description": "Fast wireless charging pad with LED indicator", "created_at": datetime.now(timezone.utc)},
-        {"tenant_id": TENANT_ID, "name": "Premium Headphones", "category": "Audio", "price": 149.99,
-         "stock": 45, "rating": 4.8, "units_sold": 198, "revenue": 29700, "margin": 38,
-         "description": "Over-ear noise cancelling headphones", "created_at": datetime.now(timezone.utc)},
-        {"tenant_id": TENANT_ID, "name": "USB-C Hub Ultra", "category": "Accessories", "price": 24.99,
-         "stock": 200, "rating": 4.5, "units_sold": 456, "revenue": 11400, "margin": 52,
-         "description": "7-in-1 USB-C hub with HDMI and ethernet", "created_at": datetime.now(timezone.utc)},
-        {"tenant_id": TENANT_ID, "name": "Organic Cotton Tee", "category": "Clothing", "price": 24.99,
-         "stock": 350, "rating": 4.6, "units_sold": 823, "revenue": 20575, "margin": 61,
-         "description": "Sustainably sourced organic cotton t-shirt", "created_at": datetime.now(timezone.utc)},
-        {"tenant_id": TENANT_ID, "name": "Bluetooth Keyboard", "category": "Electronics", "price": 59.99,
-         "stock": 78, "rating": 4.4, "units_sold": 156, "revenue": 9358, "margin": 45,
-         "description": "Slim wireless mechanical keyboard", "created_at": datetime.now(timezone.utc)},
-        {"tenant_id": TENANT_ID, "name": "Yoga Mat Premium", "category": "Fitness", "price": 39.99,
-         "stock": 95, "rating": 4.9, "units_sold": 412, "revenue": 16476, "margin": 55,
-         "description": "Non-slip eco-friendly yoga mat", "created_at": datetime.now(timezone.utc)},
-        {"tenant_id": TENANT_ID, "name": "LED Desk Lamp", "category": "Home", "price": 44.99,
-         "stock": 67, "rating": 4.2, "units_sold": 234, "revenue": 10528, "margin": 48,
-         "description": "Adjustable LED lamp with 5 color temperatures", "created_at": datetime.now(timezone.utc)},
+        {"tenant_id": TENANT_ID, **p, "created_at": now}
+        for p in products_data
     ]
     await products.insert_many(product_docs)
     logger.info("  ✅ Inserted %d products", len(product_docs))
 
-    # ─── 2. Orders Collection ───────────────────────────────────────────
+    # ─── 2. Orders Collection (dynamically generated) ───────────────────
     orders = db["orders"]
     await orders.delete_many({"tenant_id": TENANT_ID})
-    now = datetime.now(timezone.utc)
-    order_docs = []
     statuses = ["pending", "processing", "shipped", "delivered", "returned"]
+    order_docs = []
     for i in range(30):
         order_docs.append({
             "tenant_id": TENANT_ID,
@@ -107,7 +91,7 @@ async def seed():
     await orders.insert_many(order_docs)
     logger.info("  ✅ Inserted %d orders", len(order_docs))
 
-    # ─── 3. Sales Metrics (daily aggregates) ────────────────────────────
+    # ─── 3. Sales Metrics (dynamically generated daily aggregates) ──────
     sales_metrics = db["sales_metrics"]
     await sales_metrics.delete_many({"tenant_id": TENANT_ID})
     metrics_docs = []
@@ -128,186 +112,113 @@ async def seed():
     await sales_metrics.insert_many(metrics_docs)
     logger.info("  ✅ Inserted %d daily sales metrics", len(metrics_docs))
 
-    # ─── 3b. Monthly Sales Summary (for bar/pie charts) ──────────────
+    # ─── 3b. Monthly Sales Summary ──────────────────────────────────────
+    monthly_sales_data = load_json("sales/monthly.json")
     monthly_sales = db["monthly_sales"]
     await monthly_sales.delete_many({"tenant_id": TENANT_ID})
-    months = [
-        {"month": "Jan 2026", "revenue": 42500, "orders": 385, "profit": 14875, "growth": 0},
-        {"month": "Feb 2026", "revenue": 48200, "orders": 412, "profit": 17352, "growth": 13.4},
-        {"month": "Mar 2026", "revenue": 55800, "orders": 478, "profit": 20604, "growth": 15.8},
-        {"month": "Apr 2026", "revenue": 61200, "orders": 524, "profit": 23256, "growth": 9.7},
-    ]
-    monthly_docs = [{"tenant_id": TENANT_ID, **m, "year": 2026} for m in months]
+    monthly_docs = [{"tenant_id": TENANT_ID, **m, "year": 2026} for m in monthly_sales_data]
     await monthly_sales.insert_many(monthly_docs)
     logger.info("  ✅ Inserted %d monthly sales summaries", len(monthly_docs))
 
-    # ─── 3c. Sales by Category (for pie/donut charts) ────────────────
+    # ─── 3c. Sales by Category ──────────────────────────────────────────
+    category_sales_data = load_json("sales/category.json")
     category_sales = db["category_sales"]
     await category_sales.delete_many({"tenant_id": TENANT_ID})
-    cat_docs = [
-        {"tenant_id": TENANT_ID, "category": "Electronics", "revenue": 78600, "units_sold": 1243, "pct_total": 37.8, "avg_price": 63.23, "top_product": "Smart Speaker Pro"},
-        {"tenant_id": TENANT_ID, "category": "Audio", "revenue": 44850, "units_sold": 612, "pct_total": 21.6, "avg_price": 73.28, "top_product": "Premium Headphones"},
-        {"tenant_id": TENANT_ID, "category": "Clothing", "revenue": 35420, "units_sold": 1417, "pct_total": 17.1, "avg_price": 25.00, "top_product": "Organic Cotton Tee"},
-        {"tenant_id": TENANT_ID, "category": "Accessories", "revenue": 24800, "units_sold": 992, "pct_total": 11.9, "avg_price": 25.00, "top_product": "USB-C Hub Ultra"},
-        {"tenant_id": TENANT_ID, "category": "Fitness", "revenue": 16476, "units_sold": 412, "pct_total": 7.9, "avg_price": 39.99, "top_product": "Yoga Mat Premium"},
-        {"tenant_id": TENANT_ID, "category": "Home", "revenue": 7654, "units_sold": 170, "pct_total": 3.7, "avg_price": 45.02, "top_product": "LED Desk Lamp"},
-    ]
+    cat_docs = [{"tenant_id": TENANT_ID, **c} for c in category_sales_data]
     await category_sales.insert_many(cat_docs)
     logger.info("  ✅ Inserted %d category sales breakdowns", len(cat_docs))
 
-    # ─── 3d. Regional Sales (for geographic dashboards) ──────────────
+    # ─── 3d. Regional Sales ─────────────────────────────────────────────
+    regional_sales_data = load_json("sales/regional.json")
     regional_sales = db["regional_sales"]
     await regional_sales.delete_many({"tenant_id": TENANT_ID})
-    region_docs = [
-        {"tenant_id": TENANT_ID, "region": "North America", "revenue": 98500, "orders": 1842, "customers": 1205, "avg_order_value": 53.47},
-        {"tenant_id": TENANT_ID, "region": "Europe", "revenue": 62300, "orders": 1156, "customers": 890, "avg_order_value": 53.89},
-        {"tenant_id": TENANT_ID, "region": "Asia Pacific", "revenue": 31200, "orders": 623, "customers": 478, "avg_order_value": 50.08},
-        {"tenant_id": TENANT_ID, "region": "Latin America", "revenue": 12800, "orders": 287, "customers": 215, "avg_order_value": 44.60},
-        {"tenant_id": TENANT_ID, "region": "Middle East & Africa", "revenue": 3000, "orders": 91, "customers": 68, "avg_order_value": 32.97},
-    ]
+    region_docs = [{"tenant_id": TENANT_ID, **r} for r in regional_sales_data]
     await regional_sales.insert_many(region_docs)
     logger.info("  ✅ Inserted %d regional sales records", len(region_docs))
 
     # ─── 4. Tasks / Project Board ───────────────────────────────────────
+    tasks_data = load_json("tasks.json")
     tasks = db["tasks"]
     await tasks.delete_many({"tenant_id": TENANT_ID})
-    task_docs = [
-        {"tenant_id": TENANT_ID, "title": "Define pricing tiers", "description": "Research competitor pricing", "status": "backlog", "priority": "medium", "assignee": "Sarah L.", "tags": ["pricing", "strategy"], "created_at": now - timedelta(days=14)},
-        {"tenant_id": TENANT_ID, "title": "Create product photos", "description": "Schedule studio shoot for all 12 SKUs", "status": "backlog", "priority": "low", "assignee": "Mike R.", "tags": ["marketing"], "created_at": now - timedelta(days=12)},
-        {"tenant_id": TENANT_ID, "title": "Build landing page", "description": "Responsive landing page with hero, features, and pricing", "status": "in_progress", "priority": "high", "assignee": "Alex K.", "tags": ["frontend", "urgent"], "due_date": (now + timedelta(days=4)).strftime("%Y-%m-%d"), "created_at": now - timedelta(days=7)},
-        {"tenant_id": TENANT_ID, "title": "API integration", "description": "Connect payment gateway and inventory sync", "status": "in_progress", "priority": "urgent", "assignee": "Jordan M.", "tags": ["backend"], "due_date": (now + timedelta(days=2)).strftime("%Y-%m-%d"), "created_at": now - timedelta(days=10)},
-        {"tenant_id": TENANT_ID, "title": "Write product descriptions", "description": "SEO-optimized descriptions for all products", "status": "review", "priority": "medium", "assignee": "Emily W.", "tags": ["content"], "created_at": now - timedelta(days=5)},
-        {"tenant_id": TENANT_ID, "title": "Set up analytics tracking", "description": "GA4 + custom events", "status": "done", "priority": "high", "assignee": "Alex K.", "tags": ["analytics"], "created_at": now - timedelta(days=20)},
-        {"tenant_id": TENANT_ID, "title": "Domain + SSL configured", "description": "DNS, SSL cert, CDN setup", "status": "done", "priority": "high", "assignee": "Jordan M.", "tags": ["devops"], "created_at": now - timedelta(days=25)},
-        {"tenant_id": TENANT_ID, "title": "Email templates", "description": "Order confirmation, shipping, welcome emails", "status": "in_progress", "priority": "medium", "assignee": "Emily W.", "tags": ["email", "marketing"], "created_at": now - timedelta(days=3)},
-    ]
+    task_docs = []
+    for t in tasks_data:
+        doc = {
+            "tenant_id": TENANT_ID,
+            "title": t["title"],
+            "description": t["description"],
+            "status": t["status"],
+            "priority": t["priority"],
+            "assignee": t["assignee"],
+            "tags": t["tags"],
+            "created_at": now - timedelta(days=t["created_days_ago"]),
+        }
+        if "due_days_from_now" in t:
+            doc["due_date"] = (now + timedelta(days=t["due_days_from_now"])).strftime("%Y-%m-%d")
+        task_docs.append(doc)
     await tasks.insert_many(task_docs)
     logger.info("  ✅ Inserted %d tasks", len(task_docs))
 
     # ─── 5. Audit / Event Log ───────────────────────────────────────────
+    events_data = load_json("events.json")
     events = db["events"]
     await events.delete_many({"tenant_id": TENANT_ID})
     event_docs = [
-        {"tenant_id": TENANT_ID, "event_type": "order_placed", "title": "Order placed", "description": "Customer placed order for 3 items totaling $142.97", "actor": "Customer", "entity_type": "order", "entity_id": "ORD-2847", "timestamp": now - timedelta(hours=8)},
-        {"tenant_id": TENANT_ID, "event_type": "payment_confirmed", "title": "Payment confirmed", "description": "Visa ending in 4242 — authorized and captured", "actor": "Payment Gateway", "entity_type": "order", "entity_id": "ORD-2847", "timestamp": now - timedelta(hours=7, minutes=59)},
-        {"tenant_id": TENANT_ID, "event_type": "inventory_reserved", "title": "Inventory reserved", "description": "All 3 items reserved from warehouse A", "actor": "System", "entity_type": "order", "entity_id": "ORD-2847", "timestamp": now - timedelta(hours=7, minutes=15)},
-        {"tenant_id": TENANT_ID, "event_type": "shipped", "title": "Shipped via FedEx", "description": "Tracking: FX-7829341 — Est. delivery Apr 24", "actor": "Warehouse Team", "entity_type": "order", "entity_id": "ORD-2847", "timestamp": now - timedelta(hours=5, minutes=20)},
-        {"tenant_id": TENANT_ID, "event_type": "low_stock_alert", "title": "Low stock alert", "description": "Smart Speaker Pro down to 5 units — reorder triggered", "actor": "Inventory System", "entity_type": "product", "entity_id": "smart-speaker-pro", "timestamp": now - timedelta(hours=3, minutes=50)},
-        {"tenant_id": TENANT_ID, "event_type": "support_note", "title": "Customer note", "description": "Customer requested gift wrapping via support chat", "actor": "Support Agent", "entity_type": "order", "entity_id": "ORD-2847", "timestamp": now - timedelta(hours=2, minutes=15)},
+        {
+            "tenant_id": TENANT_ID,
+            "event_type": e["event_type"],
+            "title": e["title"],
+            "description": e["description"],
+            "actor": e["actor"],
+            "entity_type": e["entity_type"],
+            "entity_id": e["entity_id"],
+            "timestamp": now - timedelta(hours=e["hours_ago"]),
+        }
+        for e in events_data
     ]
     await events.insert_many(event_docs)
     logger.info("  ✅ Inserted %d events", len(event_docs))
 
     # ─── 6. Support Tickets ─────────────────────────────────────────────
+    tickets_data = load_json("support_tickets.json")
     tickets = db["support_tickets"]
     await tickets.delete_many({"tenant_id": TENANT_ID})
     ticket_docs = [
-        {"tenant_id": TENANT_ID, "ticket_id": "TKT-101", "subject": "Order not received", "status": "open", "priority": "high", "customer_email": "john@example.com", "created_at": now - timedelta(days=1)},
-        {"tenant_id": TENANT_ID, "ticket_id": "TKT-102", "subject": "Wrong item shipped", "status": "in_progress", "priority": "urgent", "customer_email": "jane@example.com", "created_at": now - timedelta(days=2)},
-        {"tenant_id": TENANT_ID, "ticket_id": "TKT-103", "subject": "Refund request", "status": "resolved", "priority": "medium", "customer_email": "bob@example.com", "created_at": now - timedelta(days=5)},
+        {
+            "tenant_id": TENANT_ID,
+            "ticket_id": t["ticket_id"],
+            "subject": t["subject"],
+            "status": t["status"],
+            "priority": t["priority"],
+            "customer_email": t["customer_email"],
+            "created_at": now - timedelta(days=t["days_ago"]),
+        }
+        for t in tickets_data
     ]
     await tickets.insert_many(ticket_docs)
     logger.info("  ✅ Inserted %d support tickets", len(ticket_docs))
 
-    # ─── 7. Schema Registry Entries ─────────────────────────────────────
-    schema_registry = db["schema_registry"]
-    await schema_registry.delete_many({"tenant_id": TENANT_ID})
-    schemas = [
-        {"tenant_id": TENANT_ID, "collection_name": "products", "display_name": "Products",
-         "description": "Product catalog with pricing, stock, and sales data",
-         "fields": {"name": "string", "category": "string", "price": "number", "stock": "number",
-                    "rating": "number", "units_sold": "number", "revenue": "number", "margin": "number",
-                    "description": "string", "created_at": "date"},
-         "registered_at": now},
-        {"tenant_id": TENANT_ID, "collection_name": "orders", "display_name": "Orders",
-         "description": "Customer orders with items, totals, and status tracking",
-         "fields": {"order_id": "string", "customer_name": "string", "customer_email": "string",
-                    "items": "array", "total": "number", "status": "string", "created_at": "date", "shipped_at": "date"},
-         "registered_at": now},
-        {"tenant_id": TENANT_ID, "collection_name": "sales_metrics", "display_name": "Sales Metrics",
-         "description": "Daily aggregated sales data including revenue, orders, sessions, and conversion rates",
-         "fields": {"date": "string", "revenue": "number", "orders": "number", "sessions": "number",
-                    "conversion_rate": "number", "avg_order_value": "number", "new_customers": "number",
-                    "returning_customers": "number"},
-         "registered_at": now},
-        {"tenant_id": TENANT_ID, "collection_name": "tasks", "display_name": "Tasks",
-         "description": "Project tasks with status, priority, assignees, and tags",
-         "fields": {"title": "string", "description": "string", "status": "string", "priority": "string",
-                    "assignee": "string", "tags": "array", "due_date": "string", "created_at": "date"},
-         "registered_at": now},
-        {"tenant_id": TENANT_ID, "collection_name": "events", "display_name": "Events",
-         "description": "Audit log / event timeline for orders and system events",
-         "fields": {"event_type": "string", "title": "string", "description": "string",
-                    "actor": "string", "entity_type": "string", "entity_id": "string", "timestamp": "date"},
-         "registered_at": now},
-        {"tenant_id": TENANT_ID, "collection_name": "support_tickets", "display_name": "Support Tickets",
-         "description": "Customer support tickets with status and priority",
-         "fields": {"ticket_id": "string", "subject": "string", "status": "string",
-                    "priority": "string", "customer_email": "string", "created_at": "date"},
-         "registered_at": now},
-        {"tenant_id": TENANT_ID, "collection_name": "monthly_sales", "display_name": "Monthly Sales",
-         "description": "Monthly aggregated revenue, orders, profit, and growth percentage",
-         "fields": {"month": "string", "year": "number", "revenue": "number", "orders": "number",
-                    "profit": "number", "growth": "number"},
-         "registered_at": now},
-        {"tenant_id": TENANT_ID, "collection_name": "category_sales", "display_name": "Sales by Category",
-         "description": "Revenue and units sold breakdown by product category with percentage of total",
-         "fields": {"category": "string", "revenue": "number", "units_sold": "number",
-                    "pct_total": "number", "avg_price": "number", "top_product": "string"},
-         "registered_at": now},
-        {"tenant_id": TENANT_ID, "collection_name": "regional_sales", "display_name": "Regional Sales",
-         "description": "Revenue, orders, and customer counts by geographic region",
-         "fields": {"region": "string", "revenue": "number", "orders": "number",
-                    "customers": "number", "avg_order_value": "number"},
-         "registered_at": now},
-    ]
-    await schema_registry.insert_many(schemas)
-    logger.info("  ✅ Registered %d collection schemas", len(schemas))
-
-    # ─── 8. Tenant Config ───────────────────────────────────────────────
+    # ─── 7. Tenant Config ───────────────────────────────────────────────
     tenants = db["tenants"]
     await tenants.update_one(
         {"tenant_id": TENANT_ID},
         {"$set": {
             "tenant_id": TENANT_ID,
-            "name": "Demo Store",
-            "domain": "demo.synaptiq.app",
-            "plan": "pro",
-            "ai_config": {
-                "provider": "gemini",
-                "enabled_components": [
-                    "item_card", "item_grid", "item_detail", "comparison_table",
-                    "filter_summary", "result_count", "empty_state", "action_confirm",
-                    "info_banner", "data_table", "form_input",
-                    "kpi_card", "chart", "stat_grid", "kanban", "timeline",
-                    "metric_table", "progress_tracker", "launchpad", "view",
-                ],
-            },
+            "name": tenant_config["name"],
+            "domain": tenant_config["domain"],
+            "plan": tenant_config["plan"],
+            "ai_config": tenant_config["ai_config"],
             "updated_at": now,
         }},
         upsert=True,
     )
     logger.info("  ✅ Tenant config upserted")
 
-    # ─── 9. Applications ────────────────────────────────────────────────
+    # ─── 8. Applications ────────────────────────────────────────────────
+    app_config = load_json("application.json")
     applications = db["applications"]
     await applications.update_one(
-        {"appId": "demo"},
-        {"$set": {
-            "tenantId": TENANT_ID,
-            "appId": "demo",
-            "slug": "demo",
-            "name": "Demo App",
-            "isDefault": True,
-            "status": "ACTIVE",
-            "branding": {
-                "logoUrl": "/assets/logo.svg",
-                "faviconUrl": "/assets/favicon.ico",
-                "primaryColor": "#3B82F6",
-                "fontFamily": "Inter, sans-serif"
-            },
-            "createdAt": now,
-        }},
+        {"appId": app_config["appId"]},
+        {"$set": {**app_config, "createdAt": now}},
         upsert=True,
     )
     logger.info("  ✅ Application config upserted")

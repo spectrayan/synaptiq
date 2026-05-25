@@ -1,0 +1,52 @@
+{
+  "clientId": "school-age-002",
+  "profileName": "School-Age Child — Social Skills Focus",
+  "demographics": {
+    "age": "7 years, 2 months",
+    "diagnosis": "Autism Spectrum Disorder, Level 1 (requiring support)",
+    "gender": "Female",
+    "grade": "2nd grade, general education with support"
+  },
+  "assessments": {
+    "ados2": { "module": 3, "severityScore": "5/10" },
+    "vineland": {
+      "communication": { "score": 78, "percentile": "7th" },
+      "dailyLivingSkills": { "score": 85, "percentile": "16th" },
+      "socialization": { "score": 70, "percentile": "2nd" }
+    },
+    "abllsR": {
+      "language": "75% mastered",
+      "socialInteraction": "35% mastered",
+      "academicSkills": "60% mastered"
+    }
+  },
+  "currentSkills": {
+    "communication": "Speaks in 5-7 word sentences, good vocabulary, difficulty with conversational turn-taking",
+    "social": "Parallel play only, does not initiate with peers, difficulty reading social cues",
+    "adaptive": "Independent with most self-care, needs reminders for hygiene tasks",
+    "academic": "Reading at grade level, math slightly below, difficulty with group work",
+    "behavior": "Meltdowns when routines change (2-3 per week at school), rigid thinking"
+  },
+  "priorityAreas": [
+    "Peer interaction and friendship skills",
+    "Flexibility with changes in routine",
+    "Participation in group activities at school"
+  ],
+  "learningProfile": {
+    "reinforcers": ["Computer time", "art activities", "praise from teacher", "stickers"],
+    "strengths": ["Strong visual learner", "excellent memory", "motivated by academic success"],
+    "challenges": ["Anxiety with social situations", "difficulty with perspective-taking"]
+  },
+  "familyContext": {
+    "primaryLanguage": "English",
+    "parentGoals": "Develop friendships and participate in after-school activities",
+    "therapyHours": "10 hours/week of ABA therapy (school and home-based)",
+    "siblings": "Older brother (age 10) who is neurotypical"
+  },
+  "goalGenerationRequest": {
+    "numberOfGoals": 5,
+    "timeframeMonths": 12,
+    "includeQuarterlyMilestones": true,
+    "perspective": "parent"
+  }
+}

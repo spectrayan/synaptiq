@@ -1,0 +1,55 @@
+{
+  "clientId": "early-learner-001",
+  "profileName": "Early Learner — Communication Focus",
+  "demographics": {
+    "age": "3 years, 6 months",
+    "diagnosis": "Autism Spectrum Disorder, Level 3 (requiring very substantial support)",
+    "gender": "Male"
+  },
+  "assessments": {
+    "ados2": {
+      "module": 1,
+      "severityScore": "8/10"
+    },
+    "vineland": {
+      "communication": { "score": 55, "percentile": "0.1" },
+      "dailyLivingSkills": { "score": 62, "percentile": "1st" },
+      "socialization": { "score": 58, "percentile": "0.3" }
+    },
+    "vbMapp": {
+      "mand": { "level": 0, "skills": "0/10" },
+      "tact": { "level": 0, "skills": "0/10" },
+      "listenerResponding": { "level": 1, "skills": "3/10" },
+      "imitation": { "level": 0, "skills": "1/10" }
+    }
+  },
+  "currentSkills": {
+    "communication": "Non-verbal, uses leading and reaching to request. No functional words or signs.",
+    "social": "Limited eye contact, no joint attention, prefers solitary play",
+    "adaptive": "Requires full assistance with all self-care tasks (feeding, dressing, toileting)",
+    "behavior": "Frequent tantrums (10-15 per day) when denied access to preferred items, hand flapping when excited"
+  },
+  "priorityAreas": [
+    "Communication — ability to request wants and needs",
+    "Reduce tantrum behaviors",
+    "Increase engagement with family members"
+  ],
+  "learningProfile": {
+    "reinforcers": ["iPad (YouTube videos)", "spinning toys", "swinging", "goldfish crackers"],
+    "attentionSpan": "2-3 minutes with preferred activities, <30 seconds with non-preferred",
+    "strengths": ["Responds well to visual supports", "errorless teaching", "immediate reinforcement"],
+    "challenges": ["Prompt dependency", "difficulty with transitions"]
+  },
+  "familyContext": {
+    "primaryLanguage": "English",
+    "parentAvailability": "Committed and available for parent training",
+    "therapyHours": "20 hours/week of ABA therapy approved",
+    "siblings": "Younger sibling (18 months) in the home"
+  },
+  "goalGenerationRequest": {
+    "numberOfGoals": 5,
+    "timeframeMonths": 12,
+    "includeQuarterlyMilestones": true,
+    "perspective": "parent"
+  }
+}

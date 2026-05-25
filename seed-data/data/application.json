@@ -1,0 +1,14 @@
+{
+  "tenantId": "demo-tenant",
+  "appId": "demo",
+  "slug": "demo",
+  "name": "Demo App",
+  "isDefault": true,
+  "status": "ACTIVE",
+  "branding": {
+    "logoUrl": "/assets/logo.svg",
+    "faviconUrl": "/assets/favicon.ico",
+    "primaryColor": "#3B82F6",
+    "fontFamily": "Inter, sans-serif"
+  }
+}

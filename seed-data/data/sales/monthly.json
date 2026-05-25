@@ -1,0 +1,6 @@
+[
+  {"month": "Jan 2026", "revenue": 42500, "orders": 385, "profit": 14875, "growth": 0},
+  {"month": "Feb 2026", "revenue": 48200, "orders": 412, "profit": 17352, "growth": 13.4},
+  {"month": "Mar 2026", "revenue": 55800, "orders": 478, "profit": 20604, "growth": 15.8},
+  {"month": "Apr 2026", "revenue": 61200, "orders": 524, "profit": 23256, "growth": 9.7}
+]

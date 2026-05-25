@@ -1,0 +1,26 @@
+[
+  {
+    "ticket_id": "TKT-101",
+    "subject": "Order not received",
+    "status": "open",
+    "priority": "high",
+    "customer_email": "john@example.com",
+    "days_ago": 1
+  },
+  {
+    "ticket_id": "TKT-102",
+    "subject": "Wrong item shipped",
+    "status": "in_progress",
+    "priority": "urgent",
+    "customer_email": "jane@example.com",
+    "days_ago": 2
+  },
+  {
+    "ticket_id": "TKT-103",
+    "subject": "Refund request",
+    "status": "resolved",
+    "priority": "medium",
+    "customer_email": "bob@example.com",
+    "days_ago": 5
+  }
+]

@@ -1,0 +1,7 @@
+[
+  {"region": "North America", "revenue": 98500, "orders": 1842, "customers": 1205, "avg_order_value": 53.47},
+  {"region": "Europe", "revenue": 62300, "orders": 1156, "customers": 890, "avg_order_value": 53.89},
+  {"region": "Asia Pacific", "revenue": 31200, "orders": 623, "customers": 478, "avg_order_value": 50.08},
+  {"region": "Latin America", "revenue": 12800, "orders": 287, "customers": 215, "avg_order_value": 44.60},
+  {"region": "Middle East & Africa", "revenue": 3000, "orders": 91, "customers": 68, "avg_order_value": 32.97}
+]
