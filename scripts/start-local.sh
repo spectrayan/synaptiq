@@ -31,6 +31,14 @@ NC='\033[0m'
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT_DIR"
 
+# Load .env file if present (GOOGLE_API_KEY, AUTH_PROVIDER, etc.)
+if [ -f "$ROOT_DIR/.env" ]; then
+    echo -e "${CYAN}Loading .env file...${NC}"
+    set -a
+    source "$ROOT_DIR/.env"
+    set +a
+fi
+
 AUTH_PROVIDER="${AUTH_PROVIDER:-builtin}"
 
 # Track child PIDs for cleanup
