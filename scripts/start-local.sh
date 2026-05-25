@@ -55,7 +55,7 @@ cleanup() {
         pkill -f "firebase emulators:start" 2>/dev/null || true
     fi
     pkill -f "spring-boot:run.*spring-apis" 2>/dev/null || true
-    pkill -f "nx serve shell" 2>/dev/null || true
+    pkill -f "nx serve synaptiq" 2>/dev/null || true
     rm -f /tmp/synaptiq-api.pid /tmp/synaptiq-shell.pid /tmp/synaptiq-firebase.pid
     echo -e "${GREEN}Done.${NC}"
 }
@@ -190,7 +190,7 @@ echo -e "${GREEN}  ✓ Backend starting on http://localhost:8080 (PID: $API_PID)
 
 # ── Start Angular frontend ───────────────────────────────────────────────────
 
-pnpm nx serve shell &> /tmp/synaptiq-shell.log &
+pnpm nx serve synaptiq &> /tmp/synaptiq-shell.log &
 SHELL_PID=$!
 PIDS+=("$SHELL_PID")
 echo "$SHELL_PID" > /tmp/synaptiq-shell.pid

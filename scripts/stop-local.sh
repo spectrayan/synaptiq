@@ -52,7 +52,7 @@ if [ -f /tmp/synaptiq-shell.pid ]; then
     kill "$PID" 2>/dev/null || true
     rm -f /tmp/synaptiq-shell.pid
 fi
-pkill -f "nx serve shell" 2>/dev/null || true
+pkill -f "nx serve synaptiq" 2>/dev/null || true
 echo -e "${GREEN}  ✓ Frontend stopped${NC}"
 
 # ── Kill anything still holding ports 4200 / 8080 ───────────────────────────

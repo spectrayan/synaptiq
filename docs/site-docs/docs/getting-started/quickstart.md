@@ -99,7 +99,7 @@ This creates:
         -Dspring-boot.run.profiles=dev
 
     # Terminal 2: Frontend (Angular on :4200)
-    pnpm nx serve shell
+    pnpm nx serve synaptiq
     ```
 
 === "Backend Only"
@@ -113,7 +113,7 @@ This creates:
 === "Frontend Only"
 
     ```bash
-    pnpm nx serve shell
+    pnpm nx serve synaptiq
     ```
 
 ---

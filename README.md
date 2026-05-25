@@ -230,7 +230,7 @@ GOOGLE_API_KEY="$GOOGLE_API_KEY" AUTH_PROVIDER="builtin" \
   -Dspring-boot.run.profiles=dev -Dmaven.test.skip=true
 
 # Frontend (Angular on :4200)
-pnpm nx serve shell
+pnpm nx serve synaptiq
 ```
 
 ### 5. Open the App
@@ -346,7 +346,7 @@ We welcome contributions of all kinds! Please see our **[Contributing Guide](CON
 git clone https://github.com/<your-username>/synaptiq.git
 cd synaptiq && pnpm install
 docker compose up -d
-pnpm nx serve shell
+pnpm nx serve synaptiq
 ```
 
 ---

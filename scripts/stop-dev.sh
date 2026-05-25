@@ -45,7 +45,7 @@ if [ -f /tmp/synaptiq-shell.pid ]; then
     rm -f /tmp/synaptiq-shell.pid
 fi
 # Also kill any nx serve processes
-pkill -f "nx serve shell" 2>/dev/null || true
+pkill -f "nx serve synaptiq" 2>/dev/null || true
 echo -e "${GREEN}  ✓ Frontend stopped${NC}"
 
 # ── Stop Docker services ─────────────────────────────────────────────────────

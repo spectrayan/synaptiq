@@ -126,7 +126,7 @@ if "%AUTH_PROVIDER%"=="firebase" set "FIREBASE_ENV_CMD=set FIREBASE_AUTH_EMULATO
 start "Synaptiq API" cmd /k "cd /d %ROOT_DIR% && set AUTH_PROVIDER=%AUTH_PROVIDER% && !FIREBASE_ENV_CMD!mvn spring-boot:run -f apps/backend/spring-apis/pom.xml -Dspring-boot.run.profiles=dev"
 echo %GREEN%   v Backend starting on http://localhost:8080
 
-start "Synaptiq Shell" cmd /k "cd /d %ROOT_DIR% && pnpm nx serve shell"
+start "Synaptiq Shell" cmd /k "cd /d %ROOT_DIR% && pnpm nx serve synaptiq"
 echo %GREEN%   v Frontend starting on http://localhost:4200
 echo.
 

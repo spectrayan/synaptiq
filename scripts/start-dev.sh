@@ -126,7 +126,7 @@ echo ""
 echo -e "${YELLOW}[5/5]${NC} Starting Angular frontend (dev server on port 4200)..."
 
 # Start frontend in the background
-pnpm nx serve shell &> /tmp/synaptiq-shell.log &
+pnpm nx serve synaptiq &> /tmp/synaptiq-shell.log &
 SHELL_PID=$!
 
 echo -e "${GREEN}  ✓ Frontend starting on http://localhost:4200 (PID: $SHELL_PID)${NC}"

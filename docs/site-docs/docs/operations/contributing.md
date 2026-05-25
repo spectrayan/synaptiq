@@ -34,7 +34,7 @@ Synaptiq uses **Nx 22** for monorepo management. Always use Nx to run tasks:
 
 ```bash
 # Build
-pnpm nx build shell            # Frontend
+pnpm nx build synaptiq            # Frontend
 pnpm nx build spring-apis      # Backend
 
 # Test
@@ -45,7 +45,7 @@ pnpm nx test spring-apis
 pnpm nx lint shell
 
 # Serve
-pnpm nx serve shell
+pnpm nx serve synaptiq
 ```
 
 ### Backend Development
@@ -66,10 +66,10 @@ pnpm run build:openapi
 
 ```bash
 # Serve with hot reload
-pnpm nx serve shell
+pnpm nx serve synaptiq
 
 # Build for production
-pnpm nx build shell --configuration=production
+pnpm nx build synaptiq --configuration=production
 ```
 
 ---

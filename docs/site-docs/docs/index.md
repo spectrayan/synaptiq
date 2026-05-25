@@ -156,7 +156,7 @@ docker compose up -d
 # 3. Start backend & frontend
 GOOGLE_API_KEY="your-key" AUTH_PROVIDER="builtin" \
   mvn spring-boot:run -f apps/backend/spring-apis/pom.xml -Dspring-boot.run.profiles=dev
-pnpm nx serve shell
+pnpm nx serve synaptiq
 
 # 4. Open http://localhost:4200
 # Login: admin@synaptiq.dev / admin123

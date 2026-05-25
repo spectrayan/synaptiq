@@ -40,7 +40,7 @@ GOOGLE_API_KEY="your-key" AUTH_PROVIDER="builtin" \
 ### Frontend
 
 ```bash
-pnpm nx serve shell
+pnpm nx serve synaptiq
 ```
 
 ---

@@ -133,7 +133,7 @@ REM ── Step 5: Start Angular frontend ────────────�
 echo %YELLOW%[5/5]%RESET% Starting Angular frontend (dev server on port 4200)...
 
 REM Start frontend in a new window
-start "Synaptiq Shell" cmd /k "cd /d %ROOT_DIR% && pnpm nx serve shell"
+start "Synaptiq Shell" cmd /k "cd /d %ROOT_DIR% && pnpm nx serve synaptiq"
 
 echo %GREEN%  ✓ Frontend starting on http://localhost:4200%RESET%
 echo.
