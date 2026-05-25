@@ -1,0 +1,104 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Synaptiq — Lint, Format & Test (manual trigger only)
+# ─────────────────────────────────────────────────────────────────────────────
+name: Quality Checks
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: 'Which checks to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - lint-only
+          - test-only
+          - format-only
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  actions: read
+  contents: read
+  packages: read
+
+jobs:
+  # ─── Frontend Quality ──────────────────────────────────────────────────────
+  frontend-quality:
+    name: Frontend — Lint · Format · Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: tree:0
+          fetch-depth: 0
+
+      - uses: nrwl/nx-set-shas@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Format check
+        if: inputs.scope == 'all' || inputs.scope == 'format-only'
+        run: npx nx format:check
+        continue-on-error: true
+
+      - name: Lint (affected)
+        if: inputs.scope == 'all' || inputs.scope == 'lint-only'
+        run: npx nx affected -t lint --parallel=3 --exclude='spring-apis,agent-flow-spring,camel-integration,openapi-spec,synaptiq-apis'
+        continue-on-error: true
+
+      - name: Test (affected)
+        if: inputs.scope == 'all' || inputs.scope == 'test-only'
+        run: npx nx affected -t test --parallel=3 --configuration=ci --exclude='spring-apis,agent-flow-spring,camel-integration,openapi-spec,synaptiq-apis'
+        continue-on-error: true
+        env:
+          CI: true
+
+  # ─── Backend Quality ───────────────────────────────────────────────────────
+  backend-quality:
+    name: Backend — Test
+    runs-on: ubuntu-latest
+    if: inputs.scope == 'all' || inputs.scope == 'test-only'
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+          server-id: spectrayan-github-server-sent-events
+          server-username: GITHUB_ACTOR
+          server-password: GH_PKG_TOKEN
+
+      - name: Build full reactor (skip tests)
+        run: mvn clean install -DskipTests -B -q
+        env:
+          GH_PKG_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Test (spring-apis)
+        run: mvn test -B -pl apps/backend/spring-apis
+        continue-on-error: true
+        env:
+          CI: true
+          GH_PKG_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}

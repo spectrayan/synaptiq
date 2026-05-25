@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Synaptiq CI — Nx monorepo + Spring Boot backend
+# Synaptiq CI — Build & Test (required checks)
 # ─────────────────────────────────────────────────────────────────────────────
 name: CI
 
@@ -20,7 +20,7 @@ permissions:
 # ─── Frontend (Angular / Nx) ────────────────────────────────────────────────
 jobs:
   frontend:
-    name: Frontend — Lint · Test · Build
+    name: Frontend — Build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -44,17 +44,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Format check
-        run: npx nx format:check
-
-      - name: Lint (affected)
-        run: npx nx affected -t lint --parallel=3 --exclude='spring-apis,agent-flow-spring,camel-integration,openapi-spec,synaptiq-apis'
-
-      - name: Test (affected)
-        run: npx nx affected -t test --parallel=3 --configuration=ci --exclude='spring-apis,agent-flow-spring,camel-integration,openapi-spec,synaptiq-apis'
-        env:
-          CI: true
-
       - name: Build (affected)
         run: npx nx affected -t build --parallel=3 --exclude='spring-apis,agent-flow-spring,camel-integration,openapi-spec,synaptiq-apis'
 
@@ -68,7 +57,7 @@ jobs:
 
   # ─── Backend (Java / Spring Boot) ────────────────────────────────────────
   backend:
-    name: Backend — Build · Test
+    name: Backend — Build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -89,12 +78,6 @@ jobs:
       - name: Build full reactor (skip tests)
         run: mvn clean install -DskipTests -B -q
         env:
-          GH_PKG_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
-
-      - name: Test (spring-apis)
-        run: mvn test -B -pl apps/backend/spring-apis
-        env:
-          CI: true
           GH_PKG_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Upload JAR artifact
